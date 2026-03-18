@@ -10,8 +10,10 @@ import javafx.scene.input.ScrollEvent;
 import systems.courant.sd.model.def.ElementType;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Consumer;
 import systems.courant.sd.app.canvas.controllers.CausalLinkCreationController;
 import systems.courant.sd.app.canvas.controllers.ConnectionRerouteController;
 import systems.courant.sd.app.canvas.controllers.DragController;
@@ -30,6 +32,32 @@ final class InputDispatcher {
 
     private static final double MIN_REATTACH_DRAG_SQ = 5 * 5;
 
+    private static final Map<KeyCode, Consumer<ModelCanvas>> SHORTCUT_KEYS = Map.ofEntries(
+            Map.entry(KeyCode.A, c -> c.elements().selectAll()),
+            Map.entry(KeyCode.C, c -> c.elements().copySelection()),
+            Map.entry(KeyCode.X, c -> c.elements().cutSelection()),
+            Map.entry(KeyCode.V, c -> c.elements().pasteClipboard()),
+            Map.entry(KeyCode.PLUS, ModelCanvas::zoomIn),
+            Map.entry(KeyCode.EQUALS, ModelCanvas::zoomIn),
+            Map.entry(KeyCode.ADD, ModelCanvas::zoomIn),
+            Map.entry(KeyCode.MINUS, ModelCanvas::zoomOut),
+            Map.entry(KeyCode.SUBTRACT, ModelCanvas::zoomOut),
+            Map.entry(KeyCode.DIGIT0, ModelCanvas::resetZoom)
+    );
+
+    private static final Map<KeyCode, CanvasToolBar.Tool> DIGIT_TO_TOOL = Map.ofEntries(
+            Map.entry(KeyCode.DIGIT1, CanvasToolBar.Tool.SELECT),
+            Map.entry(KeyCode.DIGIT2, CanvasToolBar.Tool.PLACE_STOCK),
+            Map.entry(KeyCode.DIGIT3, CanvasToolBar.Tool.PLACE_FLOW),
+            Map.entry(KeyCode.DIGIT4, CanvasToolBar.Tool.PLACE_VARIABLE),
+            Map.entry(KeyCode.DIGIT5, CanvasToolBar.Tool.PLACE_MODULE),
+            Map.entry(KeyCode.DIGIT6, CanvasToolBar.Tool.PLACE_LOOKUP),
+            Map.entry(KeyCode.DIGIT7, CanvasToolBar.Tool.PLACE_CLD_VARIABLE),
+            Map.entry(KeyCode.DIGIT8, CanvasToolBar.Tool.PLACE_CAUSAL_LINK),
+            Map.entry(KeyCode.DIGIT9, CanvasToolBar.Tool.PLACE_COMMENT),
+            Map.entry(KeyCode.DIGIT0, CanvasToolBar.Tool.PLACE_INFO_LINK)
+    );
+
     private final DragController dragController;
     private final MarqueeController marqueeController;
     private final ResizeController resizeController;
@@ -40,10 +68,7 @@ final class InputDispatcher {
     private final ConnectionRerouteController rerouteController;
     private final InlineEditController inlineEdit;
 
-    // Pan state
-    private boolean panning;
-    private boolean panMoved;
-    private boolean spaceDown;
+    private final PanController panController = new PanController();
     private double dragStartX;
     private double dragStartY;
 
@@ -88,11 +113,11 @@ final class InputDispatcher {
     }
 
     boolean isSpaceDown() {
-        return spaceDown;
+        return panController.isSpaceDown();
     }
 
     boolean isPanning() {
-        return panning;
+        return panController.isPanning();
     }
 
     // --- Scroll ---
@@ -207,11 +232,8 @@ final class InputDispatcher {
         dragStartY = event.getY();
 
         // Pan: middle-drag, right-drag, or Space+left-drag
-        if (event.getButton() == MouseButton.MIDDLE
-                || event.getButton() == MouseButton.SECONDARY
-                || (event.getButton() == MouseButton.PRIMARY && spaceDown)) {
-            panning = true;
-            panMoved = false;
+        if (panController.shouldStartPan(event.getButton())) {
+            panController.startPan(event.getX(), event.getY());
             updateCursor(canvas);
             event.consume();
             return;
@@ -455,13 +477,7 @@ final class InputDispatcher {
             return;
         }
 
-        if (panning) {
-            panMoved = true;
-            double screenDx = event.getX() - dragStartX;
-            double screenDy = event.getY() - dragStartY;
-            viewport.pan(screenDx, screenDy);
-            dragStartX = event.getX();
-            dragStartY = event.getY();
+        if (panController.handleDrag(event.getX(), event.getY(), viewport)) {
             canvas.requestRedraw();
             event.consume();
             return;
@@ -562,7 +578,8 @@ final class InputDispatcher {
         }
 
         // Right-click release without drag: show context menu
-        if (panning && !panMoved && event.getButton() == MouseButton.SECONDARY) {
+        if (panController.isPanning() && !panController.hasPanMoved()
+                && event.getButton() == MouseButton.SECONDARY) {
             double worldX = viewport.toWorldX(event.getX());
             double worldY = viewport.toWorldY(event.getY());
             if (handleRightClickRelease(worldX, worldY, event, canvas)) {
@@ -580,8 +597,7 @@ final class InputDispatcher {
         pendingNarrowTarget = null;
 
         dragController.end();
-        panning = false;
-        panMoved = false;
+        panController.endPan();
         updateCursor(canvas);
         event.consume();
     }
@@ -594,8 +610,7 @@ final class InputDispatcher {
         double sx = event.getScreenX();
         double sy = event.getScreenY();
 
-        panning = false;
-        panMoved = false;
+        panController.endPan();
 
         // 1. Element hit
         String hit = HitTester.hitTest(canvasState, worldX, worldY, hideAux);
@@ -645,78 +660,53 @@ final class InputDispatcher {
             return;
         }
 
-        if (event.getCode() == KeyCode.ESCAPE) {
+        KeyCode code = event.getCode();
+
+        // State-dependent keys
+        if (code == KeyCode.ESCAPE) {
             handleEscape(canvas);
             event.consume();
-        } else if (event.getCode() == KeyCode.ENTER && isConnectionTool(canvas.getActiveTool())) {
+        } else if (code == KeyCode.ENTER && isConnectionTool(canvas.getActiveTool())) {
             handleConnectionEnter(canvas);
             event.consume();
-        } else if (event.getCode() == KeyCode.TAB && isConnectionTool(canvas.getActiveTool())) {
+        } else if (code == KeyCode.TAB && isConnectionTool(canvas.getActiveTool())) {
             handleConnectionTab(canvas, event.isShiftDown());
             event.consume();
-        } else if (event.getCode() == KeyCode.SPACE) {
-            spaceDown = true;
+        } else if (code == KeyCode.SPACE) {
+            panController.onSpacePressed();
             updateCursor(canvas);
             event.consume();
-        } else if (event.getCode() == KeyCode.DELETE || event.getCode() == KeyCode.BACK_SPACE) {
+        } else if (code == KeyCode.DELETE || code == KeyCode.BACK_SPACE) {
             canvas.elements().deleteSelectedOrConnection();
             event.consume();
-        } else if (event.isShortcutDown() && event.getCode() == KeyCode.A) {
-            canvas.elements().selectAll();
-            event.consume();
-        } else if (event.isShortcutDown() && event.getCode() == KeyCode.C) {
-            canvas.elements().copySelection();
-            event.consume();
-        } else if (event.isShortcutDown() && event.getCode() == KeyCode.X) {
-            canvas.elements().cutSelection();
-            event.consume();
-        } else if (event.isShortcutDown() && event.getCode() == KeyCode.V) {
-            canvas.elements().pasteClipboard();
-            event.consume();
-        } else if (event.isShortcutDown()
-                && (event.getCode() == KeyCode.PLUS || event.getCode() == KeyCode.EQUALS
-                        || event.getCode() == KeyCode.ADD)) {
-            canvas.zoomIn();
-            event.consume();
-        } else if (event.isShortcutDown()
-                && (event.getCode() == KeyCode.MINUS || event.getCode() == KeyCode.SUBTRACT)) {
-            canvas.zoomOut();
-            event.consume();
-        } else if (event.isShortcutDown() && event.getCode() == KeyCode.DIGIT0) {
-            canvas.resetZoom();
-            event.consume();
-        } else if (!event.isShortcutDown() && !event.isShiftDown() && !event.isAltDown()) {
-            switch (event.getCode()) {
-                case DIGIT1 -> { canvas.switchTool(CanvasToolBar.Tool.SELECT); event.consume(); }
-                case DIGIT2 -> { canvas.switchTool(CanvasToolBar.Tool.PLACE_STOCK); event.consume(); }
-                case DIGIT3 -> { canvas.switchTool(CanvasToolBar.Tool.PLACE_FLOW); event.consume(); }
-                case DIGIT4 -> { canvas.switchTool(CanvasToolBar.Tool.PLACE_VARIABLE); event.consume(); }
-                case DIGIT5 -> { canvas.switchTool(CanvasToolBar.Tool.PLACE_MODULE); event.consume(); }
-                case DIGIT6 -> { canvas.switchTool(CanvasToolBar.Tool.PLACE_LOOKUP); event.consume(); }
-                case DIGIT7 -> { canvas.switchTool(CanvasToolBar.Tool.PLACE_CLD_VARIABLE); event.consume(); }
-                case DIGIT8 -> { canvas.switchTool(CanvasToolBar.Tool.PLACE_CAUSAL_LINK); event.consume(); }
-                case DIGIT9 -> { canvas.switchTool(CanvasToolBar.Tool.PLACE_COMMENT); event.consume(); }
-                case DIGIT0 -> { canvas.switchTool(CanvasToolBar.Tool.PLACE_INFO_LINK); event.consume(); }
-                case OPEN_BRACKET -> {
-                    if (canvas.analysis().isLoopHighlightActive()) {
-                        canvas.analysis().stepLoopBack();
-                        event.consume();
-                    }
+        } else if (event.isShortcutDown()) {
+            Consumer<ModelCanvas> action = SHORTCUT_KEYS.get(code);
+            if (action != null) {
+                action.accept(canvas);
+                event.consume();
+            }
+        } else if (!event.isShiftDown() && !event.isAltDown()) {
+            CanvasToolBar.Tool tool = DIGIT_TO_TOOL.get(code);
+            if (tool != null) {
+                canvas.switchTool(tool);
+                event.consume();
+            } else if (code == KeyCode.OPEN_BRACKET) {
+                if (canvas.analysis().isLoopHighlightActive()) {
+                    canvas.analysis().stepLoopBack();
+                    event.consume();
                 }
-                case CLOSE_BRACKET -> {
-                    if (canvas.analysis().isLoopHighlightActive()) {
-                        canvas.analysis().stepLoopForward();
-                        event.consume();
-                    }
+            } else if (code == KeyCode.CLOSE_BRACKET) {
+                if (canvas.analysis().isLoopHighlightActive()) {
+                    canvas.analysis().stepLoopForward();
+                    event.consume();
                 }
-                default -> { }
             }
         }
     }
 
     void handleKeyReleased(KeyEvent event) {
         if (event.getCode() == KeyCode.SPACE) {
-            spaceDown = false;
+            panController.onSpaceReleased();
         }
     }
 
@@ -854,11 +844,11 @@ final class InputDispatcher {
         if (resizeController.isActive()) {
             cursor = ResizeController.cursorFor(resizeController.getHandle());
         } else if (reattachController.isActive() || rerouteController.isActive()
-                || panning || dragController.isDragging()) {
+                || panController.isPanning() || dragController.isDragging()) {
             cursor = Cursor.CLOSED_HAND;
         } else if (marqueeController.isActive()) {
             cursor = Cursor.CROSSHAIR;
-        } else if (spaceDown) {
+        } else if (panController.isSpaceDown()) {
             cursor = Cursor.MOVE;
         } else if (flowCreation.isPending() || infoLinkCreation.isPending()
                 || activeTool != CanvasToolBar.Tool.SELECT) {
