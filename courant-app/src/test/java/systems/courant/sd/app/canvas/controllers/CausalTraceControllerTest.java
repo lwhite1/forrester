@@ -107,6 +107,18 @@ class CausalTraceControllerTest {
         }
 
         @Test
+        void shouldClearTraceWhenTracedElementDeletedFromModel() {
+            CausalTraceController controller = new CausalTraceController();
+            controller.startTrace("B", TraceDirection.UPSTREAM, chainModel());
+            assertThat(controller.isActive()).isTrue();
+
+            // reducedModel() has no "B" — invalidate should clear the trace
+            controller.invalidate(reducedModel());
+            assertThat(controller.isActive()).isFalse();
+            assertThat(controller.getAnalysis()).isNull();
+        }
+
+        @Test
         void shouldPreserveDirectionAcrossInvalidate() {
             CausalTraceController controller = new CausalTraceController();
             controller.startTrace("S", TraceDirection.DOWNSTREAM, chainModel());
