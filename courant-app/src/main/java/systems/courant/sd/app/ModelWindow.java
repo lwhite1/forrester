@@ -5,7 +5,6 @@ import systems.courant.sd.app.canvas.ActivityLogPanel;
 import systems.courant.sd.app.canvas.BreadcrumbBar;
 import systems.courant.sd.app.canvas.CanvasToolBar;
 import systems.courant.sd.app.canvas.Clipboard;
-import systems.courant.sd.app.canvas.dialogs.ColumnMappingDialog;
 import systems.courant.sd.app.canvas.CommandPalette;
 import systems.courant.sd.app.canvas.dialogs.ContextHelpDialog;
 import systems.courant.sd.app.canvas.LoopNavigatorBar;
@@ -30,42 +29,30 @@ import systems.courant.sd.app.canvas.UndoHistoryPopup;
 import systems.courant.sd.app.canvas.UndoManager;
 import systems.courant.sd.app.canvas.dialogs.ValidationDialog;
 import systems.courant.sd.app.canvas.ZoomOverlay;
-import systems.courant.sd.io.ReferenceDataCsvReader;
-import systems.courant.sd.model.ModelMetadata;
-import systems.courant.sd.model.def.ReferenceDataset;
 import systems.courant.sd.model.def.ElementType;
 import systems.courant.sd.model.def.ModelDefinition;
 import systems.courant.sd.model.def.ValidationResult;
 import systems.courant.sd.model.def.ViewDef;
 import systems.courant.sd.model.graph.AutoLayout;
-import systems.courant.sd.model.graph.ElementSizes;
 import systems.courant.sd.model.graph.FeedbackAnalysis;
 
 import javafx.application.Platform;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.geometry.Insets;
 import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.Dialog;
-import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
-import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 import org.slf4j.Logger;
@@ -100,8 +87,7 @@ public class ModelWindow {
     private DashboardPanel dashboardPanel;
     private TabPane rightTabPane;
     private Tab dashboardTab;
-    private Stage dashboardStage;
-    private MenuItem popOutDashboardItem;
+    private DashboardDockManager dockManager;
     private BorderPane root;
     private final UndoManager undoManager = new UndoManager();
     private MenuItem undoItem;
@@ -189,9 +175,10 @@ public class ModelWindow {
         menuBar = menuResult.menuBar();
         undoItem = menuResult.undoItem();
         redoItem = menuResult.redoItem();
-        popOutDashboardItem = menuResult.popOutDashboardItem();
         validationIssuesItem = menuResult.validationIssuesItem();
         editorOnlyItems.addAll(menuResult.editorOnlyItems());
+        dockManager = new DashboardDockManager(dashboardPanel, dashboardTab,
+                rightTabPane, menuResult.popOutDashboardItem(), stage);
 
         topContainer = new VBox(menuBar, toolBar, loopNavigatorBar, breadcrumbBar);
 
@@ -510,8 +497,10 @@ public class ModelWindow {
         commandRegistry.add("Toggle Activity Log", "View",
                 () -> toggleActivityLog(!activityLogPanel.isVisible()));
         commandRegistry.add("Pop Out / Dock Dashboard", "View", () -> {
-                    if (dashboardStage == null) { popOutDashboard(); }
-                    else { dockDashboard(); } },
+                    if (!dockManager.isPoppedOut()) {
+                        dockManager.popOut(editor != null
+                                ? editor.getModelName() : "Courant");
+                    } else { dockManager.dock(); } },
                 new KeyCodeCombination(KeyCode.D,
                         KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN),
                 "menuPopOutDashboard");
@@ -585,9 +574,12 @@ public class ModelWindow {
                         canvas.analysis().getActiveLoopAnalysis(),
                         stage, editor != null ? editor.getModelName() : null),
                 null, "menuExportReport");
-        commandRegistry.add("Model Info", "File", this::showModelInfoDialog);
+        commandRegistry.add("Model Info", "File",
+                () -> ModelInfoDialog.show(editor, stage, this::updateTitle));
         commandRegistry.add("Import Reference Data", "File",
-                this::importReferenceData, null, "menuImportRefData");
+                () -> fileController.importReferenceData(
+                        simulationController::runSimulation),
+                null, "menuImportRefData");
         commandRegistry.add("Close", "File", () -> {
                     if (fileController.confirmDiscardChanges()) {
                         resetToStartScreen();
@@ -716,57 +708,7 @@ public class ModelWindow {
     }
 
     private void switchToDashboard() {
-        if (dashboardStage != null) {
-            dashboardStage.toFront();
-            dashboardStage.requestFocus();
-        } else if (rightTabPane != null && rightTabPane.getTabs().contains(dashboardTab)) {
-            rightTabPane.getSelectionModel().select(dashboardTab);
-        }
-    }
-
-    private void popOutDashboard() {
-        if (dashboardStage != null) {
-            return;
-        }
-        rightTabPane.getTabs().remove(dashboardTab);
-
-        dashboardStage = new Stage();
-        dashboardStage.setTitle("Dashboard \u2014 " + (editor != null ? editor.getModelName() : "Courant"));
-        dashboardStage.initOwner(stage);
-
-        BorderPane dashRoot = new BorderPane(dashboardPanel);
-        Scene dashScene = new Scene(dashRoot, 600, 500);
-        dashboardStage.setScene(dashScene);
-
-        dashboardStage.setOnHidden(e -> {
-            if (dashboardStage != null) {
-                dockDashboard();
-            }
-        });
-
-        dashboardStage.show();
-        popOutDashboardItem.setText("Dock Dashboard");
-    }
-
-    private void dockDashboard() {
-        if (dashboardStage == null) {
-            return;
-        }
-        Stage stageToClose = dashboardStage;
-        dashboardStage = null;
-
-        BorderPane dashRoot = (BorderPane) stageToClose.getScene().getRoot();
-        dashRoot.setCenter(null);
-
-        dashboardTab.setContent(dashboardPanel);
-        if (!rightTabPane.getTabs().contains(dashboardTab)) {
-            rightTabPane.getTabs().add(dashboardTab);
-        }
-
-        stageToClose.setOnHidden(null);
-        stageToClose.close();
-
-        popOutDashboardItem.setText("Pop Out Dashboard");
+        dockManager.switchTo();
     }
 
     private void fireLogEvent(Consumer<ModelEditListener> event) {
@@ -904,131 +846,6 @@ public class ModelWindow {
         ValidationDialog.showOrUpdate(result, canvas.elements()::selectElement, stage);
     }
 
-    private void importReferenceData() {
-        FileChooser chooser = new FileChooser();
-        chooser.setTitle("Import Reference Data (CSV)");
-        chooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("CSV Files", "*.csv"),
-                new FileChooser.ExtensionFilter("All Files", "*.*"));
-        java.io.File file = chooser.showOpenDialog(stage);
-        if (file == null) {
-            return;
-        }
-        try {
-            String name = file.getName();
-            int dot = name.lastIndexOf('.');
-            if (dot > 0) {
-                name = name.substring(0, dot);
-            }
-            ReferenceDataset rawDataset = ReferenceDataCsvReader.read(
-                    file.toPath(), name);
-
-            // Show column mapping dialog
-            ModelDefinition def = canvas.getEditor().toModelDefinition();
-            List<String> modelVarNames = new java.util.ArrayList<>();
-            def.stocks().forEach(s -> modelVarNames.add(s.name()));
-            def.variables().forEach(v -> modelVarNames.add(v.name()));
-
-            ColumnMappingDialog mappingDialog = new ColumnMappingDialog(
-                    rawDataset, modelVarNames);
-            mappingDialog.initOwner(stage);
-            ReferenceDataset mapped = mappingDialog.showAndWait().orElse(null);
-            if (mapped == null) {
-                return;
-            }
-
-            canvas.getEditor().addReferenceDataset(mapped);
-            simulationController.runSimulation();
-            log.info("Imported reference data '{}' ({} rows, {} variables)",
-                    mapped.name(), mapped.size(), mapped.variableNames().size());
-        } catch (java.io.IOException ex) {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Import Error");
-            alert.setHeaderText("Failed to import reference data");
-            alert.setContentText(ex.getMessage());
-            alert.initOwner(stage);
-            alert.showAndWait();
-        }
-    }
-
-    private void showModelInfoDialog() {
-        Dialog<ButtonType> dialog = new Dialog<>();
-        dialog.setTitle("Model Info");
-        dialog.setHeaderText(null);
-        dialog.initOwner(stage);
-
-        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
-
-        GridPane grid = new GridPane();
-        grid.setHgap(10);
-        grid.setVgap(10);
-        grid.setPadding(new Insets(10));
-
-        TextField nameField = new TextField(editor.getModelName());
-        nameField.setPrefColumnCount(30);
-        TextArea commentArea = new TextArea(
-                editor.getModelComment() != null ? editor.getModelComment() : "");
-        commentArea.setPrefRowCount(4);
-        commentArea.setPrefColumnCount(30);
-
-        ModelMetadata meta = editor.getMetadata();
-        TextField authorField = new TextField(meta != null ? nullToEmpty(meta.author()) : "");
-        authorField.setPrefColumnCount(30);
-        TextField sourceField = new TextField(meta != null ? nullToEmpty(meta.source()) : "");
-        sourceField.setPrefColumnCount(30);
-        TextField licenseField = new TextField(meta != null ? nullToEmpty(meta.license()) : "");
-        licenseField.setPrefColumnCount(30);
-        TextField urlField = new TextField(meta != null ? nullToEmpty(meta.url()) : "");
-        urlField.setPrefColumnCount(30);
-
-        int row = 0;
-        grid.add(new Label("Name:"), 0, row);
-        grid.add(nameField, 1, row++);
-        grid.add(new Label("Comment:"), 0, row);
-        grid.add(commentArea, 1, row++);
-        grid.add(new Label("Author:"), 0, row);
-        grid.add(authorField, 1, row++);
-        grid.add(new Label("Source:"), 0, row);
-        grid.add(sourceField, 1, row++);
-        grid.add(new Label("License:"), 0, row);
-        grid.add(licenseField, 1, row++);
-        grid.add(new Label("URL:"), 0, row);
-        grid.add(urlField, 1, row);
-
-        dialog.getDialogPane().setContent(grid);
-        Platform.runLater(nameField::requestFocus);
-
-        dialog.showAndWait()
-                .filter(button -> button == ButtonType.OK)
-                .ifPresent(button -> {
-                    String newName = nameField.getText().trim();
-                    editor.setModelName(newName.isEmpty() ? "Untitled" : newName);
-                    editor.setModelComment(commentArea.getText().trim());
-
-                    String author = emptyToNull(authorField.getText());
-                    String source = emptyToNull(sourceField.getText());
-                    String license = emptyToNull(licenseField.getText());
-                    String url = emptyToNull(urlField.getText());
-                    if (author != null || source != null || license != null || url != null) {
-                        editor.setMetadata(ModelMetadata.builder()
-                                .author(author).source(source)
-                                .license(license).url(url)
-                                .build());
-                    } else {
-                        editor.setMetadata(null);
-                    }
-                    updateTitle();
-                });
-    }
-
-    private static String nullToEmpty(String s) {
-        return s == null ? "" : s;
-    }
-
-    private static String emptyToNull(String s) {
-        return s == null || s.trim().isEmpty() ? null : s.trim();
-    }
-
     private void updateTitle() {
         if (!editorShown) {
             stage.setTitle("Courant");
@@ -1048,9 +865,7 @@ public class ModelWindow {
                 ? " [" + canvas.navigation().getCurrentModuleName() + "]"
                 : "";
         stage.setTitle("Courant \u2014 " + name + dirtySuffix + moduleSuffix);
-        if (dashboardStage != null) {
-            dashboardStage.setTitle("Dashboard \u2014 " + name);
-        }
+        dockManager.updateTitle(name);
     }
 
     private void updateBreadcrumb() {
@@ -1155,11 +970,7 @@ public class ModelWindow {
             contextHelpDialog.close();
             contextHelpDialog = null;
         }
-        if (dashboardStage != null) {
-            dashboardStage.setOnHidden(null);
-            dashboardStage.close();
-            dashboardStage = null;
-        }
+        dockManager.closePopout();
 
         // Clear canvas and dashboard state
         canvas.navigation().clearNavigation();
@@ -1212,11 +1023,7 @@ public class ModelWindow {
             contextHelpDialog = null;
         }
         helpWindows.closeAll();
-        if (dashboardStage != null) {
-            dashboardStage.setOnHidden(null);
-            dashboardStage.close();
-            dashboardStage = null;
-        }
+        dockManager.closePopout();
         stage.close();
     }
 }
