@@ -96,6 +96,10 @@ public final class ReferenceDataCsvReader {
                         row[i] = Double.NaN;
                     }
                 }
+                if (Double.isNaN(row[0])) {
+                    throw new IOException(
+                            "Missing or blank time value at line " + lineNumber);
+                }
                 rawRows.add(row);
             }
 

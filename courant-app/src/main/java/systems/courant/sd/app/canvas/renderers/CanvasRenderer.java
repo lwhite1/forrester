@@ -948,20 +948,8 @@ public class CanvasRenderer {
         gc.setLineDashes();
     }
 
-    /**
-     * Draws a dashed highlight rectangle around a stock element.
-     */
     private void drawStockHoverHighlight(GraphicsContext gc, String stockName) {
-        double sx = canvasState.getX(stockName);
-        double sy = canvasState.getY(stockName);
-        double halfW = LayoutMetrics.effectiveWidth(canvasState, stockName) / 2 + 4;
-        double halfH = LayoutMetrics.effectiveHeight(canvasState, stockName) / 2 + 4;
-
-        gc.setStroke(STOCK_HOVER_COLOR);
-        gc.setLineWidth(2.5);
-        gc.setLineDashes(6, 3);
-        gc.strokeRect(sx - halfW, sy - halfH, halfW * 2, halfH * 2);
-        gc.setLineDashes();
+        drawElementHoverHighlight(gc, stockName);
     }
 
     /**

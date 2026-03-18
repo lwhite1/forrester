@@ -9,7 +9,6 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -20,7 +19,7 @@ public class CourantApp extends Application {
 
     static final double DECORATION_ALLOWANCE = 40;
 
-    private final List<ModelWindow> openWindows = new ArrayList<>();
+    private int openWindowCount;
     private final Clipboard clipboard = new Clipboard();
 
     @Override
@@ -33,11 +32,11 @@ public class CourantApp extends Application {
     }
 
     private void openWindow(Stage stage) {
-        ModelWindow window = new ModelWindow(stage, this, clipboard);
-        openWindows.add(window);
+        new ModelWindow(stage, this, clipboard);
+        openWindowCount++;
         stage.setOnHidden(e -> {
-            openWindows.remove(window);
-            if (openWindows.isEmpty()) {
+            openWindowCount--;
+            if (openWindowCount == 0) {
                 // Close any remaining windows (help dialogs, etc.)
                 List.copyOf(Window.getWindows()).forEach(w -> {
                     if (w instanceof Stage s) {

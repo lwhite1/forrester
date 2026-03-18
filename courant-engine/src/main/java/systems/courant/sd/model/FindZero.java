@@ -2,6 +2,9 @@ package systems.courant.sd.model;
 
 import com.google.common.base.Preconditions;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.function.DoubleSupplier;
 
 /**
@@ -16,6 +19,7 @@ import java.util.function.DoubleSupplier;
  */
 public class FindZero implements Formula {
 
+    private static final Logger log = LoggerFactory.getLogger(FindZero.class);
     private static final int MAX_ITERATIONS = 50;
     private static final double TOLERANCE = 1e-10;
 
@@ -55,6 +59,12 @@ public class FindZero implements Formula {
     public double getCurrentValue() {
         double lo = loBound.getAsDouble();
         double hi = hiBound.getAsDouble();
+
+        if (Double.isNaN(lo) || Double.isNaN(hi)) {
+            log.warn("FIND ZERO: NaN bound (lo={}, hi={}), returning NaN", lo, hi);
+            variableHolder[0] = Double.NaN;
+            return Double.NaN;
+        }
 
         // Evaluate expression at lo
         variableHolder[0] = lo;

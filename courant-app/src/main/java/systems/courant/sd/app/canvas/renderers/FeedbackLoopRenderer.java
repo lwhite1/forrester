@@ -8,6 +8,7 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
+import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import systems.courant.sd.app.canvas.CanvasState;
 import systems.courant.sd.app.canvas.CausalLinkGeometry;
@@ -81,7 +82,9 @@ public final class FeedbackLoopRenderer {
             case INDETERMINATE -> ColorPalette.LOOP_INDETERMINATE;
         };
 
-        double textWidth = label.length() * 9;
+        Text textNode = new Text(label);
+        textNode.setFont(LOOP_LABEL_FONT);
+        double textWidth = textNode.getLayoutBounds().getWidth();
         double badgeW = textWidth + LABEL_PADDING * 2;
         double badgeH = 20;
         double x = cx - badgeW / 2;

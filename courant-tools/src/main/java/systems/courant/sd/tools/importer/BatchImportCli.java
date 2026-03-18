@@ -151,14 +151,18 @@ public class BatchImportCli {
                 failures.add(msg);
                 log.error("  FAILED: {}", msg);
             } finally {
-                if (isTemp && sourceFile != null) {
-                    try {
-                        Files.deleteIfExists(sourceFile);
-                        if (tempDir != null) {
-                            Files.deleteIfExists(tempDir);
-                        }
+                if (isTemp && tempDir != null) {
+                    try (var paths = Files.walk(tempDir)) {
+                        paths.sorted(java.util.Comparator.reverseOrder())
+                                .forEach(p -> {
+                                    try {
+                                        Files.deleteIfExists(p);
+                                    } catch (IOException e2) {
+                                        log.warn("  Could not delete temp path: {}", p);
+                                    }
+                                });
                     } catch (IOException e) {
-                        log.warn("  Could not delete temp file: {}", sourceFile);
+                        log.warn("  Could not clean up temp directory: {}", tempDir);
                     }
                 }
             }

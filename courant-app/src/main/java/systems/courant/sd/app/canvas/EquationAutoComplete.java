@@ -163,7 +163,21 @@ public final class EquationAutoComplete {
         if (tf == null) {
             return;
         }
-        detach(new TextFieldEquationField(tf));
+        Object obj = tf.getProperties().remove(PROP_STATE);
+        if (obj instanceof State state) {
+            state.hidePopup();
+            state.hideHint();
+            tf.removeEventFilter(KeyEvent.KEY_PRESSED, state.keyFilter);
+            tf.textProperty().removeListener(state.textListener);
+            tf.caretPositionProperty().removeListener(state.caretListener);
+            tf.focusedProperty().removeListener(state.focusListener);
+        }
+        Object original = tf.getProperties().remove(PROP_ORIGINAL_ACTION);
+        if (original instanceof EventHandler<?> handler) {
+            @SuppressWarnings("unchecked")
+            EventHandler<ActionEvent> actionHandler = (EventHandler<ActionEvent>) handler;
+            tf.setOnAction(actionHandler);
+        }
     }
 
     /** Returns true if the autocomplete popup is showing for the given {@link TextField}. */
@@ -171,7 +185,8 @@ public final class EquationAutoComplete {
         if (tf == null) {
             return false;
         }
-        return isPopupShowing(new TextFieldEquationField(tf));
+        Object obj = tf.getProperties().get(PROP_STATE);
+        return obj instanceof State state && state.popup != null && state.popup.isShowing();
     }
 
     // ── Token extraction (package-private for testing) ──────────────────
