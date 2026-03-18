@@ -47,13 +47,11 @@ import javafx.scene.Scene;
 import javafx.geometry.Insets;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
-import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
@@ -180,7 +178,21 @@ public class ModelWindow {
         configureCanvasCallbacks();
         createRightPanel();
 
-        menuBar = createMenuBar();
+        populateCommands();
+        var menuResult = new MenuBarBuilder(commandRegistry,
+                fileController.buildExamplesMenu(),
+                this::toggleActivityLog,
+                checked -> { canvas.setHideVariables(checked); canvas.requestFocus(); },
+                checked -> { canvas.setShowDelayBadges(checked); canvas.requestFocus(); },
+                checked -> { canvas.setHideInfoLinks(checked); canvas.requestFocus(); })
+                .build();
+        menuBar = menuResult.menuBar();
+        undoItem = menuResult.undoItem();
+        redoItem = menuResult.redoItem();
+        popOutDashboardItem = menuResult.popOutDashboardItem();
+        validationIssuesItem = menuResult.validationIssuesItem();
+        editorOnlyItems.addAll(menuResult.editorOnlyItems());
+
         topContainer = new VBox(menuBar, toolBar, loopNavigatorBar, breadcrumbBar);
 
         root = new BorderPane();
@@ -413,339 +425,220 @@ public class ModelWindow {
         }
     }
 
-    private MenuBar createMenuBar() {
-        Menu fileMenu = createFileMenu();
-        Menu editMenu = createEditMenu();
-        Menu viewMenu = createViewMenu();
-        Menu simulateMenu = createSimulateMenu();
-        Menu helpMenu = createHelpMenu();
+    /**
+     * Populates the {@link CommandRegistry} with every application command.
+     * Both the menu bar ({@link MenuBarBuilder}) and the {@link CommandPalette}
+     * are driven from this single registry, eliminating action duplication.
+     */
+    private void populateCommands() {
+        commandRegistry = new CommandRegistry();
 
-        return new MenuBar(fileMenu, editMenu, viewMenu, simulateMenu, helpMenu);
-    }
+        // -- Build (palette only — tool-switching shortcuts) --
+        commandRegistry.add("Add Stock", "Build",
+                () -> switchToolAndFocus(CanvasToolBar.Tool.PLACE_STOCK));
+        commandRegistry.add("Add Flow", "Build",
+                () -> switchToolAndFocus(CanvasToolBar.Tool.PLACE_FLOW));
+        commandRegistry.add("Add Variable", "Build",
+                () -> switchToolAndFocus(CanvasToolBar.Tool.PLACE_VARIABLE));
+        commandRegistry.add("Add Module", "Build",
+                () -> switchToolAndFocus(CanvasToolBar.Tool.PLACE_MODULE));
+        commandRegistry.add("Add Lookup Table", "Build",
+                () -> switchToolAndFocus(CanvasToolBar.Tool.PLACE_LOOKUP));
+        commandRegistry.add("Add CLD Variable", "Build",
+                () -> switchToolAndFocus(CanvasToolBar.Tool.PLACE_CLD_VARIABLE));
+        commandRegistry.add("Draw Causal Link", "Build",
+                () -> switchToolAndFocus(CanvasToolBar.Tool.PLACE_CAUSAL_LINK));
+        commandRegistry.add("Draw Info Link", "Build",
+                () -> switchToolAndFocus(CanvasToolBar.Tool.PLACE_INFO_LINK));
+        commandRegistry.add("Add Comment", "Build",
+                () -> switchToolAndFocus(CanvasToolBar.Tool.PLACE_COMMENT));
+        commandRegistry.add("Select Tool", "Build",
+                () -> switchToolAndFocus(CanvasToolBar.Tool.SELECT));
 
-    private Menu createFileMenu() {
-        Menu fileMenu = new Menu("File");
+        // -- Simulate --
+        commandRegistry.add("Simulation Settings", "Simulate",
+                simulationController::openSimulationSettings);
+        commandRegistry.add("Run Simulation", "Simulate",
+                simulationController::runSimulation,
+                new KeyCodeCombination(KeyCode.R, KeyCombination.SHORTCUT_DOWN),
+                "menuRunSimulation");
+        commandRegistry.add("Validate Model", "Simulate",
+                simulationController::validateModel,
+                new KeyCodeCombination(KeyCode.B, KeyCombination.SHORTCUT_DOWN));
+        commandRegistry.add("Extreme Conditions", "Simulate",
+                simulationController::runExtremeConditionTest);
+        commandRegistry.add("Parameter Sweep", "Simulate",
+                simulationController::runParameterSweep);
+        commandRegistry.add("Multi-Parameter Sweep", "Simulate",
+                simulationController::runMultiParameterSweep);
+        commandRegistry.add("Monte Carlo", "Simulate",
+                simulationController::runMonteCarlo);
+        commandRegistry.add("Optimize", "Simulate",
+                simulationController::runOptimization);
+        commandRegistry.add("Calibrate", "Simulate",
+                simulationController::runCalibration);
 
-        MenuItem newWindowItem = new MenuItem("New Window");
-        newWindowItem.setId("menuNewWindow");
-        newWindowItem.setAccelerator(new KeyCodeCombination(KeyCode.N,
-                KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN));
-        newWindowItem.setOnAction(e -> app.openNewWindow());
+        // -- View --
+        commandRegistry.add("Command Palette", "View",
+                () -> commandPalette.show(stage),
+                new KeyCodeCombination(KeyCode.K, KeyCombination.SHORTCUT_DOWN));
+        commandRegistry.add("Zoom to Fit", "View", () -> {
+                    canvas.zoomToFit(); canvas.requestFocus(); },
+                new KeyCodeCombination(KeyCode.F,
+                        KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN),
+                "menuZoomToFit");
+        commandRegistry.add("Reset Zoom", "View", () -> {
+                    canvas.resetZoom(); canvas.requestFocus(); },
+                new KeyCodeCombination(KeyCode.DIGIT0,
+                        KeyCombination.SHORTCUT_DOWN),
+                "menuResetZoom");
+        commandRegistry.add("Zoom In", "View", () -> {
+                    canvas.zoomIn(); canvas.requestFocus(); });
+        commandRegistry.add("Zoom Out", "View", () -> {
+                    canvas.zoomOut(); canvas.requestFocus(); });
+        commandRegistry.add("Validation Issues", "View",
+                this::showValidationDialog, null, "menuValidationIssues");
+        commandRegistry.add("Toggle Hide Variables", "View", () -> {
+                    canvas.setHideVariables(!canvas.isHideVariables());
+                    canvas.requestFocus(); });
+        commandRegistry.add("Toggle Hide Info Links", "View", () -> {
+                    canvas.setHideInfoLinks(!canvas.isHideInfoLinks());
+                    canvas.requestFocus(); });
+        commandRegistry.add("Toggle Delay Indicators", "View", () -> {
+                    canvas.setShowDelayBadges(!canvas.isShowDelayBadges());
+                    canvas.requestFocus(); });
+        commandRegistry.add("Toggle Activity Log", "View",
+                () -> toggleActivityLog(!activityLogPanel.isVisible()));
+        commandRegistry.add("Pop Out / Dock Dashboard", "View", () -> {
+                    if (dashboardStage == null) { popOutDashboard(); }
+                    else { dockDashboard(); } },
+                new KeyCodeCombination(KeyCode.D,
+                        KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN),
+                "menuPopOutDashboard");
 
-        MenuItem newItem = new MenuItem("New");
-        newItem.setId("menuNew");
-        newItem.setAccelerator(new KeyCodeCombination(KeyCode.N, KeyCombination.SHORTCUT_DOWN));
-        newItem.setOnAction(e -> {
-            showEditor();
-            fileController.newModel();
-        });
+        // -- Edit --
+        commandRegistry.add("Undo", "Edit", () -> {
+                    canvas.undo().performUndo(); canvas.requestFocus(); },
+                new KeyCodeCombination(KeyCode.Z,
+                        KeyCombination.SHORTCUT_DOWN),
+                "menuUndo");
+        commandRegistry.add("Redo", "Edit", () -> {
+                    canvas.undo().performRedo(); canvas.requestFocus(); },
+                new KeyCodeCombination(KeyCode.Z,
+                        KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN),
+                "menuRedo");
+        commandRegistry.add("Undo History", "Edit",
+                this::showUndoHistoryPopup, null, "menuUndoHistory");
+        commandRegistry.add("Cut", "Edit", () -> {
+                    canvas.elements().cutSelection(); canvas.requestFocus(); },
+                new KeyCodeCombination(KeyCode.X,
+                        KeyCombination.SHORTCUT_DOWN));
+        commandRegistry.add("Copy", "Edit", () -> {
+                    canvas.elements().copySelection(); canvas.requestFocus(); },
+                new KeyCodeCombination(KeyCode.C,
+                        KeyCombination.SHORTCUT_DOWN));
+        commandRegistry.add("Paste", "Edit", () -> {
+                    canvas.elements().pasteClipboard(); canvas.requestFocus(); },
+                new KeyCodeCombination(KeyCode.V,
+                        KeyCombination.SHORTCUT_DOWN));
+        commandRegistry.add("Select All", "Edit", () -> {
+                    canvas.elements().selectAll(); canvas.requestFocus(); },
+                new KeyCodeCombination(KeyCode.A,
+                        KeyCombination.SHORTCUT_DOWN));
 
-        MenuItem openItem = new MenuItem("Open...");
-        openItem.setId("menuOpen");
-        openItem.setAccelerator(new KeyCodeCombination(KeyCode.O, KeyCombination.SHORTCUT_DOWN));
-        openItem.setOnAction(e -> {
-            showEditor();
-            fileController.openFile();
-        });
+        // -- File --
+        commandRegistry.add("New Model", "File", () -> {
+                    showEditor(); fileController.newModel(); },
+                new KeyCodeCombination(KeyCode.N,
+                        KeyCombination.SHORTCUT_DOWN),
+                "menuNew");
+        commandRegistry.add("New Window", "File", () -> app.openNewWindow(),
+                new KeyCodeCombination(KeyCode.N,
+                        KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN),
+                "menuNewWindow");
+        commandRegistry.add("Open Model", "File", () -> {
+                    showEditor(); fileController.openFile(); },
+                new KeyCodeCombination(KeyCode.O,
+                        KeyCombination.SHORTCUT_DOWN),
+                "menuOpen");
+        commandRegistry.add("Save", "File", fileController::save,
+                new KeyCodeCombination(KeyCode.S,
+                        KeyCombination.SHORTCUT_DOWN),
+                "menuSave");
+        commandRegistry.add("Save As", "File", fileController::saveAs,
+                new KeyCodeCombination(KeyCode.S,
+                        KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN),
+                "menuSaveAs");
+        commandRegistry.add("Export Diagram", "File",
+                () -> DiagramExporter.exportDiagram(
+                        canvas.getCanvasState(), canvas.getEditor(),
+                        canvas.getConnectors(),
+                        canvas.analysis().getActiveLoopAnalysis(),
+                        stage, editor != null ? editor.getModelName() : null),
+                new KeyCodeCombination(KeyCode.E,
+                        KeyCombination.SHORTCUT_DOWN),
+                "menuExport");
+        commandRegistry.add("Export Report", "File",
+                () -> ReportExporter.exportReport(
+                        canvas.getCanvasState(), canvas.getEditor(),
+                        canvas.getConnectors(),
+                        canvas.analysis().getActiveLoopAnalysis(),
+                        stage, editor != null ? editor.getModelName() : null),
+                null, "menuExportReport");
+        commandRegistry.add("Model Info", "File", this::showModelInfoDialog);
+        commandRegistry.add("Import Reference Data", "File",
+                this::importReferenceData, null, "menuImportRefData");
+        commandRegistry.add("Close", "File", () -> {
+                    if (fileController.confirmDiscardChanges()) {
+                        resetToStartScreen();
+                    } },
+                new KeyCodeCombination(KeyCode.W,
+                        KeyCombination.SHORTCUT_DOWN));
+        commandRegistry.add("Exit", "File", () -> {
+                    if (fileController.confirmDiscardChanges()) {
+                        Platform.exit();
+                    } });
 
-        MenuItem saveItem = new MenuItem("Save");
-        saveItem.setId("menuSave");
-        saveItem.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.SHORTCUT_DOWN));
-        saveItem.setOnAction(e -> fileController.save());
-
-        MenuItem saveAsItem = new MenuItem("Save As...");
-        saveAsItem.setId("menuSaveAs");
-        saveAsItem.setAccelerator(new KeyCodeCombination(KeyCode.S,
-                KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN));
-        saveAsItem.setOnAction(e -> fileController.saveAs());
-
-        MenuItem exportItem = new MenuItem("Export Diagram...");
-        exportItem.setId("menuExport");
-        exportItem.setAccelerator(new KeyCodeCombination(KeyCode.E, KeyCombination.SHORTCUT_DOWN));
-        exportItem.setOnAction(e -> DiagramExporter.exportDiagram(
-                canvas.getCanvasState(), canvas.getEditor(),
-                canvas.getConnectors(), canvas.analysis().getActiveLoopAnalysis(), stage,
-                editor != null ? editor.getModelName() : null));
-
-        MenuItem exportReportItem = new MenuItem("Export Report...");
-        exportReportItem.setId("menuExportReport");
-        exportReportItem.setOnAction(e -> ReportExporter.exportReport(
-                canvas.getCanvasState(), canvas.getEditor(),
-                canvas.getConnectors(), canvas.analysis().getActiveLoopAnalysis(), stage,
-                editor != null ? editor.getModelName() : null));
-
-        MenuItem closeItem = new MenuItem("Close");
-        closeItem.setAccelerator(new KeyCodeCombination(KeyCode.W, KeyCombination.SHORTCUT_DOWN));
-        closeItem.setOnAction(e -> {
-            if (fileController.confirmDiscardChanges()) {
-                resetToStartScreen();
-            }
-        });
-
-        MenuItem exitItem = new MenuItem("Exit");
-        exitItem.setOnAction(e -> {
-            if (fileController.confirmDiscardChanges()) {
-                Platform.exit();
-            }
-        });
-
-        Menu examplesMenu = fileController.buildExamplesMenu();
-
-        MenuItem modelInfoItem = new MenuItem("Model Info\u2026");
-        modelInfoItem.setOnAction(e -> showModelInfoDialog());
-
-        MenuItem importRefDataItem = new MenuItem("Import Reference Data\u2026");
-        importRefDataItem.setId("menuImportRefData");
-        importRefDataItem.setOnAction(e -> importReferenceData());
-
-        // Disable file items that require an open model
-        closeItem.setDisable(true);
-        saveItem.setDisable(true);
-        saveAsItem.setDisable(true);
-        exportItem.setDisable(true);
-        exportReportItem.setDisable(true);
-        modelInfoItem.setDisable(true);
-        importRefDataItem.setDisable(true);
-        editorOnlyItems.addAll(List.of(closeItem, saveItem, saveAsItem, exportItem, exportReportItem,
-                modelInfoItem, importRefDataItem));
-
-        fileMenu.getItems().addAll(newWindowItem, newItem, openItem, examplesMenu,
-                new SeparatorMenuItem(), modelInfoItem, importRefDataItem,
-                new SeparatorMenuItem(), saveItem, saveAsItem, exportItem, exportReportItem,
-                new SeparatorMenuItem(), closeItem, exitItem);
-
-        return fileMenu;
-    }
-
-    private Menu createEditMenu() {
-        Menu editMenu = new Menu("Edit");
-
-        undoItem = new MenuItem("Undo");
-        undoItem.setId("menuUndo");
-        undoItem.setAccelerator(new KeyCodeCombination(KeyCode.Z, KeyCombination.SHORTCUT_DOWN));
-        undoItem.setOnAction(e -> {
-            canvas.undo().performUndo();
-            canvas.requestFocus();
-        });
-        undoItem.setDisable(true);
-
-        redoItem = new MenuItem("Redo");
-        redoItem.setId("menuRedo");
-        redoItem.setAccelerator(new KeyCodeCombination(KeyCode.Z,
-                KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN));
-        redoItem.setOnAction(e -> {
-            canvas.undo().performRedo();
-            canvas.requestFocus();
-        });
-        redoItem.setDisable(true);
-
-        MenuItem undoHistoryItem = new MenuItem("Undo History\u2026");
-        undoHistoryItem.setId("menuUndoHistory");
-        undoHistoryItem.setOnAction(e -> showUndoHistoryPopup());
-
-        MenuItem cutItem = new MenuItem("Cut");
-        cutItem.setAccelerator(new KeyCodeCombination(KeyCode.X, KeyCombination.SHORTCUT_DOWN));
-        cutItem.setOnAction(e -> {
-            canvas.elements().cutSelection();
-            canvas.requestFocus();
-        });
-
-        MenuItem copyItem = new MenuItem("Copy");
-        copyItem.setAccelerator(new KeyCodeCombination(KeyCode.C, KeyCombination.SHORTCUT_DOWN));
-        copyItem.setOnAction(e -> {
-            canvas.elements().copySelection();
-            canvas.requestFocus();
-        });
-
-        MenuItem pasteItem = new MenuItem("Paste");
-        pasteItem.setAccelerator(new KeyCodeCombination(KeyCode.V, KeyCombination.SHORTCUT_DOWN));
-        pasteItem.setOnAction(e -> {
-            canvas.elements().pasteClipboard();
-            canvas.requestFocus();
-        });
-
-        MenuItem selectAllItem = new MenuItem("Select All");
-        selectAllItem.setAccelerator(new KeyCodeCombination(KeyCode.A, KeyCombination.SHORTCUT_DOWN));
-        selectAllItem.setOnAction(e -> {
-            canvas.elements().selectAll();
-            canvas.requestFocus();
-        });
-
-        editMenu.getItems().addAll(undoItem, redoItem, undoHistoryItem,
-                new SeparatorMenuItem(),
-                cutItem, copyItem, pasteItem, new SeparatorMenuItem(), selectAllItem);
-        editMenu.setDisable(true);
-        editorOnlyItems.add(editMenu);
-
-        return editMenu;
-    }
-
-    private Menu createViewMenu() {
-        Menu viewMenu = new Menu("View");
-
-        CheckMenuItem activityLogItem = new CheckMenuItem("Activity Log");
-        activityLogItem.setAccelerator(new KeyCodeCombination(KeyCode.L, KeyCombination.SHORTCUT_DOWN));
-        activityLogItem.setOnAction(e -> {
-            boolean show = activityLogItem.isSelected();
-            activityLogPanel.setVisible(show);
-            activityLogPanel.setManaged(show);
-            if (show) {
-                root.setLeft(activityLogPanel);
-            } else {
-                root.setLeft(null);
-            }
-        });
-
-        popOutDashboardItem = new MenuItem("Pop Out Dashboard");
-        popOutDashboardItem.setId("menuPopOutDashboard");
-        popOutDashboardItem.setAccelerator(new KeyCodeCombination(KeyCode.D,
-                KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN));
-        popOutDashboardItem.setOnAction(e -> {
-            if (dashboardStage == null) {
-                popOutDashboard();
-            } else {
-                dockDashboard();
-            }
-        });
-
-        MenuItem commandPaletteItem = new MenuItem("Command Palette\u2026");
-        commandPaletteItem.setAccelerator(new KeyCodeCombination(KeyCode.K, KeyCombination.SHORTCUT_DOWN));
-        commandPaletteItem.setOnAction(e -> commandPalette.show(stage));
-
-        MenuItem zoomToFitItem = new MenuItem("Zoom to Fit");
-        zoomToFitItem.setId("menuZoomToFit");
-        zoomToFitItem.setAccelerator(new KeyCodeCombination(KeyCode.F,
-                KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN));
-        zoomToFitItem.setOnAction(e -> { canvas.zoomToFit(); canvas.requestFocus(); });
-
-        MenuItem resetZoomItem = new MenuItem("Reset Zoom");
-        resetZoomItem.setId("menuResetZoom");
-        resetZoomItem.setAccelerator(new KeyCodeCombination(KeyCode.DIGIT0, KeyCombination.SHORTCUT_DOWN));
-        resetZoomItem.setOnAction(e -> { canvas.resetZoom(); canvas.requestFocus(); });
-
-        validationIssuesItem = new MenuItem("Validation Issues\u2026");
-        validationIssuesItem.setId("menuValidationIssues");
-        validationIssuesItem.setDisable(true);
-        validationIssuesItem.setOnAction(e -> showValidationDialog());
-
-        CheckMenuItem hideAuxItem = new CheckMenuItem("Hide Variables");
-        hideAuxItem.setId("menuHideVariables");
-        hideAuxItem.setOnAction(e -> { canvas.setHideVariables(hideAuxItem.isSelected()); canvas.requestFocus(); });
-
-        CheckMenuItem showDelayItem = new CheckMenuItem("Show Delay Indicators");
-        showDelayItem.setId("menuShowDelayIndicators");
-        showDelayItem.setOnAction(e -> {
-            canvas.setShowDelayBadges(showDelayItem.isSelected()); canvas.requestFocus(); });
-
-        CheckMenuItem hideInfoLinksItem = new CheckMenuItem("Hide Info Links");
-        hideInfoLinksItem.setId("menuHideInfoLinks");
-        hideInfoLinksItem.setOnAction(e -> {
-            canvas.setHideInfoLinks(hideInfoLinksItem.isSelected()); canvas.requestFocus(); });
-
-        viewMenu.getItems().addAll(commandPaletteItem, new SeparatorMenuItem(),
-                zoomToFitItem, resetZoomItem, new SeparatorMenuItem(),
-                hideAuxItem, hideInfoLinksItem, showDelayItem, new SeparatorMenuItem(),
-                validationIssuesItem, new SeparatorMenuItem(),
-                activityLogItem, popOutDashboardItem);
-        viewMenu.setDisable(true);
-        editorOnlyItems.add(viewMenu);
-
-        return viewMenu;
-    }
-
-    private Menu createSimulateMenu() {
-        Menu simulateMenu = new Menu("Simulate");
-
-        MenuItem settingsItem = new MenuItem("Simulation Settings...");
-        settingsItem.setOnAction(e -> simulationController.openSimulationSettings());
-
-        MenuItem runItem = new MenuItem("Run Simulation");
-        runItem.setId("menuRunSimulation");
-        runItem.setAccelerator(new KeyCodeCombination(KeyCode.R, KeyCombination.SHORTCUT_DOWN));
-        runItem.setOnAction(e -> simulationController.runSimulation());
-
-        MenuItem validateItem = new MenuItem("Validate Model");
-        validateItem.setAccelerator(new KeyCodeCombination(KeyCode.B, KeyCombination.SHORTCUT_DOWN));
-        validateItem.setOnAction(e -> simulationController.validateModel());
-
-        MenuItem extremeCondItem = new MenuItem("Extreme Conditions...");
-        extremeCondItem.setOnAction(e -> simulationController.runExtremeConditionTest());
-
-        MenuItem sweepItem = new MenuItem("Parameter Sweep...");
-        sweepItem.setOnAction(e -> simulationController.runParameterSweep());
-
-        MenuItem multiSweepItem = new MenuItem("Multi-Parameter Sweep...");
-        multiSweepItem.setOnAction(e -> simulationController.runMultiParameterSweep());
-
-        MenuItem monteCarloItem = new MenuItem("Monte Carlo...");
-        monteCarloItem.setOnAction(e -> simulationController.runMonteCarlo());
-
-        MenuItem optimizeItem = new MenuItem("Optimize...");
-        optimizeItem.setOnAction(e -> simulationController.runOptimization());
-
-        MenuItem calibrateItem = new MenuItem("Calibrate...");
-        calibrateItem.setOnAction(e -> simulationController.runCalibration());
-
-        simulateMenu.getItems().addAll(settingsItem, runItem,
-                new SeparatorMenuItem(), validateItem, extremeCondItem,
-                new SeparatorMenuItem(), sweepItem, multiSweepItem, monteCarloItem, optimizeItem,
-                calibrateItem);
-        simulateMenu.setDisable(true);
-        editorOnlyItems.add(simulateMenu);
-
-        return simulateMenu;
-    }
-
-    private Menu createHelpMenu() {
-        Menu helpMenu = new Menu("Help");
-
-        MenuItem contextHelpItem = new MenuItem("Context Help");
-        contextHelpItem.setAccelerator(new KeyCodeCombination(KeyCode.F1));
-        contextHelpItem.setOnAction(e -> showContextHelp());
-
-        MenuItem gettingStartedItem = new MenuItem("Getting Started\u2026");
-        gettingStartedItem.setOnAction(e ->
-                helpWindows.showOrBring(QuickstartDialog.class, QuickstartDialog::new));
-
-        MenuItem sirTutorialItem = new MenuItem("Tutorial: SIR Epidemic\u2026");
-        sirTutorialItem.setOnAction(e ->
-                helpWindows.showOrBring(SirTutorialDialog.class, SirTutorialDialog::new));
-
-        MenuItem supplyChainTutorialItem = new MenuItem("Tutorial: Supply Chain\u2026");
-        supplyChainTutorialItem.setOnAction(e ->
-                helpWindows.showOrBring(SupplyChainTutorialDialog.class,
+        // -- Help --
+        commandRegistry.add("Context Help", "Help", this::showContextHelp,
+                new KeyCodeCombination(KeyCode.F1));
+        commandRegistry.add("Getting Started", "Help",
+                () -> helpWindows.showOrBring(QuickstartDialog.class,
+                        QuickstartDialog::new));
+        commandRegistry.add("Tutorial: SIR Epidemic", "Help",
+                () -> helpWindows.showOrBring(SirTutorialDialog.class,
+                        SirTutorialDialog::new));
+        commandRegistry.add("Tutorial: Supply Chain", "Help",
+                () -> helpWindows.showOrBring(SupplyChainTutorialDialog.class,
                         SupplyChainTutorialDialog::new));
-
-        MenuItem sdConceptsItem = new MenuItem("SD Concepts");
-        sdConceptsItem.setOnAction(e ->
-                helpWindows.showOrBring(SdConceptsDialog.class, SdConceptsDialog::new));
-
-        MenuItem exprLangItem = new MenuItem("Expression Language");
-        exprLangItem.setOnAction(e ->
-                helpWindows.showOrBring(ExpressionLanguageDialog.class, ExpressionLanguageDialog::new));
-
-        MenuItem shortcutsItem = new MenuItem("Keyboard Shortcuts");
-        shortcutsItem.setOnAction(e ->
-                helpWindows.showOrBring(KeyboardShortcutsDialog.class, KeyboardShortcutsDialog::new));
-
-        MenuItem aboutItem = new MenuItem("About Courant");
-        aboutItem.setOnAction(e -> {
+        commandRegistry.add("SD Concepts", "Help",
+                () -> helpWindows.showOrBring(SdConceptsDialog.class,
+                        SdConceptsDialog::new));
+        commandRegistry.add("Expression Language", "Help",
+                () -> helpWindows.showOrBring(ExpressionLanguageDialog.class,
+                        ExpressionLanguageDialog::new));
+        commandRegistry.add("Keyboard Shortcuts", "Help",
+                () -> helpWindows.showOrBring(KeyboardShortcutsDialog.class,
+                        KeyboardShortcutsDialog::new));
+        commandRegistry.add("About Courant", "Help", () -> {
             Alert about = new Alert(Alert.AlertType.INFORMATION);
             about.setTitle("About Courant");
             about.setHeaderText("Courant");
-            about.setContentText("A visual System Dynamics modeling environment.\nVersion "
-                    + AppVersion.get());
+            about.setContentText(
+                    "A visual System Dynamics modeling environment.\nVersion "
+                            + AppVersion.get());
             about.showAndWait();
         });
+    }
 
-        helpMenu.getItems().addAll(contextHelpItem,
-                new SeparatorMenuItem(),
-                gettingStartedItem, sirTutorialItem, supplyChainTutorialItem,
-                new SeparatorMenuItem(), sdConceptsItem, exprLangItem,
-                new SeparatorMenuItem(), shortcutsItem,
-                new SeparatorMenuItem(), aboutItem);
-
-        return helpMenu;
+    private void toggleActivityLog(boolean show) {
+        activityLogPanel.setVisible(show);
+        activityLogPanel.setManaged(show);
+        if (show) {
+            root.setLeft(activityLogPanel);
+        } else {
+            root.setLeft(null);
+        }
     }
 
     void loadDefinition(ModelDefinition def, String displayName) {
@@ -1201,142 +1094,7 @@ public class ModelWindow {
         return pendingLayout;
     }
 
-    private void buildRegistry() {
-        commandRegistry = new CommandRegistry();
-        addBuildCommands();
-        addSimulateCommands();
-        addViewCommands();
-        addEditCommands();
-        addFileCommands();
-        addHelpCommands();
-    }
-
-    private void addBuildCommands() {
-        commandRegistry.add("Add Stock", "Build",
-                () -> switchToolAndFocus(CanvasToolBar.Tool.PLACE_STOCK));
-        commandRegistry.add("Add Flow", "Build",
-                () -> switchToolAndFocus(CanvasToolBar.Tool.PLACE_FLOW));
-        commandRegistry.add("Add Variable", "Build",
-                () -> switchToolAndFocus(CanvasToolBar.Tool.PLACE_VARIABLE));
-        commandRegistry.add("Add Module", "Build",
-                () -> switchToolAndFocus(CanvasToolBar.Tool.PLACE_MODULE));
-        commandRegistry.add("Add Lookup Table", "Build",
-                () -> switchToolAndFocus(CanvasToolBar.Tool.PLACE_LOOKUP));
-        commandRegistry.add("Add CLD Variable", "Build",
-                () -> switchToolAndFocus(CanvasToolBar.Tool.PLACE_CLD_VARIABLE));
-        commandRegistry.add("Draw Causal Link", "Build",
-                () -> switchToolAndFocus(CanvasToolBar.Tool.PLACE_CAUSAL_LINK));
-        commandRegistry.add("Draw Info Link", "Build",
-                () -> switchToolAndFocus(CanvasToolBar.Tool.PLACE_INFO_LINK));
-        commandRegistry.add("Add Comment", "Build",
-                () -> switchToolAndFocus(CanvasToolBar.Tool.PLACE_COMMENT));
-        commandRegistry.add("Select Tool", "Build",
-                () -> switchToolAndFocus(CanvasToolBar.Tool.SELECT));
-    }
-
-    private void addSimulateCommands() {
-        commandRegistry.add("Run Simulation", "Simulate", simulationController::runSimulation);
-        commandRegistry.add("Validate Model", "Simulate", simulationController::validateModel);
-        commandRegistry.add("Simulation Settings", "Simulate",
-                simulationController::openSimulationSettings);
-        commandRegistry.add("Extreme Conditions", "Simulate",
-                simulationController::runExtremeConditionTest);
-        commandRegistry.add("Parameter Sweep", "Simulate",
-                simulationController::runParameterSweep);
-        commandRegistry.add("Multi-Parameter Sweep", "Simulate",
-                simulationController::runMultiParameterSweep);
-        commandRegistry.add("Monte Carlo", "Simulate", simulationController::runMonteCarlo);
-        commandRegistry.add("Optimize", "Simulate", simulationController::runOptimization);
-        commandRegistry.add("Calibrate", "Simulate", simulationController::runCalibration);
-    }
-
-    private void addViewCommands() {
-        commandRegistry.add("Validation Issues", "View", this::showValidationDialog);
-        commandRegistry.add("Zoom to Fit", "View", () -> {
-            canvas.zoomToFit(); canvas.requestFocus(); });
-        commandRegistry.add("Reset Zoom", "View", () -> {
-            canvas.resetZoom(); canvas.requestFocus(); });
-        commandRegistry.add("Zoom In", "View", () -> {
-            canvas.zoomIn(); canvas.requestFocus(); });
-        commandRegistry.add("Zoom Out", "View", () -> {
-            canvas.zoomOut(); canvas.requestFocus(); });
-        commandRegistry.add("Toggle Hide Variables", "View", () -> {
-            canvas.setHideVariables(!canvas.isHideVariables()); canvas.requestFocus(); });
-        commandRegistry.add("Toggle Hide Info Links", "View", () -> {
-            canvas.setHideInfoLinks(!canvas.isHideInfoLinks()); canvas.requestFocus(); });
-        commandRegistry.add("Toggle Delay Indicators", "View", () -> {
-            canvas.setShowDelayBadges(!canvas.isShowDelayBadges()); canvas.requestFocus(); });
-        commandRegistry.add("Toggle Activity Log", "View", () -> {
-            boolean show = !activityLogPanel.isVisible();
-            activityLogPanel.setVisible(show);
-            activityLogPanel.setManaged(show);
-            if (show) { root.setLeft(activityLogPanel); } else { root.setLeft(null); }
-        });
-        commandRegistry.add("Pop Out / Dock Dashboard", "View", () -> {
-            if (dashboardStage == null) { popOutDashboard(); } else { dockDashboard(); }
-        });
-    }
-
-    private void addEditCommands() {
-        commandRegistry.add("Undo", "Edit", () -> {
-            canvas.undo().performUndo(); canvas.requestFocus(); });
-        commandRegistry.add("Redo", "Edit", () -> {
-            canvas.undo().performRedo(); canvas.requestFocus(); });
-        commandRegistry.add("Undo History", "Edit", this::showUndoHistoryPopup);
-        commandRegistry.add("Cut", "Edit", () -> {
-            canvas.elements().cutSelection(); canvas.requestFocus(); });
-        commandRegistry.add("Copy", "Edit", () -> {
-            canvas.elements().copySelection(); canvas.requestFocus(); });
-        commandRegistry.add("Paste", "Edit", () -> {
-            canvas.elements().pasteClipboard(); canvas.requestFocus(); });
-        commandRegistry.add("Select All", "Edit", () -> {
-            canvas.elements().selectAll(); canvas.requestFocus(); });
-    }
-
-    private void addFileCommands() {
-        commandRegistry.add("New Model", "File", fileController::newModel);
-        commandRegistry.add("New Window", "File", () -> app.openNewWindow());
-        commandRegistry.add("Open Model", "File", fileController::openFile);
-        commandRegistry.add("Save", "File", fileController::save);
-        commandRegistry.add("Save As", "File", fileController::saveAs);
-        commandRegistry.add("Export Diagram", "File", () -> DiagramExporter.exportDiagram(
-                canvas.getCanvasState(), canvas.getEditor(),
-                canvas.getConnectors(), canvas.analysis().getActiveLoopAnalysis(), stage,
-                editor != null ? editor.getModelName() : null));
-        commandRegistry.add("Model Info", "File", this::showModelInfoDialog);
-    }
-
-    private void addHelpCommands() {
-        commandRegistry.add("Context Help", "Help", this::showContextHelp);
-        commandRegistry.add("Getting Started", "Help",
-                () -> helpWindows.showOrBring(QuickstartDialog.class, QuickstartDialog::new));
-        commandRegistry.add("Tutorial: SIR Epidemic", "Help",
-                () -> helpWindows.showOrBring(SirTutorialDialog.class, SirTutorialDialog::new));
-        commandRegistry.add("Tutorial: Supply Chain", "Help",
-                () -> helpWindows.showOrBring(SupplyChainTutorialDialog.class,
-                        SupplyChainTutorialDialog::new));
-        commandRegistry.add("SD Concepts", "Help",
-                () -> helpWindows.showOrBring(SdConceptsDialog.class, SdConceptsDialog::new));
-        commandRegistry.add("Expression Language", "Help",
-                () -> helpWindows.showOrBring(ExpressionLanguageDialog.class,
-                        ExpressionLanguageDialog::new));
-        commandRegistry.add("Keyboard Shortcuts", "Help",
-                () -> helpWindows.showOrBring(KeyboardShortcutsDialog.class,
-                        KeyboardShortcutsDialog::new));
-        commandRegistry.add("About Courant", "Help", () -> {
-            Alert about = new Alert(Alert.AlertType.INFORMATION);
-            about.setTitle("About Courant");
-            about.setHeaderText("Courant");
-            about.setContentText("A visual System Dynamics modeling environment.\nVersion "
-                    + AppVersion.get());
-            about.showAndWait();
-        });
-    }
-
     private List<CommandPalette.Command> buildCommands() {
-        if (commandRegistry == null) {
-            buildRegistry();
-        }
         List<CommandPalette.Command> commands = new ArrayList<>(commandRegistry.toPaletteCommands());
         addElementNavigationCommands(commands);
         return commands;
