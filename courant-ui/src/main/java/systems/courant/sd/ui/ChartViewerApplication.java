@@ -137,14 +137,14 @@ public class ChartViewerApplication extends Application {
     static void ensureFxRunning() {
         if (FX_STARTED.compareAndSet(false, true)) {
             try {
-                Platform.startup(() -> {});
+                Platform.startup(() -> Platform.setImplicitExit(false));
             } catch (IllegalStateException e) {
                 // Toolkit already initialized (e.g., by the app or TestFX)
+                Platform.setImplicitExit(false);
             } catch (RuntimeException e) {
                 FX_STARTED.set(false);
                 throw e;
             }
-            Platform.setImplicitExit(false);
         }
     }
 
