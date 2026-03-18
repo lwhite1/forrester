@@ -2,7 +2,9 @@ package systems.courant.sd.app;
 
 import systems.courant.sd.app.canvas.ModelCanvas;
 import systems.courant.sd.app.canvas.ModelEditListener;
+import systems.courant.sd.app.canvas.dialogs.ColumnMappingDialog;
 import systems.courant.sd.io.ImportResult;
+import systems.courant.sd.io.ReferenceDataCsvReader;
 import systems.courant.sd.io.ModelImporter;
 import systems.courant.sd.io.json.ModelDefinitionSerializer;
 import systems.courant.sd.io.vensim.VensimExporter;
@@ -11,6 +13,7 @@ import systems.courant.sd.io.xmile.XmileExporter;
 import systems.courant.sd.io.xmile.XmileImporter;
 import systems.courant.sd.model.def.ModelDefinition;
 import systems.courant.sd.model.def.ModelDefinitionBuilder;
+import systems.courant.sd.model.def.ReferenceDataset;
 
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
@@ -30,6 +33,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.TreeMap;
 import java.util.List;
 import java.util.Map;
@@ -319,6 +323,48 @@ final class FileController {
             updateTitle.run();
         } catch (IOException ex) {
             showError.accept("Failed to load example: " + ex.getMessage());
+        }
+    }
+
+    void importReferenceData(Runnable onImportComplete) {
+        FileChooser chooser = new FileChooser();
+        chooser.setTitle("Import Reference Data (CSV)");
+        chooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("CSV Files", "*.csv"),
+                new FileChooser.ExtensionFilter("All Files", "*.*"));
+        File file = chooser.showOpenDialog(stage);
+        if (file == null) {
+            return;
+        }
+        try {
+            String name = file.getName();
+            int dot = name.lastIndexOf('.');
+            if (dot > 0) {
+                name = name.substring(0, dot);
+            }
+            ReferenceDataset rawDataset = ReferenceDataCsvReader.read(
+                    file.toPath(), name);
+
+            ModelDefinition def = canvas.getEditor().toModelDefinition();
+            List<String> modelVarNames = new ArrayList<>();
+            def.stocks().forEach(s -> modelVarNames.add(s.name()));
+            def.variables().forEach(v -> modelVarNames.add(v.name()));
+
+            ColumnMappingDialog mappingDialog = new ColumnMappingDialog(
+                    rawDataset, modelVarNames);
+            mappingDialog.initOwner(stage);
+            ReferenceDataset mapped = mappingDialog.showAndWait().orElse(null);
+            if (mapped == null) {
+                return;
+            }
+
+            canvas.getEditor().addReferenceDataset(mapped);
+            onImportComplete.run();
+            log.info("Imported reference data '{}' ({} rows, {} variables)",
+                    mapped.name(), mapped.size(), mapped.variableNames().size());
+        } catch (IOException ex) {
+            showError.accept("Failed to import reference data: "
+                    + ex.getMessage());
         }
     }
 
