@@ -451,28 +451,45 @@ public class Simulation {
      */
     private void resetStatefulFormulas() {
         Set<Variable> seen = Collections.newSetFromMap(new IdentityHashMap<>());
+        Set<Flow> seenFlows = Collections.newSetFromMap(new IdentityHashMap<>());
         for (Variable variable : model.getVariables()) {
             seen.add(variable);
             resetIfStateful(variable.getFormula());
         }
+        for (Flow flow : model.getFlows()) {
+            seenFlows.add(flow);
+            resetIfResettable(flow);
+        }
         for (Module module : model.getModules()) {
-            resetModuleFormulas(module, seen);
+            resetModuleFormulas(module, seen, seenFlows);
         }
     }
 
-    private static void resetModuleFormulas(Module module, Set<Variable> seen) {
+    private static void resetModuleFormulas(Module module, Set<Variable> seen,
+                                             Set<Flow> seenFlows) {
         for (Variable variable : module.getVariables()) {
             if (seen.add(variable)) {
                 resetIfStateful(variable.getFormula());
             }
         }
+        for (Flow flow : module.getFlows()) {
+            if (seenFlows.add(flow)) {
+                resetIfResettable(flow);
+            }
+        }
         for (Module child : module.getSubModules().values()) {
-            resetModuleFormulas(child, seen);
+            resetModuleFormulas(child, seen, seenFlows);
         }
     }
 
     private static void resetIfStateful(Formula formula) {
         if (formula instanceof Resettable resettable) {
+            resettable.reset();
+        }
+    }
+
+    private static void resetIfResettable(Object obj) {
+        if (obj instanceof Resettable resettable) {
             resettable.reset();
         }
     }
