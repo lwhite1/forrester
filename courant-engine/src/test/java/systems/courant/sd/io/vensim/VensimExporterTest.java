@@ -268,6 +268,13 @@ class VensimExporterTest {
         }
 
         @Test
+        void shouldNotMangleAdjacentOperators() {
+            // Malformed !== should not produce invalid <>=
+            assertThat(VensimExporter.toVensimExpr("x !== 0"))
+                    .doesNotContain("<>=");
+        }
+
+        @Test
         void shouldTranslateTimeVariable() {
             assertThat(VensimExporter.toVensimExpr("TIME + 1"))
                     .isEqualTo("Time + 1");
