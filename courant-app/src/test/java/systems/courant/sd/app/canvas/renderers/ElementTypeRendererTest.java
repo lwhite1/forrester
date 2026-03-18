@@ -20,7 +20,7 @@ class ElementTypeRendererTest {
 
         @SuppressWarnings("unchecked")
         private Map<ElementType, ElementTypeRenderer> getRendererMap() throws Exception {
-            Field field = CanvasRenderer.class.getDeclaredField("ELEMENT_RENDERERS");
+            Field field = ElementPass.class.getDeclaredField("ELEMENT_RENDERERS");
             field.setAccessible(true);
             return (Map<ElementType, ElementTypeRenderer>) field.get(null);
         }
