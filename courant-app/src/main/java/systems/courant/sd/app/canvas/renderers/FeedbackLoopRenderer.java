@@ -1,6 +1,5 @@
 package systems.courant.sd.app.canvas.renderers;
 
-import systems.courant.sd.model.def.ElementType;
 import systems.courant.sd.model.graph.FeedbackAnalysis.LoopType;
 
 import javafx.geometry.VPos;
@@ -36,38 +35,9 @@ public final class FeedbackLoopRenderer {
      * Uses a solid border in the loop highlight color with a subtle fill.
      */
     public static void drawLoopHighlight(GraphicsContext gc, CanvasState state, String name) {
-        ElementType type = state.getType(name).orElse(null);
-        double cx = state.getX(name);
-        double cy = state.getY(name);
-
-        if (type == null || Double.isNaN(cx) || Double.isNaN(cy)) {
-            return;
-        }
-
-        gc.setStroke(ColorPalette.LOOP_HIGHLIGHT);
-        gc.setLineWidth(GLOW_LINE_WIDTH);
         gc.setLineDashes();
-
-        if (type == ElementType.FLOW) {
-            double half = LayoutMetrics.FLOW_INDICATOR_SIZE / 2 + GLOW_PADDING;
-            double[] xPoints = {cx, cx + half, cx, cx - half};
-            double[] yPoints = {cy - half, cy, cy + half, cy};
-
-            gc.setFill(ColorPalette.LOOP_FILL);
-            gc.fillPolygon(xPoints, yPoints, 4);
-            gc.strokePolygon(xPoints, yPoints, 4);
-        } else {
-            double halfW = LayoutMetrics.effectiveWidth(state, name) / 2 + GLOW_PADDING;
-            double halfH = LayoutMetrics.effectiveHeight(state, name) / 2 + GLOW_PADDING;
-            double x = cx - halfW;
-            double y = cy - halfH;
-            double w = halfW * 2;
-            double h = halfH * 2;
-
-            gc.setFill(ColorPalette.LOOP_FILL);
-            gc.fillRect(x, y, w, h);
-            gc.strokeRect(x, y, w, h);
-        }
+        OutlineGeometry.drawElementOutline(gc, state, name, GLOW_PADDING,
+                ColorPalette.LOOP_FILL, ColorPalette.LOOP_HIGHLIGHT, GLOW_LINE_WIDTH);
     }
 
     /**

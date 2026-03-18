@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Locale;
 import systems.courant.sd.app.canvas.renderers.CanvasRenderer;
 import systems.courant.sd.app.canvas.renderers.ElementRenderer;
+import systems.courant.sd.app.canvas.renderers.OutlineGeometry;
 
 /**
  * Exports the diagram to an SVG file by translating canvas drawing operations
@@ -721,38 +722,35 @@ public final class SvgExporter {
     // --- Loop highlights ---
 
     private static void writeLoopHighlight(PrintWriter w, CanvasState state, String name) {
-        ElementType type = state.getType(name).orElse(null);
-        double cx = state.getX(name);
-        double cy = state.getY(name);
-
-        if (type == null || Double.isNaN(cx) || Double.isNaN(cy)) {
+        OutlineGeometry.Shape shape = OutlineGeometry.resolve(state, name,
+                LayoutMetrics.LOOP_GLOW_PADDING);
+        if (shape == null) {
             return;
         }
 
-        double glowPadding = LayoutMetrics.LOOP_GLOW_PADDING;
-
-        if (type == ElementType.FLOW) {
-            double half = LayoutMetrics.FLOW_INDICATOR_SIZE / 2 + glowPadding;
-            String points = String.format(Locale.US, "%.2f,%.2f %.2f,%.2f %.2f,%.2f %.2f,%.2f",
-                    cx, cy - half, cx + half, cy, cx, cy + half, cx - half, cy);
-            w.printf(Locale.US,
-                    "  <polygon points=\"%s\" fill=\"%s\" fill-opacity=\"%.2f\" " +
-                    "stroke=\"%s\" stroke-opacity=\"%.2f\" stroke-width=\"%.1f\"/>%n",
-                    points,
-                    svgColor(ColorPalette.LOOP_FILL), svgOpacity(ColorPalette.LOOP_FILL),
-                    svgColor(ColorPalette.LOOP_HIGHLIGHT), svgOpacity(ColorPalette.LOOP_HIGHLIGHT),
-                    LayoutMetrics.LOOP_GLOW_LINE_WIDTH);
-        } else {
-            double halfW = LayoutMetrics.effectiveWidth(state, name) / 2 + glowPadding;
-            double halfH = LayoutMetrics.effectiveHeight(state, name) / 2 + glowPadding;
-            w.printf(Locale.US,
-                    "  <rect x=\"%.2f\" y=\"%.2f\" width=\"%.2f\" height=\"%.2f\" " +
-                    "fill=\"%s\" fill-opacity=\"%.2f\" " +
-                    "stroke=\"%s\" stroke-opacity=\"%.2f\" stroke-width=\"%.1f\"/>%n",
-                    cx - halfW, cy - halfH, halfW * 2, halfH * 2,
-                    svgColor(ColorPalette.LOOP_FILL), svgOpacity(ColorPalette.LOOP_FILL),
-                    svgColor(ColorPalette.LOOP_HIGHLIGHT), svgOpacity(ColorPalette.LOOP_HIGHLIGHT),
-                    LayoutMetrics.LOOP_GLOW_LINE_WIDTH);
+        switch (shape) {
+            case OutlineGeometry.Diamond d -> {
+                String points = String.format(Locale.US, "%.2f,%.2f %.2f,%.2f %.2f,%.2f %.2f,%.2f",
+                        d.xPoints()[0], d.yPoints()[0], d.xPoints()[1], d.yPoints()[1],
+                        d.xPoints()[2], d.yPoints()[2], d.xPoints()[3], d.yPoints()[3]);
+                w.printf(Locale.US,
+                        "  <polygon points=\"%s\" fill=\"%s\" fill-opacity=\"%.2f\" " +
+                        "stroke=\"%s\" stroke-opacity=\"%.2f\" stroke-width=\"%.1f\"/>%n",
+                        points,
+                        svgColor(ColorPalette.LOOP_FILL), svgOpacity(ColorPalette.LOOP_FILL),
+                        svgColor(ColorPalette.LOOP_HIGHLIGHT), svgOpacity(ColorPalette.LOOP_HIGHLIGHT),
+                        LayoutMetrics.LOOP_GLOW_LINE_WIDTH);
+            }
+            case OutlineGeometry.Rect r -> {
+                w.printf(Locale.US,
+                        "  <rect x=\"%.2f\" y=\"%.2f\" width=\"%.2f\" height=\"%.2f\" " +
+                        "fill=\"%s\" fill-opacity=\"%.2f\" " +
+                        "stroke=\"%s\" stroke-opacity=\"%.2f\" stroke-width=\"%.1f\"/>%n",
+                        r.x(), r.y(), r.w(), r.h(),
+                        svgColor(ColorPalette.LOOP_FILL), svgOpacity(ColorPalette.LOOP_FILL),
+                        svgColor(ColorPalette.LOOP_HIGHLIGHT), svgOpacity(ColorPalette.LOOP_HIGHLIGHT),
+                        LayoutMetrics.LOOP_GLOW_LINE_WIDTH);
+            }
         }
     }
 
