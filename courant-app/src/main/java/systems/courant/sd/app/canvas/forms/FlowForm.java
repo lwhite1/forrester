@@ -6,8 +6,6 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Priority;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -21,6 +19,8 @@ import systems.courant.sd.app.canvas.EquationField;
 public class FlowForm implements ElementForm {
 
     private final FormContext ctx;
+    private final FormFieldBuilder fields;
+    private final DimensionalAnalysisUI dimAnalysis;
 
     private TextField nameField;
     private EquationField equationField;
@@ -30,50 +30,52 @@ public class FlowForm implements ElementForm {
     private Label sinkLabel;
     private TextArea commentArea;
 
-    public FlowForm(FormContext ctx) {
+    public FlowForm(FormContext ctx, FormFieldBuilder fields, DimensionalAnalysisUI dimAnalysis) {
         this.ctx = ctx;
+        this.fields = fields;
+        this.dimAnalysis = dimAnalysis;
     }
 
     @Override
     public int build(int startRow) {
         Optional<FlowDef> flowOpt = ctx.getEditor().getFlowByName(ctx.getElementName());
         if (flowOpt.isEmpty()) {
-            ctx.addReadOnlyRow(startRow++, "Name", ctx.getElementName());
+            fields.addReadOnlyRow(startRow++, "Name", ctx.getElementName());
             return startRow;
         }
         FlowDef flow = flowOpt.get();
 
         int row = startRow;
-        nameField = ctx.createNameField();
-        ctx.addFieldRow(row++, "Name", nameField,
+        nameField = fields.createNameField();
+        fields.addFieldRow(row++, "Name", nameField,
                 "The name used to reference this flow in equations");
 
-        commentArea = ctx.addCommentArea(row++, flow.comment(), this::commitComment);
+        commentArea = fields.addCommentArea(row++, flow.comment(), this::commitComment);
 
-        equationField = ctx.createEquationField(flow.equation());
-        ctx.addEquationCommitHandlers(equationField, this::commitEquation);
+        equationField = fields.createEquationField(flow.equation());
+        fields.addEquationCommitHandlers(equationField, this::commitEquation);
         EquationAutoComplete.attach(equationField, ctx.getEditor(), ctx.getElementName());
-        ctx.addFieldRow(row++, "Equation", ctx.wrapWithHelpButton(equationField),
+        fields.addFieldRow(row++, "Equation", fields.wrapWithHelpButton(equationField),
                 "The rate equation determining how fast material flows.\n"
                 + "Use element names, operators (+, -, *, /), and functions.");
-        ctx.attachEquationValidation(equationField, row++);
+        dimAnalysis.attachEquationValidation(equationField, row++);
 
-        materialUnitBox = ctx.createUnitComboBox(flow.materialUnit());
-        ctx.addComboCommitHandlers(materialUnitBox, this::commitMaterialUnit);
-        ctx.addFieldRow(row++, "Material Unit", materialUnitBox,
+        materialUnitBox = fields.createUnitComboBox(flow.materialUnit());
+        fields.addComboCommitHandlers(materialUnitBox, this::commitMaterialUnit);
+        fields.addFieldRow(row++, "Material Unit", materialUnitBox,
                 "The material being transferred (e.g., Person, USD).\n"
                 + "Combined with Time Unit to form the rate (e.g., Person per Day).");
 
-        timeUnitBox = ctx.createTimeUnitComboBox(flow.timeUnit());
-        ctx.addComboCommitHandlers(timeUnitBox, this::commitTimeUnit);
-        ctx.addFieldRow(row++, "Time Unit", timeUnitBox,
+        timeUnitBox = fields.createTimeUnitComboBox(flow.timeUnit());
+        fields.addComboCommitHandlers(timeUnitBox, this::commitTimeUnit);
+        fields.addFieldRow(row++, "Time Unit", timeUnitBox,
                 "The time unit for the flow rate (e.g., units per Day)");
 
         sourceLabel = new Label(flow.source() != null ? flow.source() : "(cloud)");
-        ctx.addReadOnlyRow(row++, "Source", sourceLabel,
+        fields.addReadOnlyRow(row++, "Source", sourceLabel,
                 "The stock this flow drains from. (cloud) = unlimited external source.");
         sinkLabel = new Label(flow.sink() != null ? flow.sink() : "(cloud)");
-        ctx.addReadOnlyRow(row++, "Sink", sinkLabel,
+        fields.addReadOnlyRow(row++, "Sink", sinkLabel,
                 "The stock this flow fills. (cloud) = unlimited external sink.");
 
         return row;

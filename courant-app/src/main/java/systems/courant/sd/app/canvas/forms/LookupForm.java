@@ -47,18 +47,20 @@ public class LookupForm implements ElementForm {
             + "-fx-background-radius: 5; -fx-padding: 5;";
 
     private final FormContext ctx;
+    private final FormFieldBuilder fields;
     private LineChart<Number, Number> chart;
     private int chartRow;
 
-    public LookupForm(FormContext ctx) {
+    public LookupForm(FormContext ctx, FormFieldBuilder fields) {
         this.ctx = ctx;
+        this.fields = fields;
     }
 
     @Override
     public int build(int startRow) {
         Optional<LookupTableDef> lookupOpt = ctx.getEditor().getLookupTableByName(ctx.getElementName());
         if (lookupOpt.isEmpty()) {
-            ctx.addReadOnlyRow(startRow++, "Name", ctx.getElementName());
+            fields.addReadOnlyRow(startRow++, "Name", ctx.getElementName());
             return startRow;
         }
         LookupTableDef lookup = lookupOpt.get();
@@ -73,16 +75,16 @@ public class LookupForm implements ElementForm {
     }
 
     private int buildHeaderFields(int row, LookupTableDef lookup) {
-        TextField nameField = ctx.createNameField();
-        ctx.addFieldRow(row++, "Name", nameField,
+        TextField nameField = fields.createNameField();
+        fields.addFieldRow(row++, "Name", nameField,
                 "The name used to reference this lookup table in equations.\n"
                 + "Use LOOKUP(table_name, input_value) in equations.");
 
-        ctx.addCommentArea(row++, lookup.comment(), this::commitComment);
+        fields.addCommentArea(row++, lookup.comment(), this::commitComment);
 
-        ComboBox<String> unitBox = ctx.createUnitComboBox(lookup.unit());
-        ctx.addComboCommitHandlers(unitBox, this::commitUnit);
-        ctx.addFieldRow(row++, "Unit", unitBox,
+        ComboBox<String> unitBox = fields.createUnitComboBox(lookup.unit());
+        fields.addComboCommitHandlers(unitBox, this::commitUnit);
+        fields.addFieldRow(row++, "Unit", unitBox,
                 "The unit of measurement for the lookup output");
 
         return row;
@@ -107,7 +109,7 @@ public class LookupForm implements ElementForm {
                 });
             }
         });
-        ctx.addFieldRow(row++, "Interpolation", interpBox,
+        fields.addFieldRow(row++, "Interpolation", interpBox,
                 "How values between data points are estimated.\n"
                 + "LINEAR: straight lines between points.\n"
                 + "SPLINE: smooth curves through points.");
@@ -117,7 +119,7 @@ public class LookupForm implements ElementForm {
     private int buildDataPointsTable(int row, LookupTableDef lookup) {
         double[] xs = lookup.xValues();
         double[] ys = lookup.yValues();
-        ctx.addReadOnlyRow(row++, "Data Points", xs.length + " points",
+        fields.addReadOnlyRow(row++, "Data Points", xs.length + " points",
                 "The x/y pairs defining the lookup function");
 
         GridPane tableGrid = new GridPane();
@@ -545,8 +547,8 @@ public class LookupForm implements ElementForm {
         } catch (NumberFormatException ignored) {
             xField.setText(ElementRenderer.formatValue(lt.xValues()[index]));
             yField.setText(ElementRenderer.formatValue(lt.yValues()[index]));
-            ctx.flashInvalidInput(xField);
-            ctx.flashInvalidInput(yField);
+            fields.flashInvalidInput(xField);
+            fields.flashInvalidInput(yField);
         }
     }
 

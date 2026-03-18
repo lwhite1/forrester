@@ -4,8 +4,6 @@ import systems.courant.sd.model.def.CldVariableDef;
 
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Priority;
 
 import java.util.Objects;
 
@@ -16,12 +14,14 @@ import java.util.Objects;
 public class CldVariableForm implements ElementForm {
 
     private final FormContext ctx;
+    private final FormFieldBuilder fields;
 
     private TextField nameField;
     private TextArea commentArea;
 
-    public CldVariableForm(FormContext ctx) {
+    public CldVariableForm(FormContext ctx, FormFieldBuilder fields) {
         this.ctx = ctx;
+        this.fields = fields;
     }
 
     @Override
@@ -29,16 +29,16 @@ public class CldVariableForm implements ElementForm {
         CldVariableDef variable = ctx.getEditor().getCldVariableByName(ctx.getElementName())
                 .orElse(null);
         if (variable == null) {
-            ctx.addReadOnlyRow(startRow++, "Name", ctx.getElementName());
+            fields.addReadOnlyRow(startRow++, "Name", ctx.getElementName());
             return startRow;
         }
 
         int row = startRow;
-        nameField = ctx.createNameField();
-        ctx.addFieldRow(row++, "Name", nameField,
+        nameField = fields.createNameField();
+        fields.addFieldRow(row++, "Name", nameField,
                 "The name of this causal variable");
 
-        commentArea = ctx.addCommentArea(row++, variable.comment(), this::commitComment);
+        commentArea = fields.addCommentArea(row++, variable.comment(), this::commitComment);
 
         return row;
     }
