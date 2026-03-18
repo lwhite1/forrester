@@ -336,17 +336,136 @@ public final class ResultReportGenerator {
         html.append("</section>\n\n");
     }
 
+    // ── SVG: Chart Scaffold ────────────────────────────────────────────
+
+    /**
+     * Computed plot-area coordinates and Y-axis range for standard charts.
+     * Eliminates repeated margin/tick/axis scaffolding from individual
+     * chart methods.
+     */
+    private record ChartScaffold(int plotLeft, int plotRight, int plotTop, int plotBottom,
+                                  int plotWidth, int plotHeight, double yMin, double yMax) {
+
+        static ChartScaffold of(double dataMin, double dataMax) {
+            int pLeft = MARGIN_LEFT;
+            int pRight = CHART_WIDTH - MARGIN_RIGHT;
+            int pTop = MARGIN_TOP;
+            int pBottom = CHART_HEIGHT - MARGIN_BOTTOM;
+            double yLo = dataMin;
+            double yHi = dataMax;
+            if (yLo == Double.MAX_VALUE) {
+                yLo = 0;
+                yHi = 1;
+            }
+            if (yLo == yHi) {
+                yHi = yLo + 1;
+            }
+            double yPad = (yHi - yLo) * 0.05;
+            return new ChartScaffold(pLeft, pRight, pTop, pBottom,
+                    pRight - pLeft, pBottom - pTop,
+                    yLo - yPad, yHi + yPad);
+        }
+
+        double mapY(double value) {
+            return plotTop + plotHeight - (value - yMin) / (yMax - yMin) * plotHeight;
+        }
+
+        double mapX(double fraction) {
+            return plotLeft + fraction * plotWidth;
+        }
+
+        void writeOpen(StringBuilder svg) {
+            svgLine(svg,
+                    "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 %d %d\" "
+                            + "class=\"chart-svg\">",
+                    CHART_WIDTH, CHART_HEIGHT);
+        }
+
+        void writeBackground(StringBuilder svg, String fill) {
+            svgLine(svg,
+                    "<rect x=\"%d\" y=\"%d\" width=\"%d\" height=\"%d\" fill=\"%s\" stroke=\"#e2e8f0\"/>",
+                    plotLeft, plotTop, plotWidth, plotHeight, fill);
+        }
+
+        void writeAxes(StringBuilder svg) {
+            svgLine(svg,
+                    "<line x1=\"%d\" y1=\"%d\" x2=\"%d\" y2=\"%d\" stroke=\"#1a1a1a\" stroke-width=\"1\"/>",
+                    plotLeft, plotTop, plotLeft, plotBottom);
+            svgLine(svg,
+                    "<line x1=\"%d\" y1=\"%d\" x2=\"%d\" y2=\"%d\" stroke=\"#1a1a1a\" stroke-width=\"1\"/>",
+                    plotLeft, plotBottom, plotRight, plotBottom);
+        }
+
+        void writeYTicks(StringBuilder svg, int ticks, boolean gridLines) {
+            for (int i = 0; i <= ticks; i++) {
+                double y = plotTop + plotHeight - (plotHeight * (double) i / ticks);
+                double val = yMin + (yMax - yMin) * i / ticks;
+                if (gridLines) {
+                    svgLine(svg,
+                            "<line x1=\"%d\" y1=\"%.1f\" x2=\"%d\" y2=\"%.1f\" "
+                                    + "stroke=\"#edf2f7\" stroke-width=\"1\"/>",
+                            plotLeft, y, plotRight, y);
+                }
+                svgLine(svg,
+                        "<text x=\"%d\" y=\"%.1f\" text-anchor=\"end\" "
+                                + "font-size=\"11\" fill=\"#4a5568\">%s</text>",
+                        plotLeft - 8, y + 4, fmt(val));
+            }
+        }
+
+        void writeXTicksByStep(StringBuilder svg, long[] steps) {
+            long stepMin = steps[0];
+            long stepMax = steps[steps.length - 1];
+            if (stepMin == stepMax) {
+                stepMax = stepMin + 1;
+            }
+            int xTicks = Math.min(10, steps.length - 1);
+            if (xTicks > 0) {
+                for (int i = 0; i <= xTicks; i++) {
+                    int stepIdx = (int) Math.round((double) i * (steps.length - 1) / xTicks);
+                    long step = steps[stepIdx];
+                    double x = plotLeft + (double) (step - stepMin) / (stepMax - stepMin) * plotWidth;
+                    svgLine(svg,
+                            "<text x=\"%.1f\" y=\"%d\" text-anchor=\"middle\" "
+                                    + "font-size=\"11\" fill=\"#4a5568\">%d</text>",
+                            x, plotBottom + 18, step);
+                }
+            }
+        }
+
+        void writeXTicksByIndex(StringBuilder svg, int stepCount) {
+            int xTicks = Math.min(10, stepCount - 1);
+            if (xTicks > 0) {
+                for (int i = 0; i <= xTicks; i++) {
+                    int step = (int) Math.round((double) i * (stepCount - 1) / xTicks);
+                    double x = plotLeft + (double) step / (stepCount - 1) * plotWidth;
+                    svgLine(svg,
+                            "<text x=\"%.1f\" y=\"%d\" text-anchor=\"middle\" "
+                                    + "font-size=\"11\" fill=\"#4a5568\">%d</text>",
+                            x, plotBottom + 18, step);
+                }
+            }
+        }
+
+        void writeTitle(StringBuilder svg, String title) {
+            svgLine(svg,
+                    "<text x=\"%d\" y=\"%d\" text-anchor=\"middle\" "
+                            + "font-size=\"14\" font-weight=\"600\" fill=\"#2c5282\">%s</text>",
+                    plotLeft + plotWidth / 2, 20, esc(title));
+        }
+
+        void writeStepLabel(StringBuilder svg) {
+            svgLine(svg,
+                    "<text x=\"%d\" y=\"%d\" text-anchor=\"middle\" "
+                            + "font-size=\"12\" fill=\"#4a5568\">Step</text>",
+                    plotLeft + plotWidth / 2, CHART_HEIGHT - 5);
+        }
+    }
+
     // ── SVG: Line Chart ─────────────────────────────────────────────────
 
     static String lineChartSvg(String title, long[] steps,
                                List<String> seriesNames, List<double[]> seriesData) {
-        int plotLeft = MARGIN_LEFT;
-        int plotRight = CHART_WIDTH - MARGIN_RIGHT;
-        int plotTop = MARGIN_TOP;
-        int plotBottom = CHART_HEIGHT - MARGIN_BOTTOM;
-        int plotWidth = plotRight - plotLeft;
-        int plotHeight = plotBottom - plotTop;
-
         double yMin = Double.MAX_VALUE;
         double yMax = -Double.MAX_VALUE;
         for (double[] data : seriesData) {
@@ -361,16 +480,7 @@ public final class ResultReportGenerator {
                 }
             }
         }
-        if (yMin == Double.MAX_VALUE) {
-            yMin = 0;
-            yMax = 1;
-        }
-        if (yMin == yMax) {
-            yMax = yMin + 1;
-        }
-        double yPad = (yMax - yMin) * 0.05;
-        yMin -= yPad;
-        yMax += yPad;
+        ChartScaffold chart = ChartScaffold.of(yMin, yMax);
 
         long stepMin = steps[0];
         long stepMax = steps[steps.length - 1];
@@ -379,30 +489,9 @@ public final class ResultReportGenerator {
         }
 
         StringBuilder svg = new StringBuilder(4096);
-        svgLine(svg,
-                "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 %d %d\" "
-                        + "class=\"chart-svg\">",
-                CHART_WIDTH, CHART_HEIGHT);
-
-        // Plot background
-        svgLine(svg,
-                "<rect x=\"%d\" y=\"%d\" width=\"%d\" height=\"%d\" fill=\"#fafafa\" stroke=\"#e2e8f0\"/>",
-                plotLeft, plotTop, plotWidth, plotHeight);
-
-        // Horizontal grid lines and Y-axis labels
-        int yTicks = 5;
-        for (int i = 0; i <= yTicks; i++) {
-            double y = plotTop + plotHeight - (plotHeight * (double) i / yTicks);
-            double val = yMin + (yMax - yMin) * i / yTicks;
-            svgLine(svg,
-                    "<line x1=\"%d\" y1=\"%.1f\" x2=\"%d\" y2=\"%.1f\" "
-                            + "stroke=\"#edf2f7\" stroke-width=\"1\"/>",
-                    plotLeft, y, plotRight, y);
-            svgLine(svg,
-                    "<text x=\"%d\" y=\"%.1f\" text-anchor=\"end\" "
-                            + "font-size=\"11\" fill=\"#4a5568\">%s</text>",
-                    plotLeft - 8, y + 4, fmt(val));
-        }
+        chart.writeOpen(svg);
+        chart.writeBackground(svg, "#fafafa");
+        chart.writeYTicks(svg, 5, true);
 
         // Series polylines
         for (int s = 0; s < seriesData.size(); s++) {
@@ -413,8 +502,8 @@ public final class ResultReportGenerator {
                 if (!Double.isFinite(data[i])) {
                     continue;
                 }
-                double x = plotLeft + (double) (steps[i] - stepMin) / (stepMax - stepMin) * plotWidth;
-                double y = plotTop + plotHeight - (data[i] - yMin) / (yMax - yMin) * plotHeight;
+                double x = chart.mapX((double) (steps[i] - stepMin) / (stepMax - stepMin));
+                double y = chart.mapY(data[i]);
                 if (!points.isEmpty()) {
                     points.append(' ');
                 }
@@ -425,44 +514,15 @@ public final class ResultReportGenerator {
                     points, color);
         }
 
-        // Axes
-        svgLine(svg,
-                "<line x1=\"%d\" y1=\"%d\" x2=\"%d\" y2=\"%d\" stroke=\"#1a1a1a\" stroke-width=\"1\"/>",
-                plotLeft, plotTop, plotLeft, plotBottom);
-        svgLine(svg,
-                "<line x1=\"%d\" y1=\"%d\" x2=\"%d\" y2=\"%d\" stroke=\"#1a1a1a\" stroke-width=\"1\"/>",
-                plotLeft, plotBottom, plotRight, plotBottom);
-
-        // X-axis ticks
-        int xTicks = Math.min(10, steps.length - 1);
-        if (xTicks > 0) {
-            for (int i = 0; i <= xTicks; i++) {
-                int stepIdx = (int) Math.round((double) i * (steps.length - 1) / xTicks);
-                long step = steps[stepIdx];
-                double x = plotLeft + (double) (step - stepMin) / (stepMax - stepMin) * plotWidth;
-                svgLine(svg,
-                        "<text x=\"%.1f\" y=\"%d\" text-anchor=\"middle\" "
-                                + "font-size=\"11\" fill=\"#4a5568\">%d</text>",
-                        x, plotBottom + 18, step);
-            }
-        }
-
-        // Axis label
-        svgLine(svg,
-                "<text x=\"%d\" y=\"%d\" text-anchor=\"middle\" "
-                        + "font-size=\"12\" fill=\"#4a5568\">Step</text>",
-                plotLeft + plotWidth / 2, CHART_HEIGHT - 5);
-
-        // Title
-        svgLine(svg,
-                "<text x=\"%d\" y=\"%d\" text-anchor=\"middle\" "
-                        + "font-size=\"14\" font-weight=\"600\" fill=\"#2c5282\">%s</text>",
-                plotLeft + plotWidth / 2, 20, esc(title));
+        chart.writeAxes(svg);
+        chart.writeXTicksByStep(svg, steps);
+        chart.writeStepLabel(svg);
+        chart.writeTitle(svg, title);
 
         // Legend (only when multiple series)
         if (seriesNames.size() > 1) {
-            int legendX = plotRight - 180;
-            int legendY = plotTop + 10;
+            int legendX = chart.plotRight() - 180;
+            int legendY = chart.plotTop() + 10;
             for (int s = 0; s < seriesNames.size() && s < SERIES_COLORS.length; s++) {
                 String color = SERIES_COLORS[s % SERIES_COLORS.length];
                 int ly = legendY + s * 16;
@@ -508,39 +568,19 @@ public final class ResultReportGenerator {
             yMin = Math.min(yMin, pct2[i]);
             yMax = Math.max(yMax, pct97[i]);
         }
-        double range = yMax - yMin;
-        if (range == 0) {
-            range = 1;
-        }
-        yMin -= range * 0.05;
-        yMax += range * 0.05;
-
-        int plotLeft = MARGIN_LEFT;
-        int plotRight = CHART_WIDTH - MARGIN_RIGHT;
-        int plotTop = MARGIN_TOP;
-        int plotBottom = CHART_HEIGHT - MARGIN_BOTTOM;
-        int plotWidth = plotRight - plotLeft;
-        int plotHeight = plotBottom - plotTop;
+        ChartScaffold chart = ChartScaffold.of(yMin, yMax);
 
         StringBuilder svg = new StringBuilder(8192);
-        svgLine(svg,
-                "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 %d %d\" "
-                        + "class=\"chart-svg\">",
-                CHART_WIDTH, CHART_HEIGHT);
-
-        // Background
-        svgLine(svg,
-                "<rect x=\"%d\" y=\"%d\" width=\"%d\" height=\"%d\" fill=\"white\" stroke=\"#e2e8f0\"/>",
-                plotLeft, plotTop, plotWidth, plotHeight);
+        chart.writeOpen(svg);
+        chart.writeBackground(svg, "white");
 
         // Percentile bands
         for (int b = 0; b < lowerBands.length; b++) {
             StringBuilder points = new StringBuilder();
             // Upper edge (left to right)
             for (int i = 0; i < stepCount; i++) {
-                double x = plotLeft + (double) i / (stepCount - 1) * plotWidth;
-                double y = plotTop + plotHeight
-                        - (upperBands[b][i] - yMin) / (yMax - yMin) * plotHeight;
+                double x = chart.mapX((double) i / (stepCount - 1));
+                double y = chart.mapY(upperBands[b][i]);
                 if (!points.isEmpty()) {
                     points.append(' ');
                 }
@@ -548,9 +588,8 @@ public final class ResultReportGenerator {
             }
             // Lower edge (right to left)
             for (int i = stepCount - 1; i >= 0; i--) {
-                double x = plotLeft + (double) i / (stepCount - 1) * plotWidth;
-                double y = plotTop + plotHeight
-                        - (lowerBands[b][i] - yMin) / (yMax - yMin) * plotHeight;
+                double x = chart.mapX((double) i / (stepCount - 1));
+                double y = chart.mapY(lowerBands[b][i]);
                 points.append(' ');
                 points.append(String.format(Locale.US, "%.1f,%.1f", x, y));
             }
@@ -562,8 +601,8 @@ public final class ResultReportGenerator {
         // Median line
         StringBuilder medianPoints = new StringBuilder();
         for (int i = 0; i < stepCount; i++) {
-            double x = plotLeft + (double) i / (stepCount - 1) * plotWidth;
-            double y = plotTop + plotHeight - (median[i] - yMin) / (yMax - yMin) * plotHeight;
+            double x = chart.mapX((double) i / (stepCount - 1));
+            double y = chart.mapY(median[i]);
             if (!medianPoints.isEmpty()) {
                 medianPoints.append(' ');
             }
@@ -574,52 +613,15 @@ public final class ResultReportGenerator {
                         + "stroke-width=\"2\"/>",
                 medianPoints);
 
-        // Axes
-        svgLine(svg,
-                "<line x1=\"%d\" y1=\"%d\" x2=\"%d\" y2=\"%d\" stroke=\"#1a1a1a\" stroke-width=\"1\"/>",
-                plotLeft, plotTop, plotLeft, plotBottom);
-        svgLine(svg,
-                "<line x1=\"%d\" y1=\"%d\" x2=\"%d\" y2=\"%d\" stroke=\"#1a1a1a\" stroke-width=\"1\"/>",
-                plotLeft, plotBottom, plotRight, plotBottom);
-
-        // Y-axis labels
-        int yTicks = 5;
-        for (int i = 0; i <= yTicks; i++) {
-            double y = plotTop + plotHeight - (plotHeight * (double) i / yTicks);
-            double val = yMin + (yMax - yMin) * i / yTicks;
-            svgLine(svg,
-                    "<text x=\"%d\" y=\"%.1f\" text-anchor=\"end\" "
-                            + "font-size=\"11\" fill=\"#4a5568\">%s</text>",
-                    plotLeft - 8, y + 4, fmt(val));
-        }
-
-        // X-axis labels
-        int xTicks = Math.min(10, stepCount - 1);
-        if (xTicks > 0) {
-            for (int i = 0; i <= xTicks; i++) {
-                int step = (int) Math.round((double) i * (stepCount - 1) / xTicks);
-                double x = plotLeft + (double) step / (stepCount - 1) * plotWidth;
-                svgLine(svg,
-                        "<text x=\"%.1f\" y=\"%d\" text-anchor=\"middle\" "
-                                + "font-size=\"11\" fill=\"#4a5568\">%d</text>",
-                        x, plotBottom + 18, step);
-            }
-        }
-
-        // Labels
-        svgLine(svg,
-                "<text x=\"%d\" y=\"%d\" text-anchor=\"middle\" "
-                        + "font-size=\"12\" fill=\"#4a5568\">Step</text>",
-                plotLeft + plotWidth / 2, CHART_HEIGHT - 5);
-        svgLine(svg,
-                "<text x=\"%d\" y=\"%d\" text-anchor=\"middle\" "
-                        + "font-size=\"14\" font-weight=\"600\" fill=\"#2c5282\">%s</text>",
-                plotLeft + plotWidth / 2, 20,
-                esc(variableName + " — Fan Chart (" + mc.getRunCount() + " runs)"));
+        chart.writeAxes(svg);
+        chart.writeYTicks(svg, 5, false);
+        chart.writeXTicksByIndex(svg, stepCount);
+        chart.writeStepLabel(svg);
+        chart.writeTitle(svg, variableName + " — Fan Chart (" + mc.getRunCount() + " runs)");
 
         // Legend
-        int legendX = plotRight - 140;
-        int legendY = plotTop + 10;
+        int legendX = chart.plotRight() - 140;
+        int legendY = chart.plotTop() + 10;
         String[] bandLabels = {"P2.5–P97.5", "P12.5–P87.5", "P25–P75"};
         for (int b = 0; b < bandLabels.length; b++) {
             svgLine(svg,
