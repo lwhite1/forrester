@@ -1,28 +1,26 @@
 package systems.courant.sd.app.canvas.dialogs;
 
-import javafx.geometry.Insets;
-import javafx.scene.Scene;
-import javafx.scene.control.ScrollPane;
+import static systems.courant.sd.app.canvas.dialogs.StyledText.*;
+
 import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
-import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
-import javafx.stage.Stage;
+
+import java.util.List;
 
 /**
  * A step-by-step quickstart tutorial dialog that walks a new user through
  * building a coffee cooling model. Mirrors the content of userdocs/Quickstart.md
  * in an in-app help window.
  */
-public class QuickstartDialog extends Stage {
+public class QuickstartDialog extends AbstractTutorialDialog {
 
     public QuickstartDialog() {
-        setTitle("Getting Started — Build Your First Model");
+        super("Getting Started — Build Your First Model", 660, 540, 610);
+    }
 
-        TabPane tabs = new TabPane();
-        tabs.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
-
-        tabs.getTabs().addAll(
+    @Override
+    protected List<Tab> buildTabs() {
+        return List.of(
                 createTab("1. The Idea", ideaTab()),
                 createTab("2. Place Elements", placeElementsTab()),
                 createTab("3. Connect & Equate", connectTab()),
@@ -30,20 +28,6 @@ public class QuickstartDialog extends Stage {
                 createTab("5. Experiment", experimentTab()),
                 createTab("6. Next Steps", nextStepsTab())
         );
-
-        Scene scene = new Scene(tabs, 660, 540);
-        setScene(scene);
-    }
-
-    private Tab createTab(String title, TextFlow content) {
-        content.setPadding(new Insets(16));
-        content.setLineSpacing(4);
-        content.setMaxWidth(610);
-
-        ScrollPane scroll = new ScrollPane(content);
-        scroll.setFitToWidth(true);
-
-        return new Tab(title, scroll);
     }
 
     private TextFlow ideaTab() {
@@ -288,25 +272,4 @@ public class QuickstartDialog extends Stage {
         );
     }
 
-    private Text bold(String content) {
-        Text text = new Text(content);
-        text.setStyle("-fx-font-weight: bold;");
-        return text;
-    }
-
-    private Text plain(String content) {
-        return new Text(content);
-    }
-
-    private Text mono(String content) {
-        Text text = new Text(content);
-        text.setStyle("-fx-font-family: monospace; -fx-font-weight: bold;");
-        return text;
-    }
-
-    private Text italic(String content) {
-        Text text = new Text(content);
-        text.setStyle("-fx-font-style: italic;");
-        return text;
-    }
 }

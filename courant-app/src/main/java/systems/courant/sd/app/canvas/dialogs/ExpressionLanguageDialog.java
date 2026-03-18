@@ -1,5 +1,8 @@
 package systems.courant.sd.app.canvas.dialogs;
 
+import static systems.courant.sd.app.canvas.dialogs.StyledText.bold;
+import static systems.courant.sd.app.canvas.dialogs.StyledText.plain;
+
 import systems.courant.sd.model.compile.FunctionDoc;
 import systems.courant.sd.model.compile.FunctionDocRegistry;
 
@@ -294,16 +297,6 @@ public class ExpressionLanguageDialog extends Stage {
         }
 
         return new VBox(4, header, grid);
-    }
-
-    private Text bold(String content) {
-        Text text = new Text(content);
-        text.setStyle("-fx-font-weight: bold;");
-        return text;
-    }
-
-    private Text plain(String content) {
-        return new Text(content);
     }
 
     private Text mono(String content) {
