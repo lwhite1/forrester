@@ -91,8 +91,9 @@ public class CsvSubscriber implements EventHandler, Closeable {
         }
         csvWriter.writeNext(values.toArray(new String[0]));
         if (csvWriter.checkError()) {
-            logger.warn("Failed to write CSV data row at step {}: {}",
-                    event.getStep(), csvWriter.getException());
+            throw new CsvOutputException(
+                    "Failed to write CSV data row at step " + event.getStep(),
+                    csvWriter.getException());
         }
     }
 
@@ -118,7 +119,8 @@ public class CsvSubscriber implements EventHandler, Closeable {
         values.addAll(variableNames);
         csvWriter.writeNext(values.toArray(new String[0]));
         if (csvWriter.checkError()) {
-            logger.warn("Failed to write CSV header: {}", csvWriter.getException());
+            throw new CsvOutputException(
+                    "Failed to write CSV header", csvWriter.getException());
         }
     }
 
