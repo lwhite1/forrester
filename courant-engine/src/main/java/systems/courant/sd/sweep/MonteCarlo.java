@@ -1,6 +1,5 @@
 package systems.courant.sd.sweep;
 
-import systems.courant.sd.Simulation;
 import systems.courant.sd.measure.Quantity;
 import systems.courant.sd.measure.TimeUnit;
 import systems.courant.sd.model.Model;
@@ -78,20 +77,8 @@ public class MonteCarlo {
                 paramMap.put(paramNames.get(p), parameterVectors[i][p]);
             }
 
-            Simulation simulation;
-            if (compiledModelFactory != null) {
-                CompiledModel compiled = compiledModelFactory.apply(paramMap);
-                simulation = compiled.createSimulation(timeStep, duration);
-            } else {
-                Model model = modelFactory.apply(paramMap);
-                simulation = new Simulation(model, timeStep, duration);
-            }
-            RunResult runResult = new RunResult(paramMap);
-
-            simulation.addEventHandler(runResult);
-            simulation.execute();
-
-            results.add(runResult);
+            results.add(SimulationRunner.run(modelFactory, compiledModelFactory,
+                    paramMap, timeStep, duration));
         }
 
         return new MonteCarloResult(results);
