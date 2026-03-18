@@ -44,15 +44,7 @@ public class StockForm implements ElementForm {
         ctx.addFieldRow(row++, "Name", nameField,
                 "The name used to reference this stock in equations");
 
-        commentArea = new TextArea(stock.comment() != null ? stock.comment() : "");
-        commentArea.setId("propComment");
-        commentArea.setPrefRowCount(2);
-        commentArea.setWrapText(true);
-        commentArea.setMaxWidth(Double.MAX_VALUE);
-        GridPane.setHgrow(commentArea, Priority.ALWAYS);
-        ctx.addTextAreaCommitHandlers(commentArea, this::commitComment);
-        ctx.addFieldRow(row++, "Description", commentArea,
-                "Documentation for this element");
+        commentArea = ctx.addCommentArea(row++, stock.comment(), this::commitComment);
 
         initialValueField = ctx.createTextField(
                 ElementRenderer.formatValue(stock.initialValue()));

@@ -308,6 +308,27 @@ public class FormContext {
         });
     }
 
+    /**
+     * Creates a standard comment/description TextArea, registers commit handlers,
+     * and adds it as a field row. Returns the TextArea for forms that need a reference.
+     *
+     * @param row            the grid row index
+     * @param currentComment the element's current comment (may be {@code null})
+     * @param commitHandler  handler invoked on focus-loss to persist changes
+     * @return the configured TextArea
+     */
+    public TextArea addCommentArea(int row, String currentComment, Consumer<TextArea> commitHandler) {
+        TextArea area = new TextArea(currentComment != null ? currentComment : "");
+        area.setId("propComment");
+        area.setPrefRowCount(2);
+        area.setWrapText(true);
+        area.setMaxWidth(Double.MAX_VALUE);
+        GridPane.setHgrow(area, Priority.ALWAYS);
+        addTextAreaCommitHandlers(area, commitHandler);
+        addFieldRow(row, "Description", area, "Documentation for this element");
+        return area;
+    }
+
     public void addComboCommitHandlers(ComboBox<String> box, Consumer<ComboBox<String>> handler) {
         box.setOnAction(e -> {
             if (!updatingFields) {

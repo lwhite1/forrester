@@ -38,15 +38,7 @@ public class CldVariableForm implements ElementForm {
         ctx.addFieldRow(row++, "Name", nameField,
                 "The name of this causal variable");
 
-        commentArea = new TextArea(variable.comment() != null ? variable.comment() : "");
-        commentArea.setId("propComment");
-        commentArea.setPrefRowCount(2);
-        commentArea.setWrapText(true);
-        commentArea.setMaxWidth(Double.MAX_VALUE);
-        GridPane.setHgrow(commentArea, Priority.ALWAYS);
-        ctx.addTextAreaCommitHandlers(commentArea, this::commitComment);
-        ctx.addFieldRow(row++, "Description", commentArea,
-                "Documentation for this variable");
+        commentArea = ctx.addCommentArea(row++, variable.comment(), this::commitComment);
 
         return row;
     }

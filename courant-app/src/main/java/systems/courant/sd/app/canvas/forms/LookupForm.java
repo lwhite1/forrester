@@ -78,15 +78,7 @@ public class LookupForm implements ElementForm {
                 "The name used to reference this lookup table in equations.\n"
                 + "Use LOOKUP(table_name, input_value) in equations.");
 
-        TextArea commentArea = new TextArea(lookup.comment() != null ? lookup.comment() : "");
-        commentArea.setId("propComment");
-        commentArea.setPrefRowCount(2);
-        commentArea.setWrapText(true);
-        commentArea.setMaxWidth(Double.MAX_VALUE);
-        GridPane.setHgrow(commentArea, javafx.scene.layout.Priority.ALWAYS);
-        ctx.addTextAreaCommitHandlers(commentArea, this::commitComment);
-        ctx.addFieldRow(row++, "Description", commentArea,
-                "Documentation for this element");
+        ctx.addCommentArea(row++, lookup.comment(), this::commitComment);
 
         ComboBox<String> unitBox = ctx.createUnitComboBox(lookup.unit());
         ctx.addComboCommitHandlers(unitBox, this::commitUnit);

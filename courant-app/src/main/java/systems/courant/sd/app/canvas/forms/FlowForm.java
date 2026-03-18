@@ -48,15 +48,7 @@ public class FlowForm implements ElementForm {
         ctx.addFieldRow(row++, "Name", nameField,
                 "The name used to reference this flow in equations");
 
-        commentArea = new TextArea(flow.comment() != null ? flow.comment() : "");
-        commentArea.setId("propComment");
-        commentArea.setPrefRowCount(2);
-        commentArea.setWrapText(true);
-        commentArea.setMaxWidth(Double.MAX_VALUE);
-        GridPane.setHgrow(commentArea, Priority.ALWAYS);
-        ctx.addTextAreaCommitHandlers(commentArea, this::commitComment);
-        ctx.addFieldRow(row++, "Description", commentArea,
-                "Documentation for this element");
+        commentArea = ctx.addCommentArea(row++, flow.comment(), this::commitComment);
 
         equationField = ctx.createEquationField(flow.equation());
         ctx.addEquationCommitHandlers(equationField, this::commitEquation);
