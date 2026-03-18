@@ -39,8 +39,19 @@ public final class CausalTraceController {
      */
     public void invalidate(ModelDefinition model) {
         if (isActive() && model != null) {
+            if (!elementExists(tracedElement, model)) {
+                clearTrace();
+                return;
+            }
             this.traceAnalysis = CausalTraceAnalysis.trace(
                     tracedElement, tracedDirection, model);
         }
+    }
+
+    private static boolean elementExists(String name, ModelDefinition model) {
+        return model.stocks().stream().anyMatch(s -> s.name().equals(name))
+                || model.flows().stream().anyMatch(f -> f.name().equals(name))
+                || model.variables().stream().anyMatch(v -> v.name().equals(name))
+                || model.cldVariables().stream().anyMatch(c -> c.name().equals(name));
     }
 }
