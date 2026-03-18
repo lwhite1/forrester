@@ -89,7 +89,7 @@ public final class SelectionRenderer {
         gc.setStroke(ColorPalette.HOVER);
         gc.setLineWidth(3.0);
         gc.setLineDashes();
-        strokeQuadCurve(gc, fromX, fromY, cpX, cpY, toX, toY);
+        CausalLinkGeometry.strokeQuadCurve(gc, fromX, fromY, cpX, cpY, toX, toY, 1.0);
     }
 
     /**
@@ -102,23 +102,8 @@ public final class SelectionRenderer {
         gc.setStroke(SELECTION_COLOR);
         gc.setLineWidth(3.0);
         gc.setLineDashes(SELECTION_DASH_LENGTH, SELECTION_DASH_GAP);
-        strokeQuadCurve(gc, fromX, fromY, cpX, cpY, toX, toY);
+        CausalLinkGeometry.strokeQuadCurve(gc, fromX, fromY, cpX, cpY, toX, toY, 1.0);
         gc.setLineDashes();
-    }
-
-    private static void strokeQuadCurve(GraphicsContext gc,
-                                         double fromX, double fromY,
-                                         double cpX, double cpY,
-                                         double toX, double toY) {
-        gc.beginPath();
-        gc.moveTo(fromX, fromY);
-        int segments = 30;
-        for (int i = 1; i <= segments; i++) {
-            double t = (double) i / segments;
-            double[] pt = CausalLinkGeometry.evaluate(fromX, fromY, cpX, cpY, toX, toY, t);
-            gc.lineTo(pt[0], pt[1]);
-        }
-        gc.stroke();
     }
 
     /**
