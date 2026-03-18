@@ -96,18 +96,25 @@ public class SimulationRunner {
         private final Map<String, String> units = new LinkedHashMap<>();
         private final Set<String> stockNames = new LinkedHashSet<>();
 
+        /** Snapshotted element references in column order, set at simulation start. */
+        private List<Stock> capturedStocks;
+        private List<Variable> capturedVariables;
+
         @Override
         public void handleSimulationStartEvent(SimulationStartEvent event) {
             Model model = event.getModel();
             columnNames.add("Step");
-            for (Stock stock : model.getStocks()) {
+
+            capturedStocks = new ArrayList<>(model.getStocks());
+            for (Stock stock : capturedStocks) {
                 columnNames.add(stock.getName());
                 stockNames.add(stock.getName());
                 units.put(stock.getName(),
                         stock.getUnit() != null ? stock.getUnit().getName() : "");
             }
-            Collection<Variable> variables = model.getVariables();
-            for (Variable variable : variables) {
+
+            capturedVariables = new ArrayList<>(model.getVariables());
+            for (Variable variable : capturedVariables) {
                 columnNames.add(variable.getName());
                 units.put(variable.getName(),
                         variable.getUnit() != null ? variable.getUnit().getName() : "");
@@ -116,19 +123,16 @@ public class SimulationRunner {
 
         @Override
         public void handleTimeStepEvent(TimeStepEvent event) {
-            Model model = event.getModel();
             long step = event.getStep();
 
-            List<Stock> stocks = model.getStocks();
-            Collection<Variable> variables = model.getVariables();
-            double[] row = new double[1 + stocks.size() + variables.size()];
-
+            double[] row = new double[1 + capturedStocks.size() + capturedVariables.size()];
             row[0] = step;
+
             int idx = 1;
-            for (Stock stock : stocks) {
+            for (Stock stock : capturedStocks) {
                 row[idx++] = stock.getValue();
             }
-            for (Variable variable : variables) {
+            for (Variable variable : capturedVariables) {
                 row[idx++] = variable.getValue();
             }
             rows.add(row);
