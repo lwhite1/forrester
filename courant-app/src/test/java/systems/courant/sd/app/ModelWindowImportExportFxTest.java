@@ -28,6 +28,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -54,6 +55,15 @@ class ModelWindowImportExportFxTest {
         }
     }
 
+    private void awaitLayout() {
+        try {
+            window.layoutFuture().get(10, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            throw new RuntimeException("Layout did not complete", e);
+        }
+        WaitForAsyncUtils.waitForFxEvents();
+    }
+
     // --- Vensim Import ---
 
     @Test
@@ -66,6 +76,7 @@ class ModelWindowImportExportFxTest {
             window.setCurrentFile(null);
         });
         WaitForAsyncUtils.waitForFxEvents();
+        awaitLayout();
 
         ModelEditor editor = window.getEditor();
         assertThat(editor.getStocks()).hasSize(1);
@@ -81,6 +92,7 @@ class ModelWindowImportExportFxTest {
 
         Platform.runLater(() -> window.loadDefinition(result.definition(), "sir.mdl"));
         WaitForAsyncUtils.waitForFxEvents();
+        awaitLayout();
 
         ModelEditor editor = window.getEditor();
         assertThat(editor.getStocks()).hasSize(3);
@@ -101,6 +113,7 @@ class ModelWindowImportExportFxTest {
             window.setCurrentFile(null);
         });
         WaitForAsyncUtils.waitForFxEvents();
+        awaitLayout();
 
         ModelEditor editor = window.getEditor();
         assertThat(editor.getStocks()).hasSize(1);
@@ -118,6 +131,7 @@ class ModelWindowImportExportFxTest {
 
         Platform.runLater(() -> window.loadDefinition(result.definition(), "sir.xmile"));
         WaitForAsyncUtils.waitForFxEvents();
+        awaitLayout();
 
         ModelEditor editor = window.getEditor();
         assertThat(editor.getStocks()).hasSize(3);
@@ -134,6 +148,7 @@ class ModelWindowImportExportFxTest {
 
         Platform.runLater(() -> window.loadDefinition(initial.definition(), "teacup.xmile"));
         WaitForAsyncUtils.waitForFxEvents();
+        awaitLayout();
 
         ModelDefinition canvasDef = window.getCanvas().toModelDefinition();
         Path mdlFile = tempDir.resolve("teacup-export.mdl");
@@ -155,6 +170,7 @@ class ModelWindowImportExportFxTest {
 
         Platform.runLater(() -> window.loadDefinition(initial.definition(), "teacup.mdl"));
         WaitForAsyncUtils.waitForFxEvents();
+        awaitLayout();
 
         ModelDefinition canvasDef = window.getCanvas().toModelDefinition();
         Path xmileFile = tempDir.resolve("teacup-export.xmile");
@@ -181,6 +197,7 @@ class ModelWindowImportExportFxTest {
             window.setCurrentFile(null);
         });
         WaitForAsyncUtils.waitForFxEvents();
+        awaitLayout();
 
         assertThat(stage.getTitle()).contains("teacup");
     }
@@ -193,6 +210,7 @@ class ModelWindowImportExportFxTest {
 
         Platform.runLater(() -> window.loadDefinition(result.definition(), "sir.mdl"));
         WaitForAsyncUtils.waitForFxEvents();
+        awaitLayout();
 
         Label elementsLabel = robot.lookup("#statusElements").queryAs(Label.class);
         assertThat(elementsLabel.getText()).contains("3 stocks");
@@ -206,12 +224,14 @@ class ModelWindowImportExportFxTest {
                 .importModel(resourcePath("vensim/sir.mdl"));
         Platform.runLater(() -> window.loadDefinition(sir.definition(), "sir.mdl"));
         WaitForAsyncUtils.waitForFxEvents();
+        awaitLayout();
         assertThat(window.getEditor().getStocks()).hasSize(3);
 
         ImportResult teacup = new XmileImporter()
                 .importModel(resourcePath("xmile/teacup.xmile"));
         Platform.runLater(() -> window.loadDefinition(teacup.definition(), "teacup.xmile"));
         WaitForAsyncUtils.waitForFxEvents();
+        awaitLayout();
         assertThat(window.getEditor().getStocks()).hasSize(1);
     }
 

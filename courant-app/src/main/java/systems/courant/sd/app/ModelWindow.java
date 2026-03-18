@@ -76,6 +76,7 @@ import org.slf4j.LoggerFactory;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 /**
@@ -119,13 +120,14 @@ public class ModelWindow {
     private FileController fileController;
     private SimulationController simulationController;
     private ModelEditListener dirtyListener;
+    private volatile CompletableFuture<Void> pendingLayout = CompletableFuture.completedFuture(null);
 
     private SplitPane editorSplitPane;
     private VBox topContainer;
     private CanvasToolBar toolBar;
     private MenuBar menuBar;
     private LoopNavigatorBar loopNavigatorBar;
-    private boolean editorShown;
+    private volatile boolean editorShown;
     private final List<MenuItem> editorOnlyItems = new ArrayList<>();
     private MenuItem validationIssuesItem;
 
@@ -769,10 +771,13 @@ public class ModelWindow {
                 view = new ViewDef("Main", List.of(), List.of(), List.of());
             }
             applyView(editorSnapshot, view, displayName);
+            pendingLayout = CompletableFuture.completedFuture(null);
         } else {
             // Run auto-layout on a background thread to keep the UI responsive.
             // ELK initialization on first use and layout of large models can
             // take over a second on a cold JVM.
+            var layoutFuture = new CompletableFuture<Void>();
+            pendingLayout = layoutFuture;
             statusBar.showProgress("Computing layout\u2026");
             canvas.setDisable(true);
             Thread layoutThread = new Thread(() -> {
@@ -784,6 +789,7 @@ public class ModelWindow {
                         canvas.setDisable(false);
                         statusBar.clearProgress();
                         applyView(editorSnapshot, view, displayName);
+                        layoutFuture.complete(null);
                     });
                 } catch (Exception e) {
                     log.error("Auto-layout failed", e);
@@ -793,6 +799,7 @@ public class ModelWindow {
                         showError("Layout Error",
                                 "Auto-layout failed: " + e.getMessage());
                     });
+                    layoutFuture.completeExceptionally(e);
                 }
             }, "auto-layout");
             layoutThread.setDaemon(true);
@@ -1183,6 +1190,15 @@ public class ModelWindow {
 
     ModelCanvas getCanvas() {
         return canvas;
+    }
+
+    /**
+     * Returns a future that completes when the most recent background
+     * auto-layout finishes and {@code applyView} has been called on the
+     * FX thread.  Already-complete if the last load used the synchronous path.
+     */
+    CompletableFuture<Void> layoutFuture() {
+        return pendingLayout;
     }
 
     private void buildRegistry() {
