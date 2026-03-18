@@ -62,13 +62,8 @@ public class InfoLinkCreationController {
         }
     }
 
-    private boolean pending;
-    private String pendingSourceName;
+    private final TwoClickState state = new TwoClickState();
     private HitTester.PortHit pendingSourcePort;
-    private double sourceX;
-    private double sourceY;
-    private double rubberBandEndX;
-    private double rubberBandEndY;
     private HitTester.PortHit currentHoveredPort;
 
     /**
@@ -77,7 +72,7 @@ public class InfoLinkCreationController {
      */
     public LinkResult handleClick(double worldX, double worldY,
                                   CanvasState canvasState, ModelEditor editor) {
-        if (!pending) {
+        if (!state.isPending()) {
             return handleFirstClick(worldX, worldY, canvasState, editor);
         } else {
             return handleSecondClick(worldX, worldY, canvasState, editor);
@@ -90,13 +85,8 @@ public class InfoLinkCreationController {
         HitTester.PortHit portHit = HitTester.hitTestPort(canvasState, editor, worldX, worldY);
         if (portHit != null) {
             if (!portHit.isInput()) {
-                pending = true;
-                pendingSourceName = null;
                 pendingSourcePort = portHit;
-                sourceX = portHit.portX();
-                sourceY = portHit.portY();
-                rubberBandEndX = worldX;
-                rubberBandEndY = worldY;
+                state.begin(null, portHit.portX(), portHit.portY(), worldX, worldY);
                 return LinkResult.pending();
             }
             // Input port clicked as source — fall through to element hit
@@ -105,13 +95,8 @@ public class InfoLinkCreationController {
         // Try element hit
         String hit = HitTester.hitTest(canvasState, worldX, worldY);
         if (hit != null) {
-            pending = true;
-            pendingSourceName = hit;
             pendingSourcePort = null;
-            sourceX = canvasState.getX(hit);
-            sourceY = canvasState.getY(hit);
-            rubberBandEndX = worldX;
-            rubberBandEndY = worldY;
+            state.begin(hit, canvasState.getX(hit), canvasState.getY(hit), worldX, worldY);
             return LinkResult.pending();
         }
 
@@ -123,10 +108,10 @@ public class InfoLinkCreationController {
         // Try port hit first
         HitTester.PortHit portHit = HitTester.hitTestPort(canvasState, editor, worldX, worldY);
 
-        if (pendingSourceName != null) {
+        if (state.source() != null) {
             // Source is an element — target must be an input port
             if (portHit != null && portHit.isInput()) {
-                return createInputBinding(pendingSourceName, portHit, editor);
+                return createInputBinding(state.source(), portHit, editor);
             }
             // Element to element or element to output port — reject
             cancel();
@@ -200,10 +185,7 @@ public class InfoLinkCreationController {
      * Updates the rubber-band endpoint and hovered port during mouse movement.
      */
     public void updateRubberBand(double worldX, double worldY) {
-        if (pending) {
-            rubberBandEndX = worldX;
-            rubberBandEndY = worldY;
-        }
+        state.updateRubberBand(worldX, worldY);
     }
 
     /**
@@ -218,28 +200,24 @@ public class InfoLinkCreationController {
      * Cancels any pending info link creation.
      */
     public void cancel() {
-        pending = false;
-        pendingSourceName = null;
+        state.reset();
         pendingSourcePort = null;
-        sourceX = 0;
-        sourceY = 0;
-        rubberBandEndX = 0;
-        rubberBandEndY = 0;
         currentHoveredPort = null;
     }
 
     public boolean isPending() {
-        return pending;
+        return state.isPending();
     }
 
     /**
      * Returns an immutable snapshot of the current state.
      */
     public State getState() {
-        if (!pending) {
+        if (!state.isPending()) {
             return new State(false, null, null, 0, 0, 0, 0, currentHoveredPort);
         }
-        return new State(true, pendingSourceName, pendingSourcePort,
-                sourceX, sourceY, rubberBandEndX, rubberBandEndY, currentHoveredPort);
+        return new State(true, state.source(), pendingSourcePort,
+                state.sourceX(), state.sourceY(),
+                state.rubberBandEndX(), state.rubberBandEndY(), currentHoveredPort);
     }
 }

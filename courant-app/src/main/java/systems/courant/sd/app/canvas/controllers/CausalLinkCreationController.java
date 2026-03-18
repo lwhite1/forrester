@@ -51,12 +51,7 @@ public class CausalLinkCreationController {
         }
     }
 
-    private boolean pending;
-    private String pendingSource;
-    private double sourceX;
-    private double sourceY;
-    private double rubberBandEndX;
-    private double rubberBandEndY;
+    private final TwoClickState state = new TwoClickState();
 
     /**
      * Handles a click during causal link creation.
@@ -65,17 +60,12 @@ public class CausalLinkCreationController {
      */
     public LinkResult handleClick(double worldX, double worldY,
                                   CanvasState canvasState, ModelEditor editor) {
-        if (!pending) {
+        if (!state.isPending()) {
             String hit = HitTester.hitTest(canvasState, worldX, worldY);
             if (hit == null) {
                 return LinkResult.rejected("Click on a variable to start drawing a causal link");
             }
-            pending = true;
-            pendingSource = hit;
-            sourceX = canvasState.getX(hit);
-            sourceY = canvasState.getY(hit);
-            rubberBandEndX = worldX;
-            rubberBandEndY = worldY;
+            state.begin(hit, canvasState.getX(hit), canvasState.getY(hit), worldX, worldY);
             return LinkResult.pending();
         } else {
             String targetHit = HitTester.hitTest(canvasState, worldX, worldY);
@@ -87,13 +77,13 @@ public class CausalLinkCreationController {
 
             // Check for duplicate link
             for (CausalLinkDef existing : editor.getCausalLinks()) {
-                if (existing.from().equals(pendingSource) && existing.to().equals(targetHit)) {
+                if (existing.from().equals(state.source()) && existing.to().equals(targetHit)) {
                     cancel();
                     return LinkResult.rejected("A causal link already exists between these variables");
                 }
             }
 
-            editor.addCausalLink(pendingSource, targetHit, CausalLinkDef.Polarity.UNKNOWN);
+            editor.addCausalLink(state.source(), targetHit, CausalLinkDef.Polarity.UNKNOWN);
             cancel();
             return LinkResult.created();
         }
@@ -103,38 +93,31 @@ public class CausalLinkCreationController {
      * Updates the rubber-band endpoint during mouse movement.
      */
     public void updateRubberBand(double worldX, double worldY) {
-        if (pending) {
-            rubberBandEndX = worldX;
-            rubberBandEndY = worldY;
-        }
+        state.updateRubberBand(worldX, worldY);
     }
 
     /**
      * Cancels any pending causal link creation, resetting all state.
      */
     public void cancel() {
-        pending = false;
-        pendingSource = null;
-        sourceX = 0;
-        sourceY = 0;
-        rubberBandEndX = 0;
-        rubberBandEndY = 0;
+        state.reset();
     }
 
     /**
      * Returns true if a causal link creation is pending (first click done, awaiting second).
      */
     public boolean isPending() {
-        return pending;
+        return state.isPending();
     }
 
     /**
      * Returns an immutable snapshot of the current causal link creation state.
      */
     public State getState() {
-        if (!pending) {
+        if (!state.isPending()) {
             return State.IDLE;
         }
-        return new State(true, pendingSource, sourceX, sourceY, rubberBandEndX, rubberBandEndY);
+        return new State(true, state.source(), state.sourceX(), state.sourceY(),
+                state.rubberBandEndX(), state.rubberBandEndY());
     }
 }

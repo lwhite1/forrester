@@ -51,12 +51,7 @@ public class FlowCreationController {
         }
     }
 
-    private boolean pending;
-    private String pendingSource;
-    private double sourceX;
-    private double sourceY;
-    private double rubberBandEndX;
-    private double rubberBandEndY;
+    private final TwoClickState state = new TwoClickState();
 
     /**
      * Handles a click during flow creation.
@@ -65,40 +60,38 @@ public class FlowCreationController {
      */
     public FlowResult handleClick(double worldX, double worldY,
                                    CanvasState canvasState, ModelEditor editor) {
-        if (!pending) {
+        if (!state.isPending()) {
             // First click: set source
             String hit = hitTestStockOnly(worldX, worldY, canvasState);
-            pending = true;
-            pendingSource = hit;
-
+            double srcX;
+            double srcY;
             if (hit != null) {
-                sourceX = canvasState.getX(hit);
-                sourceY = canvasState.getY(hit);
+                srcX = canvasState.getX(hit);
+                srcY = canvasState.getY(hit);
             } else {
-                sourceX = worldX;
-                sourceY = worldY;
+                srcX = worldX;
+                srcY = worldY;
             }
-            rubberBandEndX = worldX;
-            rubberBandEndY = worldY;
+            state.begin(hit, srcX, srcY, worldX, worldY);
             return FlowResult.pending();
         } else {
             // Second click: set sink and create flow
             String sinkHit = hitTestStockOnly(worldX, worldY, canvasState);
 
             // Prevent self-loop: source and sink must not be the same stock
-            if (sinkHit != null && sinkHit.equals(pendingSource)) {
+            if (sinkHit != null && sinkHit.equals(state.source())) {
                 cancel();
                 return FlowResult.rejected("Cannot create a self-loop: source and sink are the same stock");
             }
 
             // Prevent cloud-to-cloud: at least one end must be a stock
-            if (pendingSource == null && sinkHit == null) {
+            if (state.source() == null && sinkHit == null) {
                 cancel();
                 return FlowResult.rejected("At least one end of a flow must connect to a stock");
             }
 
-            double srcX = sourceX;
-            double srcY = sourceY;
+            double srcX = state.sourceX();
+            double srcY = state.sourceY();
             double dstX;
             double dstY;
 
@@ -113,7 +106,7 @@ public class FlowCreationController {
             double midX = (srcX + dstX) / 2;
             double midY = (srcY + dstY) / 2;
 
-            String name = editor.addFlow(pendingSource, sinkHit);
+            String name = editor.addFlow(state.source(), sinkHit);
             canvasState.addElement(name, ElementType.FLOW, midX, midY);
 
             cancel();
@@ -125,39 +118,32 @@ public class FlowCreationController {
      * Updates the rubber-band endpoint during mouse movement.
      */
     public void updateRubberBand(double worldX, double worldY) {
-        if (pending) {
-            rubberBandEndX = worldX;
-            rubberBandEndY = worldY;
-        }
+        state.updateRubberBand(worldX, worldY);
     }
 
     /**
      * Cancels any pending flow creation, resetting all state.
      */
     public void cancel() {
-        pending = false;
-        pendingSource = null;
-        sourceX = 0;
-        sourceY = 0;
-        rubberBandEndX = 0;
-        rubberBandEndY = 0;
+        state.reset();
     }
 
     /**
      * Returns true if a flow creation is pending (first click done, awaiting second).
      */
     public boolean isPending() {
-        return pending;
+        return state.isPending();
     }
 
     /**
      * Returns an immutable snapshot of the current flow creation state.
      */
     public State getState() {
-        if (!pending) {
+        if (!state.isPending()) {
             return State.IDLE;
         }
-        return new State(true, pendingSource, sourceX, sourceY, rubberBandEndX, rubberBandEndY);
+        return new State(true, state.source(), state.sourceX(), state.sourceY(),
+                state.rubberBandEndX(), state.rubberBandEndY());
     }
 
     /**
