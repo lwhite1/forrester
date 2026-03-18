@@ -1,6 +1,5 @@
 package systems.courant.sd.sweep;
 
-import systems.courant.sd.Simulation;
 import systems.courant.sd.measure.Quantity;
 import systems.courant.sd.measure.TimeUnit;
 import systems.courant.sd.model.Model;
@@ -8,7 +7,6 @@ import systems.courant.sd.model.compile.CompiledModel;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.function.DoubleFunction;
 
 /**
@@ -55,20 +53,8 @@ public class ParameterSweep {
         List<RunResult> results = new ArrayList<>();
 
         for (double value : parameterValues) {
-            Simulation simulation;
-            if (compiledModelFactory != null) {
-                CompiledModel compiled = compiledModelFactory.apply(value);
-                simulation = compiled.createSimulation(timeStep, duration);
-            } else {
-                Model model = modelFactory.apply(value);
-                simulation = new Simulation(model, timeStep, duration);
-            }
-            RunResult runResult = new RunResult(Map.of(parameterName, value));
-
-            simulation.addEventHandler(runResult);
-            simulation.execute();
-
-            results.add(runResult);
+            results.add(SimulationRunner.run(modelFactory, compiledModelFactory,
+                    parameterName, value, timeStep, duration));
         }
 
         return new SweepResult(parameterName, results);

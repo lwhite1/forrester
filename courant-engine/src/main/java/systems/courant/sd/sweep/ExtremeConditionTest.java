@@ -90,14 +90,11 @@ public class ExtremeConditionTest {
     private void runSingleTest(ParameterInfo param, ExtremeCondition condition,
                                double extremeValue, List<ExtremeConditionFinding> findings) {
         try {
-            CompiledModel compiled = compiledModelFactory.apply(
-                    Map.of(param.name(), extremeValue));
-            Simulation simulation = compiled.createSimulation(timeStep, duration);
+            Map<String, Double> paramMap = Map.of(param.name(), extremeValue);
+            Simulation simulation = SimulationRunner.createSimulation(
+                    null, compiledModelFactory, paramMap, timeStep, duration);
             simulation.setStrictMode(true);
-
-            RunResult runResult = new RunResult(Map.of(param.name(), extremeValue));
-            simulation.addEventHandler(runResult);
-            simulation.execute();
+            RunResult runResult = SimulationRunner.execute(simulation, paramMap);
 
             // Post-run inspection: check for negative stocks and extreme values
             inspectRunResult(param, condition, extremeValue, runResult, findings);
