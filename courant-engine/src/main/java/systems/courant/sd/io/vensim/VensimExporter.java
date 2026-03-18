@@ -504,11 +504,11 @@ public final class VensimExporter {
         // ** → ^ (Courant uses ** for power, Vensim uses ^)
         expr = DOUBLE_STAR_PATTERN.matcher(expr).replaceAll("^");
 
+        // == → = (must precede != to avoid mangling malformed !==)
+        expr = DOUBLE_EQ_PATTERN.matcher(expr).replaceAll("=");
+
         // != → <>
         expr = NOT_EQ_PATTERN.matcher(expr).replaceAll("<>");
-
-        // == → =
-        expr = DOUBLE_EQ_PATTERN.matcher(expr).replaceAll("=");
 
         // TIME → Time
         expr = TIME_PATTERN.matcher(expr).replaceAll("Time");
