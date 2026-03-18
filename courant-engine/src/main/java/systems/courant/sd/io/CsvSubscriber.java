@@ -32,25 +32,35 @@ public class CsvSubscriber implements EventHandler, Closeable {
 
     private static final Logger logger = LoggerFactory.getLogger(CsvSubscriber.class);
 
+    private final String filePath;
     private CSVWriter csvWriter;
+    private boolean closed;
 
     /**
      * Creates a new CSV subscriber that writes to the specified file path.
-     * Parent directories are created if they do not exist.
+     * Parent directories are created if they do not exist. The file itself is
+     * not opened until the first simulation event is received (lazy initialization),
+     * so no file handle is leaked if the subscriber is never used.
      *
      * @param fileName the path of the CSV file to write
      */
     public CsvSubscriber(String fileName) {
+        this.filePath = fileName;
         File file = Paths.get(fileName).toFile();
         File parent = file.getParentFile();
         if (parent != null && !parent.mkdirs() && !parent.isDirectory()) {
             throw new CsvOutputException("Failed to create directory: " + parent.getAbsolutePath());
         }
-        try {
-            csvWriter = new CSVWriter(new OutputStreamWriter(
-                    Files.newOutputStream(Paths.get(fileName)), StandardCharsets.UTF_8));
-        } catch (IOException e) {
-            throw new CsvOutputException("Failed to open CSV file: " + fileName, e);
+    }
+
+    private void ensureWriter() {
+        if (csvWriter == null && !closed) {
+            try {
+                csvWriter = new CSVWriter(new OutputStreamWriter(
+                        Files.newOutputStream(Paths.get(filePath)), StandardCharsets.UTF_8));
+            } catch (IOException e) {
+                throw new CsvOutputException("Failed to open CSV file: " + filePath, e);
+            }
         }
     }
 
@@ -60,6 +70,7 @@ public class CsvSubscriber implements EventHandler, Closeable {
      */
     @Override
     public void handleTimeStepEvent(TimeStepEvent event) {
+        ensureWriter();
         if (csvWriter == null) {
             return;
         }
@@ -90,6 +101,7 @@ public class CsvSubscriber implements EventHandler, Closeable {
      */
     @Override
     public void handleSimulationStartEvent(SimulationStartEvent event) {
+        ensureWriter();
         if (csvWriter == null) {
             return;
         }
@@ -124,6 +136,7 @@ public class CsvSubscriber implements EventHandler, Closeable {
      */
     @Override
     public void close() {
+        closed = true;
         if (csvWriter != null) {
             try {
                 csvWriter.flush();
