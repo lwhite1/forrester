@@ -24,8 +24,11 @@ public class Variable extends Element {
      * True while this variable's formula is being evaluated. A re-entrant call
      * (caused by an algebraic loop) returns {@link #cachedValue} instead of
      * recursing, effectively using the previous timestep's value to break the cycle.
+     *
+     * <p>Volatile to ensure visibility if a Variable is ever accessed from multiple
+     * threads (e.g., parallel parameter sweeps sharing a compiled model).
      */
-    private boolean evaluating;
+    private volatile boolean evaluating;
 
     /**
      * Creates a new variable with the given name, unit, and formula.
