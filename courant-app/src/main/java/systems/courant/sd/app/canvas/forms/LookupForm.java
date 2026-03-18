@@ -380,17 +380,22 @@ public class LookupForm implements ElementForm {
 
         lineSeries.getData().clear();
         if ("SPLINE".equals(interpolation) && n >= 3) {
-            var function = new SplineInterpolator().interpolate(xs, ys);
-            double xMin = xs[0];
-            double xMax = xs[n - 1];
-            for (int i = 0; i <= SPLINE_INTERPOLATION_POINTS; i++) {
-                double x = xMin + (xMax - xMin) * i / SPLINE_INTERPOLATION_POINTS;
-                lineSeries.getData().add(new XYChart.Data<>(x, function.value(x)));
+            try {
+                var function = new SplineInterpolator().interpolate(xs, ys);
+                double xMin = xs[0];
+                double xMax = xs[n - 1];
+                for (int i = 0; i <= SPLINE_INTERPOLATION_POINTS; i++) {
+                    double x = xMin + (xMax - xMin) * i / SPLINE_INTERPOLATION_POINTS;
+                    lineSeries.getData().add(new XYChart.Data<>(x, function.value(x)));
+                }
+                return;
+            } catch (Exception ignored) {
+                // Fall back to linear if spline fails (e.g. near-duplicate x values)
+                lineSeries.getData().clear();
             }
-        } else {
-            for (int i = 0; i < n; i++) {
-                lineSeries.getData().add(new XYChart.Data<>(xs[i], ys[i]));
-            }
+        }
+        for (int i = 0; i < n; i++) {
+            lineSeries.getData().add(new XYChart.Data<>(xs[i], ys[i]));
         }
     }
 
