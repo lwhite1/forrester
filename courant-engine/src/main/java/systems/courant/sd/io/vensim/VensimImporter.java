@@ -251,8 +251,13 @@ public class VensimImporter implements ModelImporter {
     }
 
     private void resolveEquivalences(SubscriptContext subscripts) {
+        int maxIterations = subscripts.equivalences.size() + 1;
         boolean changed = true;
         while (changed) {
+            if (--maxIterations < 0) {
+                throw new IllegalArgumentException(
+                        "Circular dimension equivalences detected — cannot resolve subscript mappings");
+            }
             changed = false;
             for (var entry : subscripts.equivalences.entrySet()) {
                 String dimName = entry.getKey();
