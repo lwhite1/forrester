@@ -1,5 +1,6 @@
 package systems.courant.sd.io.xmile;
 
+import systems.courant.sd.io.ExportUtils;
 import systems.courant.sd.io.ImportResult;
 import systems.courant.sd.model.def.VariableDef;
 import systems.courant.sd.model.def.FlowDef;
@@ -376,38 +377,38 @@ class XmileExporterTest {
 
         @Test
         void shouldExtractLookupReference() {
-            assertThat(XmileExporter.extractLookupReference("LOOKUP(my_table, x + 1)"))
+            assertThat(ExportUtils.extractLookupReference("LOOKUP(my_table, x + 1)"))
                     .hasValue("my_table");
         }
 
         @Test
         void shouldExtractLookupInput() {
-            assertThat(XmileExporter.extractLookupInput("LOOKUP(my_table, x + 1)"))
+            assertThat(ExportUtils.extractLookupInput("LOOKUP(my_table, x + 1)"))
                     .hasValue("x + 1");
         }
 
         @Test
         void shouldReturnEmptyForNonLookup() {
-            assertThat(XmileExporter.extractLookupReference("a + b")).isEmpty();
-            assertThat(XmileExporter.extractLookupInput("a + b")).isEmpty();
+            assertThat(ExportUtils.extractLookupReference("a + b")).isEmpty();
+            assertThat(ExportUtils.extractLookupInput("a + b")).isEmpty();
         }
 
         @Test
-        void shouldExtractInputWithTrailingExpression() {
-            // Issue #631: lastIndexOf(')') would grab ') + foo(y' instead of just 'x'
-            assertThat(XmileExporter.extractLookupInput("LOOKUP(name, x) + foo(y)"))
-                    .hasValue("x");
+        void shouldRejectNonSimpleLookupWithTrailingExpression() {
+            // Not a simple LOOKUP(...) call — there's "+ foo(y)" after the closing paren
+            assertThat(ExportUtils.extractLookupInput("LOOKUP(name, x) + foo(y)"))
+                    .isEmpty();
         }
 
         @Test
         void shouldExtractInputWithNestedParens() {
-            assertThat(XmileExporter.extractLookupInput("LOOKUP(my_table, max(a, b))"))
+            assertThat(ExportUtils.extractLookupInput("LOOKUP(my_table, max(a, b))"))
                     .hasValue("max(a, b)");
         }
 
         @Test
         void shouldReturnEmptyForUnmatchedParen() {
-            assertThat(XmileExporter.extractLookupInput("LOOKUP(name, x")).isEmpty();
+            assertThat(ExportUtils.extractLookupInput("LOOKUP(name, x")).isEmpty();
         }
     }
 }

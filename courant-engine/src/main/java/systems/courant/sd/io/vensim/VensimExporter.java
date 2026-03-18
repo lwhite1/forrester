@@ -1,5 +1,6 @@
 package systems.courant.sd.io.vensim;
 
+import systems.courant.sd.io.ExportUtils;
 import systems.courant.sd.io.FormatUtils;
 import systems.courant.sd.model.def.VariableDef;
 import systems.courant.sd.model.def.CldVariableDef;
@@ -62,8 +63,6 @@ public final class VensimExporter {
     private static final Pattern DOUBLE_EQ_PATTERN = Pattern.compile("==");
     private static final Pattern NOT_EQ_PATTERN = Pattern.compile("!=");
     private static final Pattern TIME_PATTERN = Pattern.compile("\\bTIME\\b");
-    private static final Pattern LOOKUP_REF_PATTERN = Pattern.compile(
-            "(?i)^LOOKUP\\s*\\(");
     private static final Pattern EMBEDDED_LOOKUP_PATTERN = Pattern.compile(
             "(?i)\\bLOOKUP\\s*\\(");
     private static final Pattern DELAY_FIXED_EXPORT_PATTERN = Pattern.compile(
@@ -96,7 +95,7 @@ public final class VensimExporter {
         Map<String, String> nameMap = buildNameMap(def);
 
         // Collect lookup names referenced by variables (embedded as WITH LOOKUP)
-        Set<String> embeddedLookupNames = collectEmbeddedLookupNames(def);
+        Set<String> embeddedLookupNames = ExportUtils.collectEmbeddedLookupNames(def);
 
         // Collect synthetic _net_flow names whose equations will be inlined into INTEG
         Set<String> inlinedFlowNames = collectInlinedFlowNames(def);
@@ -240,11 +239,11 @@ public final class VensimExporter {
                 + formatSubscriptSuffix(v.subscripts());
 
         // Check if this variable is a simple LOOKUP(name, input) — convert to WITH LOOKUP
-        Optional<String> lookupNameOpt = extractLookupReference(v.equation());
+        Optional<String> lookupNameOpt = ExportUtils.extractLookupReference(v.equation());
         if (lookupNameOpt.isPresent()) {
-            Optional<LookupTableDef> lookupOpt = findLookup(def, lookupNameOpt.get());
+            Optional<LookupTableDef> lookupOpt = ExportUtils.findLookup(def, lookupNameOpt.get());
             if (lookupOpt.isPresent()) {
-                Optional<String> inputExprOpt = extractLookupInput(v.equation());
+                Optional<String> inputExprOpt = ExportUtils.extractLookupInput(v.equation());
                 if (inputExprOpt.isPresent()) {
                     String vensimInput = toVensimExpr(inputExprOpt.get(), nameMap);
                     String lookupData = formatLookupData(lookupOpt.get());
@@ -536,7 +535,7 @@ public final class VensimExporter {
             }
             int funcStart = m.start();
             int openParen = m.end() - 1;
-            int closeParen = findClosingParen(expr, openParen);
+            int closeParen = FormatUtils.findMatchingCloseParen(expr, openParen);
             if (closeParen < 0) {
                 break;
             }
@@ -590,7 +589,7 @@ public final class VensimExporter {
         String trimmed = condition.strip();
         // Check for "(expr) == 0" pattern with balanced parens
         if (trimmed.startsWith("(")) {
-            int closeParen = findClosingParen(trimmed, 0);
+            int closeParen = FormatUtils.findMatchingCloseParen(trimmed, 0);
             if (closeParen > 0) {
                 String remainder = trimmed.substring(closeParen + 1).strip();
                 if (remainder.matches("==\\s*0")) {
@@ -889,65 +888,6 @@ public final class VensimExporter {
         return inlined;
     }
 
-    private static Set<String> collectEmbeddedLookupNames(ModelDefinition def) {
-        Set<String> names = new HashSet<>();
-        for (VariableDef v : def.variables()) {
-            extractLookupReference(v.equation()).ifPresent(names::add);
-        }
-        return names;
-    }
-
-    /**
-     * Extracts the lookup table name from a simple {@code LOOKUP(name, input)} expression.
-     * Only matches when the entire expression is a single LOOKUP call (no surrounding operators).
-     */
-    static Optional<String> extractLookupReference(String equation) {
-        if (equation == null) {
-            return Optional.empty();
-        }
-        String trimmed = equation.strip();
-        Matcher m = LOOKUP_REF_PATTERN.matcher(trimmed);
-        if (!m.find()) {
-            return Optional.empty();
-        }
-        int openParen = trimmed.indexOf('(');
-        int closeParen = findClosingParen(trimmed, openParen);
-        if (closeParen < 0 || closeParen != trimmed.length() - 1) {
-            // Not a simple LOOKUP(...) — there's content after the closing paren
-            return Optional.empty();
-        }
-        int comma = findTopLevelComma(trimmed, openParen + 1);
-        if (comma < 0) {
-            return Optional.empty();
-        }
-        return Optional.of(trimmed.substring(openParen + 1, comma).strip());
-    }
-
-    /**
-     * Extracts the input expression from a simple {@code LOOKUP(name, input)} expression.
-     * Only matches when the entire expression is a single LOOKUP call.
-     */
-    static Optional<String> extractLookupInput(String equation) {
-        if (equation == null) {
-            return Optional.empty();
-        }
-        String trimmed = equation.strip();
-        Matcher m = LOOKUP_REF_PATTERN.matcher(trimmed);
-        if (!m.find()) {
-            return Optional.empty();
-        }
-        int openParen = trimmed.indexOf('(');
-        int closeParen = findClosingParen(trimmed, openParen);
-        if (closeParen < 0 || closeParen != trimmed.length() - 1) {
-            return Optional.empty();
-        }
-        int comma = findTopLevelComma(trimmed, openParen + 1);
-        if (comma < 0) {
-            return Optional.empty();
-        }
-        return Optional.of(trimmed.substring(comma + 1, closeParen).strip());
-    }
-
     private static String formatLookupData(LookupTableDef lookup) {
         double[] xVals = lookup.xValues();
         double[] yVals = lookup.yValues();
@@ -980,21 +920,6 @@ public final class VensimExporter {
         return range + "," + pairs;
     }
 
-    private static Optional<LookupTableDef> findLookup(ModelDefinition def, String name) {
-        for (LookupTableDef lt : def.lookupTables()) {
-            if (lt.name().equals(name)) {
-                return Optional.of(lt);
-            }
-        }
-        return Optional.empty();
-    }
-
-    /**
-     * Replaces LOOKUP(name, input) calls in a complex expression with the lookup's
-     * table-call syntax: {@code name(input)}. This allows the downstream Vensim name
-     * denormalization to produce valid .mdl output where the lookup is referenced by
-     * its standalone table name rather than through the LOOKUP() wrapper.
-     */
     /**
      * Replaces LOOKUP(name, input) calls in a complex expression with table-call
      * syntax: {@code name(input)}. The standalone lookup table must still be emitted
@@ -1010,19 +935,19 @@ public final class VensimExporter {
         while (m.find()) {
             int funcStart = m.start();
             int openParen = m.end() - 1;
-            int closeParen = findClosingParen(expr, openParen);
+            int closeParen = FormatUtils.findMatchingCloseParen(expr, openParen);
             if (closeParen < 0) {
                 break;
             }
             String argsContent = expr.substring(openParen + 1, closeParen);
-            int comma = findTopLevelComma(argsContent, 0);
+            int comma = FormatUtils.findTopLevelComma(argsContent, 0);
             if (comma < 0) {
                 break;
             }
             String lookupName = argsContent.substring(0, comma).strip();
             String input = argsContent.substring(comma + 1).strip();
             // Only inline if the lookup table exists in the model
-            Optional<LookupTableDef> lookupOpt = findLookup(def, lookupName);
+            Optional<LookupTableDef> lookupOpt = ExportUtils.findLookup(def, lookupName);
             if (lookupOpt.isPresent()) {
                 // Do NOT add to embeddedLookupNames — standalone table must still be emitted
                 String replacement = lookupName + "(" + input + ")";
@@ -1035,23 +960,4 @@ public final class VensimExporter {
         return expr;
     }
 
-    private static int findClosingParen(String content, int openParenPos) {
-        int depth = 1;
-        for (int i = openParenPos + 1; i < content.length(); i++) {
-            char c = content.charAt(i);
-            if (c == '(') {
-                depth++;
-            } else if (c == ')') {
-                depth--;
-                if (depth == 0) {
-                    return i;
-                }
-            }
-        }
-        return -1;
-    }
-
-    private static int findTopLevelComma(String content, int startPos) {
-        return FormatUtils.findTopLevelComma(content, startPos);
-    }
 }

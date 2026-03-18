@@ -1,5 +1,6 @@
 package systems.courant.sd.io.xmile;
 
+import systems.courant.sd.io.ExportUtils;
 import systems.courant.sd.io.FormatUtils;
 import systems.courant.sd.model.def.VariableDef;
 import systems.courant.sd.model.def.FlowDef;
@@ -175,7 +176,7 @@ public final class XmileExporter {
                 XmileConstants.NAMESPACE_URI, XmileConstants.VARIABLES);
         modelElem.appendChild(variablesElem);
 
-        Set<String> embeddedLookupNames = collectEmbeddedLookupNames(def);
+        Set<String> embeddedLookupNames = ExportUtils.collectEmbeddedLookupNames(def);
 
         for (StockDef stock : def.stocks()) {
             writeStock(doc, variablesElem, stock, def);
@@ -352,12 +353,12 @@ public final class XmileExporter {
         elem.setAttribute(XmileConstants.ATTR_NAME, v.name());
 
         // Check if this variable references a lookup — if so, embed the gf
-        Optional<String> lookupNameOpt = extractLookupReference(v.equation());
+        Optional<String> lookupNameOpt = ExportUtils.extractLookupReference(v.equation());
         if (lookupNameOpt.isPresent()) {
-            Optional<LookupTableDef> lookupOpt = findLookup(def, lookupNameOpt.get());
+            Optional<LookupTableDef> lookupOpt = ExportUtils.findLookup(def, lookupNameOpt.get());
             if (lookupOpt.isPresent()) {
                 // Extract the input expression from LOOKUP(name, input)
-                String inputExpr = extractLookupInput(v.equation())
+                String inputExpr = ExportUtils.extractLookupInput(v.equation())
                         .orElse(v.equation());
                 Element eqn = doc.createElementNS(
                         XmileConstants.NAMESPACE_URI, XmileConstants.EQN);
@@ -456,69 +457,6 @@ public final class XmileExporter {
         gf.appendChild(ypts);
 
         parent.appendChild(gf);
-    }
-
-    private static Set<String> collectEmbeddedLookupNames(ModelDefinition def) {
-        Set<String> names = new HashSet<>();
-        for (VariableDef v : def.variables()) {
-            extractLookupReference(v.equation()).ifPresent(names::add);
-        }
-        return names;
-    }
-
-    /**
-     * Extracts the lookup table name from a LOOKUP(name, input) expression.
-     */
-    static Optional<String> extractLookupReference(String equation) {
-        if (equation == null) {
-            return Optional.empty();
-        }
-        String trimmed = equation.strip();
-        if (!trimmed.toUpperCase().startsWith("LOOKUP(")) {
-            return Optional.empty();
-        }
-        int openParen = trimmed.indexOf('(');
-        int comma = findTopLevelComma(trimmed, openParen + 1);
-        if (comma < 0) {
-            return Optional.empty();
-        }
-        return Optional.of(trimmed.substring(openParen + 1, comma).strip());
-    }
-
-    /**
-     * Extracts the input expression from a LOOKUP(name, input) expression.
-     */
-    static Optional<String> extractLookupInput(String equation) {
-        if (equation == null) {
-            return Optional.empty();
-        }
-        String trimmed = equation.strip();
-        if (!trimmed.toUpperCase().startsWith("LOOKUP(")) {
-            return Optional.empty();
-        }
-        int openParen = trimmed.indexOf('(');
-        int comma = findTopLevelComma(trimmed, openParen + 1);
-        if (comma < 0) {
-            return Optional.empty();
-        }
-        int closeParen = FormatUtils.findMatchingCloseParen(trimmed, openParen);
-        if (closeParen < 0 || closeParen <= comma) {
-            return Optional.empty();
-        }
-        return Optional.of(trimmed.substring(comma + 1, closeParen).strip());
-    }
-
-    private static int findTopLevelComma(String content, int startPos) {
-        return FormatUtils.findTopLevelComma(content, startPos);
-    }
-
-    private static Optional<LookupTableDef> findLookup(ModelDefinition def, String name) {
-        for (LookupTableDef lt : def.lookupTables()) {
-            if (lt.name().equals(name)) {
-                return Optional.of(lt);
-            }
-        }
-        return Optional.empty();
     }
 
     private static String joinDoubles(double[] values) {
