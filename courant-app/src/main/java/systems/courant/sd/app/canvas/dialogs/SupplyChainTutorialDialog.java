@@ -1,28 +1,26 @@
 package systems.courant.sd.app.canvas.dialogs;
 
-import javafx.geometry.Insets;
-import javafx.scene.Scene;
-import javafx.scene.control.ScrollPane;
+import static systems.courant.sd.app.canvas.dialogs.StyledText.*;
+
 import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
-import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
-import javafx.stage.Stage;
+
+import java.util.List;
 
 /**
  * A step-by-step tutorial dialog that walks the user through building a
  * supply chain / inventory model. Introduces delays, oscillation from
  * delayed feedback, and the bullwhip effect.
  */
-public class SupplyChainTutorialDialog extends Stage {
+public class SupplyChainTutorialDialog extends AbstractTutorialDialog {
 
     public SupplyChainTutorialDialog() {
-        setTitle("Tutorial — Supply Chain Model");
+        super("Tutorial — Supply Chain Model", 660, 540, 610);
+    }
 
-        TabPane tabs = new TabPane();
-        tabs.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
-
-        tabs.getTabs().addAll(
+    @Override
+    protected List<Tab> buildTabs() {
+        return List.of(
                 createTab("1. The Idea", ideaTab()),
                 createTab("2. Stocks", stocksTab()),
                 createTab("3. Flows", flowsTab()),
@@ -31,20 +29,6 @@ public class SupplyChainTutorialDialog extends Stage {
                 createTab("6. Experiment", experimentTab()),
                 createTab("7. Key Takeaways", takeawaysTab())
         );
-
-        Scene scene = new Scene(tabs, 660, 540);
-        setScene(scene);
-    }
-
-    private Tab createTab(String title, TextFlow content) {
-        content.setPadding(new Insets(16));
-        content.setLineSpacing(4);
-        content.setMaxWidth(610);
-
-        ScrollPane scroll = new ScrollPane(content);
-        scroll.setFitToWidth(true);
-
-        return new Tab(title, scroll);
     }
 
     private TextFlow ideaTab() {
@@ -309,25 +293,4 @@ public class SupplyChainTutorialDialog extends Stage {
         );
     }
 
-    private Text bold(String content) {
-        Text text = new Text(content);
-        text.setStyle("-fx-font-weight: bold;");
-        return text;
-    }
-
-    private Text plain(String content) {
-        return new Text(content);
-    }
-
-    private Text mono(String content) {
-        Text text = new Text(content);
-        text.setStyle("-fx-font-family: monospace; -fx-font-weight: bold;");
-        return text;
-    }
-
-    private Text italic(String content) {
-        Text text = new Text(content);
-        text.setStyle("-fx-font-style: italic;");
-        return text;
-    }
 }

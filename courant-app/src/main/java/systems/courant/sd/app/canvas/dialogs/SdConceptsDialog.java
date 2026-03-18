@@ -1,26 +1,24 @@
 package systems.courant.sd.app.canvas.dialogs;
 
-import javafx.geometry.Insets;
-import javafx.scene.Scene;
-import javafx.scene.control.ScrollPane;
+import static systems.courant.sd.app.canvas.dialogs.StyledText.*;
+
 import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
-import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
-import javafx.stage.Stage;
+
+import java.util.List;
 
 /**
  * A help dialog that explains core System Dynamics concepts.
  */
-public class SdConceptsDialog extends Stage {
+public class SdConceptsDialog extends AbstractTutorialDialog {
 
     public SdConceptsDialog() {
-        setTitle("SD Concepts");
+        super("SD Concepts", 640, 520, 580);
+    }
 
-        TabPane tabs = new TabPane();
-        tabs.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
-
-        tabs.getTabs().addAll(
+    @Override
+    protected List<Tab> buildTabs() {
+        return List.of(
                 createTab("Overview", overviewText()),
                 createTab("Stocks", stocksText()),
                 createTab("Flows", flowsText()),
@@ -29,21 +27,6 @@ public class SdConceptsDialog extends Stage {
                 createTab("Causal Loops", causalLoopsText()),
                 createTab("Simulation", simulationText())
         );
-
-        Scene scene = new Scene(tabs, 640, 520);
-        setScene(scene);
-    }
-
-    private Tab createTab(String title, TextFlow content) {
-        content.setPadding(new Insets(16));
-        content.setLineSpacing(4);
-        content.setMaxWidth(580);
-
-        ScrollPane scroll = new ScrollPane(content);
-        scroll.setFitToWidth(true);
-
-        Tab tab = new Tab(title, scroll);
-        return tab;
     }
 
     private TextFlow overviewText() {
@@ -256,13 +239,4 @@ public class SdConceptsDialog extends Stage {
         );
     }
 
-    private Text bold(String content) {
-        Text text = new Text(content);
-        text.setStyle("-fx-font-weight: bold;");
-        return text;
-    }
-
-    private Text plain(String content) {
-        return new Text(content);
-    }
 }
