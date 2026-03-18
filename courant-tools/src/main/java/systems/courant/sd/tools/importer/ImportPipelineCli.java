@@ -38,6 +38,7 @@ public class ImportPipelineCli implements Closeable {
             System.exit(1);
         } catch (Exception e) {
             System.err.println("Error: " + e.getMessage());
+            e.printStackTrace(System.err);
             System.exit(1);
         }
     }
