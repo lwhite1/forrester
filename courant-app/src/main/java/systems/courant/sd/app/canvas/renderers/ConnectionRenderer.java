@@ -173,16 +173,7 @@ public final class ConnectionRenderer {
             gc.setLineDashes();
         }
 
-        gc.beginPath();
-        gc.moveTo(fromX, fromY);
-        // Draw the curve using sampled line segments for precision
-        int segments = 30;
-        for (int i = 1; i <= segments; i++) {
-            double t = stopT * i / segments;
-            double[] pt = CausalLinkGeometry.evaluate(fromX, fromY, cp.x(), cp.y(), toX, toY, t);
-            gc.lineTo(pt[0], pt[1]);
-        }
-        gc.stroke();
+        CausalLinkGeometry.strokeQuadCurve(gc, fromX, fromY, cp.x(), cp.y(), toX, toY, stopT);
         gc.setLineDashes();
 
         // Arrowhead oriented along the curve tangent at the tip
@@ -250,18 +241,10 @@ public final class ConnectionRenderer {
             gc.setLineDashes();
         }
 
-        int segments = 30;
-        gc.beginPath();
-        gc.moveTo(startX, startY);
         // Stop a bit before the end for the arrowhead
         double stopT = 0.9;
-        for (int i = 1; i <= segments; i++) {
-            double t = stopT * i / segments;
-            double[] pt = CausalLinkGeometry.evaluateCubic(
-                    startX, startY, cp1X, cp1Y, cp2X, cp2Y, endX, endY, t);
-            gc.lineTo(pt[0], pt[1]);
-        }
-        gc.stroke();
+        CausalLinkGeometry.strokeCubicCurve(gc,
+                startX, startY, cp1X, cp1Y, cp2X, cp2Y, endX, endY, stopT);
         gc.setLineDashes();
 
         // Arrowhead at the end

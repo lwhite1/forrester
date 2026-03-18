@@ -129,15 +129,7 @@ public final class FeedbackLoopRenderer {
         gc.setLineWidth(EDGE_LINE_WIDTH);
         gc.setLineDashes();
 
-        gc.beginPath();
-        gc.moveTo(fromX, fromY);
-        int segments = 30;
-        for (int i = 1; i <= segments; i++) {
-            double t = (double) i / segments;
-            double[] pt = CausalLinkGeometry.evaluate(fromX, fromY, cpX, cpY, toX, toY, t);
-            gc.lineTo(pt[0], pt[1]);
-        }
-        gc.stroke();
+        CausalLinkGeometry.strokeQuadCurve(gc, fromX, fromY, cpX, cpY, toX, toY, 1.0);
     }
 
     /**
@@ -148,16 +140,8 @@ public final class FeedbackLoopRenderer {
         gc.setLineWidth(EDGE_LINE_WIDTH);
         gc.setLineDashes();
 
-        gc.beginPath();
-        gc.moveTo(loopPts[0], loopPts[1]);
-        int segments = 30;
-        for (int i = 1; i <= segments; i++) {
-            double t = (double) i / segments;
-            double[] pt = CausalLinkGeometry.evaluateCubic(
-                    loopPts[0], loopPts[1], loopPts[2], loopPts[3],
-                    loopPts[4], loopPts[5], loopPts[6], loopPts[7], t);
-            gc.lineTo(pt[0], pt[1]);
-        }
-        gc.stroke();
+        CausalLinkGeometry.strokeCubicCurve(gc,
+                loopPts[0], loopPts[1], loopPts[2], loopPts[3],
+                loopPts[4], loopPts[5], loopPts[6], loopPts[7], 1.0);
     }
 }

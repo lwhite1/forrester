@@ -2,6 +2,8 @@ package systems.courant.sd.app.canvas;
 
 import systems.courant.sd.model.def.CausalLinkDef;
 
+import javafx.scene.canvas.GraphicsContext;
+
 import java.util.List;
 
 /**
@@ -254,5 +256,46 @@ public final class CausalLinkGeometry {
             }
         }
         return minDist;
+    }
+
+    private static final int CURVE_SEGMENTS = 30;
+
+    /**
+     * Strokes a quadratic Bézier curve on the graphics context using line segments.
+     *
+     * @param stopT parameter value to stop at (1.0 for full curve, &lt;1.0 to leave room for arrowhead)
+     */
+    public static void strokeQuadCurve(GraphicsContext gc,
+                                        double fromX, double fromY,
+                                        double cpX, double cpY,
+                                        double toX, double toY, double stopT) {
+        gc.beginPath();
+        gc.moveTo(fromX, fromY);
+        for (int i = 1; i <= CURVE_SEGMENTS; i++) {
+            double t = stopT * i / CURVE_SEGMENTS;
+            double[] pt = evaluate(fromX, fromY, cpX, cpY, toX, toY, t);
+            gc.lineTo(pt[0], pt[1]);
+        }
+        gc.stroke();
+    }
+
+    /**
+     * Strokes a cubic Bézier curve on the graphics context using line segments.
+     *
+     * @param stopT parameter value to stop at (1.0 for full curve, &lt;1.0 to leave room for arrowhead)
+     */
+    public static void strokeCubicCurve(GraphicsContext gc,
+                                         double p0x, double p0y,
+                                         double cp1x, double cp1y,
+                                         double cp2x, double cp2y,
+                                         double p1x, double p1y, double stopT) {
+        gc.beginPath();
+        gc.moveTo(p0x, p0y);
+        for (int i = 1; i <= CURVE_SEGMENTS; i++) {
+            double t = stopT * i / CURVE_SEGMENTS;
+            double[] pt = evaluateCubic(p0x, p0y, cp1x, cp1y, cp2x, cp2y, p1x, p1y, t);
+            gc.lineTo(pt[0], pt[1]);
+        }
+        gc.stroke();
     }
 }
