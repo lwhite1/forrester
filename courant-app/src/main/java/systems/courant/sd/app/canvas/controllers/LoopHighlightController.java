@@ -91,8 +91,13 @@ public final class LoopHighlightController {
         if (analysis == null) {
             return false;
         }
-        int count = analysis.loopCount();
-        if (index < -1 || index >= count) {
+        if (index >= 0) {
+            if (index >= analysis.loopCount()) {
+                index = -1;
+            } else if (typeFilter != null && !filteredIndices().contains(index)) {
+                index = -1;
+            }
+        } else {
             index = -1;
         }
         this.activeIndex = index;
