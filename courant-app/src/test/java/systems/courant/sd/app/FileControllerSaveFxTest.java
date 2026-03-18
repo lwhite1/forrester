@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -49,7 +50,7 @@ class FileControllerSaveFxTest {
         }
     }
 
-    private void loadTeacupModel() throws IOException {
+    private void loadTeacupModel() throws Exception {
         ImportResult result = new VensimImporter()
                 .importModel(resourcePath("vensim/teacup.mdl"));
         Platform.runLater(() -> {
@@ -57,11 +58,13 @@ class FileControllerSaveFxTest {
             window.setCurrentFile(null);
         });
         WaitForAsyncUtils.waitForFxEvents();
+        window.layoutFuture().get(10, TimeUnit.SECONDS);
+        WaitForAsyncUtils.waitForFxEvents();
     }
 
     @Test
     @DisplayName("saveToChosenFile with .mdl clears dirty flag and updates currentFile")
-    void shouldClearDirtyAfterVensimExport(FxRobot robot, @TempDir Path tempDir) throws IOException {
+    void shouldClearDirtyAfterVensimExport(FxRobot robot, @TempDir Path tempDir) throws Exception {
         loadTeacupModel();
 
         Platform.runLater(() -> window.getFileController().markDirty());
@@ -80,7 +83,7 @@ class FileControllerSaveFxTest {
 
     @Test
     @DisplayName("saveToChosenFile with .xmile clears dirty flag and updates currentFile")
-    void shouldClearDirtyAfterXmileExport(FxRobot robot, @TempDir Path tempDir) throws IOException {
+    void shouldClearDirtyAfterXmileExport(FxRobot robot, @TempDir Path tempDir) throws Exception {
         loadTeacupModel();
 
         Platform.runLater(() -> window.getFileController().markDirty());
@@ -99,7 +102,7 @@ class FileControllerSaveFxTest {
 
     @Test
     @DisplayName("saveToChosenFile with .stmx clears dirty flag")
-    void shouldClearDirtyAfterStmxExport(FxRobot robot, @TempDir Path tempDir) throws IOException {
+    void shouldClearDirtyAfterStmxExport(FxRobot robot, @TempDir Path tempDir) throws Exception {
         loadTeacupModel();
 
         Platform.runLater(() -> window.getFileController().markDirty());
@@ -116,7 +119,7 @@ class FileControllerSaveFxTest {
 
     @Test
     @DisplayName("saveToChosenFile with .json clears dirty flag and updates currentFile")
-    void shouldClearDirtyAfterJsonSave(FxRobot robot, @TempDir Path tempDir) throws IOException {
+    void shouldClearDirtyAfterJsonSave(FxRobot robot, @TempDir Path tempDir) throws Exception {
         loadTeacupModel();
 
         Platform.runLater(() -> window.getFileController().markDirty());
@@ -134,7 +137,7 @@ class FileControllerSaveFxTest {
 
     @Test
     @DisplayName("window title drops dirty indicator after export")
-    void shouldUpdateTitleAfterExport(FxRobot robot, @TempDir Path tempDir) throws IOException {
+    void shouldUpdateTitleAfterExport(FxRobot robot, @TempDir Path tempDir) throws Exception {
         loadTeacupModel();
 
         Platform.runLater(() -> window.getFileController().markDirty());
@@ -150,7 +153,7 @@ class FileControllerSaveFxTest {
 
     @Test
     @DisplayName("exported Vensim file can be reimported after saveToChosenFile")
-    void shouldProduceValidVensimFile(FxRobot robot, @TempDir Path tempDir) throws IOException {
+    void shouldProduceValidVensimFile(FxRobot robot, @TempDir Path tempDir) throws Exception {
         loadTeacupModel();
 
         File mdlFile = tempDir.resolve("roundtrip.mdl").toFile();
@@ -165,7 +168,7 @@ class FileControllerSaveFxTest {
 
     @Test
     @DisplayName("exported XMILE file can be reimported after saveToChosenFile")
-    void shouldProduceValidXmileFile(FxRobot robot, @TempDir Path tempDir) throws IOException {
+    void shouldProduceValidXmileFile(FxRobot robot, @TempDir Path tempDir) throws Exception {
         loadTeacupModel();
 
         File xmileFile = tempDir.resolve("roundtrip.xmile").toFile();
