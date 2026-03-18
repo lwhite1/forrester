@@ -150,7 +150,7 @@ class ModelWindowImportExportFxTest {
         WaitForAsyncUtils.waitForFxEvents();
         awaitLayout();
 
-        ModelDefinition canvasDef = window.getCanvas().toModelDefinition();
+        ModelDefinition canvasDef = window.getCanvas().navigation().toModelDefinition();
         Path mdlFile = tempDir.resolve("teacup-export.mdl");
         VensimExporter.toFile(canvasDef, mdlFile);
         assertThat(Files.exists(mdlFile)).isTrue();
@@ -172,7 +172,7 @@ class ModelWindowImportExportFxTest {
         WaitForAsyncUtils.waitForFxEvents();
         awaitLayout();
 
-        ModelDefinition canvasDef = window.getCanvas().toModelDefinition();
+        ModelDefinition canvasDef = window.getCanvas().navigation().toModelDefinition();
         Path xmileFile = tempDir.resolve("teacup-export.xmile");
         XmileExporter.toFile(canvasDef, xmileFile);
         assertThat(Files.exists(xmileFile)).isTrue();

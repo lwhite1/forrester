@@ -140,7 +140,7 @@ public class ModelWindow {
 
     private void buildUI() {
         canvas = new ModelCanvas(clipboard);
-        canvas.setUndoManager(undoManager);
+        canvas.undo().setUndoManager(undoManager);
 
         statusBar = new StatusBar();
         analysisRunner = new AnalysisRunner(statusBar, this::showError);
@@ -168,7 +168,7 @@ public class ModelWindow {
 
         dashboardPanel.setRerunAction(simulationController::runSimulation);
         dashboardPanel.setOnVariableClicked(name -> {
-            canvas.selectElement(name);
+            canvas.elements().selectElement(name);
             canvas.requestFocus();
         });
         dashboardPanel.setOnReferenceDataImported(dataset -> {
@@ -244,27 +244,27 @@ public class ModelWindow {
         loopNavigatorBar.setVisible(false);
         loopNavigatorBar.setManaged(false);
         loopNavigatorBar.setOnPrev(() -> {
-            canvas.stepLoopBack();
+            canvas.analysis().stepLoopBack();
             updateLoopNavigator();
             canvas.requestFocus();
         });
         loopNavigatorBar.setOnNext(() -> {
-            canvas.stepLoopForward();
+            canvas.analysis().stepLoopForward();
             updateLoopNavigator();
             canvas.requestFocus();
         });
         loopNavigatorBar.setOnShowAll(() -> {
-            canvas.setActiveLoopIndex(-1);
+            canvas.analysis().setActiveLoopIndex(-1);
             updateLoopNavigator();
             canvas.requestFocus();
         });
         loopNavigatorBar.setOnFilterChanged(filter -> {
-            canvas.setLoopTypeFilter(filter);
+            canvas.analysis().setLoopTypeFilter(filter);
             updateLoopNavigator();
             canvas.requestFocus();
         });
         toolBar.setOnLoopToggleChanged(active -> {
-            canvas.setLoopHighlightActive(active);
+            canvas.analysis().setLoopHighlightActive(active);
             loopNavigatorBar.setVisible(active);
             loopNavigatorBar.setManaged(active);
             if (!active) {
@@ -281,7 +281,7 @@ public class ModelWindow {
         canvas.setToolBar(toolBar);
         canvas.setOnStatusChanged(() -> {
             updateStatusBar();
-            if (canvas.isLoopHighlightActive()) {
+            if (canvas.analysis().isLoopHighlightActive()) {
                 updateLoopNavigator();
             }
             if (propertiesPanel != null) {
@@ -295,7 +295,7 @@ public class ModelWindow {
                     + (replaced.size() == 1 ? "" : "s")
                     + " replaced with 0 (" + names + ")");
         });
-        canvas.setOnValidationChanged(result -> {
+        canvas.analysis().setOnValidationChanged(result -> {
             statusBar.updateValidation(result.errorCount(), result.warningCount());
             if (validationIssuesItem != null) {
                 validationIssuesItem.setDisable(result.isClean());
@@ -305,10 +305,10 @@ public class ModelWindow {
 
         breadcrumbBar = new BreadcrumbBar();
         breadcrumbBar.setOnNavigateTo(depth -> {
-            canvas.navigateToDepth(depth);
+            canvas.navigation().navigateToDepth(depth);
             canvas.requestFocus();
         });
-        canvas.setOnNavigationChanged(this::updateBreadcrumb);
+        canvas.navigation().setOnNavigationChanged(this::updateBreadcrumb);
     }
 
     private void createRightPanel() {
@@ -464,14 +464,14 @@ public class ModelWindow {
         exportItem.setAccelerator(new KeyCodeCombination(KeyCode.E, KeyCombination.SHORTCUT_DOWN));
         exportItem.setOnAction(e -> DiagramExporter.exportDiagram(
                 canvas.getCanvasState(), canvas.getEditor(),
-                canvas.getConnectors(), canvas.getActiveLoopAnalysis(), stage,
+                canvas.getConnectors(), canvas.analysis().getActiveLoopAnalysis(), stage,
                 editor != null ? editor.getModelName() : null));
 
         MenuItem exportReportItem = new MenuItem("Export Report...");
         exportReportItem.setId("menuExportReport");
         exportReportItem.setOnAction(e -> ReportExporter.exportReport(
                 canvas.getCanvasState(), canvas.getEditor(),
-                canvas.getConnectors(), canvas.getActiveLoopAnalysis(), stage,
+                canvas.getConnectors(), canvas.analysis().getActiveLoopAnalysis(), stage,
                 editor != null ? editor.getModelName() : null));
 
         MenuItem closeItem = new MenuItem("Close");
@@ -524,7 +524,7 @@ public class ModelWindow {
         undoItem.setId("menuUndo");
         undoItem.setAccelerator(new KeyCodeCombination(KeyCode.Z, KeyCombination.SHORTCUT_DOWN));
         undoItem.setOnAction(e -> {
-            canvas.performUndo();
+            canvas.undo().performUndo();
             canvas.requestFocus();
         });
         undoItem.setDisable(true);
@@ -534,7 +534,7 @@ public class ModelWindow {
         redoItem.setAccelerator(new KeyCodeCombination(KeyCode.Z,
                 KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN));
         redoItem.setOnAction(e -> {
-            canvas.performRedo();
+            canvas.undo().performRedo();
             canvas.requestFocus();
         });
         redoItem.setDisable(true);
@@ -546,28 +546,28 @@ public class ModelWindow {
         MenuItem cutItem = new MenuItem("Cut");
         cutItem.setAccelerator(new KeyCodeCombination(KeyCode.X, KeyCombination.SHORTCUT_DOWN));
         cutItem.setOnAction(e -> {
-            canvas.cutSelection();
+            canvas.elements().cutSelection();
             canvas.requestFocus();
         });
 
         MenuItem copyItem = new MenuItem("Copy");
         copyItem.setAccelerator(new KeyCodeCombination(KeyCode.C, KeyCombination.SHORTCUT_DOWN));
         copyItem.setOnAction(e -> {
-            canvas.copySelection();
+            canvas.elements().copySelection();
             canvas.requestFocus();
         });
 
         MenuItem pasteItem = new MenuItem("Paste");
         pasteItem.setAccelerator(new KeyCodeCombination(KeyCode.V, KeyCombination.SHORTCUT_DOWN));
         pasteItem.setOnAction(e -> {
-            canvas.pasteClipboard();
+            canvas.elements().pasteClipboard();
             canvas.requestFocus();
         });
 
         MenuItem selectAllItem = new MenuItem("Select All");
         selectAllItem.setAccelerator(new KeyCodeCombination(KeyCode.A, KeyCombination.SHORTCUT_DOWN));
         selectAllItem.setOnAction(e -> {
-            canvas.selectAll();
+            canvas.elements().selectAll();
             canvas.requestFocus();
         });
 
@@ -808,7 +808,7 @@ public class ModelWindow {
     }
 
     private void applyView(ModelEditor ed, ViewDef view, String displayName) {
-        canvas.clearNavigation();
+        canvas.navigation().clearNavigation();
         canvas.clearSparklines();
         canvas.setModel(ed, view);
         undoManager.clear();
@@ -930,13 +930,13 @@ public class ModelWindow {
     }
 
     private void showUndoHistoryPopup() {
-        UndoManager activeUndo = canvas.getUndoManager();
+        UndoManager activeUndo = canvas.undo().getUndoManager();
         if (activeUndo == null || !activeUndo.canUndo()) {
             return;
         }
         List<String> labels = activeUndo.undoLabels();
         UndoHistoryPopup popup = new UndoHistoryPopup(labels, depth -> {
-            canvas.performUndoTo(depth);
+            canvas.undo().performUndoTo(depth);
             canvas.requestFocus();
             updateStatusBar();
         });
@@ -973,7 +973,7 @@ public class ModelWindow {
             zoomOverlay.updateZoom(canvas.getZoomScale());
         }
 
-        UndoManager activeUndo = canvas.getUndoManager();
+        UndoManager activeUndo = canvas.undo().getUndoManager();
         if (undoItem != null) {
             undoItem.setDisable(activeUndo == null || !activeUndo.canUndo());
         }
@@ -986,8 +986,8 @@ public class ModelWindow {
         if (statusBar == null) {
             return;
         }
-        if (canvas.isLoopHighlightActive()) {
-            FeedbackAnalysis analysis = canvas.getLoopAnalysis();
+        if (canvas.analysis().isLoopHighlightActive()) {
+            FeedbackAnalysis analysis = canvas.analysis().getLoopAnalysis();
             int count = analysis != null ? analysis.loopCount() : 0;
             statusBar.updateLoops(count);
         } else {
@@ -999,16 +999,16 @@ public class ModelWindow {
         if (loopNavigatorBar == null) {
             return;
         }
-        loopNavigatorBar.update(canvas.getLoopAnalysis(), canvas.getActiveLoopIndex(),
-                canvas.getLoopTypeFilter(), canvas.getFilteredLoopCount());
+        loopNavigatorBar.update(canvas.analysis().getLoopAnalysis(), canvas.analysis().getActiveLoopIndex(),
+                canvas.analysis().getLoopTypeFilter(), canvas.analysis().getFilteredLoopCount());
     }
 
     private void showValidationDialog() {
-        ValidationResult result = canvas.getLastValidationResult();
+        ValidationResult result = canvas.analysis().getLastValidationResult();
         if (result.isClean()) {
             return;
         }
-        ValidationDialog.showOrUpdate(result, canvas::selectElement, stage);
+        ValidationDialog.showOrUpdate(result, canvas.elements()::selectElement, stage);
     }
 
     private void importReferenceData() {
@@ -1151,8 +1151,8 @@ public class ModelWindow {
             name = "Untitled";
         }
         String dirtySuffix = (fileController != null && fileController.isDirty()) ? " \u2022" : "";
-        String moduleSuffix = canvas != null && canvas.isInsideModule()
-                ? " [" + canvas.getCurrentModuleName() + "]"
+        String moduleSuffix = canvas != null && canvas.navigation().isInsideModule()
+                ? " [" + canvas.navigation().getCurrentModuleName() + "]"
                 : "";
         stage.setTitle("Courant \u2014 " + name + dirtySuffix + moduleSuffix);
         if (dashboardStage != null) {
@@ -1162,7 +1162,7 @@ public class ModelWindow {
 
     private void updateBreadcrumb() {
         if (breadcrumbBar != null && canvas.getEditor() != null) {
-            breadcrumbBar.update(canvas.getNavigationPath());
+            breadcrumbBar.update(canvas.navigation().getNavigationPath());
         }
         updateTitle();
         updateStatusBar();
@@ -1279,18 +1279,18 @@ public class ModelWindow {
 
     private void addEditCommands() {
         commandRegistry.add("Undo", "Edit", () -> {
-            canvas.performUndo(); canvas.requestFocus(); });
+            canvas.undo().performUndo(); canvas.requestFocus(); });
         commandRegistry.add("Redo", "Edit", () -> {
-            canvas.performRedo(); canvas.requestFocus(); });
+            canvas.undo().performRedo(); canvas.requestFocus(); });
         commandRegistry.add("Undo History", "Edit", this::showUndoHistoryPopup);
         commandRegistry.add("Cut", "Edit", () -> {
-            canvas.cutSelection(); canvas.requestFocus(); });
+            canvas.elements().cutSelection(); canvas.requestFocus(); });
         commandRegistry.add("Copy", "Edit", () -> {
-            canvas.copySelection(); canvas.requestFocus(); });
+            canvas.elements().copySelection(); canvas.requestFocus(); });
         commandRegistry.add("Paste", "Edit", () -> {
-            canvas.pasteClipboard(); canvas.requestFocus(); });
+            canvas.elements().pasteClipboard(); canvas.requestFocus(); });
         commandRegistry.add("Select All", "Edit", () -> {
-            canvas.selectAll(); canvas.requestFocus(); });
+            canvas.elements().selectAll(); canvas.requestFocus(); });
     }
 
     private void addFileCommands() {
@@ -1301,7 +1301,7 @@ public class ModelWindow {
         commandRegistry.add("Save As", "File", fileController::saveAs);
         commandRegistry.add("Export Diagram", "File", () -> DiagramExporter.exportDiagram(
                 canvas.getCanvasState(), canvas.getEditor(),
-                canvas.getConnectors(), canvas.getActiveLoopAnalysis(), stage,
+                canvas.getConnectors(), canvas.analysis().getActiveLoopAnalysis(), stage,
                 editor != null ? editor.getModelName() : null));
         commandRegistry.add("Model Info", "File", this::showModelInfoDialog);
     }
@@ -1347,7 +1347,7 @@ public class ModelWindow {
             ElementType type = canvas.getCanvasState().getType(name).orElse(null);
             String category = formatElementType(type);
             commands.add(new CommandPalette.Command(name, category, () -> {
-                canvas.selectElement(name);
+                canvas.elements().selectElement(name);
                 canvas.requestFocus();
             }));
         }
@@ -1404,7 +1404,7 @@ public class ModelWindow {
         }
 
         // Clear canvas and dashboard state
-        canvas.clearNavigation();
+        canvas.navigation().clearNavigation();
         canvas.clearSparklines();
         if (dashboardPanel != null) {
             dashboardPanel.clear();

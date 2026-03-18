@@ -321,7 +321,7 @@ public class PropertiesPanel extends VBox {
         Button deleteBtn = createToolbarButton("Delete");
         deleteBtn.setOnAction(e -> {
             if (ctx.getCanvas() != null) {
-                ctx.getCanvas().deleteSelectedElements();
+                ctx.getCanvas().elements().deleteSelectedElements();
                 ctx.getCanvas().requestFocus();
             }
         });
@@ -458,7 +458,7 @@ public class PropertiesPanel extends VBox {
         deleteBtn.setId("propertiesDelete");
         deleteBtn.setOnAction(e -> {
             if (ctx.getCanvas() != null) {
-                ctx.getCanvas().deleteSelectedElements();
+                ctx.getCanvas().elements().deleteSelectedElements();
                 ctx.getCanvas().requestFocus();
             }
         });
@@ -470,7 +470,7 @@ public class PropertiesPanel extends VBox {
             drillBtn.setId("propertiesDrill");
             drillBtn.setOnAction(e -> {
                 if (ctx.getCanvas() != null) {
-                    ctx.getCanvas().drillInto(ctx.getElementName());
+                    ctx.getCanvas().navigation().drillInto(ctx.getElementName());
                     ctx.getCanvas().requestFocus();
                 }
             });
@@ -479,7 +479,7 @@ public class PropertiesPanel extends VBox {
             bindingsBtn.setId("propertiesBindings");
             bindingsBtn.setOnAction(e -> {
                 if (ctx.getCanvas() != null) {
-                    ctx.getCanvas().triggerBindingConfig(ctx.getElementName());
+                    ctx.getCanvas().elements().triggerBindingConfig(ctx.getElementName());
                     ctx.getCanvas().requestFocus();
                 }
             });
@@ -570,8 +570,8 @@ public class PropertiesPanel extends VBox {
     }
 
     private int buildDependencySection(int row, String elementName) {
-        Set<String> usedBy = ctx.getCanvas().whereUsed(elementName);
-        Set<String> uses = ctx.getCanvas().uses(elementName);
+        Set<String> usedBy = ctx.getCanvas().analysis().whereUsed(elementName);
+        Set<String> uses = ctx.getCanvas().analysis().uses(elementName);
 
         if (!usedBy.isEmpty()) {
             Label label = new Label("Used by");
@@ -607,7 +607,7 @@ public class PropertiesPanel extends VBox {
             link.setPadding(new Insets(0, 2, 0, 0));
             link.setOnAction(e -> {
                 if (ctx.getCanvas() != null) {
-                    ctx.getCanvas().selectElement(name);
+                    ctx.getCanvas().elements().selectElement(name);
                 }
             });
             pane.getChildren().add(link);

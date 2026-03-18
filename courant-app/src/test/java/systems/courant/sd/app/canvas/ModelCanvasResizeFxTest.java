@@ -30,7 +30,7 @@ class ModelCanvasResizeFxTest {
     @Start
     void start(Stage stage) {
         canvas = new ModelCanvas(new Clipboard());
-        canvas.setUndoManager(new UndoManager());
+        canvas.undo().setUndoManager(new UndoManager());
         root = new StackPane(canvas);
         stage.setScene(new Scene(root, 800, 600));
         stage.show();

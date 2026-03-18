@@ -32,7 +32,7 @@ class NavigateToDepthUndoFxTest {
     @Start
     void start(Stage stage) {
         canvas = new ModelCanvas(new Clipboard());
-        canvas.setUndoManager(new UndoManager());
+        canvas.undo().setUndoManager(new UndoManager());
         stage.setScene(new Scene(new StackPane(canvas), 800, 600));
         stage.show();
     }
@@ -86,7 +86,7 @@ class NavigateToDepthUndoFxTest {
      */
     private void drillToDepth(int depth) {
         for (int i = 0; i < depth; i++) {
-            canvas.drillInto("Module 1");
+            canvas.navigation().drillInto("Module 1");
         }
     }
 
@@ -96,14 +96,14 @@ class NavigateToDepthUndoFxTest {
         loadNestedModules();
         drillToDepth(3);
 
-        assertThat(canvas.getNavigationPath()).hasSize(4); // Root + 3 levels
+        assertThat(canvas.navigation().getNavigationPath()).hasSize(4); // Root + 3 levels
 
         // The root-level undo manager was saved in the nav frame when we drilled in.
         // navigateToDepth should restore it and push exactly one undo entry.
-        canvas.navigateToDepth(0);
+        canvas.navigation().navigateToDepth(0);
 
-        assertThat(canvas.isInsideModule()).isFalse();
-        UndoManager rootUndo = canvas.getUndoManager();
+        assertThat(canvas.navigation().isInsideModule()).isFalse();
+        UndoManager rootUndo = canvas.undo().getUndoManager();
         assertThat(rootUndo.undoDepth()).isEqualTo(1);
     }
 
@@ -113,12 +113,12 @@ class NavigateToDepthUndoFxTest {
         loadNestedModules();
         drillToDepth(2);
 
-        assertThat(canvas.getNavigationPath()).hasSize(3); // Root + 2 levels
+        assertThat(canvas.navigation().getNavigationPath()).hasSize(3); // Root + 2 levels
 
-        canvas.navigateToDepth(0);
+        canvas.navigation().navigateToDepth(0);
 
-        assertThat(canvas.isInsideModule()).isFalse();
-        UndoManager rootUndo = canvas.getUndoManager();
+        assertThat(canvas.navigation().isInsideModule()).isFalse();
+        UndoManager rootUndo = canvas.undo().getUndoManager();
         assertThat(rootUndo.undoDepth()).isEqualTo(1);
     }
 
@@ -128,12 +128,12 @@ class NavigateToDepthUndoFxTest {
         loadNestedModules();
         drillToDepth(1);
 
-        assertThat(canvas.getNavigationPath()).hasSize(2); // Root + 1 level
+        assertThat(canvas.navigation().getNavigationPath()).hasSize(2); // Root + 1 level
 
-        canvas.navigateToDepth(0);
+        canvas.navigation().navigateToDepth(0);
 
-        assertThat(canvas.isInsideModule()).isFalse();
-        UndoManager rootUndo = canvas.getUndoManager();
+        assertThat(canvas.navigation().isInsideModule()).isFalse();
+        UndoManager rootUndo = canvas.undo().getUndoManager();
         assertThat(rootUndo.undoDepth()).isEqualTo(1);
     }
 
@@ -143,9 +143,9 @@ class NavigateToDepthUndoFxTest {
         loadNestedModules();
         drillToDepth(2);
 
-        canvas.navigateToDepth(2); // already at depth 2
+        canvas.navigation().navigateToDepth(2); // already at depth 2
 
-        UndoManager currentUndo = canvas.getUndoManager();
+        UndoManager currentUndo = canvas.undo().getUndoManager();
         assertThat(currentUndo.undoDepth()).isZero();
     }
 
@@ -155,10 +155,10 @@ class NavigateToDepthUndoFxTest {
         loadNestedModules();
         drillToDepth(1);
 
-        canvas.navigateBack();
+        canvas.navigation().navigateBack();
 
-        assertThat(canvas.isInsideModule()).isFalse();
-        UndoManager rootUndo = canvas.getUndoManager();
+        assertThat(canvas.navigation().isInsideModule()).isFalse();
+        UndoManager rootUndo = canvas.undo().getUndoManager();
         assertThat(rootUndo.undoDepth()).isEqualTo(1);
     }
 
@@ -166,7 +166,7 @@ class NavigateToDepthUndoFxTest {
     @DisplayName("navigateToDepth with no editor should not throw")
     void shouldNotThrowWhenEditorIsNull() {
         // canvas has no model set yet
-        assertThatCode(() -> canvas.navigateToDepth(0)).doesNotThrowAnyException();
+        assertThatCode(() -> canvas.navigation().navigateToDepth(0)).doesNotThrowAnyException();
     }
 
     @Test
@@ -176,11 +176,11 @@ class NavigateToDepthUndoFxTest {
         drillToDepth(3);
 
         // Navigate from depth 3 to depth 1 (back 2 levels, but stay inside module)
-        canvas.navigateToDepth(1);
+        canvas.navigation().navigateToDepth(1);
 
-        assertThat(canvas.isInsideModule()).isTrue();
-        assertThat(canvas.getNavigationPath()).hasSize(2); // Root + 1 level
-        UndoManager midUndo = canvas.getUndoManager();
+        assertThat(canvas.navigation().isInsideModule()).isTrue();
+        assertThat(canvas.navigation().getNavigationPath()).hasSize(2); // Root + 1 level
+        UndoManager midUndo = canvas.undo().getUndoManager();
         assertThat(midUndo.undoDepth()).isEqualTo(1);
     }
 }

@@ -218,7 +218,7 @@ final class FileController {
         String ext = name.contains(".") ? name.substring(name.lastIndexOf('.')).toLowerCase() : "";
 
         try {
-            ModelDefinition def = canvas.toModelDefinition();
+            ModelDefinition def = canvas.navigation().toModelDefinition();
             switch (ext) {
                 case ".mdl" -> VensimExporter.toFile(def, file.toPath());
                 case ".xmile", ".stmx", ".itmx" -> XmileExporter.toFile(def, file.toPath());
@@ -324,7 +324,7 @@ final class FileController {
 
     private void saveToFile(Path path) {
         try {
-            ModelDefinition def = canvas.toModelDefinition();
+            ModelDefinition def = canvas.navigation().toModelDefinition();
             serializer.toFile(def, path);
             dirty = false;
             updateTitle.run();

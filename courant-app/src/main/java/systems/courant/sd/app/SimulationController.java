@@ -94,7 +94,7 @@ final class SimulationController {
             return;
         }
 
-        ModelDefinition def = canvas.toModelDefinition();
+        ModelDefinition def = canvas.navigation().toModelDefinition();
         SimulationSettings finalSettings = settings;
 
         // Snapshot parameter values for ghost run labeling
@@ -144,7 +144,7 @@ final class SimulationController {
         }
 
         ParameterSweepDialog.Config config = configOpt.get();
-        ModelDefinition def = canvas.toModelDefinition();
+        ModelDefinition def = canvas.navigation().toModelDefinition();
         SimulationSettings finalSettings = settings;
 
         analysisRunner.run("Running sweep...",
@@ -193,7 +193,7 @@ final class SimulationController {
         }
 
         MultiParameterSweepDialog.Config config = configOpt.get();
-        ModelDefinition def = canvas.toModelDefinition();
+        ModelDefinition def = canvas.navigation().toModelDefinition();
         SimulationSettings finalSettings = settings;
 
         analysisRunner.run("Running multi-parameter sweep...",
@@ -254,7 +254,7 @@ final class SimulationController {
             return;
         }
 
-        ModelDefinition def = canvas.toModelDefinition();
+        ModelDefinition def = canvas.navigation().toModelDefinition();
         SimulationSettings finalSettings = settings;
 
         analysisRunner.run(
@@ -319,7 +319,7 @@ final class SimulationController {
         }
 
         OptimizerDialog.Config config = configOpt.get();
-        ModelDefinition def = canvas.toModelDefinition();
+        ModelDefinition def = canvas.navigation().toModelDefinition();
         SimulationSettings finalSettings = settings;
 
         analysisRunner.run(
@@ -395,7 +395,7 @@ final class SimulationController {
         }
 
         CalibrateDialog.Config config = configOpt.get();
-        ModelDefinition def = canvas.toModelDefinition();
+        ModelDefinition def = canvas.navigation().toModelDefinition();
         SimulationSettings finalSettings = settings;
 
         analysisRunner.run(
@@ -452,13 +452,13 @@ final class SimulationController {
     }
 
     void validateModel() {
-        ModelDefinition def = canvas.toModelDefinition();
+        ModelDefinition def = canvas.navigation().toModelDefinition();
 
         analysisRunner.run(
                 () -> ModelValidator.validate(def),
                 result -> {
                     statusBar.updateValidation(result.errorCount(), result.warningCount());
-                    ValidationDialog.showOrUpdate(result, canvas::selectElement);
+                    ValidationDialog.showOrUpdate(result, canvas.elements()::selectElement);
                     fireLogEvent.accept(l -> l.onValidation(result.errorCount(), result.warningCount()));
                 },
                 "Validation Error");
@@ -470,7 +470,7 @@ final class SimulationController {
             return;
         }
 
-        ModelDefinition def = canvas.toModelDefinition();
+        ModelDefinition def = canvas.navigation().toModelDefinition();
         List<VariableDef> params = def.parameters();
 
         if (params.isEmpty()) {
@@ -561,10 +561,10 @@ final class SimulationController {
     }
 
     private void computeLoopDominance(SimulationRunner.SimulationResult result) {
-        if (!canvas.isLoopHighlightActive()) {
+        if (!canvas.analysis().isLoopHighlightActive()) {
             return;
         }
-        FeedbackAnalysis analysis = canvas.getLoopAnalysis();
+        FeedbackAnalysis analysis = canvas.analysis().getLoopAnalysis();
         if (analysis == null || analysis.loopCount() == 0) {
             return;
         }

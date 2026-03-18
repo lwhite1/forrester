@@ -34,7 +34,7 @@ class InputDispatcherMouseExitFxTest {
     @Start
     void start(Stage stage) {
         canvas = new ModelCanvas(new Clipboard());
-        canvas.setUndoManager(new UndoManager());
+        canvas.undo().setUndoManager(new UndoManager());
 
         ModelEditor editor = new ModelEditor();
         editor.addStock(); // Stock 1

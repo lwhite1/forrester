@@ -46,7 +46,7 @@ class MaturityIndicatorFxTest {
         ViewDef view = AutoLayout.layout(def);
 
         canvas = new ModelCanvas(new Clipboard());
-        canvas.setUndoManager(new UndoManager());
+        canvas.undo().setUndoManager(new UndoManager());
         editor = new ModelEditor();
         editor.loadFrom(def);
         canvas.setModel(editor, view);
