@@ -24,6 +24,11 @@ import systems.courant.sd.app.canvas.renderers.OutlineGeometry;
 /**
  * Exports the diagram to an SVG file by translating canvas drawing operations
  * into SVG XML elements. Follows the same layer order as {@link CanvasRenderer}.
+ *
+ * <p>Geometry computations are shared with the Canvas renderer via
+ * {@link ArrowheadGeometry}, {@link MaterialFlowEndpoints}, and
+ * {@link PolarityLabelLayout}, ensuring that any fix to the geometry
+ * is applied consistently in both renderers.
  */
 public final class SvgExporter {
 
@@ -151,81 +156,37 @@ public final class SvgExporter {
 
     private static void writeMaterialFlows(PrintWriter w, CanvasState state, ModelEditor editor) {
         for (FlowDef flow : editor.getFlows()) {
-            if (!state.hasElement(flow.name())) {
+            MaterialFlowEndpoints ep = MaterialFlowEndpoints.resolve(flow, state);
+            if (ep == null) {
                 continue;
-            }
-            double midX = state.getX(flow.name());
-            double midY = state.getY(flow.name());
-
-            double sourceX;
-            double sourceY;
-            boolean sourceIsCloud;
-
-            if (flow.source() != null && state.hasElement(flow.source())) {
-                FlowGeometry.Point2D edge = FlowGeometry.clipToElement(state, flow.source(), midX, midY);
-                sourceX = edge.x();
-                sourceY = edge.y();
-                sourceIsCloud = false;
-            } else {
-                FlowGeometry.Point2D cloud = FlowEndpointCalculator.cloudPosition(
-                        FlowEndpointCalculator.FlowEnd.SOURCE, flow, state);
-                sourceX = cloud != null ? cloud.x() : midX - LayoutMetrics.CLOUD_OFFSET;
-                sourceY = cloud != null ? cloud.y() : midY;
-                sourceIsCloud = true;
-            }
-
-            double sinkX;
-            double sinkY;
-            boolean sinkIsCloud;
-
-            if (flow.sink() != null && state.hasElement(flow.sink())) {
-                FlowGeometry.Point2D edge = FlowGeometry.clipToElement(state, flow.sink(), midX, midY);
-                sinkX = edge.x();
-                sinkY = edge.y();
-                sinkIsCloud = false;
-            } else {
-                FlowGeometry.Point2D cloud = FlowEndpointCalculator.cloudPosition(
-                        FlowEndpointCalculator.FlowEnd.SINK, flow, state);
-                sinkX = cloud != null ? cloud.x() : midX + LayoutMetrics.CLOUD_OFFSET;
-                sinkY = cloud != null ? cloud.y() : midY;
-                sinkIsCloud = true;
             }
 
             // Clouds
-            if (sourceIsCloud) {
-                writeCloud(w, sourceX, sourceY);
+            if (ep.sourceIsCloud()) {
+                writeCloud(w, ep.sourceX(), ep.sourceY());
             }
-            if (sinkIsCloud) {
-                writeCloud(w, sinkX, sinkY);
+            if (ep.sinkIsCloud()) {
+                writeCloud(w, ep.sinkX(), ep.sinkY());
             }
 
-            // Source → diamond (no arrowhead — full length)
+            // Source -> diamond (no arrowhead -- full length)
             w.printf(Locale.US,
                     "  <line x1=\"%.2f\" y1=\"%.2f\" x2=\"%.2f\" y2=\"%.2f\" " +
                     "stroke=\"%s\" stroke-width=\"%.1f\"/>%n",
-                    sourceX, sourceY, midX, midY,
+                    ep.sourceX(), ep.sourceY(), ep.midX(), ep.midY(),
                     svgColor(ColorPalette.MATERIAL_FLOW), LayoutMetrics.MATERIAL_FLOW_WIDTH);
 
-            // Diamond → sink: stop line at arrowhead base
-            double sinkDx = sinkX - midX;
-            double sinkDy = sinkY - midY;
-            double sinkDist = Math.sqrt(sinkDx * sinkDx + sinkDy * sinkDy);
-            double lineEndX = sinkX;
-            double lineEndY = sinkY;
-            if (sinkDist > LayoutMetrics.ARROWHEAD_LENGTH) {
-                double ux = sinkDx / sinkDist;
-                double uy = sinkDy / sinkDist;
-                lineEndX = sinkX - ux * LayoutMetrics.ARROWHEAD_LENGTH;
-                lineEndY = sinkY - uy * LayoutMetrics.ARROWHEAD_LENGTH;
-            }
+            // Diamond -> sink: stop line at arrowhead base
+            double[] stop = ArrowheadGeometry.lineStopPoint(
+                    ep.midX(), ep.midY(), ep.sinkX(), ep.sinkY(), LayoutMetrics.ARROWHEAD_LENGTH);
             w.printf(Locale.US,
                     "  <line x1=\"%.2f\" y1=\"%.2f\" x2=\"%.2f\" y2=\"%.2f\" " +
                     "stroke=\"%s\" stroke-width=\"%.1f\"/>%n",
-                    midX, midY, lineEndX, lineEndY,
+                    ep.midX(), ep.midY(), stop[0], stop[1],
                     svgColor(ColorPalette.MATERIAL_FLOW), LayoutMetrics.MATERIAL_FLOW_WIDTH);
 
             // Arrowhead fills gap from lineEnd to sink
-            writeArrowhead(w, midX, midY, sinkX, sinkY,
+            writeSvgArrowhead(w, ep.midX(), ep.midY(), ep.sinkX(), ep.sinkY(),
                     LayoutMetrics.ARROWHEAD_LENGTH, LayoutMetrics.ARROWHEAD_WIDTH,
                     ColorPalette.MATERIAL_FLOW);
         }
@@ -249,28 +210,19 @@ public final class SvgExporter {
             FlowGeometry.Point2D ct = FlowGeometry.clipToElement(state, route.to(), fromX, fromY);
 
             // Stop line at arrowhead base
-            double ldx = ct.x() - cf.x();
-            double ldy = ct.y() - cf.y();
-            double ldist = Math.sqrt(ldx * ldx + ldy * ldy);
-            double ltx = ct.x();
-            double lty = ct.y();
-            if (ldist > LayoutMetrics.INFO_ARROWHEAD_LENGTH) {
-                double lux = ldx / ldist;
-                double luy = ldy / ldist;
-                ltx = ct.x() - lux * LayoutMetrics.INFO_ARROWHEAD_LENGTH;
-                lty = ct.y() - luy * LayoutMetrics.INFO_ARROWHEAD_LENGTH;
-            }
+            double[] stop = ArrowheadGeometry.lineStopPoint(
+                    cf.x(), cf.y(), ct.x(), ct.y(), LayoutMetrics.INFO_ARROWHEAD_LENGTH);
 
             w.printf(Locale.US,
                     "  <line x1=\"%.2f\" y1=\"%.2f\" x2=\"%.2f\" y2=\"%.2f\" " +
                     "stroke=\"%s\" stroke-opacity=\"%.2f\" stroke-width=\"%.1f\" " +
                     "stroke-dasharray=\"%.0f %.0f\"/>%n",
-                    cf.x(), cf.y(), ltx, lty,
+                    cf.x(), cf.y(), stop[0], stop[1],
                     svgColor(ColorPalette.INFO_LINK), svgOpacity(ColorPalette.INFO_LINK),
                     LayoutMetrics.INFO_LINK_WIDTH,
                     LayoutMetrics.INFO_LINK_DASH_LENGTH, LayoutMetrics.INFO_LINK_DASH_GAP);
 
-            writeArrowhead(w, cf.x(), cf.y(), ct.x(), ct.y(),
+            writeSvgArrowhead(w, cf.x(), cf.y(), ct.x(), ct.y(),
                     LayoutMetrics.INFO_ARROWHEAD_LENGTH, LayoutMetrics.INFO_ARROWHEAD_WIDTH,
                     ColorPalette.INFO_LINK);
         }
@@ -466,7 +418,7 @@ public final class SvgExporter {
         double y = cy - height / 2;
         double r = LayoutMetrics.AUX_CORNER_RADIUS;
 
-        // Fill — subtle gray, no border
+        // Fill -- subtle gray, no border
         w.printf(Locale.US,
                 "  <rect x=\"%.2f\" y=\"%.2f\" width=\"%.2f\" height=\"%.2f\" rx=\"%.1f\" " +
                 "fill=\"%s\"/>%n",
@@ -489,7 +441,7 @@ public final class SvgExporter {
                 "font-family=\"sans-serif\" font-size=\"%.0f\" font-weight=\"bold\" fill=\"%s\">%s</text>%n",
                 x + 5, y + 3, LayoutMetrics.BADGE_FONT_SIZE, svgColor(ColorPalette.BADGE_TEXT), escapeXml(badge));
 
-        // Name centered — wrap to two lines if needed
+        // Name centered -- wrap to two lines if needed
         writeSvgWrappedName(w, name, LayoutMetrics.AUX_NAME_FONT, LayoutMetrics.AUX_NAME_FONT_SIZE,
                 cx, cy, width, 20);
     }
@@ -534,7 +486,7 @@ public final class SvgExporter {
         double y = cy - height / 2;
         double r = LayoutMetrics.LOOKUP_CORNER_RADIUS;
 
-        // Fill — subtle gray, no border
+        // Fill -- subtle gray, no border
         w.printf(Locale.US,
                 "  <rect x=\"%.2f\" y=\"%.2f\" width=\"%.2f\" height=\"%.2f\" rx=\"%.1f\" " +
                 "fill=\"%s\"/>%n",
@@ -547,14 +499,14 @@ public final class SvgExporter {
                 x + 4, y + 3, LayoutMetrics.BADGE_FONT_SIZE,
                 svgColor(ColorPalette.BADGE_TEXT), ElementRenderer.BADGE_LOOKUP);
 
-        // Name centered vertically — wrap to two lines if needed
+        // Name centered vertically -- wrap to two lines if needed
         writeSvgWrappedName(w, name, LayoutMetrics.LOOKUP_NAME_FONT, LayoutMetrics.LOOKUP_NAME_FONT_SIZE,
                 cx, cy, width, 16);
     }
 
     private static void writeCldVariable(PrintWriter w, String name,
                                           double cx, double cy, double width, double height) {
-        // Plain text only — no rectangle, matching standard CLD notation
+        // Plain text only -- no rectangle, matching standard CLD notation
         String label = ElementRenderer.truncate(name, LayoutMetrics.AUX_NAME_FONT, width - 12);
         w.printf(Locale.US,
                 "  <text x=\"%.2f\" y=\"%.2f\" text-anchor=\"middle\" dominant-baseline=\"central\" " +
@@ -609,7 +561,7 @@ public final class SvgExporter {
                 Color selfLinkColor = isUnknown ? ColorPalette.CAUSAL_UNKNOWN : ColorPalette.CAUSAL_LINK;
                 String dashAttr = isUnknown ? " stroke-dasharray=\"4 3\"" : "";
 
-                // Cubic Bézier path
+                // Cubic Bezier path
                 w.printf(Locale.US,
                         "  <path d=\"M %.2f %.2f C %.2f %.2f, %.2f %.2f, %.2f %.2f\" " +
                         "fill=\"none\" stroke=\"%s\" stroke-width=\"%.1f\"%s/>%n",
@@ -619,14 +571,13 @@ public final class SvgExporter {
                 // Arrowhead at end
                 double[] tan = CausalLinkGeometry.tangentCubic(
                         lp[0], lp[1], lp[2], lp[3], lp[4], lp[5], lp[6], lp[7], 1.0);
-                writeArrowheadFromTangent(w, lp[6], lp[7], tan[0], tan[1],
+                writeSvgArrowheadFromTangent(w, lp[6], lp[7], tan[0], tan[1],
                         LayoutMetrics.CAUSAL_ARROWHEAD_LENGTH, LayoutMetrics.CAUSAL_ARROWHEAD_WIDTH,
                         selfLinkColor);
 
                 // Polarity label at top of loop
-                double[] midPt = CausalLinkGeometry.evaluateCubic(
-                        lp[0], lp[1], lp[2], lp[3], lp[4], lp[5], lp[6], lp[7], 0.5);
-                writePolarityLabel(w, link.polarity(), midPt[0], midPt[1] - 10);
+                PolarityLabelLayout labelLayout = PolarityLabelLayout.forSelfLoop(lp);
+                writePolarityLabel(w, link.polarity(), labelLayout.x(), labelLayout.y());
                 continue;
             }
 
@@ -643,7 +594,7 @@ public final class SvgExporter {
             Color curLinkColor = isUnknown ? ColorPalette.CAUSAL_UNKNOWN : ColorPalette.CAUSAL_LINK;
             String dashAttr = isUnknown ? " stroke-dasharray=\"4 3\"" : "";
 
-            // Quadratic Bézier path
+            // Quadratic Bezier path
             w.printf(Locale.US,
                     "  <path d=\"M %.2f %.2f Q %.2f %.2f, %.2f %.2f\" " +
                     "fill=\"none\" stroke=\"%s\" stroke-width=\"%.1f\"%s/>%n",
@@ -653,39 +604,22 @@ public final class SvgExporter {
             // Arrowhead oriented along curve tangent at endpoint
             double[] tan = CausalLinkGeometry.tangent(
                     cf.x(), cf.y(), cp.x(), cp.y(), ct.x(), ct.y(), 1.0);
-            writeArrowheadFromTangent(w, ct.x(), ct.y(), tan[0], tan[1],
+            writeSvgArrowheadFromTangent(w, ct.x(), ct.y(), tan[0], tan[1],
                     LayoutMetrics.CAUSAL_ARROWHEAD_LENGTH, LayoutMetrics.CAUSAL_ARROWHEAD_WIDTH,
                     curLinkColor);
 
             // Polarity label at t=0.8 on the curve, offset perpendicular
-            double dx = ct.x() - cf.x();
-            double dy = ct.y() - cf.y();
-            double dist = Math.sqrt(dx * dx + dy * dy);
-            if (dist > 1) {
-                double[] labelPt = CausalLinkGeometry.evaluate(
-                        cf.x(), cf.y(), cp.x(), cp.y(), ct.x(), ct.y(), 0.8);
-                double[] labelTan = CausalLinkGeometry.tangent(
-                        cf.x(), cf.y(), cp.x(), cp.y(), ct.x(), ct.y(), 0.8);
-                double tanDist = Math.sqrt(labelTan[0] * labelTan[0] + labelTan[1] * labelTan[1]);
-                if (tanDist > 0) {
-                    double perpX = -labelTan[1] / tanDist;
-                    double perpY = labelTan[0] / tanDist;
-                    double perpOffset = 12;
-                    writePolarityLabel(w, link.polarity(),
-                            labelPt[0] + perpX * perpOffset,
-                            labelPt[1] + perpY * perpOffset);
-                }
+            PolarityLabelLayout labelLayout = PolarityLabelLayout.forQuadratic(
+                    cf.x(), cf.y(), cp.x(), cp.y(), ct.x(), ct.y());
+            if (labelLayout.valid()) {
+                writePolarityLabel(w, link.polarity(), labelLayout.x(), labelLayout.y());
             }
         }
     }
 
     private static void writePolarityLabel(PrintWriter w, CausalLinkDef.Polarity polarity,
                                             double x, double y) {
-        Color labelColor = switch (polarity) {
-            case POSITIVE -> ColorPalette.CAUSAL_POSITIVE;
-            case NEGATIVE -> ColorPalette.CAUSAL_NEGATIVE;
-            case UNKNOWN -> ColorPalette.CAUSAL_UNKNOWN;
-        };
+        Color labelColor = PolarityLabelLayout.colorFor(polarity);
         double fontSize = polarity == CausalLinkDef.Polarity.UNKNOWN
                 ? LayoutMetrics.CAUSAL_UNKNOWN_FONT_SIZE : LayoutMetrics.CAUSAL_POLARITY_FONT_SIZE;
         w.printf(Locale.US,
@@ -693,30 +627,6 @@ public final class SvgExporter {
                 "dominant-baseline=\"central\" font-weight=\"bold\" font-size=\"%.0f\" " +
                 "fill=\"%s\">%s</text>%n",
                 x, y, fontSize, svgColor(labelColor), escapeXml(polarity.symbol()));
-    }
-
-    private static void writeArrowheadFromTangent(PrintWriter w,
-                                                   double tipX, double tipY,
-                                                   double tanX, double tanY,
-                                                   double length, double width,
-                                                   Color color) {
-        double dist = Math.sqrt(tanX * tanX + tanY * tanY);
-        if (dist < 1e-9) {
-            return;
-        }
-        double ux = tanX / dist;
-        double uy = tanY / dist;
-        double baseX = tipX - ux * length;
-        double baseY = tipY - uy * length;
-        double perpX = -uy * width / 2;
-        double perpY = ux * width / 2;
-
-        w.printf(Locale.US,
-                "  <polygon points=\"%.2f,%.2f %.2f,%.2f %.2f,%.2f\" fill=\"%s\"/>%n",
-                tipX, tipY,
-                baseX + perpX, baseY + perpY,
-                baseX - perpX, baseY - perpY,
-                svgColor(color));
     }
 
     // --- Loop highlights ---
@@ -804,27 +714,42 @@ public final class SvgExporter {
                 cx, cy, svgColor(ColorPalette.CLOUD));
     }
 
-    private static void writeArrowhead(PrintWriter w, double fromX, double fromY,
-                                       double toX, double toY,
-                                       double length, double arrowWidth, Color color) {
-        double dx = toX - fromX;
-        double dy = toY - fromY;
-        double dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < 1) {
+    /**
+     * Writes an SVG arrowhead polygon for a straight line, using shared geometry.
+     */
+    private static void writeSvgArrowhead(PrintWriter w, double fromX, double fromY,
+                                          double toX, double toY,
+                                          double length, double arrowWidth, Color color) {
+        ArrowheadGeometry ah = ArrowheadGeometry.fromLine(fromX, fromY, toX, toY, length, arrowWidth);
+        if (ah == null) {
             return;
         }
+        writeSvgArrowheadPolygon(w, ah, color);
+    }
 
-        double ux = dx / dist;
-        double uy = dy / dist;
+    /**
+     * Writes an SVG arrowhead polygon oriented along a tangent vector, using shared geometry.
+     */
+    private static void writeSvgArrowheadFromTangent(PrintWriter w,
+                                                      double tipX, double tipY,
+                                                      double tanX, double tanY,
+                                                      double length, double width,
+                                                      Color color) {
+        ArrowheadGeometry ah = ArrowheadGeometry.fromTangent(tipX, tipY, tanX, tanY, length, width);
+        if (ah == null) {
+            return;
+        }
+        writeSvgArrowheadPolygon(w, ah, color);
+    }
 
-        double baseX = toX - ux * length;
-        double baseY = toY - uy * length;
-
-        double perpX = -uy * arrowWidth / 2;
-        double perpY = ux * arrowWidth / 2;
-
+    /**
+     * Writes the SVG polygon element for an arrowhead.
+     */
+    private static void writeSvgArrowheadPolygon(PrintWriter w, ArrowheadGeometry ah, Color color) {
         String points = String.format(Locale.US, "%.2f,%.2f %.2f,%.2f %.2f,%.2f",
-                toX, toY, baseX + perpX, baseY + perpY, baseX - perpX, baseY - perpY);
+                ah.tipX(), ah.tipY(),
+                ah.baseLeftX(), ah.baseLeftY(),
+                ah.baseRightX(), ah.baseRightY());
 
         double opacity = svgOpacity(color);
         if (opacity < 1.0) {

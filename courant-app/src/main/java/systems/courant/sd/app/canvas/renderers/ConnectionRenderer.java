@@ -7,13 +7,17 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
+import systems.courant.sd.app.canvas.ArrowheadGeometry;
 import systems.courant.sd.app.canvas.CausalLinkGeometry;
 import systems.courant.sd.app.canvas.ColorPalette;
 import systems.courant.sd.app.canvas.FlowEndpointCalculator;
 import systems.courant.sd.app.canvas.LayoutMetrics;
+import systems.courant.sd.app.canvas.PolarityLabelLayout;
 
 /**
  * Static methods for drawing material flows and info links between elements.
+ * Geometry computations are delegated to {@link ArrowheadGeometry} and
+ * {@link PolarityLabelLayout} so they can be shared with the SVG exporter.
  */
 public final class ConnectionRenderer {
 
@@ -35,8 +39,8 @@ public final class ConnectionRenderer {
 
     /**
      * Draws a material flow routed through the flow indicator (diamond) position.
-     * The path is: source → diamond → sink, with clouds drawn at endpoints marked as clouds.
-     * All coordinates must be concrete (no NaN) — the caller is responsible for computing
+     * The path is: source -> diamond -> sink, with clouds drawn at endpoints marked as clouds.
+     * All coordinates must be concrete (no NaN) -- the caller is responsible for computing
      * cloud positions via {@link FlowEndpointCalculator#cloudPosition}.
      *
      * @param sourceX       source endpoint X
@@ -89,25 +93,16 @@ public final class ConnectionRenderer {
             }
         }
 
-        // Source → diamond segment (no arrowhead — draw full length)
+        // Source -> diamond segment (no arrowhead -- draw full length)
         gc.setStroke(color);
         gc.setLineWidth(LayoutMetrics.MATERIAL_FLOW_WIDTH);
         gc.setLineDashes();
         gc.strokeLine(pipeSourceX, pipeSourceY, midX, midY);
 
-        // Diamond → sink segment: stop line at arrowhead base
-        double sinkDx = pipeSinkX - midX;
-        double sinkDy = pipeSinkY - midY;
-        double sinkDist = Math.sqrt(sinkDx * sinkDx + sinkDy * sinkDy);
-        double lineEndX = pipeSinkX;
-        double lineEndY = pipeSinkY;
-        if (sinkDist > LayoutMetrics.ARROWHEAD_LENGTH) {
-            double ux = sinkDx / sinkDist;
-            double uy = sinkDy / sinkDist;
-            lineEndX = pipeSinkX - ux * LayoutMetrics.ARROWHEAD_LENGTH;
-            lineEndY = pipeSinkY - uy * LayoutMetrics.ARROWHEAD_LENGTH;
-        }
-        gc.strokeLine(midX, midY, lineEndX, lineEndY);
+        // Diamond -> sink segment: stop line at arrowhead base
+        double[] stop = ArrowheadGeometry.lineStopPoint(
+                midX, midY, pipeSinkX, pipeSinkY, LayoutMetrics.ARROWHEAD_LENGTH);
+        gc.strokeLine(midX, midY, stop[0], stop[1]);
 
         // Arrowhead fills the gap from lineEnd to pipeSink
         drawArrowhead(gc, midX, midY, pipeSinkX, pipeSinkY,
@@ -122,22 +117,13 @@ public final class ConnectionRenderer {
                                     double fromX, double fromY,
                                     double toX, double toY) {
         // Stop line at arrowhead base so it doesn't extend behind the arrowhead
-        double dx = toX - fromX;
-        double dy = toY - fromY;
-        double dist = Math.sqrt(dx * dx + dy * dy);
-        double lineToX = toX;
-        double lineToY = toY;
-        if (dist > LayoutMetrics.INFO_ARROWHEAD_LENGTH) {
-            double ux = dx / dist;
-            double uy = dy / dist;
-            lineToX = toX - ux * LayoutMetrics.INFO_ARROWHEAD_LENGTH;
-            lineToY = toY - uy * LayoutMetrics.INFO_ARROWHEAD_LENGTH;
-        }
+        double[] stop = ArrowheadGeometry.lineStopPoint(
+                fromX, fromY, toX, toY, LayoutMetrics.INFO_ARROWHEAD_LENGTH);
 
         gc.setStroke(ColorPalette.INFO_LINK);
         gc.setLineWidth(LayoutMetrics.INFO_LINK_WIDTH);
         gc.setLineDashes(LayoutMetrics.INFO_LINK_DASH_LENGTH, LayoutMetrics.INFO_LINK_DASH_GAP);
-        gc.strokeLine(fromX, fromY, lineToX, lineToY);
+        gc.strokeLine(fromX, fromY, stop[0], stop[1]);
         gc.setLineDashes();
 
         drawArrowhead(gc, fromX, fromY, toX, toY,
@@ -146,7 +132,7 @@ public final class ConnectionRenderer {
     }
 
     /**
-     * Draws a causal link as a quadratic Bézier curve with arrowhead and polarity label.
+     * Draws a causal link as a quadratic Bezier curve with arrowhead and polarity label.
      */
     public static void drawCausalLink(GraphicsContext gc,
                                       double fromX, double fromY,
@@ -177,46 +163,29 @@ public final class ConnectionRenderer {
         gc.setLineDashes();
 
         // Arrowhead oriented along the curve tangent at the tip
-        drawArrowheadFromTangent(gc, tipX, tipY, tanX, tanY,
-                LayoutMetrics.CAUSAL_ARROWHEAD_LENGTH, LayoutMetrics.CAUSAL_ARROWHEAD_WIDTH,
-                linkColor);
+        ArrowheadGeometry arrowhead = ArrowheadGeometry.fromTangent(tipX, tipY, tanX, tanY,
+                LayoutMetrics.CAUSAL_ARROWHEAD_LENGTH, LayoutMetrics.CAUSAL_ARROWHEAD_WIDTH);
+        if (arrowhead != null) {
+            fillArrowhead(gc, arrowhead, linkColor);
+        }
 
         // Polarity label near the arrowhead, offset perpendicular to the curve tangent
-        double dx = toX - fromX;
-        double dy = toY - fromY;
-        double dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist > 1) {
-            Color labelColor = switch (polarity) {
-                case POSITIVE -> ColorPalette.CAUSAL_POSITIVE;
-                case NEGATIVE -> ColorPalette.CAUSAL_NEGATIVE;
-                case UNKNOWN -> ColorPalette.CAUSAL_UNKNOWN;
-            };
-
-            // Place label at t ≈ 0.8 on the curve, offset perpendicular to the tangent
-            double labelT = 0.8;
-            double[] labelPt = CausalLinkGeometry.evaluate(fromX, fromY, cp.x(), cp.y(), toX, toY, labelT);
-            double[] labelTan = CausalLinkGeometry.tangent(fromX, fromY, cp.x(), cp.y(), toX, toY, labelT);
-            double tanDist = Math.sqrt(labelTan[0] * labelTan[0] + labelTan[1] * labelTan[1]);
-            if (tanDist > 0) {
-                double perpX = -labelTan[1] / tanDist;
-                double perpY = labelTan[0] / tanDist;
-                double perpOffset = 12;
-                double labelX = labelPt[0] + perpX * perpOffset;
-                double labelY = labelPt[1] + perpY * perpOffset;
-
-                Font labelFont = polarity == CausalLinkDef.Polarity.UNKNOWN
-                        ? LayoutMetrics.CAUSAL_UNKNOWN_FONT : LayoutMetrics.CAUSAL_POLARITY_FONT;
-                gc.setFill(labelColor);
-                gc.setFont(labelFont);
-                gc.setTextAlign(TextAlignment.CENTER);
-                gc.setTextBaseline(VPos.CENTER);
-                gc.fillText(polarity.symbol(), labelX, labelY);
-            }
+        PolarityLabelLayout labelLayout = PolarityLabelLayout.forQuadratic(
+                fromX, fromY, cp.x(), cp.y(), toX, toY);
+        if (labelLayout.valid()) {
+            Color labelColor = PolarityLabelLayout.colorFor(polarity);
+            Font labelFont = polarity == CausalLinkDef.Polarity.UNKNOWN
+                    ? LayoutMetrics.CAUSAL_UNKNOWN_FONT : LayoutMetrics.CAUSAL_POLARITY_FONT;
+            gc.setFill(labelColor);
+            gc.setFont(labelFont);
+            gc.setTextAlign(TextAlignment.CENTER);
+            gc.setTextBaseline(VPos.CENTER);
+            gc.fillText(polarity.symbol(), labelLayout.x(), labelLayout.y());
         }
     }
 
     /**
-     * Draws a self-loop causal link as a cubic Bézier curve.
+     * Draws a self-loop causal link as a cubic Bezier curve.
      */
     public static void drawCausalLinkSelfLoop(GraphicsContext gc,
                                                double[] loopPts,
@@ -250,52 +219,30 @@ public final class ConnectionRenderer {
         // Arrowhead at the end
         double[] tan = CausalLinkGeometry.tangentCubic(
                 startX, startY, cp1X, cp1Y, cp2X, cp2Y, endX, endY, 1.0);
-        drawArrowheadFromTangent(gc, endX, endY, tan[0], tan[1],
-                LayoutMetrics.CAUSAL_ARROWHEAD_LENGTH, LayoutMetrics.CAUSAL_ARROWHEAD_WIDTH,
-                linkColor);
+        ArrowheadGeometry arrowhead = ArrowheadGeometry.fromTangent(endX, endY, tan[0], tan[1],
+                LayoutMetrics.CAUSAL_ARROWHEAD_LENGTH, LayoutMetrics.CAUSAL_ARROWHEAD_WIDTH);
+        if (arrowhead != null) {
+            fillArrowhead(gc, arrowhead, linkColor);
+        }
 
         // Polarity label at the top of the loop
-        double[] midPt = CausalLinkGeometry.evaluateCubic(
-                startX, startY, cp1X, cp1Y, cp2X, cp2Y, endX, endY, 0.5);
-        Color labelColor = switch (polarity) {
-            case POSITIVE -> ColorPalette.CAUSAL_POSITIVE;
-            case NEGATIVE -> ColorPalette.CAUSAL_NEGATIVE;
-            case UNKNOWN -> ColorPalette.CAUSAL_UNKNOWN;
-        };
+        PolarityLabelLayout labelLayout = PolarityLabelLayout.forSelfLoop(loopPts);
+        Color labelColor = PolarityLabelLayout.colorFor(polarity);
         Font labelFont = polarity == CausalLinkDef.Polarity.UNKNOWN
                 ? LayoutMetrics.CAUSAL_UNKNOWN_FONT : LayoutMetrics.CAUSAL_POLARITY_FONT;
         gc.setFill(labelColor);
         gc.setFont(labelFont);
         gc.setTextAlign(TextAlignment.CENTER);
         gc.setTextBaseline(VPos.CENTER);
-        gc.fillText(polarity.symbol(), midPt[0], midPt[1] - 10);
+        gc.fillText(polarity.symbol(), labelLayout.x(), labelLayout.y());
     }
 
     /**
-     * Draws a filled arrowhead at (tipX,tipY) oriented along the given tangent vector.
+     * Fills a pre-computed arrowhead triangle on the graphics context.
      */
-    private static void drawArrowheadFromTangent(GraphicsContext gc,
-                                                  double tipX, double tipY,
-                                                  double tanX, double tanY,
-                                                  double length, double width,
-                                                  javafx.scene.paint.Color color) {
-        double dist = Math.sqrt(tanX * tanX + tanY * tanY);
-        if (dist < 1e-9) {
-            return;
-        }
-
-        double ux = tanX / dist;
-        double uy = tanY / dist;
-
-        double baseX = tipX - ux * length;
-        double baseY = tipY - uy * length;
-
-        double perpX = -uy * width / 2;
-        double perpY = ux * width / 2;
-
-        double[] xPoints = {tipX, baseX + perpX, baseX - perpX};
-        double[] yPoints = {tipY, baseY + perpY, baseY - perpY};
-
+    private static void fillArrowhead(GraphicsContext gc, ArrowheadGeometry ah, Color color) {
+        double[] xPoints = {ah.tipX(), ah.baseLeftX(), ah.baseRightX()};
+        double[] yPoints = {ah.tipY(), ah.baseLeftY(), ah.baseRightY()};
         gc.setFill(color);
         gc.fillPolygon(xPoints, yPoints, 3);
     }
@@ -308,30 +255,11 @@ public final class ConnectionRenderer {
                                       double fromX, double fromY,
                                       double toX, double toY,
                                       double length, double width,
-                                      javafx.scene.paint.Color color) {
-        double dx = toX - fromX;
-        double dy = toY - fromY;
-        double dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < 1) {
-            return;
+                                      Color color) {
+        ArrowheadGeometry ah = ArrowheadGeometry.fromLine(fromX, fromY, toX, toY, length, width);
+        if (ah != null) {
+            fillArrowhead(gc, ah, color);
         }
-
-        double ux = dx / dist;
-        double uy = dy / dist;
-
-        // Base of the arrowhead
-        double baseX = toX - ux * length;
-        double baseY = toY - uy * length;
-
-        // Perpendicular offset
-        double perpX = -uy * width / 2;
-        double perpY = ux * width / 2;
-
-        double[] xPoints = {toX, baseX + perpX, baseX - perpX};
-        double[] yPoints = {toY, baseY + perpY, baseY - perpY};
-
-        gc.setFill(color);
-        gc.fillPolygon(xPoints, yPoints, 3);
     }
 
     /**
