@@ -389,7 +389,7 @@ public class LookupForm implements ElementForm {
                     lineSeries.getData().add(new XYChart.Data<>(x, function.value(x)));
                 }
                 return;
-            } catch (Exception ignored) {
+            } catch (IllegalArgumentException ignored) {
                 // Fall back to linear if spline fails (e.g. near-duplicate x values)
                 lineSeries.getData().clear();
             }
