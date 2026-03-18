@@ -25,7 +25,7 @@ class ModelCanvasUndoFxTest {
     void start(Stage stage) {
         canvas = new ModelCanvas(new Clipboard());
         undoManager = new UndoManager();
-        canvas.setUndoManager(undoManager);
+        canvas.undo().setUndoManager(undoManager);
         stage.setScene(new Scene(new StackPane(canvas), 800, 600));
         stage.show();
     }
@@ -55,8 +55,8 @@ class ModelCanvasUndoFxTest {
     void shouldNotPushUndoOnRejectedFlowSelfLoop() {
         loadTwoStocks();
 
-        canvas.handleFlowClick(100, 200); // Stock 1 as source
-        canvas.handleFlowClick(100, 200); // Stock 1 again → rejected
+        canvas.elements().handleFlowClick(100, 200); // Stock 1 as source
+        canvas.elements().handleFlowClick(100, 200); // Stock 1 again → rejected
 
         assertThat(undoManager.canUndo()).isFalse();
         assertThat(undoManager.undoLabels()).isEmpty();
@@ -67,8 +67,8 @@ class ModelCanvasUndoFxTest {
     void shouldNotPushUndoOnRejectedFlowCloudToCloud() {
         loadTwoStocks();
 
-        canvas.handleFlowClick(250, 100); // empty space → cloud source
-        canvas.handleFlowClick(300, 300); // empty space → cloud sink → rejected
+        canvas.elements().handleFlowClick(250, 100); // empty space → cloud source
+        canvas.elements().handleFlowClick(300, 300); // empty space → cloud sink → rejected
 
         assertThat(undoManager.canUndo()).isFalse();
         assertThat(undoManager.undoLabels()).isEmpty();
@@ -79,8 +79,8 @@ class ModelCanvasUndoFxTest {
     void shouldPushUndoOnSuccessfulFlowCreation() {
         loadTwoStocks();
 
-        canvas.handleFlowClick(100, 200); // Stock 1 as source
-        canvas.handleFlowClick(400, 200); // Stock 2 as sink → success
+        canvas.elements().handleFlowClick(100, 200); // Stock 1 as source
+        canvas.elements().handleFlowClick(400, 200); // Stock 2 as sink → success
 
         assertThat(undoManager.canUndo()).isTrue();
         assertThat(undoManager.undoLabels()).containsExactly("Add flow");
@@ -91,8 +91,8 @@ class ModelCanvasUndoFxTest {
     void shouldNotPushUndoOnRejectedCausalLinkNoTarget() {
         loadTwoCldVariables();
 
-        canvas.handleCausalLinkClick(100, 200); // Variable 1 as source
-        canvas.handleCausalLinkClick(300, 300); // empty space → rejected
+        canvas.elements().handleCausalLinkClick(100, 200); // Variable 1 as source
+        canvas.elements().handleCausalLinkClick(300, 300); // empty space → rejected
 
         assertThat(undoManager.canUndo()).isFalse();
         assertThat(undoManager.undoLabels()).isEmpty();
@@ -104,13 +104,13 @@ class ModelCanvasUndoFxTest {
         loadTwoCldVariables();
 
         // Create first link successfully
-        canvas.handleCausalLinkClick(100, 200);
-        canvas.handleCausalLinkClick(400, 200);
+        canvas.elements().handleCausalLinkClick(100, 200);
+        canvas.elements().handleCausalLinkClick(400, 200);
         int undoCountAfterFirst = undoManager.undoLabels().size();
 
         // Try to create duplicate link
-        canvas.handleCausalLinkClick(100, 200);
-        canvas.handleCausalLinkClick(400, 200);
+        canvas.elements().handleCausalLinkClick(100, 200);
+        canvas.elements().handleCausalLinkClick(400, 200);
 
         assertThat(undoManager.undoLabels()).hasSize(undoCountAfterFirst);
     }
@@ -120,8 +120,8 @@ class ModelCanvasUndoFxTest {
     void shouldPushUndoOnSuccessfulCausalLinkCreation() {
         loadTwoCldVariables();
 
-        canvas.handleCausalLinkClick(100, 200); // Variable 1 as source
-        canvas.handleCausalLinkClick(400, 200); // Variable 2 as target → success
+        canvas.elements().handleCausalLinkClick(100, 200); // Variable 1 as source
+        canvas.elements().handleCausalLinkClick(400, 200); // Variable 2 as target → success
 
         assertThat(undoManager.canUndo()).isTrue();
         assertThat(undoManager.undoLabels()).containsExactly("Add causal link");
@@ -132,7 +132,7 @@ class ModelCanvasUndoFxTest {
     void shouldPushUndoOnRename() {
         loadTwoStocks();
 
-        canvas.renameElement("Stock 1", "Population");
+        canvas.elements().renameElement("Stock 1", "Population");
 
         assertThat(undoManager.canUndo()).isTrue();
         assertThat(undoManager.undoLabels()).containsExactly("Rename Stock 1 → Population");
@@ -143,7 +143,7 @@ class ModelCanvasUndoFxTest {
     void shouldNotPushUndoOnRejectedRenameDuplicate() {
         loadTwoStocks();
 
-        canvas.renameElement("Stock 1", "Stock 2"); // already exists → rejected
+        canvas.elements().renameElement("Stock 1", "Stock 2"); // already exists → rejected
 
         assertThat(undoManager.canUndo()).isFalse();
         assertThat(undoManager.undoLabels()).isEmpty();
@@ -154,7 +154,7 @@ class ModelCanvasUndoFxTest {
     void shouldNotPushUndoOnNoOpRename() {
         loadTwoStocks();
 
-        canvas.renameElement("Stock 1", "Stock 1"); // no-op
+        canvas.elements().renameElement("Stock 1", "Stock 1"); // no-op
 
         assertThat(undoManager.canUndo()).isFalse();
         assertThat(undoManager.undoLabels()).isEmpty();

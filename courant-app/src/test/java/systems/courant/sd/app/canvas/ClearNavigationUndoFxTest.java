@@ -33,7 +33,7 @@ class ClearNavigationUndoFxTest {
     void start(Stage stage) {
         canvas = new ModelCanvas(new Clipboard());
         rootUndoManager = new UndoManager();
-        canvas.setUndoManager(rootUndoManager);
+        canvas.undo().setUndoManager(rootUndoManager);
         stage.setScene(new Scene(new StackPane(canvas), 800, 600));
         stage.show();
     }
@@ -70,16 +70,16 @@ class ClearNavigationUndoFxTest {
     @DisplayName("clearNavigation after drill-in should close module UndoManager and restore root")
     void shouldCloseModuleUndoManagerOnClear() {
         loadNestedModules();
-        canvas.drillInto("Module 1");
+        canvas.navigation().drillInto("Module 1");
 
-        assertThat(canvas.isInsideModule()).isTrue();
-        UndoManager moduleUm = canvas.getUndoManager();
+        assertThat(canvas.navigation().isInsideModule()).isTrue();
+        UndoManager moduleUm = canvas.undo().getUndoManager();
         assertThat(moduleUm).isNotSameAs(rootUndoManager);
 
-        canvas.clearNavigation();
+        canvas.navigation().clearNavigation();
 
         assertThat(moduleUm.isClosed()).isTrue();
-        assertThat(canvas.getUndoManager()).isSameAs(rootUndoManager);
+        assertThat(canvas.undo().getUndoManager()).isSameAs(rootUndoManager);
         assertThat(rootUndoManager.isClosed()).isFalse();
     }
 
@@ -87,20 +87,20 @@ class ClearNavigationUndoFxTest {
     @DisplayName("clearNavigation after multi-level drill-in should close all module UndoManagers")
     void shouldCloseAllModuleUndoManagersOnClear() {
         loadNestedModules();
-        canvas.drillInto("Module 1");
-        UndoManager level1Um = canvas.getUndoManager();
+        canvas.navigation().drillInto("Module 1");
+        UndoManager level1Um = canvas.undo().getUndoManager();
 
-        canvas.drillInto("Module 1");
-        UndoManager level2Um = canvas.getUndoManager();
+        canvas.navigation().drillInto("Module 1");
+        UndoManager level2Um = canvas.undo().getUndoManager();
 
         assertThat(level1Um).isNotSameAs(rootUndoManager);
         assertThat(level2Um).isNotSameAs(level1Um);
 
-        canvas.clearNavigation();
+        canvas.navigation().clearNavigation();
 
         assertThat(level2Um.isClosed()).isTrue();
         assertThat(level1Um.isClosed()).isTrue();
-        assertThat(canvas.getUndoManager()).isSameAs(rootUndoManager);
+        assertThat(canvas.undo().getUndoManager()).isSameAs(rootUndoManager);
         assertThat(rootUndoManager.isClosed()).isFalse();
     }
 
@@ -109,9 +109,9 @@ class ClearNavigationUndoFxTest {
     void shouldNotCloseRootUndoManagerWhenAtRoot() {
         loadNestedModules();
 
-        canvas.clearNavigation();
+        canvas.navigation().clearNavigation();
 
-        assertThat(canvas.getUndoManager()).isSameAs(rootUndoManager);
+        assertThat(canvas.undo().getUndoManager()).isSameAs(rootUndoManager);
         assertThat(rootUndoManager.isClosed()).isFalse();
     }
 }

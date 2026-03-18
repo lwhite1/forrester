@@ -260,9 +260,9 @@ final class InputDispatcher {
             return false;
         }
         if (canvasState.getType(hit).orElse(null) == ElementType.MODULE) {
-            canvas.drillInto(hit);
+            canvas.navigation().drillInto(hit);
         } else {
-            canvas.startInlineEdit(hit);
+            canvas.elements().startInlineEdit(hit);
         }
         event.consume();
         return true;
@@ -323,11 +323,11 @@ final class InputDispatcher {
                                               CanvasToolBar.Tool activeTool,
                                               double worldX, double worldY) {
         if (activeTool == CanvasToolBar.Tool.PLACE_FLOW) {
-            canvas.handleFlowClick(worldX, worldY);
+            canvas.elements().handleFlowClick(worldX, worldY);
         } else if (activeTool == CanvasToolBar.Tool.PLACE_CAUSAL_LINK) {
-            canvas.handleCausalLinkClick(worldX, worldY);
+            canvas.elements().handleCausalLinkClick(worldX, worldY);
         } else if (activeTool == CanvasToolBar.Tool.PLACE_INFO_LINK) {
-            canvas.handleInfoLinkClick(worldX, worldY);
+            canvas.elements().handleInfoLinkClick(worldX, worldY);
         } else {
             return false;
         }
@@ -348,7 +348,7 @@ final class InputDispatcher {
         if (hit != null) {
             return false;
         }
-        canvas.createElementAt(worldX, worldY);
+        canvas.elements().createElementAt(worldX, worldY);
         updateCursor(canvas);
         event.consume();
         return true;
@@ -507,7 +507,7 @@ final class InputDispatcher {
                 }
             } else {
                 String flowLabel = reattachController.flowName();
-                UndoManager um = canvas.getUndoManager();
+                UndoManager um = canvas.undo().getUndoManager();
                 boolean reconnected = reattachController.complete(
                         viewport.toWorldX(event.getX()),
                         viewport.toWorldY(event.getY()),
@@ -602,9 +602,9 @@ final class InputDispatcher {
         if (hit != null) {
             ElementType hitType = canvasState.getType(hit).orElse(null);
             if (hitType == ElementType.MODULE || hitType == ElementType.CLD_VARIABLE) {
-                canvas.showElementContextMenu(hit, sx, sy);
+                canvas.elements().showElementContextMenu(hit, sx, sy);
             } else {
-                canvas.showGeneralElementContextMenu(hit, sx, sy);
+                canvas.elements().showGeneralElementContextMenu(hit, sx, sy);
             }
             updateCursor(canvas);
             return true;
@@ -618,7 +618,7 @@ final class InputDispatcher {
         ConnectionId causalHit = HitTester.hitTestCausalLink(canvasState,
                 editor.getCausalLinks(), worldX, worldY, hideAux);
         if (causalHit != null) {
-            canvas.showCausalLinkContextMenu(causalHit, sx, sy);
+            canvas.elements().showCausalLinkContextMenu(causalHit, sx, sy);
             updateCursor(canvas);
             return true;
         }
@@ -627,13 +627,13 @@ final class InputDispatcher {
         ConnectionId infoHit = HitTester.hitTestInfoLink(canvasState,
                 canvas.getConnectors(), worldX, worldY, hideAux);
         if (infoHit != null) {
-            canvas.showInfoLinkContextMenu(infoHit, sx, sy);
+            canvas.elements().showInfoLinkContextMenu(infoHit, sx, sy);
             updateCursor(canvas);
             return true;
         }
 
         // 4. Empty canvas
-        canvas.showCanvasContextMenu(worldX, worldY, sx, sy);
+        canvas.elements().showCanvasContextMenu(worldX, worldY, sx, sy);
         updateCursor(canvas);
         return true;
     }
@@ -659,19 +659,19 @@ final class InputDispatcher {
             updateCursor(canvas);
             event.consume();
         } else if (event.getCode() == KeyCode.DELETE || event.getCode() == KeyCode.BACK_SPACE) {
-            canvas.deleteSelectedOrConnection();
+            canvas.elements().deleteSelectedOrConnection();
             event.consume();
         } else if (event.isShortcutDown() && event.getCode() == KeyCode.A) {
-            canvas.selectAll();
+            canvas.elements().selectAll();
             event.consume();
         } else if (event.isShortcutDown() && event.getCode() == KeyCode.C) {
-            canvas.copySelection();
+            canvas.elements().copySelection();
             event.consume();
         } else if (event.isShortcutDown() && event.getCode() == KeyCode.X) {
-            canvas.cutSelection();
+            canvas.elements().cutSelection();
             event.consume();
         } else if (event.isShortcutDown() && event.getCode() == KeyCode.V) {
-            canvas.pasteClipboard();
+            canvas.elements().pasteClipboard();
             event.consume();
         } else if (event.isShortcutDown()
                 && (event.getCode() == KeyCode.PLUS || event.getCode() == KeyCode.EQUALS
@@ -698,14 +698,14 @@ final class InputDispatcher {
                 case DIGIT9 -> { canvas.switchTool(CanvasToolBar.Tool.PLACE_COMMENT); event.consume(); }
                 case DIGIT0 -> { canvas.switchTool(CanvasToolBar.Tool.PLACE_INFO_LINK); event.consume(); }
                 case OPEN_BRACKET -> {
-                    if (canvas.isLoopHighlightActive()) {
-                        canvas.stepLoopBack();
+                    if (canvas.analysis().isLoopHighlightActive()) {
+                        canvas.analysis().stepLoopBack();
                         event.consume();
                     }
                 }
                 case CLOSE_BRACKET -> {
-                    if (canvas.isLoopHighlightActive()) {
-                        canvas.stepLoopForward();
+                    if (canvas.analysis().isLoopHighlightActive()) {
+                        canvas.analysis().stepLoopForward();
                         event.consume();
                     }
                 }
@@ -748,11 +748,11 @@ final class InputDispatcher {
 
         CanvasToolBar.Tool activeTool = canvas.getActiveTool();
         if (activeTool == CanvasToolBar.Tool.PLACE_FLOW) {
-            canvas.handleFlowClick(worldX, worldY);
+            canvas.elements().handleFlowClick(worldX, worldY);
         } else if (activeTool == CanvasToolBar.Tool.PLACE_CAUSAL_LINK) {
-            canvas.handleCausalLinkClick(worldX, worldY);
+            canvas.elements().handleCausalLinkClick(worldX, worldY);
         } else if (activeTool == CanvasToolBar.Tool.PLACE_INFO_LINK) {
-            canvas.handleInfoLinkClick(worldX, worldY);
+            canvas.elements().handleInfoLinkClick(worldX, worldY);
         }
         updateCursor(canvas);
     }
@@ -797,11 +797,11 @@ final class InputDispatcher {
     }
 
     private void handleEscape(ModelCanvas canvas) {
-        if (canvas.isTraceActive()) {
-            canvas.clearTrace();
+        if (canvas.analysis().isTraceActive()) {
+            canvas.analysis().clearTrace();
             canvas.requestRedraw();
         } else if (resizeController.isActive()) {
-            resizeController.cancel(canvas::performUndo);
+            resizeController.cancel(canvas.undo()::performUndo);
             canvas.requestRedraw();
         } else if (marqueeController.isActive()) {
             marqueeController.cancel(canvas.canvasState());
@@ -831,8 +831,8 @@ final class InputDispatcher {
             canvas.canvasState().clearSelection();
             canvas.requestRedraw();
             canvas.fireStatusChanged();
-        } else if (canvas.isInsideModule()) {
-            canvas.navigateBack();
+        } else if (canvas.navigation().isInsideModule()) {
+            canvas.navigation().navigateBack();
         }
         updateCursor(canvas);
     }

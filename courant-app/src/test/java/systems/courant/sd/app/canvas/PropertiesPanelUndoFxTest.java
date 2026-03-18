@@ -32,7 +32,7 @@ class PropertiesPanelUndoFxTest {
     void start(Stage stage) {
         canvas = new ModelCanvas(new Clipboard());
         undoManager = new UndoManager();
-        canvas.setUndoManager(undoManager);
+        canvas.undo().setUndoManager(undoManager);
         panel = new PropertiesPanel();
 
         editor = new ModelEditor();
@@ -132,8 +132,8 @@ class PropertiesPanelUndoFxTest {
             state.addElement("Variable 2", ElementType.CLD_VARIABLE, 400, 200);
             canvas.setModel(editor, state.toViewDef());
 
-            canvas.handleCausalLinkClick(100, 200);
-            canvas.handleCausalLinkClick(400, 200);
+            canvas.elements().handleCausalLinkClick(100, 200);
+            canvas.elements().handleCausalLinkClick(400, 200);
 
             canvas.setSelectedConnection(
                     new ConnectionId("Variable 1", "Variable 2"), true);

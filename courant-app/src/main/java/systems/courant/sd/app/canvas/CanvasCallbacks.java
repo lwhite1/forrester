@@ -22,7 +22,7 @@ final class CanvasCallbacks implements InlineEditController.Callbacks,
 
     @Override
     public void applyRename(String oldName, String newName) {
-        canvas.applyRename(oldName, newName);
+        canvas.elements().applyRename(oldName, newName);
     }
 
     @Override
@@ -57,32 +57,32 @@ final class CanvasCallbacks implements InlineEditController.Callbacks,
 
     @Override
     public void startInlineEdit(String name) {
-        canvas.startInlineEdit(name);
+        canvas.elements().startInlineEdit(name);
     }
 
     @Override
     public void deleteSelectedElements() {
-        canvas.deleteSelectedElements();
+        canvas.elements().deleteSelectedElements();
     }
 
     @Override
     public void cutSelection() {
-        canvas.cutSelection();
+        canvas.elements().cutSelection();
     }
 
     @Override
     public void copySelection() {
-        canvas.copySelection();
+        canvas.elements().copySelection();
     }
 
     @Override
     public void pasteClipboard() {
-        canvas.pasteClipboard();
+        canvas.elements().pasteClipboard();
     }
 
     @Override
     public void selectAll() {
-        canvas.selectAll();
+        canvas.elements().selectAll();
     }
 
     @Override
@@ -122,56 +122,56 @@ final class CanvasCallbacks implements InlineEditController.Callbacks,
 
     @Override
     public String createElementAt(double wx, double wy, CanvasToolBar.Tool tool) {
-        return canvas.createElementAtForCallback(wx, wy, tool);
+        return canvas.elements().createElementAtForCallback(wx, wy, tool);
     }
 
     @Override
     public boolean deleteConnection(ConnectionId conn, boolean isCausal) {
-        return canvas.deleteConnectionForCallback(conn, isCausal);
+        return canvas.elements().deleteConnectionForCallback(conn, isCausal);
     }
 
     @Override
     public boolean canPaste() {
-        return canvas.canPasteForCallback();
+        return canvas.elements().canPasteForCallback();
     }
 
     @Override
     public void classifyCldVariable(String name, ElementType type) {
-        canvas.classifyCldVariableInternal(name, type);
+        canvas.elements().classifyCldVariable(name, type);
     }
 
     @Override
     public void drillInto(String moduleName) {
-        canvas.drillInto(moduleName);
+        canvas.navigation().drillInto(moduleName);
     }
 
     @Override
     public void openDefinePortsDialog(String moduleName) {
-        canvas.openDefinePortsDialogInternal(moduleName);
+        canvas.navigation().openDefinePortsDialog(moduleName);
     }
 
     @Override
     public void openBindingsDialog(String moduleName) {
-        canvas.openBindingsDialogInternal(moduleName);
+        canvas.navigation().openBindingsDialog(moduleName);
     }
 
     @Override
     public void traceUpstream(String name) {
-        canvas.traceUpstream(name);
+        canvas.analysis().traceUpstream(name);
     }
 
     @Override
     public void traceDownstream(String name) {
-        canvas.traceDownstream(name);
+        canvas.analysis().traceDownstream(name);
     }
 
     @Override
     public void showWhereUsed(String name) {
-        canvas.showWhereUsed(name);
+        canvas.analysis().showWhereUsed(name);
     }
 
     @Override
     public void showUses(String name) {
-        canvas.showUses(name);
+        canvas.analysis().showUses(name);
     }
 }

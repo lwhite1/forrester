@@ -73,9 +73,9 @@ public final class HelpContextResolver {
                 isEquationFieldFocused(focusOwner),
                 selectedType,
                 canvas.getActiveTool(),
-                canvas.isLoopHighlightActive(),
-                canvas.isTraceActive(),
-                canvas.isInsideModule(),
+                canvas.analysis().isLoopHighlightActive(),
+                canvas.analysis().isTraceActive(),
+                canvas.navigation().isInsideModule(),
                 dashboardSelected);
     }
 

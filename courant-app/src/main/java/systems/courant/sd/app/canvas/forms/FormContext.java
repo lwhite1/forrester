@@ -515,7 +515,7 @@ public class FormContext {
             nameField.setText(oldName);
             return;
         }
-        canvas.renameElement(oldName, newName);
+        canvas.elements().renameElement(oldName, newName);
         elementName = newName;
     }
 }

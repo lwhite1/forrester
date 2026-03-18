@@ -52,7 +52,7 @@ class ModelCanvasInvalidateAnalysisFxTest {
     @Start
     void start(Stage stage) {
         canvas = new ModelCanvas(new Clipboard());
-        canvas.setUndoManager(new UndoManager());
+        canvas.undo().setUndoManager(new UndoManager());
         stage.setScene(new Scene(new StackPane(canvas), 800, 600));
         stage.show();
     }
@@ -113,8 +113,8 @@ class ModelCanvasInvalidateAnalysisFxTest {
         canvas.setModel(editor, state.toViewDef());
 
         // Validation should be computed (stock with no flow should have issues)
-        assertThat(canvas.getLastValidationResult()).isNotNull();
-        assertThat(canvas.getLastValidationResult().issues()).isNotNull();
+        assertThat(canvas.analysis().getLastValidationResult()).isNotNull();
+        assertThat(canvas.analysis().getLastValidationResult().issues()).isNotNull();
     }
 
     @Test
@@ -122,7 +122,7 @@ class ModelCanvasInvalidateAnalysisFxTest {
     void shouldHandleNullEditorGracefully() {
         // Canvas has no editor set -- calling methods that would trigger
         // invalidateAnalysis should not throw
-        assertThat(canvas.getLastValidationResult()).isNotNull();
-        assertThat(canvas.getLastValidationResult().issues()).isEmpty();
+        assertThat(canvas.analysis().getLastValidationResult()).isNotNull();
+        assertThat(canvas.analysis().getLastValidationResult().issues()).isEmpty();
     }
 }
