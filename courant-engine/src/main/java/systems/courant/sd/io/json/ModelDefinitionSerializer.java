@@ -130,8 +130,10 @@ public class ModelDefinitionSerializer {
             throw new IOException("JSON file exceeds "
                     + (MAX_FILE_SIZE / (1024 * 1024)) + " MB: " + path);
         }
-        String json = Files.readString(path);
-        return fromJson(json);
+        try (var in = Files.newInputStream(path)) {
+            JsonNode root = mapper.readTree(in);
+            return fromJsonNode(root);
+        }
     }
 
     // === Serialization ===
