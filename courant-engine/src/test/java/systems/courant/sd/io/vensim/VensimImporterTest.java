@@ -26,6 +26,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @DisplayName("VensimImporter")
 class VensimImporterTest {
@@ -3003,6 +3004,25 @@ class VensimImporterTest {
             java.nio.file.Files.deleteIfExists(secretFile);
             java.nio.file.Files.deleteIfExists(mdlPath);
             java.nio.file.Files.deleteIfExists(modelDir);
+            java.nio.file.Files.deleteIfExists(tempDir);
+        }
+    }
+
+    @Nested
+    @DisplayName("Binary file rejection")
+    class BinaryFileRejection {
+
+        @Test
+        void shouldRejectBinaryFileWithNulBytes() throws IOException {
+            Path tempDir = java.nio.file.Files.createTempDirectory("vensim-test");
+            Path binaryFile = tempDir.resolve("corrupt.mdl");
+            java.nio.file.Files.write(binaryFile, new byte[]{0x50, 0x4B, 0x00, 0x04, 0x00, 0x00});
+
+            assertThatThrownBy(() -> importer.importModel(binaryFile))
+                    .isInstanceOf(IOException.class)
+                    .hasMessageContaining("binary");
+
+            java.nio.file.Files.deleteIfExists(binaryFile);
             java.nio.file.Files.deleteIfExists(tempDir);
         }
     }
