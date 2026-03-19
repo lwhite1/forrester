@@ -2,7 +2,6 @@ package systems.courant.sd.model;
 
 import systems.courant.sd.measure.Quantity;
 import systems.courant.sd.measure.Unit;
-
 import com.carrotsearch.hppc.DoubleArrayList;
 import com.google.common.base.Preconditions;
 
@@ -22,8 +21,8 @@ public class Stock extends Element {
 
     private final Set<Flow> inflows = new LinkedHashSet<>();
     private final Set<Flow> outflows = new LinkedHashSet<>();
-
     private final DoubleArrayList history = new DoubleArrayList();
+
     private final Unit unit;
     private final double initialAmount;
     private double value;
@@ -164,7 +163,7 @@ public class Stock extends Element {
     }
 
     /**
-     * Records the current value of this stock in its history for the current time step.
+     * Records the current value in this stock's history for the current time step.
      */
     public void recordValue() {
         history.add(value);
