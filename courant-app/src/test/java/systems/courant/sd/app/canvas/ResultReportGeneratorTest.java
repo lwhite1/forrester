@@ -6,6 +6,9 @@ import systems.courant.sd.model.Flow;
 import systems.courant.sd.model.Model;
 import systems.courant.sd.model.Stock;
 import systems.courant.sd.model.Variable;
+import systems.courant.sd.model.graph.BehaviorClassification;
+import systems.courant.sd.model.graph.FeedbackAnalysis;
+import systems.courant.sd.model.graph.LoopDominanceAnalysis;
 import systems.courant.sd.sweep.MonteCarloResult;
 import systems.courant.sd.sweep.OptimizationResult;
 import systems.courant.sd.sweep.RunResult;
@@ -656,6 +659,193 @@ class ResultReportGeneratorTest {
         }
     }
 
+    // ── Phase 4: Behavior Classification ────────────────────────────────
+
+    @Nested
+    @DisplayName("behavior classification section")
+    class BehaviorSection {
+
+        @Test
+        @DisplayName("should contain behavior badges for each variable")
+        void shouldContainBehaviorBadges() {
+            List<BehaviorClassification.Result> behaviors = List.of(
+                    new BehaviorClassification.Result("Population",
+                            BehaviorClassification.Mode.EXPONENTIAL_GROWTH),
+                    new BehaviorClassification.Result("Resources",
+                            BehaviorClassification.Mode.GOAL_SEEKING));
+            StringBuilder html = new StringBuilder();
+            ResultReportGenerator.writeBehaviorSection(html, behaviors);
+            String output = html.toString();
+
+            assertThat(output).contains("Behavior Mode Classification");
+            assertThat(output).contains("Population");
+            assertThat(output).contains("Exponential Growth");
+            assertThat(output).contains("behavior-badge");
+            assertThat(output).contains("Resources");
+            assertThat(output).contains("Goal-Seeking");
+        }
+
+        @Test
+        @DisplayName("should use correct CSS class for each mode")
+        void shouldUseCorrectBadgeClasses() {
+            List<BehaviorClassification.Result> behaviors = List.of(
+                    new BehaviorClassification.Result("A",
+                            BehaviorClassification.Mode.OSCILLATION),
+                    new BehaviorClassification.Result("B",
+                            BehaviorClassification.Mode.EQUILIBRIUM));
+            StringBuilder html = new StringBuilder();
+            ResultReportGenerator.writeBehaviorSection(html, behaviors);
+            String output = html.toString();
+
+            assertThat(output).contains("behavior-oscillation");
+            assertThat(output).contains("behavior-equilibrium");
+        }
+    }
+
+    // ── Phase 4: Loop Dominance Section ───────────────────────────────
+
+    @Nested
+    @DisplayName("loop dominance section")
+    class LoopDominanceSection {
+
+        @Test
+        @DisplayName("should contain stacked area chart SVG")
+        void shouldContainStackedAreaChart() {
+            LoopDominanceAnalysis dominance = buildDominanceAnalysis();
+            StringBuilder html = new StringBuilder();
+            ResultReportGenerator.writeLoopDominanceSection(html, dominance);
+            String output = html.toString();
+
+            assertThat(output).contains("Loop Dominance");
+            assertThat(output).contains("<svg");
+            assertThat(output).contains("<polygon");
+        }
+
+        @Test
+        @DisplayName("should contain dominance transition table")
+        void shouldContainTransitionTable() {
+            LoopDominanceAnalysis dominance = buildDominanceAnalysis();
+            StringBuilder html = new StringBuilder();
+            ResultReportGenerator.writeDominanceTransitionTable(html, dominance);
+            String output = html.toString();
+
+            assertThat(output).contains("Dominance Transitions");
+            assertThat(output).contains("<th>Step Range</th>");
+            assertThat(output).contains("<th>Dominant Loop</th>");
+            assertThat(output).contains("<th>Type</th>");
+        }
+
+        @Test
+        @DisplayName("stacked area chart should handle insufficient data")
+        void shouldHandleInsufficientData() {
+            LoopDominanceAnalysis empty = new LoopDominanceAnalysis(
+                    List.of(), List.of(), 0, new double[0][0]);
+            String svg = ResultReportGenerator.stackedAreaChartSvg(empty);
+            assertThat(svg).contains("Not enough data");
+        }
+
+        @Test
+        @DisplayName("should include loop labels in legend")
+        void shouldIncludeLoopLabelsInLegend() {
+            LoopDominanceAnalysis dominance = buildDominanceAnalysis();
+            String svg = ResultReportGenerator.stackedAreaChartSvg(dominance);
+
+            assertThat(svg).contains("R1");
+            assertThat(svg).contains("B1");
+        }
+    }
+
+    // ── Phase 4: Template Customization ───────────────────────────────
+
+    @Nested
+    @DisplayName("template customization")
+    class TemplateCustomization {
+
+        @Test
+        @DisplayName("should inject custom CSS into report")
+        void shouldInjectCustomCss() {
+            RunResult run = buildSingleRun(10.0);
+            ReportTemplate template = new ReportTemplate(
+                    "body { background: #f0f0f0; }", null, null);
+
+            String html = ResultReportGenerator.generate("Test", run, null, null,
+                    null, null, null, null, template);
+
+            assertThat(html).contains("body { background: #f0f0f0; }");
+        }
+
+        @Test
+        @DisplayName("should include custom header HTML")
+        void shouldIncludeCustomHeader() {
+            RunResult run = buildSingleRun(10.0);
+            ReportTemplate template = new ReportTemplate(
+                    null, "<strong>Acme Corp</strong>", null);
+
+            String html = ResultReportGenerator.generate("Test", run, null, null,
+                    null, null, null, null, template);
+
+            assertThat(html).contains("report-header");
+            assertThat(html).contains("<strong>Acme Corp</strong>");
+        }
+
+        @Test
+        @DisplayName("should include custom footer HTML")
+        void shouldIncludeCustomFooter() {
+            RunResult run = buildSingleRun(10.0);
+            ReportTemplate template = new ReportTemplate(
+                    null, null, "Generated on 2026-03-19");
+
+            String html = ResultReportGenerator.generate("Test", run, null, null,
+                    null, null, null, null, template);
+
+            assertThat(html).contains("report-footer");
+            assertThat(html).contains("Generated on 2026-03-19");
+        }
+
+        @Test
+        @DisplayName("should omit header/footer divs when template is null")
+        void shouldOmitWhenTemplateIsNull() {
+            RunResult run = buildSingleRun(10.0);
+            String html = ResultReportGenerator.generate("Test", run, null, null,
+                    null, null, null, null, null);
+
+            // The CSS class definitions are always present, but the actual divs should not be
+            assertThat(html).doesNotContain("<div class=\"report-header\">");
+            assertThat(html).doesNotContain("<div class=\"report-footer\">");
+        }
+    }
+
+    // ── Phase 4: Full Report with All Sections ────────────────────────
+
+    @Nested
+    @DisplayName("full report with phase 4")
+    class FullReportPhase4 {
+
+        @Test
+        @DisplayName("should include all phase 4 sections")
+        void shouldIncludeAllPhase4Sections() {
+            RunResult run = buildSingleRun(10.0);
+            LoopDominanceAnalysis dominance = buildDominanceAnalysis();
+            List<BehaviorClassification.Result> behaviors = List.of(
+                    new BehaviorClassification.Result("Tank",
+                            BehaviorClassification.Mode.LINEAR_DECLINE));
+            ReportTemplate template = new ReportTemplate(
+                    ".custom { color: red; }",
+                    "<div>Header</div>",
+                    "<div>Footer</div>");
+
+            String html = ResultReportGenerator.generate("Full Phase 4", run,
+                    null, null, null, null, dominance, behaviors, template);
+
+            assertThat(html).contains("Simulation Results");
+            assertThat(html).contains("Behavior Mode Classification");
+            assertThat(html).contains("Loop Dominance");
+            assertThat(html).contains("report-header");
+            assertThat(html).contains("report-footer");
+            assertThat(html).contains(".custom { color: red; }");
+        }
+    }
+
     // ── Test Helpers ───────────────────────────────────────────────────
 
     private static RunResult buildSingleRun(double drainRate) {
@@ -718,5 +908,21 @@ class ResultReportGeneratorTest {
         Map<String, Double> bestParams = new LinkedHashMap<>();
         bestParams.put("drainRate", 7.5);
         return new OptimizationResult(bestParams, 42.0, bestRun, 100);
+    }
+
+    private static LoopDominanceAnalysis buildDominanceAnalysis() {
+        // Two loops: R1 (reinforcing) and B1 (balancing), 10 steps
+        // R1 dominates first 5 steps, B1 dominates last 5
+        double[][] activity = new double[2][10];
+        for (int step = 0; step < 10; step++) {
+            activity[0][step] = step < 5 ? 10.0 - step : 1.0; // R1: declining
+            activity[1][step] = step < 5 ? 1.0 : step;        // B1: growing
+        }
+        return new LoopDominanceAnalysis(
+                List.of("R1", "B1"),
+                List.of(FeedbackAnalysis.LoopType.REINFORCING,
+                        FeedbackAnalysis.LoopType.BALANCING),
+                10,
+                activity);
     }
 }
