@@ -57,6 +57,45 @@ class JavaSourceEscaperTest {
             assertThat(JavaSourceEscaper.doubleArrayLiteral(new double[]{1.0, 2.5, 3.7}))
                     .isEqualTo("new double[]{1.0, 2.5, 3.7}");
         }
+
+        @Test
+        void shouldFormatNaNAsDoubleNaN() {
+            assertThat(JavaSourceEscaper.doubleArrayLiteral(new double[]{1.0, Double.NaN, 3.0}))
+                    .isEqualTo("new double[]{1.0, Double.NaN, 3.0}");
+        }
+
+        @Test
+        void shouldFormatInfinityAsDoubleConstant() {
+            assertThat(JavaSourceEscaper.doubleArrayLiteral(
+                    new double[]{Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY}))
+                    .isEqualTo("new double[]{Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY}");
+        }
+    }
+
+    @Nested
+    class FormatDoubleForSource {
+
+        @Test
+        void shouldFormatNormalDouble() {
+            assertThat(JavaSourceEscaper.formatDoubleForSource(42.5)).isEqualTo("42.5");
+        }
+
+        @Test
+        void shouldFormatNaN() {
+            assertThat(JavaSourceEscaper.formatDoubleForSource(Double.NaN)).isEqualTo("Double.NaN");
+        }
+
+        @Test
+        void shouldFormatPositiveInfinity() {
+            assertThat(JavaSourceEscaper.formatDoubleForSource(Double.POSITIVE_INFINITY))
+                    .isEqualTo("Double.POSITIVE_INFINITY");
+        }
+
+        @Test
+        void shouldFormatNegativeInfinity() {
+            assertThat(JavaSourceEscaper.formatDoubleForSource(Double.NEGATIVE_INFINITY))
+                    .isEqualTo("Double.NEGATIVE_INFINITY");
+        }
     }
 
     @Nested
