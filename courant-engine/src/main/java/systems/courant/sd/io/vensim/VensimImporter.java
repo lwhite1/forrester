@@ -384,7 +384,7 @@ public class VensimImporter implements ModelImporter {
         if (labels != null) {
             String normalizedBase = VensimExprTranslator.normalizeName(baseName);
             boolean isInteg = INTEG_PATTERN.matcher(eq.expression()).find();
-            List<String> perLabelValues = splitSubscriptValues(
+            List<String> perLabelValues = VensimSubscriptExpander.splitSubscriptValues(
                     eq.expression(), labels.size());
             for (int li = 0; li < labels.size(); li++) {
                 String expandedName = normalizedBase + "_" + labels.get(li);
@@ -408,9 +408,9 @@ public class VensimImporter implements ModelImporter {
         if (dimNameRaw.contains(",")) {
             String normalizedBase = VensimExprTranslator.normalizeName(baseName);
             boolean isInteg = INTEG_PATTERN.matcher(eq.expression()).find();
-            List<List<String>> combos = resolveMultiDimLabels(
+            List<List<String>> combos = VensimSubscriptExpander.resolveMultiDimLabels(
                     dimNameRaw, subscriptDimensions);
-            List<String> perLabelValues = splitSubscriptValues(
+            List<String> perLabelValues = VensimSubscriptExpander.splitSubscriptValues(
                     eq.expression(), combos.size());
             for (int ci = 0; ci < combos.size(); ci++) {
                 String expandedName = normalizedBase + "_"
@@ -477,6 +477,15 @@ public class VensimImporter implements ModelImporter {
             Map<String, MdlEquation> equationsByName,
             String timeUnit, List<String> warnings) {
         Set<String> sketchFlowNames = new HashSet<>();
+
+        ImportContext ctx = new ImportContext(builder, subscripts.vensimNames,
+                preClassification.stockNames, preClassification.flowNames,
+                preClassification.lookupNames, sketchFlowNames, sketchValveNames,
+                equationsByName, preClassification.constantValues, timeUnit,
+                subscripts.subscriptDimensions, subscripts.subscriptDisplayLabels,
+                subscripts.subscriptMappings, preClassification.cldVariableNames,
+                preClassification.allNormalizedNames, warnings);
+
         for (MdlEquation eq : equations) {
             String name = eq.name().strip();
             if (name.isEmpty() || isSystemVar(name)) {
@@ -488,7 +497,7 @@ public class VensimImporter implements ModelImporter {
             String eqName = VensimExprTranslator.normalizeName(name);
             String displayName = VensimExprTranslator.normalizeDisplayName(name);
             if (!eq.operator().equals(":") && !eq.operator().equals("<->")
-                    && !preClassification.allNormalizedNames.add(eqName)) {
+                    && !ctx.allNormalizedNames().add(eqName)) {
                 warnings.add("Duplicate normalized name '" + eqName
                         + "' (from '" + name + "') — skipped");
                 continue;
@@ -497,22 +506,14 @@ public class VensimImporter implements ModelImporter {
 
             if (isCld) {
                 try {
-                    classifyAndBuildCld(eq, displayName, eqName, comment, builder,
-                            preClassification.cldVariableNames, warnings);
+                    classifyAndBuildCld(eq, displayName, eqName, comment, ctx);
                 } catch (IllegalArgumentException e) {
                     warnings.add("Error processing '" + name + "': " + e.getMessage());
                 }
             } else {
                 String unit = cleanUnits(eq.units());
                 try {
-                    classifyAndBuild(eq, displayName, eqName, unit, comment, builder,
-                            subscripts.vensimNames, preClassification.stockNames,
-                            preClassification.flowNames, preClassification.lookupNames,
-                            sketchFlowNames, sketchValveNames, equationsByName,
-                            preClassification.constantValues, timeUnit,
-                            subscripts.subscriptDimensions,
-                            subscripts.subscriptDisplayLabels,
-                            subscripts.subscriptMappings, warnings);
+                    classifyAndBuild(eq, displayName, eqName, unit, comment, ctx);
                 } catch (IllegalArgumentException e) {
                     warnings.add("Error processing '" + name + "': " + e.getMessage());
                 }
@@ -601,21 +602,11 @@ public class VensimImporter implements ModelImporter {
     }
 
     private void classifyAndBuild(MdlEquation eq, String displayName, String eqName,
-                                   String unit, String comment,
-                                   ModelDefinitionBuilder builder,
-                                   Set<String> vensimNames, Set<String> stockNames,
-                                   Set<String> flowNames, Set<String> lookupNames,
-                                   Set<String> sketchFlowNames,
-                                   Set<String> sketchValveNames,
-                                   Map<String, MdlEquation> equationsByName,
-                                   Map<String, Double> constantValues,
-                                   String timeUnit,
-                                   Map<String, List<String>> subscriptDimensions,
-                                   Map<String, List<String>> subscriptDisplayLabels,
-                                   Map<String, SubscriptMapping> subscriptMappings,
-                                   List<String> warnings) {
+                                   String unit, String comment, ImportContext ctx) {
         String operator = eq.operator();
         String expression = eq.expression();
+        ModelDefinitionBuilder builder = ctx.builder();
+        List<String> warnings = ctx.warnings();
 
         // Check if variable name contains subscript notation: name[Dimension]
         Matcher subscriptMatcher = SUBSCRIPT_NAME_PATTERN.matcher(eq.name().strip());
@@ -623,33 +614,29 @@ public class VensimImporter implements ModelImporter {
             String baseName = subscriptMatcher.group(1).strip();
             String dimNameRaw = subscriptMatcher.group(2).strip();
             String dimName = VensimExprTranslator.normalizeName(dimNameRaw);
-            List<String> normalizedLabels = subscriptDimensions.get(dimName);
-            List<String> displayLabels = subscriptDisplayLabels.get(dimName);
+            List<String> normalizedLabels = ctx.subscriptDimensions().get(dimName);
+            List<String> displayLabels = ctx.subscriptDisplayLabels().get(dimName);
             if (normalizedLabels != null) {
-                expandSubscriptedVariable(eq, baseName, dimName, dimNameRaw,
-                        normalizedLabels, displayLabels, unit, builder,
-                        vensimNames, stockNames, flowNames, lookupNames,
-                        sketchFlowNames, sketchValveNames, equationsByName,
-                        constantValues, timeUnit,
-                        subscriptDimensions, subscriptDisplayLabels,
-                        subscriptMappings, warnings);
+                VensimSubscriptExpander.expandSubscriptedVariable(
+                        eq, baseName, dimName, dimNameRaw,
+                        normalizedLabels, displayLabels, unit, ctx,
+                        (lEq, lDisp, lName, lUnit, lComment) ->
+                                classifyAndBuild(lEq, lDisp, lName, lUnit, lComment, ctx));
                 return;
             }
 
             // Check for multi-dimensional subscripts: name[sub1,sub2]
             if (dimNameRaw.contains(",")) {
-                expandMultiDimSubscriptedVariable(eq, baseName, dimNameRaw,
-                        unit, builder, vensimNames, stockNames, flowNames,
-                        lookupNames, sketchFlowNames, sketchValveNames,
-                        equationsByName, constantValues, timeUnit,
-                        subscriptDimensions, subscriptDisplayLabels,
-                        subscriptMappings, warnings);
+                VensimSubscriptExpander.expandMultiDimSubscriptedVariable(
+                        eq, baseName, dimNameRaw, unit, ctx,
+                        (lEq, lDisp, lName, lUnit, lComment) ->
+                                classifyAndBuild(lEq, lDisp, lName, lUnit, lComment, ctx));
                 return;
             }
 
             // Check if subscript is a single label (not a dimension name)
             String normalizedSub = VensimExprTranslator.normalizeName(dimNameRaw);
-            boolean isLabel = subscriptDimensions.values().stream()
+            boolean isLabel = ctx.subscriptDimensions().values().stream()
                     .anyMatch(lbls -> lbls.contains(normalizedSub));
             if (isLabel) {
                 String normalizedBase = VensimExprTranslator.normalizeName(baseName);
@@ -662,10 +649,7 @@ public class VensimImporter implements ModelImporter {
                         expandedDisplayName, operator, expression,
                         eq.units(), lComment, eq.group());
                 classifyAndBuild(labelEq, expandedDisplayName, expandedEqName,
-                        unit, lComment, builder, vensimNames, stockNames, flowNames,
-                        lookupNames, sketchFlowNames, sketchValveNames, equationsByName,
-                        constantValues, timeUnit, subscriptDimensions,
-                        subscriptDisplayLabels, subscriptMappings, warnings);
+                        unit, lComment, ctx);
                 return;
             }
             // If nothing matches, fall through — the brackets will be normalized away
@@ -692,8 +676,8 @@ public class VensimImporter implements ModelImporter {
 
         // Standalone lookup table (operator "()")
         if (operator.equals("()")) {
-            buildLookupTable(displayName, eqName, expression, unit, comment, builder,
-                    lookupNames, warnings);
+            buildLookupTable(displayName, eqName, expression, unit, comment,
+                    builder, ctx.lookupNames(), warnings);
             return;
         }
 
@@ -707,10 +691,7 @@ public class VensimImporter implements ModelImporter {
 
         // Stock (INTEG function)
         if (INTEG_PATTERN.matcher(expression).find()) {
-            buildStock(eq, displayName, eqName, expression, unit, comment, builder,
-                    vensimNames, flowNames, lookupNames, sketchFlowNames,
-                    sketchValveNames, equationsByName, constantValues, timeUnit,
-                    subscriptDimensions, warnings);
+            buildStock(eq, displayName, eqName, expression, unit, comment, ctx);
             return;
         }
 
@@ -720,11 +701,11 @@ public class VensimImporter implements ModelImporter {
                 builder.variable(new VariableDef(displayName, comment,
                         VariableDef.formatValue(Double.parseDouble(expression.strip())), unit));
             } else {
-                // Non-numeric unchangeable — treat as auxiliary
                 VensimExprTranslator.TranslationResult tr =
-                        VensimExprTranslator.translate(expression, eqName, vensimNames,
-                                lookupNames, subscriptDimensions);
-                addExtractedLookups(tr, builder, lookupNames, warnings);
+                        VensimExprTranslator.translate(expression, eqName,
+                                ctx.vensimNames(), ctx.lookupNames(),
+                                ctx.subscriptDimensions());
+                addExtractedLookups(tr, builder, ctx.lookupNames(), warnings);
                 builder.variable(new VariableDef(displayName, comment, tr.expression(), unit));
                 warnings.addAll(tr.warnings());
             }
@@ -740,11 +721,11 @@ public class VensimImporter implements ModelImporter {
         }
 
         // Skip variable if it was already consumed as a flow during INTEG decomposition
-        if (flowNames.contains(eqName)) {
+        if (ctx.flowNames().contains(eqName)) {
             return;
         }
 
-        // Numeric literal → constant (literal-valued variable)
+        // Numeric literal -> constant (literal-valued variable)
         if (isNumericLiteral(expression)) {
             builder.variable(new VariableDef(displayName, comment,
                     VariableDef.formatValue(Double.parseDouble(expression.strip())), unit));
@@ -754,9 +735,10 @@ public class VensimImporter implements ModelImporter {
         // Check if expression contains WITH LOOKUP
         if (expression.toUpperCase(Locale.ROOT).contains("WITH LOOKUP")) {
             VensimExprTranslator.TranslationResult tr =
-                    VensimExprTranslator.translate(expression, eqName, vensimNames,
-                            lookupNames, subscriptDimensions);
-            addExtractedLookups(tr, builder, lookupNames, warnings);
+                    VensimExprTranslator.translate(expression, eqName,
+                            ctx.vensimNames(), ctx.lookupNames(),
+                            ctx.subscriptDimensions());
+            addExtractedLookups(tr, builder, ctx.lookupNames(), warnings);
             builder.variable(new VariableDef(displayName, comment, tr.expression(), unit));
             warnings.addAll(tr.warnings());
             return;
@@ -764,17 +746,16 @@ public class VensimImporter implements ModelImporter {
 
         // Default: variable
         VensimExprTranslator.TranslationResult tr =
-                VensimExprTranslator.translate(expression, eqName, vensimNames,
-                        lookupNames, subscriptDimensions);
-        addExtractedLookups(tr, builder, lookupNames, warnings);
+                VensimExprTranslator.translate(expression, eqName,
+                        ctx.vensimNames(), ctx.lookupNames(),
+                        ctx.subscriptDimensions());
+        addExtractedLookups(tr, builder, ctx.lookupNames(), warnings);
         builder.variable(new VariableDef(displayName, comment, tr.expression(), unit));
         warnings.addAll(tr.warnings());
     }
 
     private void classifyAndBuildCld(MdlEquation eq, String displayName, String eqName,
-                                      String comment, ModelDefinitionBuilder builder,
-                                      Set<String> cldVariableNames,
-                                      List<String> warnings) {
+                                      String comment, ImportContext ctx) {
         String operator = eq.operator();
 
         // Skip subscript definitions and data variables in CLD mode
@@ -782,328 +763,25 @@ public class VensimImporter implements ModelImporter {
             return;
         }
         if (operator.equals(":=")) {
-            warnings.add("Data variable '" + eq.name() + "' skipped (not supported)");
+            ctx.warnings().add("Data variable '" + eq.name() + "' skipped (not supported)");
             return;
         }
         if (operator.equals("()")) {
             // Lookup tables don't map to CLD variables
-            warnings.add("Lookup table '" + eq.name() + "' skipped in CLD mode");
+            ctx.warnings().add("Lookup table '" + eq.name() + "' skipped in CLD mode");
             return;
         }
 
-        builder.cldVariable(new CldVariableDef(displayName, comment));
-        cldVariableNames.add(eqName);
-    }
-
-    /**
-     * Expands a subscripted variable into per-label scalar variables.
-     * For comma-separated values, assigns each value to the corresponding label.
-     * For formulas, creates copies with the dimension reference replaced by each label.
-     */
-    private void expandSubscriptedVariable(MdlEquation eq, String baseName,
-                                            String dimName, String dimNameRaw,
-                                            List<String> normalizedLabels,
-                                            List<String> displayLabels,
-                                            String unit, ModelDefinitionBuilder builder,
-                                            Set<String> vensimNames, Set<String> stockNames,
-                                            Set<String> flowNames, Set<String> lookupNames,
-                                            Set<String> sketchFlowNames,
-                                            Set<String> sketchValveNames,
-                                            Map<String, MdlEquation> equationsByName,
-                                            Map<String, Double> constantValues,
-                                            String timeUnit,
-                                            Map<String, List<String>> subscriptDimensions,
-                                            Map<String, List<String>> subscriptDisplayLabels,
-                                            Map<String, SubscriptMapping> subscriptMappings,
-                                            List<String> warnings) {
-        String operator = eq.operator();
-        String expression = eq.expression();
-        String normalizedBase = VensimExprTranslator.normalizeName(baseName);
-        String displayBase = VensimExprTranslator.normalizeDisplayName(baseName);
-
-        // Try to split expression into comma-separated per-label values
-        List<String> perLabelValues = splitSubscriptValues(expression, normalizedLabels.size());
-
-        for (int i = 0; i < normalizedLabels.size(); i++) {
-            String label = normalizedLabels.get(i);
-            String displayLabel = displayLabels.get(i);
-            String expandedEqName = normalizedBase + "_" + label;
-            String expandedDisplayName = displayBase + " " + displayLabel;
-            String comment = eq.comment().isBlank() ? eq.name().strip() : eq.comment();
-
-            String labelExpression;
-            if (perLabelValues != null) {
-                // Comma-separated values: assign per-label
-                labelExpression = perLabelValues.get(i).strip();
-            } else {
-                // Formula: replace dimension references within brackets
-                labelExpression = replaceDimInSubscripts(expression, dimNameRaw, label);
-
-                // Apply mapped dimension replacements (e.g., previous cohort → infant)
-                for (var entry : subscriptMappings.entrySet()) {
-                    SubscriptMapping mapping = entry.getValue();
-                    if (mapping.targetDimension().equals(dimName)
-                            && i < mapping.rawLabels().size()) {
-                        String mappedLabel = mapping.rawLabels().get(i);
-                        labelExpression = replaceDimInSubscripts(
-                                labelExpression, mapping.rawDimName(), mappedLabel);
-                    }
-                }
-            }
-
-            // Create a synthetic equation for this label and classify normally
-            MdlEquation labelEq = new MdlEquation(
-                    expandedDisplayName, operator, labelExpression,
-                    eq.units(), comment, eq.group());
-            classifyAndBuild(labelEq, expandedDisplayName, expandedEqName, unit, comment,
-                    builder, vensimNames, stockNames, flowNames, lookupNames,
-                    sketchFlowNames, sketchValveNames, equationsByName,
-                    constantValues, timeUnit, subscriptDimensions,
-                    subscriptDisplayLabels, subscriptMappings, warnings);
-        }
-    }
-
-    /**
-     * Splits a subscript expression into per-label values if it's comma-separated.
-     * Returns null if the expression is a formula (not comma-separated values).
-     */
-    private static List<String> splitSubscriptValues(String expression, int expectedCount) {
-        if (expression == null || expression.isBlank()) {
-            return null;
-        }
-        // Split on top-level commas only (respect parentheses)
-        List<String> parts = new ArrayList<>();
-        int depth = 0;
-        int start = 0;
-        for (int i = 0; i < expression.length(); i++) {
-            char c = expression.charAt(i);
-            if (c == '(') {
-                depth++;
-            } else if (c == ')') {
-                depth--;
-            } else if (c == ',' && depth == 0) {
-                parts.add(expression.substring(start, i));
-                start = i + 1;
-            }
-        }
-        parts.add(expression.substring(start));
-
-        // Only treat as per-label values if count matches exactly
-        if (parts.size() == expectedCount) {
-            // Verify all parts are numeric literals (constants)
-            boolean allNumeric = parts.stream()
-                    .allMatch(p -> NUMERIC_PATTERN.matcher(p.strip()).matches());
-            if (allNumeric) {
-                return parts;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Replaces a dimension name within bracket subscripts in an expression.
-     * Handles both single and comma-separated subscripts.
-     * For example, with dimName="task", replacement="design":
-     * "x[task]" → "x[design]" and "y[task,prereqtask]" → "y[design,prereqtask]"
-     */
-    private static String replaceDimInSubscripts(String expr, String dimName, String replacement) {
-        StringBuilder result = new StringBuilder();
-        int pos = 0;
-        while (pos < expr.length()) {
-            int bracketStart = expr.indexOf('[', pos);
-            if (bracketStart < 0) {
-                result.append(expr, pos, expr.length());
-                break;
-            }
-            // Find matching ']' accounting for nested brackets and quoted strings
-            int bracketEnd = findMatchingBracket(expr, bracketStart);
-            if (bracketEnd < 0) {
-                result.append(expr, pos, expr.length());
-                break;
-            }
-            result.append(expr, pos, bracketStart + 1);
-            String content = expr.substring(bracketStart + 1, bracketEnd);
-
-            String[] parts = content.split(",", -1);
-            for (int j = 0; j < parts.length; j++) {
-                if (parts[j].strip().equals(dimName)) {
-                    parts[j] = parts[j].replace(dimName, replacement);
-                }
-            }
-            result.append(String.join(",", parts));
-            result.append(']');
-            pos = bracketEnd + 1;
-        }
-        return result.toString();
-    }
-
-    /**
-     * Finds the closing ']' that matches the opening '[' at the given position,
-     * accounting for nested brackets and skipping content inside double quotes.
-     */
-    private static int findMatchingBracket(String expr, int openPos) {
-        int depth = 0;
-        boolean inQuote = false;
-        for (int i = openPos; i < expr.length(); i++) {
-            char c = expr.charAt(i);
-            if (c == '"') {
-                inQuote = !inQuote;
-            } else if (!inQuote) {
-                if (c == '[') {
-                    depth++;
-                } else if (c == ']') {
-                    depth--;
-                    if (depth == 0) {
-                        return i;
-                    }
-                }
-            }
-        }
-        return -1;
-    }
-
-    /**
-     * Resolves multi-dimensional subscript labels into a cross-product list.
-     * Each sub is checked against subscriptDimensions; dimensions expand to labels,
-     * specific labels become singletons.
-     */
-    private static List<List<String>> resolveMultiDimLabels(String dimNameRaw,
-                                                             Map<String, List<String>> subscriptDimensions) {
-        String[] subs = dimNameRaw.split(",");
-        List<List<String>> perDimLabels = new ArrayList<>();
-        for (String sub : subs) {
-            String key = VensimExprTranslator.normalizeName(sub.strip());
-            List<String> dimLabels = subscriptDimensions.get(key);
-            if (dimLabels != null) {
-                perDimLabels.add(dimLabels);
-            } else {
-                perDimLabels.add(List.of(key));
-            }
-        }
-        return crossProduct(perDimLabels);
-    }
-
-    private static List<List<String>> crossProduct(List<List<String>> lists) {
-        List<List<String>> result = new ArrayList<>();
-        result.add(new ArrayList<>());
-        for (List<String> list : lists) {
-            List<List<String>> newResult = new ArrayList<>();
-            for (List<String> existing : result) {
-                for (String item : list) {
-                    List<String> combo = new ArrayList<>(existing);
-                    combo.add(item);
-                    newResult.add(combo);
-                }
-            }
-            result = newResult;
-        }
-        return result;
-    }
-
-    /**
-     * Expands a variable with multi-dimensional subscripts (comma-separated).
-     * Generates cross-product of dimension labels and creates per-combination variables.
-     */
-    private void expandMultiDimSubscriptedVariable(MdlEquation eq, String baseName,
-                                                    String dimNameRaw, String unit,
-                                                    ModelDefinitionBuilder builder,
-                                                    Set<String> vensimNames,
-                                                    Set<String> stockNames,
-                                                    Set<String> flowNames,
-                                                    Set<String> lookupNames,
-                                                    Set<String> sketchFlowNames,
-                                                    Set<String> sketchValveNames,
-                                                    Map<String, MdlEquation> equationsByName,
-                                                    Map<String, Double> constantValues,
-                                                    String timeUnit,
-                                                    Map<String, List<String>> subscriptDimensions,
-                                                    Map<String, List<String>> subscriptDisplayLabels,
-                                                    Map<String, SubscriptMapping> subscriptMappings,
-                                                    List<String> warnings) {
-        List<List<String>> combos = resolveMultiDimLabels(dimNameRaw, subscriptDimensions);
-
-        // Build display label combos
-        String[] rawSubs = dimNameRaw.split(",");
-        List<List<String>> displayPerDim = new ArrayList<>();
-        for (String sub : rawSubs) {
-            String key = VensimExprTranslator.normalizeName(sub.strip());
-            List<String> dimDisplayLabels = subscriptDisplayLabels.get(key);
-            if (dimDisplayLabels != null) {
-                displayPerDim.add(dimDisplayLabels);
-            } else {
-                displayPerDim.add(List.of(VensimExprTranslator.normalizeDisplayName(sub.strip())));
-            }
-        }
-        List<List<String>> displayCombos = crossProduct(displayPerDim);
-
-        String normalizedBase = VensimExprTranslator.normalizeName(baseName);
-        String displayBase = VensimExprTranslator.normalizeDisplayName(baseName);
-
-        List<String> perLabelValues = splitSubscriptValues(
-                eq.expression(), combos.size());
-
-        for (int ci = 0; ci < combos.size(); ci++) {
-            List<String> combo = combos.get(ci);
-            List<String> displayCombo = displayCombos.get(ci);
-
-            String expandedEqName = normalizedBase + "_" + String.join("_", combo);
-            String expandedDisplayName = displayBase + " " + String.join(" ", displayCombo);
-            String comment = eq.comment().isBlank() ? eq.name().strip() : eq.comment();
-
-            String labelExpression;
-            if (perLabelValues != null) {
-                labelExpression = perLabelValues.get(ci).strip();
-            } else {
-                // Formula: replace each dimension subscript with the specific label
-                labelExpression = eq.expression();
-                String[] subs = dimNameRaw.split(",");
-                for (int si = 0; si < subs.length; si++) {
-                    String sub = subs[si].strip();
-                    String subKey = VensimExprTranslator.normalizeName(sub);
-                    List<String> dimLabels = subscriptDimensions.get(subKey);
-                    if (dimLabels != null) {
-                        // This sub is a dimension — find which label from the combo
-                        // by tracking which dimension index this is
-                        int dimIdx = 0;
-                        for (int pi = 0; pi < si; pi++) {
-                            String prevKey = VensimExprTranslator.normalizeName(
-                                    subs[pi].strip());
-                            if (subscriptDimensions.containsKey(prevKey)) {
-                                dimIdx++;
-                            }
-                        }
-                        // combo has all labels flattened; need the one for this dim
-                        // For cross-product, each combo element corresponds to the
-                        // dimension order. Find the right label.
-                        String label = combo.get(si);
-                        labelExpression = replaceDimInSubscripts(
-                                labelExpression, sub, label);
-                    }
-                }
-            }
-
-            MdlEquation labelEq = new MdlEquation(
-                    expandedDisplayName, eq.operator(), labelExpression,
-                    eq.units(), comment, eq.group());
-            classifyAndBuild(labelEq, expandedDisplayName, expandedEqName,
-                    unit, comment, builder, vensimNames, stockNames, flowNames,
-                    lookupNames, sketchFlowNames, sketchValveNames, equationsByName,
-                    constantValues, timeUnit, subscriptDimensions,
-                    subscriptDisplayLabels, subscriptMappings, warnings);
-        }
+        ctx.builder().cldVariable(new CldVariableDef(displayName, comment));
+        ctx.cldVariableNames().add(eqName);
     }
 
     private void buildStock(MdlEquation eq, String displayName, String eqName,
                              String expression, String unit, String comment,
-                             ModelDefinitionBuilder builder,
-                             Set<String> vensimNames, Set<String> flowNames,
-                             Set<String> lookupNames, Set<String> sketchFlowNames,
-                             Set<String> sketchValveNames,
-                             Map<String, MdlEquation> equationsByName,
-                             Map<String, Double> constantValues,
-                             String timeUnit,
-                             Map<String, List<String>> subscriptDimensions,
-                             List<String> warnings) {
+                             ImportContext ctx) {
+        ModelDefinitionBuilder builder = ctx.builder();
+        List<String> warnings = ctx.warnings();
+
         // Parse INTEG(rate_expr, initial_value)
         Matcher m = INTEG_PATTERN.matcher(expression);
         if (!m.find()) {
@@ -1132,8 +810,8 @@ public class VensimImporter implements ModelImporter {
 
         // Parse initial value
         InitialValueResult initResult = parseInitialValue(
-                initExpr, constantValues, vensimNames, lookupNames,
-                subscriptDimensions, warnings, eq.name());
+                initExpr, ctx.constantValues(), ctx.vensimNames(),
+                ctx.lookupNames(), ctx.subscriptDimensions(), warnings, eq.name());
 
         // Create stock (display name preserves spaces)
         if (initResult.expression != null) {
@@ -1152,26 +830,27 @@ public class VensimImporter implements ModelImporter {
                 // Try to match the rate term to a sketch flow valve name.
                 // When matched, use the variable's actual equation as the flow equation
                 // and skip creating the variable (since the flow replaces it).
-                String matchedValveName = matchSketchValveName(term.expr, sketchValveNames);
+                String matchedValveName = matchSketchValveName(
+                        term.expr, ctx.sketchValveNames());
                 String flowDisplayName;
                 String flowEqName;
                 String flowEquation;
                 if (matchedValveName != null) {
                     flowDisplayName = matchedValveName;
                     flowEqName = VensimExprTranslator.normalizeName(matchedValveName);
-                    MdlEquation varEq = equationsByName.get(flowEqName);
+                    MdlEquation varEq = ctx.equationsByName().get(flowEqName);
                     if (varEq != null && !varEq.expression().isBlank()) {
                         VensimExprTranslator.TranslationResult varTr =
                                 VensimExprTranslator.translate(varEq.expression(),
-                                        flowEqName, vensimNames, lookupNames,
-                                        subscriptDimensions);
+                                        flowEqName, ctx.vensimNames(),
+                                        ctx.lookupNames(), ctx.subscriptDimensions());
                         warnings.addAll(varTr.warnings());
                         flowEquation = varTr.expression();
                     } else {
-                        // Fallback: use the term expression directly
                         VensimExprTranslator.TranslationResult tr =
                                 VensimExprTranslator.translate(term.expr, eqName,
-                                        vensimNames, lookupNames, subscriptDimensions);
+                                        ctx.vensimNames(), ctx.lookupNames(),
+                                        ctx.subscriptDimensions());
                         warnings.addAll(tr.warnings());
                         flowEquation = tr.expression();
                     }
@@ -1182,35 +861,37 @@ public class VensimImporter implements ModelImporter {
                     flowEqName = eqName + flowSuffix;
                     VensimExprTranslator.TranslationResult tr =
                             VensimExprTranslator.translate(term.expr, eqName,
-                                    vensimNames, lookupNames, subscriptDimensions);
+                                    ctx.vensimNames(), ctx.lookupNames(),
+                                    ctx.subscriptDimensions());
                     warnings.addAll(tr.warnings());
                     flowEquation = tr.expression();
                 }
                 if (term.positive) {
                     builder.flow(new FlowDef(flowDisplayName, null,
-                            flowEquation, timeUnit, null, displayName));
+                            flowEquation, ctx.timeUnit(), null, displayName));
                 } else {
                     builder.flow(new FlowDef(flowDisplayName, null,
-                            flowEquation, timeUnit, displayName, null));
+                            flowEquation, ctx.timeUnit(), displayName, null));
                 }
-                flowNames.add(flowEqName);
-                sketchFlowNames.add(flowEqName);
+                ctx.flowNames().add(flowEqName);
+                ctx.sketchFlowNames().add(flowEqName);
             }
-            sketchFlowNames.add(eqName);
+            ctx.sketchFlowNames().add(eqName);
         } else {
             // Fall back to single net flow
             String flowDisplayName = displayName + " net flow";
             String flowEqName = eqName + "_net_flow";
             VensimExprTranslator.TranslationResult tr =
-                    VensimExprTranslator.translate(rateExpr, eqName, vensimNames,
-                            lookupNames, subscriptDimensions);
+                    VensimExprTranslator.translate(rateExpr, eqName,
+                            ctx.vensimNames(), ctx.lookupNames(),
+                            ctx.subscriptDimensions());
             warnings.addAll(tr.warnings());
 
             builder.flow(new FlowDef(flowDisplayName, "Net flow for " + eq.name(),
-                    tr.expression(), timeUnit, null, displayName));
-            flowNames.add(flowEqName);
-            sketchFlowNames.add(eqName);
-            sketchFlowNames.add(flowEqName);
+                    tr.expression(), ctx.timeUnit(), null, displayName));
+            ctx.flowNames().add(flowEqName);
+            ctx.sketchFlowNames().add(eqName);
+            ctx.sketchFlowNames().add(flowEqName);
         }
     }
 
