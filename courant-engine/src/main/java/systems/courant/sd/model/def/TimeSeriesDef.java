@@ -37,8 +37,8 @@ public record TimeSeriesDef(
             throw new IllegalArgumentException(
                     "timeValues and dataValues must have the same length");
         }
-        if (timeValues.length == 0) {
-            throw new IllegalArgumentException("Time series must have at least one data point");
+        if (timeValues.length < 2) {
+            throw new IllegalArgumentException("Time series must have at least 2 data points");
         }
         timeValues = timeValues.clone();
         dataValues = dataValues.clone();
