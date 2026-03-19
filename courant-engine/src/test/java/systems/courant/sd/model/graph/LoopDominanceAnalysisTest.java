@@ -120,6 +120,29 @@ class LoopDominanceAnalysisTest {
         }
 
         @Test
+        void shouldHandleMismatchedColumnData() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("PP")
+                    .stock("Prey", 100, "Animal")
+                    .stock("Predators", 20, "Animal")
+                    .flow("Predation", "Prey * Predators * 0.01", "Day", "Prey", "Predators")
+                    .build();
+
+            FeedbackAnalysis analysis = FeedbackAnalysis.analyze(def);
+            // columnNames claims 3 columns but rows have only 2 entries
+            List<String> columns = List.of("Step", "Prey", "Predators");
+            List<double[]> rows = List.of(
+                    new double[]{0, 100},
+                    new double[]{1, 80});
+
+            LoopDominanceAnalysis result = LoopDominanceAnalysis.compute(columns, rows, analysis);
+
+            // Should not throw; should compute what it can
+            assertThat(result).isNotNull();
+            assertThat(result.score(0, 1)).isGreaterThanOrEqualTo(0);
+        }
+
+        @Test
         void shouldReturnMinusOneForZeroActivity() {
             ModelDefinition def = new ModelDefinitionBuilder()
                     .name("PP")
