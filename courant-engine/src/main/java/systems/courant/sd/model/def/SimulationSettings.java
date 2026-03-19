@@ -12,6 +12,9 @@ package systems.courant.sd.model.def;
  *                     reverting to the previous value. Defaults to false.
  * @param savePer      the recording interval in steps. Only every Nth step is recorded
  *                     to history and fires time step events. Defaults to 1 (record all).
+ * @param initialTime  the simulation start time as a numeric value (e.g., 0 or 1990).
+ *                     Defaults to 0. Used to derive INITIAL_TIME and FINAL_TIME constants
+ *                     for models that reference them in equations.
  */
 public record SimulationSettings(
         String timeStep,
@@ -19,29 +22,39 @@ public record SimulationSettings(
         String durationUnit,
         double dt,
         boolean strictMode,
-        long savePer
+        long savePer,
+        double initialTime
 ) {
 
     /**
-     * Creates simulation settings with dt defaulting to 1.0, strictMode off, and savePer 1.
+     * Creates simulation settings with dt defaulting to 1.0, strictMode off, savePer 1,
+     * and initialTime 0.
      */
     public SimulationSettings(String timeStep, double duration, String durationUnit) {
-        this(timeStep, duration, durationUnit, 1.0, false, 1);
+        this(timeStep, duration, durationUnit, 1.0, false, 1, 0.0);
     }
 
     /**
-     * Creates simulation settings with strictMode off and savePer 1.
+     * Creates simulation settings with strictMode off, savePer 1, and initialTime 0.
      */
     public SimulationSettings(String timeStep, double duration, String durationUnit, double dt) {
-        this(timeStep, duration, durationUnit, dt, false, 1);
+        this(timeStep, duration, durationUnit, dt, false, 1, 0.0);
     }
 
     /**
-     * Creates simulation settings with savePer defaulting to 1.
+     * Creates simulation settings with savePer defaulting to 1 and initialTime 0.
      */
     public SimulationSettings(String timeStep, double duration, String durationUnit, double dt,
                               boolean strictMode) {
-        this(timeStep, duration, durationUnit, dt, strictMode, 1);
+        this(timeStep, duration, durationUnit, dt, strictMode, 1, 0.0);
+    }
+
+    /**
+     * Creates simulation settings with initialTime defaulting to 0.
+     */
+    public SimulationSettings(String timeStep, double duration, String durationUnit, double dt,
+                              boolean strictMode, long savePer) {
+        this(timeStep, duration, durationUnit, dt, strictMode, savePer, 0.0);
     }
 
     public SimulationSettings {
@@ -62,6 +75,9 @@ public record SimulationSettings(
         }
         if (savePer < 1) {
             throw new IllegalArgumentException("savePer must be >= 1, got " + savePer);
+        }
+        if (Double.isNaN(initialTime) || Double.isInfinite(initialTime)) {
+            throw new IllegalArgumentException("initialTime must be finite, got " + initialTime);
         }
     }
 }

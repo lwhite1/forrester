@@ -116,10 +116,11 @@ public class VensimImporter implements ModelImporter {
 
         ModelDefinitionBuilder builder = new ModelDefinitionBuilder()
                 .name(modelName)
-                .defaultSimulation(sim.timeUnit, sim.duration, sim.timeUnit, sim.timeStep);
+                .defaultSimulation(new systems.courant.sd.model.def.SimulationSettings(
+                        sim.timeUnit, sim.duration, sim.timeUnit, sim.timeStep,
+                        false, 1, sim.initialTime));
 
         registerEquivalenceDimensions(subscripts, builder);
-        injectSimulationConstants(builder, sim);
 
         PreClassificationResult preClassification = preClassifyEquations(
                 equations, subscripts, sim, warnings);
@@ -305,13 +306,6 @@ public class VensimImporter implements ModelImporter {
                 builder.subscript(displayName, labels);
             }
         }
-    }
-
-    private void injectSimulationConstants(ModelDefinitionBuilder builder,
-                                            SimulationSettings sim) {
-        builder.constant("TIME_STEP", sim.timeStep, sim.timeUnit);
-        builder.constant("INITIAL_TIME", sim.initialTime, sim.timeUnit);
-        builder.constant("FINAL_TIME", sim.finalTime, sim.timeUnit);
     }
 
     private PreClassificationResult preClassifyEquations(

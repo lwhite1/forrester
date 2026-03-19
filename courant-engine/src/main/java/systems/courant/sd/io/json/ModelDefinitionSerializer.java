@@ -388,6 +388,9 @@ public class ModelDefinitionSerializer {
         if (settings.savePer() != 1) {
             node.put("savePer", settings.savePer());
         }
+        if (settings.initialTime() != 0.0) {
+            node.put("initialTime", settings.initialTime());
+        }
         return node;
     }
 
@@ -751,13 +754,15 @@ public class ModelDefinitionSerializer {
         double dt = s.has("dt") ? s.get("dt").asDouble() : 1.0;
         boolean strict = s.has("strictMode") && s.get("strictMode").asBoolean();
         long savePerVal = s.has("savePer") ? s.get("savePer").asLong() : 1;
+        double initTime = s.has("initialTime") ? s.get("initialTime").asDouble() : 0.0;
         return new SimulationSettings(
                 requiredText(s, "timeStep"),
                 requiredDouble(s, "duration"),
                 requiredText(s, "durationUnit"),
                 dt,
                 strict,
-                savePerVal);
+                savePerVal,
+                initTime);
     }
 
     private ModelMetadata deserializeMetadata(JsonNode root) {
