@@ -46,6 +46,7 @@ public class Smooth implements Formula, Resettable {
     private final boolean hasExplicitInitial;
 
     private double smoothed;
+    private double lastInputVal;
     private boolean initialized;
     private long lastStep = -1;
     private boolean warnedNonPositive;
@@ -128,6 +129,7 @@ public class Smooth implements Formula, Resettable {
     @Override
     public void reset() {
         smoothed = 0;
+        lastInputVal = 0;
         initialized = false;
         lastStep = -1;
         warnedNonPositive = false;
@@ -145,12 +147,14 @@ public class Smooth implements Formula, Resettable {
     public double getCurrentValue() {
         long step = currentStep.getAsLong();
         if (!initialized) {
-            smoothed = hasExplicitInitial ? explicitInitial : input.getAsDouble();
+            double inputAtInit = input.getAsDouble();
+            smoothed = hasExplicitInitial ? explicitInitial : inputAtInit;
+            lastInputVal = inputAtInit;
             initialized = true;
             lastStep = step;
         } else if (step > lastStep) {
             long delta = step - lastStep;
-            double inputVal = input.getAsDouble();
+            double currentInput = input.getAsDouble();
             double st = smoothingTime.getAsDouble();
             if (st <= 0) {
                 if (!warnedNonPositive) {
@@ -160,8 +164,10 @@ public class Smooth implements Formula, Resettable {
                 st = 1.0;
             }
             for (long i = 0; i < delta; i++) {
+                double inputVal = (i < delta - 1) ? lastInputVal : currentInput;
                 smoothed += (inputVal - smoothed) / st;
             }
+            lastInputVal = currentInput;
             lastStep = step;
         }
         return smoothed;

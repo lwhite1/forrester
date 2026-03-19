@@ -54,6 +54,7 @@ public class Delay3 implements Formula, Resettable {
     private double stage2;
     private double stage3;
     private double output;
+    private double lastInputVal;
     private boolean initialized;
     private long lastStep = -1;
 
@@ -106,6 +107,7 @@ public class Delay3 implements Formula, Resettable {
         stage2 = 0;
         stage3 = 0;
         output = 0;
+        lastInputVal = 0;
         initialized = false;
         lastStep = -1;
     }
@@ -121,19 +123,22 @@ public class Delay3 implements Formula, Resettable {
     public double getCurrentValue() {
         long step = currentStep.getAsLong();
         if (!initialized) {
-            double init = hasExplicitInitial ? explicitInitial : input.getAsDouble();
+            double inputAtInit = input.getAsDouble();
+            double init = hasExplicitInitial ? explicitInitial : inputAtInit;
             double stageTime = delayTime / 3.0;
             stage1 = init * stageTime;
             stage2 = init * stageTime;
             stage3 = init * stageTime;
             output = init;
+            lastInputVal = inputAtInit;
             initialized = true;
             lastStep = step;
         } else if (step > lastStep) {
             double stageTime = delayTime / 3.0;
             long delta = step - lastStep;
-            double inputVal = input.getAsDouble();
+            double currentInput = input.getAsDouble();
             for (long d = 0; d < delta; d++) {
+                double inputVal = (d < delta - 1) ? lastInputVal : currentInput;
                 // Compute outflow rates from current stage levels
                 double rate1 = stage1 / stageTime;
                 double rate2 = stage2 / stageTime;
@@ -146,6 +151,7 @@ public class Delay3 implements Formula, Resettable {
 
                 output = rate3;
             }
+            lastInputVal = currentInput;
             lastStep = step;
         }
         return output;

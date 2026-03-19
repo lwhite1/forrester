@@ -97,18 +97,20 @@ public class Forecast implements Formula, Resettable {
             lastStep = step;
         } else if (step > lastStep) {
             long delta = step - lastStep;
+            double currentInput = input.getAsDouble();
             for (long d = 0; d < delta; d++) {
-                lastInputVal = input.getAsDouble();
-                averageInput += (lastInputVal - averageInput) / averagingTime;
+                double inputVal = (d < delta - 1) ? lastInputVal : currentInput;
+                averageInput += (inputVal - averageInput) / averagingTime;
                 double denom = averageInput * averagingTime;
                 if (Math.abs(denom) > 1e-15) {
-                    trend = (lastInputVal - averageInput) / denom;
+                    trend = (inputVal - averageInput) / denom;
                     // Clamp to prevent extreme values when averageInput is near zero
                     trend = Math.max(-10, Math.min(10, trend));
                 } else {
                     trend = 0;
                 }
             }
+            lastInputVal = currentInput;
             lastStep = step;
         }
         return lastInputVal * (1 + trend * horizon);

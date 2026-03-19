@@ -75,7 +75,7 @@ class NpvTest {
     }
 
     @Test
-    void shouldOnlyAddOnePaymentWhenSkippingSteps() {
+    void shouldAccumulatePaymentAtEachSubStepWhenSkipping() {
         int[] step1 = {0};
         int[] step2 = {0};
         Npv stepped = Npv.of(() -> 100, 0.1, () -> step1[0]);
@@ -90,16 +90,12 @@ class NpvTest {
         step1[0] = 3;
         double steppedVal = stepped.getCurrentValue();
 
-        // Skip directly from 0 to 3: adds only one payment (at step 3's discount)
+        // Skip directly from 0 to 3: should accumulate payments at each sub-step
         skipped.getCurrentValue(); // step 0
         step2[0] = 3;
         double skippedVal = skipped.getCurrentValue();
 
-        // Skipped should be less than stepped because it missed two payments
-        assertThat(skippedVal).isLessThan(steppedVal);
-
-        // Skipped = 100 (step 0) + 100 / 1.1^3
-        double expectedSkipped = 100 + 100 / Math.pow(1.1, 3);
-        assertThat(skippedVal).isCloseTo(expectedSkipped, within(1e-9));
+        // With constant stream, skipped should equal stepped (zero-order hold)
+        assertThat(skippedVal).isCloseTo(steppedVal, within(1e-9));
     }
 }

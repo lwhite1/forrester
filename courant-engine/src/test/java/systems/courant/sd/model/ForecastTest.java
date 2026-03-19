@@ -45,7 +45,7 @@ class ForecastTest {
     }
 
     @Test
-    void shouldReadInputEachIterationInCatchUpLoop() {
+    void shouldReadInputOncePerCatchUpCall() {
         int[] step = {0};
         int[] readCount = {0};
         Forecast forecast = Forecast.of(() -> { readCount[0]++; return 100; }, 5, 3, 0, () -> step[0]);
@@ -53,11 +53,11 @@ class ForecastTest {
         forecast.getCurrentValue(); // initialize (1 read)
         readCount[0] = 0;
 
-        // Jump by 5 steps — input should be read once per catch-up iteration
+        // Jump by 5 steps — input should be read once (zero-order hold for intermediate steps)
         step[0] = 5;
         forecast.getCurrentValue();
-        assertEquals(5, readCount[0],
-                "Input should be read once per catch-up iteration");
+        assertEquals(1, readCount[0],
+                "Input should be read once per getCurrentValue call (zero-order hold)");
     }
 
     @Test

@@ -24,6 +24,8 @@ public class SampleIfTrue implements Formula, Resettable {
     private final LongSupplier currentStep;
 
     private double heldValue;
+    private double lastConditionVal;
+    private double lastInputVal;
     private boolean initialized;
     private long lastStep = -1;
 
@@ -55,6 +57,8 @@ public class SampleIfTrue implements Formula, Resettable {
     @Override
     public void reset() {
         heldValue = 0;
+        lastConditionVal = 0;
+        lastInputVal = 0;
         initialized = false;
         lastStep = -1;
     }
@@ -65,17 +69,28 @@ public class SampleIfTrue implements Formula, Resettable {
         if (!initialized) {
             initialized = true;
             lastStep = step;
-            double c = condition.getAsDouble();
-            if (c != 0.0 && !Double.isNaN(c)) {
-                heldValue = input.getAsDouble();
+            lastConditionVal = condition.getAsDouble();
+            if (lastConditionVal != 0.0 && !Double.isNaN(lastConditionVal)) {
+                lastInputVal = input.getAsDouble();
+                heldValue = lastInputVal;
             } else {
+                lastInputVal = initialValue;
                 heldValue = initialValue;
             }
         } else if (step > lastStep) {
-            double c = condition.getAsDouble();
-            if (c != 0.0 && !Double.isNaN(c)) {
-                heldValue = input.getAsDouble();
+            long delta = step - lastStep;
+            double currentCondition = condition.getAsDouble();
+            for (long d = 0; d < delta; d++) {
+                boolean isFinalStep = (d == delta - 1);
+                double c = isFinalStep ? currentCondition : lastConditionVal;
+                if (c != 0.0 && !Double.isNaN(c)) {
+                    if (isFinalStep) {
+                        lastInputVal = input.getAsDouble();
+                    }
+                    heldValue = lastInputVal;
+                }
             }
+            lastConditionVal = currentCondition;
             lastStep = step;
         }
         return heldValue;
