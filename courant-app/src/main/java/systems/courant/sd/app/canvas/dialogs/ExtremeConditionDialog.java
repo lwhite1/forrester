@@ -23,17 +23,20 @@ import javafx.scene.layout.Region;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
+import java.util.Map;
+import java.util.WeakHashMap;
+
 import systems.courant.sd.app.canvas.Styles;
 
 /**
  * A dialog that displays extreme-condition test results in a table.
  *
- * <p>Only one instance may be open at a time. Use {@link #showOrUpdate} to
+ * <p>Only one instance may be open per owner window. Use {@link #showOrUpdate} to
  * create a new dialog or refresh and bring an existing one to the front.
  */
 public class ExtremeConditionDialog extends Dialog<Void> {
 
-    private static ExtremeConditionDialog openInstance;
+    private static final Map<Stage, ExtremeConditionDialog> OPEN_INSTANCES = new WeakHashMap<>();
 
     private final TableView<ExtremeConditionFinding> table;
     private final Label summaryLabel;
@@ -41,39 +44,57 @@ public class ExtremeConditionDialog extends Dialog<Void> {
     private ExtremeConditionResult currentResult;
 
     /**
-     * Shows an extreme-condition dialog with the given result. If a dialog is already open,
-     * refreshes its contents and brings it to the front instead of creating a new one.
+     * Shows an extreme-condition dialog with the given result for the given owner.
+     * If a dialog is already open for that owner, refreshes its contents and brings
+     * it to the front instead of creating a new one.
      *
      * @param result the extreme-condition test result to display
+     * @param owner  the owner stage (used to track one dialog per window)
      */
-    public static void showOrUpdate(ExtremeConditionResult result) {
-        if (openInstance != null && openInstance.isShowing()) {
-            openInstance.updateResult(result);
-            Stage window = (Stage) openInstance.getDialogPane().getScene().getWindow();
+    public static void showOrUpdate(ExtremeConditionResult result, Stage owner) {
+        ExtremeConditionDialog existing = OPEN_INSTANCES.get(owner);
+        if (existing != null && existing.isShowing()) {
+            existing.updateResult(result);
+            Stage window = (Stage) existing.getDialogPane().getScene().getWindow();
             window.toFront();
             window.requestFocus();
             return;
         }
-        if (openInstance != null) {
-            openInstance.close();
-        }
-        ExtremeConditionDialog dialog = new ExtremeConditionDialog(result);
-        openInstance = dialog;
+        ExtremeConditionDialog dialog = new ExtremeConditionDialog(result, owner);
+        OPEN_INSTANCES.put(owner, dialog);
         dialog.show();
     }
 
     /**
-     * Returns the currently open dialog, or {@code null} if none is showing.
-     * Visible for testing.
+     * Shows an extreme-condition dialog with the given result using a global singleton.
+     * Prefer {@link #showOrUpdate(ExtremeConditionResult, Stage)} for multi-window use.
      */
-    static ExtremeConditionDialog getOpenInstance() {
-        if (openInstance != null && !openInstance.isShowing()) {
-            openInstance = null;
-        }
-        return openInstance;
+    public static void showOrUpdate(ExtremeConditionResult result) {
+        showOrUpdate(result, null);
     }
 
-    public ExtremeConditionDialog(ExtremeConditionResult result) {
+    /**
+     * Returns the currently open dialog for the given owner,
+     * or {@code null} if none is showing. Visible for testing.
+     */
+    public static ExtremeConditionDialog getOpenInstance(Stage owner) {
+        ExtremeConditionDialog instance = OPEN_INSTANCES.get(owner);
+        if (instance != null && !instance.isShowing()) {
+            OPEN_INSTANCES.remove(owner);
+            return null;
+        }
+        return instance;
+    }
+
+    /**
+     * Returns the currently open dialog (global/null-owner variant),
+     * or {@code null} if none is showing. Visible for testing.
+     */
+    static ExtremeConditionDialog getOpenInstance() {
+        return getOpenInstance(null);
+    }
+
+    public ExtremeConditionDialog(ExtremeConditionResult result, Stage owner) {
         HelpContextResolver.addHelpButton(this);
         initModality(Modality.NONE);
         setTitle("Extreme Condition Test Results");
@@ -156,11 +177,7 @@ public class ExtremeConditionDialog extends Dialog<Void> {
 
         setResultConverter(button -> null);
 
-        setOnHidden(e -> {
-            if (openInstance == this) {
-                openInstance = null;
-            }
-        });
+        setOnHidden(e -> OPEN_INSTANCES.values().remove(this));
     }
 
     /**
