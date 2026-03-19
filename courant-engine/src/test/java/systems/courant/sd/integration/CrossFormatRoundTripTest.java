@@ -10,6 +10,7 @@ import systems.courant.sd.model.Stock;
 import systems.courant.sd.model.compile.CompiledModel;
 import systems.courant.sd.model.compile.ModelCompiler;
 import systems.courant.sd.model.def.FlowDef;
+import systems.courant.sd.model.def.LookupTableDef;
 import systems.courant.sd.model.def.ModelDefinition;
 import systems.courant.sd.model.def.ModelDefinitionBuilder;
 
@@ -20,6 +21,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -164,12 +166,19 @@ class CrossFormatRoundTripTest {
             ImportResult result = new XmileImporter().importModel(xmile, "LookupCross");
             ModelDefinition imported = result.definition();
 
-            // The lookup data should survive (may come back as aux+lookup or standalone lookup)
-            boolean hasLookup = !imported.lookupTables().isEmpty()
-                    || !imported.variables().isEmpty();
-            assertThat(hasLookup)
-                    .as("Lookup table data should survive XMILE round-trip")
-                    .isTrue();
+            // Verify the lookup table survived with correct data values
+            assertThat(imported.lookupTables())
+                    .as("Lookup tables should survive XMILE round-trip")
+                    .isNotEmpty();
+
+            Optional<LookupTableDef> lookup = imported.lookupTables().stream()
+                    .filter(lt -> lt.name().contains("effect"))
+                    .findFirst();
+            assertThat(lookup).as("Lookup table 'effect' should be present").isPresent();
+
+            LookupTableDef table = lookup.get();
+            assertThat(table.xValues()).as("x-values").containsExactly(xVals, within(1e-9));
+            assertThat(table.yValues()).as("y-values").containsExactly(yVals, within(1e-9));
         }
     }
 
