@@ -183,6 +183,7 @@ class ExampleModelGeneratorTest {
             ObjectNode model = modelsArray.addObject();
             model.put("id", entry.id());
             model.put("name", def.name());
+            model.put("displayName", idToDisplayName(entry.id()));
             model.put("description", entry.description());
             model.put("category", entry.category());
             model.put("difficulty", entry.difficulty());
@@ -348,5 +349,38 @@ class ExampleModelGeneratorTest {
                 .filter(s -> s.getName().equals(name))
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("Stock not found: " + name));
+    }
+
+    /**
+     * Converts a kebab-case ID to a human-readable display name.
+     * Examples: "coffee-cooling" → "Coffee Cooling", "sir-epidemic" → "SIR Epidemic".
+     */
+    static String idToDisplayName(String id) {
+        if (id == null || id.isEmpty()) {
+            return id;
+        }
+        String[] words = id.split("-");
+        var sb = new StringBuilder();
+        for (int i = 0; i < words.length; i++) {
+            if (i > 0) {
+                sb.append(' ');
+            }
+            String w = words[i];
+            if (w.length() <= 3 && w.equals(w.toLowerCase()) && !isCommonWord(w)) {
+                // Short non-common words likely acronyms: sir → SIR, sd → SD, cfc → CFC
+                sb.append(w.toUpperCase());
+            } else {
+                sb.append(Character.toUpperCase(w.charAt(0))).append(w.substring(1));
+            }
+        }
+        return sb.toString();
+    }
+
+    private static boolean isCommonWord(String w) {
+        return switch (w) {
+            case "a", "an", "and", "the", "of", "in", "on", "to", "for", "by",
+                 "vs", "ii", "new", "age", "pop" -> true;
+            default -> false;
+        };
     }
 }
