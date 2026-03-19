@@ -23,8 +23,10 @@ public final class XmileExprTranslator {
     private static final Pattern NOT_KEYWORD_PATTERN = Pattern.compile(
             "(?i)\\bNOT\\b");
     private static final Pattern INEQUALITY_PATTERN = Pattern.compile("<>");
+    private static final Pattern NAMED_ARG_PATTERN = Pattern.compile(
+            "([,(]\\s*)(\\w+)=(?!=)");
     private static final Pattern EQUALITY_SINGLE_PATTERN = Pattern.compile(
-            "(?<![<>!=\\w])=(?!=)");
+            "(?<![<>!=])=(?!=)");
     private static final Pattern SMTH3_PATTERN = Pattern.compile(
             "(?i)\\bSMTH3\\s*\\(");
     private static final Pattern SMTH1_PATTERN = Pattern.compile(
@@ -100,8 +102,11 @@ public final class XmileExprTranslator {
         expr = CARET_PATTERN.matcher(expr).replaceAll("**");
 
         // 4. Comparison operators: <> → !=, = → == (single = only)
+        //    Protect named arguments (e.g. delay=5) before converting = to ==
         expr = INEQUALITY_PATTERN.matcher(expr).replaceAll("!=");
+        expr = NAMED_ARG_PATTERN.matcher(expr).replaceAll("$1$2\u0000");
         expr = EQUALITY_SINGLE_PATTERN.matcher(expr).replaceAll("==");
+        expr = expr.replace('\u0000', '=');
 
         // 5. SMTH3 → SMOOTH3, SMTH1 → SMOOTH
         expr = SMTH3_PATTERN.matcher(expr).replaceAll("SMOOTH3(");
