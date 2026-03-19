@@ -23,9 +23,11 @@ public class Model extends Element {
     private final List<Stock> stocks = new ArrayList<>();
     private final Set<Stock> stockIdentity = new HashSet<>();
     private final Set<String> stockNames = new HashSet<>();
+    private final Set<String> topLevelStockNames = new HashSet<>();
     private final List<Flow> flows = new ArrayList<>();
     private final Set<Flow> flowIdentity = new HashSet<>();
     private final Set<String> flowNames = new HashSet<>();
+    private final Set<String> topLevelFlowNames = new HashSet<>();
     private final Map<String, Variable> variables = new LinkedHashMap<>();
     private final List<Module> modules = new ArrayList<>();
     private ModelMetadata metadata;
@@ -65,6 +67,7 @@ public class Model extends Element {
             throw new IllegalArgumentException(
                     "Duplicate stock name '" + stock.getName() + "' in model '" + getName() + "'");
         }
+        topLevelStockNames.add(stock.getName());
         stocks.add(stock);
         stockIdentity.add(stock);
     }
@@ -77,6 +80,7 @@ public class Model extends Element {
         if (stocks.remove(stock)) {
             stockIdentity.remove(stock);
             stockNames.remove(stock.getName());
+            topLevelStockNames.remove(stock.getName());
             for (Flow flow : stock.getInflows()) {
                 flow.setSink(null);
             }
@@ -171,9 +175,11 @@ public class Model extends Element {
         modules.add(module);
         for (Stock stock : module.getStocks()) {
             if (stockIdentity.add(stock)) {
-                if (stockNames.contains(stock.getName())) {
-                    log.warn("Module '{}' stock '{}' has same name as existing stock in model '{}'",
+                if (topLevelStockNames.contains(stock.getName())) {
+                    log.warn("Module '{}' stock '{}' collides with top-level stock in model '{}'; skipping duplicate",
                             module.getName(), stock.getName(), getName());
+                    stockIdentity.remove(stock);
+                    continue;
                 }
                 stocks.add(stock);
                 stockNames.add(stock.getName());
@@ -181,9 +187,11 @@ public class Model extends Element {
         }
         for (Flow flow : module.getFlows()) {
             if (flowIdentity.add(flow)) {
-                if (flowNames.contains(flow.getName())) {
-                    log.warn("Module '{}' flow '{}' has same name as existing flow in model '{}'",
+                if (topLevelFlowNames.contains(flow.getName())) {
+                    log.warn("Module '{}' flow '{}' collides with top-level flow in model '{}'; skipping duplicate",
                             module.getName(), flow.getName(), getName());
+                    flowIdentity.remove(flow);
+                    continue;
                 }
                 flows.add(flow);
                 flowNames.add(flow.getName());
@@ -228,6 +236,7 @@ public class Model extends Element {
             throw new IllegalArgumentException(
                     "Duplicate flow name '" + flow.getName() + "' in model '" + getName() + "'");
         }
+        topLevelFlowNames.add(flow.getName());
         flows.add(flow);
         flowIdentity.add(flow);
     }
