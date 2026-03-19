@@ -110,6 +110,7 @@ public class ModelReport {
         for (Module sub : module.getSubModules().values()) {
             appendModule(builder, sub, indent + "  ", visited);
         }
+        visited.remove(module.getName());
     }
 
 }
