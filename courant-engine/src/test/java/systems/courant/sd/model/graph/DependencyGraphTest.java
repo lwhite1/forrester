@@ -3,9 +3,13 @@ package systems.courant.sd.model.graph;
 import systems.courant.sd.model.def.ModelDefinition;
 import systems.courant.sd.model.def.ModelDefinitionBuilder;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
@@ -297,6 +301,36 @@ class DependencyGraphTest {
             assertThat(graph.dependenciesOf("GoodAux")).contains("S");
             // Bad aux has no formula dependencies
             assertThat(graph.dependenciesOf("BadAux")).isEmpty();
+        }
+
+        @Test
+        void shouldLogWarningWhenEquationIsUnparseable() {
+            ch.qos.logback.classic.Logger logger = (ch.qos.logback.classic.Logger)
+                    LoggerFactory.getLogger(DependencyGraph.class);
+            ListAppender<ILoggingEvent> appender = new ListAppender<>();
+            appender.start();
+            logger.addAppender(appender);
+
+            try {
+                ModelDefinition def = new ModelDefinitionBuilder()
+                        .name("LogTest")
+                        .stock("S", 100, "Thing")
+                        .flow("BadFlow", "@@@ invalid", "Day", "S", null)
+                        .variable("BadAux", "### broken", "Thing")
+                        .build();
+
+                DependencyGraph.fromDefinition(def);
+
+                List<ILoggingEvent> warnings = appender.list.stream()
+                        .filter(e -> e.getLevel() == Level.WARN)
+                        .toList();
+                assertThat(warnings).hasSize(2);
+                assertThat(warnings.get(0).getFormattedMessage()).contains("BadFlow");
+                assertThat(warnings.get(1).getFormattedMessage()).contains("BadAux");
+            } finally {
+                logger.detachAppender(appender);
+                appender.stop();
+            }
         }
 
         @Test
