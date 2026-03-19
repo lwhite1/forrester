@@ -379,7 +379,7 @@ public class CalibrateDialog extends Dialog<CalibrateDialog.Config> {
             double low = Double.parseDouble(lowerField.getText().trim());
             double high = Double.parseDouble(upperField.getText().trim());
             String guessText = guessField.getText().trim();
-            double guess = guessText.isEmpty() ? Double.NaN : Double.parseDouble(guessText);
+            double guess = guessText.isEmpty() ? (low + high) / 2.0 : Double.parseDouble(guessText);
             return new ParamConfig(getSelectedName(), low, high, guess);
         }
     }
