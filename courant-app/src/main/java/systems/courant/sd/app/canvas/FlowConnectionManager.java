@@ -148,11 +148,14 @@ final class FlowConnectionManager {
 
             // Output bindings: alias names that match an existing element
             for (Map.Entry<String, String> entry : module.outputBindings().entrySet()) {
-                String alias = entry.getValue();
-                if (alias != null && !alias.isBlank() && nameIndex.contains(alias)) {
-                    String key = moduleName + " -> " + alias;
-                    if (seen.add(key)) {
-                        result.add(new ConnectorRoute(moduleName, alias));
+                String raw = entry.getValue();
+                if (raw != null && !raw.isBlank()) {
+                    String alias = raw.replace('_', ' ');
+                    if (nameIndex.contains(alias)) {
+                        String key = moduleName + " -> " + alias;
+                        if (seen.add(key)) {
+                            result.add(new ConnectorRoute(moduleName, alias));
+                        }
                     }
                 }
             }
