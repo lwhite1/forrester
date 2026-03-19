@@ -110,7 +110,9 @@ public record LoopDominanceAnalysis(
                 double[] curr = rows.get(step);
                 double sum = 0;
                 for (int col : cols) {
-                    sum += Math.abs(curr[col] - prev[col]);
+                    if (col < curr.length && col < prev.length) {
+                        sum += Math.abs(curr[col] - prev[col]);
+                    }
                 }
                 activity[loopIdx][step] = sum;
             }
