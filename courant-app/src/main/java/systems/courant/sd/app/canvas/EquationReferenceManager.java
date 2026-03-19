@@ -6,6 +6,7 @@ import systems.courant.sd.model.expr.ExprParser;
 import systems.courant.sd.model.expr.ExprRenamer;
 import systems.courant.sd.model.expr.ExprStringifier;
 import systems.courant.sd.model.expr.Expr;
+import systems.courant.sd.model.expr.ParseException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -189,7 +190,7 @@ public final class EquationReferenceManager {
                 return equation;
             }
             return ExprStringifier.stringify(renamed);
-        } catch (Exception e) {
+        } catch (ParseException e) {
             log.debug("AST parse failed for equation '{}', falling back to string replacement: {}",
                     equation, e.getMessage());
             return replaceTokenByString(equation, oldToken, newToken);
