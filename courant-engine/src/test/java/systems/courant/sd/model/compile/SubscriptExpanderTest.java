@@ -202,6 +202,47 @@ class SubscriptExpanderTest {
         }
 
         @Test
+        void shouldExpandPartialSubscriptInTwoDimensionalEquation() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("2D Partial")
+                    .subscript("Region", List.of("North", "South"))
+                    .subscript("Age", List.of("Young", "Old"))
+                    .stock("Pop", 100, "Person", List.of("Region", "Age"))
+                    .variable("rate", "Pop[North] * 0.02", "Person/Year",
+                            List.of("Region", "Age"))
+                    .build();
+
+            ModelDefinition expanded = SubscriptExpander.expand(def);
+
+            // rate[North,Young] should reference Pop[North,Young]
+            assertThat(expanded.variables().get(0).name()).isEqualTo("rate[North,Young]");
+            assertThat(expanded.variables().get(0).equation()).isEqualTo("Pop[North,Young] * 0.02");
+            // rate[North,Old] should reference Pop[North,Old]
+            assertThat(expanded.variables().get(1).name()).isEqualTo("rate[North,Old]");
+            assertThat(expanded.variables().get(1).equation()).isEqualTo("Pop[North,Old] * 0.02");
+        }
+
+        @Test
+        void shouldLeaveFullSubscriptUnchanged() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("2D Full")
+                    .subscript("Region", List.of("North", "South"))
+                    .subscript("Age", List.of("Young", "Old"))
+                    .stock("Pop", 100, "Person", List.of("Region", "Age"))
+                    .variable("rate", "Pop[North,Young] * 0.02", "Person/Year",
+                            List.of("Region", "Age"))
+                    .build();
+
+            ModelDefinition expanded = SubscriptExpander.expand(def);
+
+            // Full subscript should remain unchanged
+            assertThat(expanded.variables().get(0).equation())
+                    .isEqualTo("Pop[North,Young] * 0.02");
+            assertThat(expanded.variables().get(1).equation())
+                    .isEqualTo("Pop[North,Young] * 0.02");
+        }
+
+        @Test
         void shouldExpandThreeDimensions() {
             ModelDefinition def = new ModelDefinitionBuilder()
                     .name("3D")
