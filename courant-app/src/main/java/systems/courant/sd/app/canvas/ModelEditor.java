@@ -192,25 +192,33 @@ public class ModelEditor {
     /** @return the name of the created stock */
     public String addStockFrom(StockDef template) {
         checkFxThread();
-        return factory.addStockFrom(template);
+        String name = factory.addStockFrom(template);
+        fireElementAdded(name, "Stock");
+        return name;
     }
 
     /** @return the name of the created flow */
     public String addFlowFrom(FlowDef template, String source, String sink) {
         checkFxThread();
-        return factory.addFlowFrom(template, source, sink);
+        String name = factory.addFlowFrom(template, source, sink);
+        fireElementAdded(name, "Flow");
+        return name;
     }
 
     /** @return the name of the created auxiliary */
     public String addVariableFrom(VariableDef template, String equation) {
         checkFxThread();
-        return factory.addVariableFrom(template, equation);
+        String name = factory.addVariableFrom(template, equation);
+        fireElementAdded(name, "Variable");
+        return name;
     }
 
     /** @return the instance name of the created module */
     public String addModuleFrom(ModuleInstanceDef template) {
         checkFxThread();
-        return factory.addModuleFrom(template);
+        String name = factory.addModuleFrom(template);
+        fireElementAdded(name, "Module");
+        return name;
     }
 
     /** @return the instance name of the created module */
@@ -232,7 +240,9 @@ public class ModelEditor {
     /** @return the name of the created lookup table */
     public String addLookupFrom(LookupTableDef template) {
         checkFxThread();
-        return factory.addLookupFrom(template);
+        String name = factory.addLookupFrom(template);
+        fireElementAdded(name, "Lookup");
+        return name;
     }
 
     /** @return the name of the created CLD variable */
@@ -262,7 +272,9 @@ public class ModelEditor {
     /** @return the name of the created comment */
     public String addCommentFrom(CommentDef template) {
         checkFxThread();
-        return factory.addCommentFrom(template);
+        String name = factory.addCommentFrom(template);
+        fireElementAdded(name, "Comment");
+        return name;
     }
 
     /**

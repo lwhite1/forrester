@@ -1542,6 +1542,37 @@ class ModelEditorTest {
 
             assertThat(name1).isNotEqualTo(name2);
         }
+
+        @Test
+        void shouldFireElementAddedForAllFromMethods() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .stock("S", 100, "u")
+                    .flow("F", "0", "day", null, null)
+                    .variable("V", "1", "u")
+                    .lookupTable("L", new double[]{0, 1}, new double[]{0, 1}, "LINEAR")
+                    .build();
+            editor.loadFrom(def);
+
+            List<String> added = new ArrayList<>();
+            editor.addListener(new ModelEditListener() {
+                @Override
+                public void onElementAdded(String name, String typeName) {
+                    added.add(typeName + ":" + name);
+                }
+            });
+
+            String s = editor.addStockFrom(editor.getStocks().get(0));
+            String f = editor.addFlowFrom(editor.getFlows().get(0), null, null);
+            String v = editor.addVariableFrom(editor.getVariables().get(0), "1");
+            String l = editor.addLookupFrom(editor.getLookupTables().get(0));
+
+            assertThat(added).containsExactly(
+                    "Stock:" + s,
+                    "Flow:" + f,
+                    "Variable:" + v,
+                    "Lookup:" + l);
+        }
     }
 
     @Nested
