@@ -1552,6 +1552,23 @@ class ExprCompilerTest {
             fracStep[0] = 24;
             assertThat(formula.getCurrentValue()).isEqualTo(1.0);
         }
+
+        @Test
+        void shouldFirePulseTrainAtExactRepeatBoundary() {
+            // DT=0.25, repeat=4: at time 6 (step 24), elapsed=4 which is exactly repeat.
+            // FP modulo can give 4.0 % 4.0 ≈ tiny positive instead of 0.
+            fracCtx.addLiteralConstant("start", 2);
+            fracCtx.addLiteralConstant("dur", 1);
+            fracCtx.addLiteralConstant("repeat", 4);
+            fracCtx.addLiteralConstant("fin", 20);
+            Formula formula = fracCompiler.compile("PULSE_TRAIN(start, dur, repeat, fin)");
+            // At time 10 (step 40): elapsed=8, 8%4 should be 0 → inside pulse
+            fracStep[0] = 40;
+            assertThat(formula.getCurrentValue()).isEqualTo(1.0);
+            // At time 14 (step 56): elapsed=12, 12%4 should be 0 → inside pulse
+            fracStep[0] = 56;
+            assertThat(formula.getCurrentValue()).isEqualTo(1.0);
+        }
     }
 
     @Nested
