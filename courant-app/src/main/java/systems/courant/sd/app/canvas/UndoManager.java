@@ -109,6 +109,17 @@ public class UndoManager implements AutoCloseable {
     }
 
     /**
+     * Waits for the most recent undo entry's background compression to complete.
+     * Visible for testing — avoids timing-dependent {@code Thread.sleep} in tests.
+     */
+    void awaitCompression() {
+        UndoEntry top = undoStack.peek();
+        if (top != null) {
+            top.future().join();
+        }
+    }
+
+    /**
      * Saves the current state tentatively, without clearing the redo stack.
      * Use this when the operation may be rejected or may fail, so that
      * redo history is preserved if the undo entry is later discarded.
