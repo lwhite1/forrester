@@ -1014,10 +1014,6 @@ public final class ResultReportGenerator {
 
     // ── HTML Header & CSS ───────────────────────────────────────────────
 
-    private static void writeHeader(StringBuilder html, String title) {
-        writeHeader(html, title, null);
-    }
-
     private static void writeHeader(StringBuilder html, String title,
                                     ReportTemplate template) {
         html.append("""
