@@ -23,11 +23,11 @@ import javafx.application.Platform;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
@@ -57,7 +57,7 @@ public class ModelEditor {
     private final List<CommentDef> comments = new CopyOnWriteArrayList<>();
     private final List<SubscriptDef> subscripts = new CopyOnWriteArrayList<>();
     private final List<ReferenceDataset> referenceDatasets = new CopyOnWriteArrayList<>();
-    private final Set<String> nameIndex = new HashSet<>();
+    private final Set<String> nameIndex = ConcurrentHashMap.newKeySet();
     private final List<ModelEditListener> listeners = new CopyOnWriteArrayList<>();
 
     private final EquationReferenceManager equationRefManager =
