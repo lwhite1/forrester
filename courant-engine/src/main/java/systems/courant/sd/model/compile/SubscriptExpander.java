@@ -44,13 +44,14 @@ public class SubscriptExpander {
             return def;
         }
 
+        Map<String, Integer> dimensionCounts = collectDimensionCounts(def);
         Pattern namePattern = buildNamePattern(subscriptedNames);
 
         return def.toBuilder()
                 .clearStocks().clearFlows().clearVariables()
-                .stocks(expandStocks(def, dimensionLabels, subscriptedNames, namePattern))
-                .flows(expandFlows(def, dimensionLabels, subscriptedNames, namePattern))
-                .variables(expandVariables(def, dimensionLabels, subscriptedNames, namePattern))
+                .stocks(expandStocks(def, dimensionLabels, subscriptedNames, namePattern, dimensionCounts))
+                .flows(expandFlows(def, dimensionLabels, subscriptedNames, namePattern, dimensionCounts))
+                .variables(expandVariables(def, dimensionLabels, subscriptedNames, namePattern, dimensionCounts))
                 .build();
     }
 
@@ -82,10 +83,31 @@ public class SubscriptExpander {
         return subscriptedNames;
     }
 
+    private static Map<String, Integer> collectDimensionCounts(ModelDefinition def) {
+        Map<String, Integer> counts = new HashMap<>();
+        for (StockDef s : def.stocks()) {
+            if (!s.subscripts().isEmpty()) {
+                counts.put(s.name(), s.subscripts().size());
+            }
+        }
+        for (FlowDef f : def.flows()) {
+            if (!f.subscripts().isEmpty()) {
+                counts.put(f.name(), f.subscripts().size());
+            }
+        }
+        for (VariableDef a : def.variables()) {
+            if (!a.subscripts().isEmpty()) {
+                counts.put(a.name(), a.subscripts().size());
+            }
+        }
+        return counts;
+    }
+
     private static List<StockDef> expandStocks(ModelDefinition def,
                                                 Map<String, List<String>> dimensionLabels,
                                                 Set<String> subscriptedNames,
-                                                Pattern namePattern) {
+                                                Pattern namePattern,
+                                                Map<String, Integer> dimensionCounts) {
         List<StockDef> expanded = new ArrayList<>();
         for (StockDef s : def.stocks()) {
             if (s.subscripts().isEmpty()) {
@@ -112,7 +134,8 @@ public class SubscriptExpander {
     private static List<FlowDef> expandFlows(ModelDefinition def,
                                               Map<String, List<String>> dimensionLabels,
                                               Set<String> subscriptedNames,
-                                              Pattern namePattern) {
+                                              Pattern namePattern,
+                                              Map<String, Integer> dimensionCounts) {
         List<FlowDef> expanded = new ArrayList<>();
         for (FlowDef f : def.flows()) {
             if (f.subscripts().isEmpty()) {
@@ -123,7 +146,7 @@ public class SubscriptExpander {
                 for (List<String> combo : cartesianProduct(labelLists)) {
                     String suffix = joinLabels(combo);
                     String expandedEq = rewriteEquation(
-                            f.equation(), suffix, subscriptedNames, namePattern);
+                            f.equation(), suffix, subscriptedNames, namePattern, dimensionCounts);
                     String expandedSource = expandReference(
                             f.source(), suffix, subscriptedNames);
                     String expandedSink = expandReference(
@@ -146,7 +169,8 @@ public class SubscriptExpander {
     private static List<VariableDef> expandVariables(ModelDefinition def,
                                                       Map<String, List<String>> dimensionLabels,
                                                       Set<String> subscriptedNames,
-                                                      Pattern namePattern) {
+                                                      Pattern namePattern,
+                                                      Map<String, Integer> dimensionCounts) {
         List<VariableDef> expanded = new ArrayList<>();
         for (VariableDef a : def.variables()) {
             if (a.subscripts().isEmpty()) {
@@ -157,7 +181,7 @@ public class SubscriptExpander {
                 for (List<String> combo : cartesianProduct(labelLists)) {
                     String suffix = joinLabels(combo);
                     String expandedEq = rewriteEquation(
-                            a.equation(), suffix, subscriptedNames, namePattern);
+                            a.equation(), suffix, subscriptedNames, namePattern, dimensionCounts);
                     expanded.add(new VariableDef(
                             a.name() + "[" + suffix + "]",
                             a.comment(),
@@ -171,15 +195,20 @@ public class SubscriptExpander {
 
     /**
      * Rewrites an equation string, replacing references to subscripted elements with
-     * their bracketed form for the given label.
+     * their bracketed form for the given label. Partial subscript references (fewer
+     * dimensions than defined) are completed with trailing dimensions from the current label.
      */
     static String rewriteEquation(String equation, String label,
-                                  Set<String> subscriptedNames, Pattern namePattern) {
+                                  Set<String> subscriptedNames, Pattern namePattern,
+                                  Map<String, Integer> dimensionCounts) {
         Matcher matcher = namePattern.matcher(equation);
         StringBuilder result = new StringBuilder();
+        int cursor = 0;
         while (matcher.find()) {
+            // Append text between previous match end and this match start
+            result.append(equation, cursor, matcher.start());
+
             String matchedText = matcher.group();
-            // Strip backticks to get the raw element name
             String rawName;
             boolean wasQuoted;
             if (matchedText.startsWith("`") && matchedText.endsWith("`")) {
@@ -189,24 +218,62 @@ public class SubscriptExpander {
                 rawName = matchedText;
                 wasQuoted = false;
             }
-            if (subscriptedNames.contains(rawName)) {
-                // Check if already has a bracket suffix (don't double-expand)
-                int afterMatch = matcher.end();
-                if (afterMatch < equation.length() && equation.charAt(afterMatch) == '[') {
-                    matcher.appendReplacement(result, Matcher.quoteReplacement(matchedText));
+
+            if (!subscriptedNames.contains(rawName)) {
+                result.append(matchedText);
+                cursor = matcher.end();
+                continue;
+            }
+
+            int afterMatch = matcher.end();
+            if (afterMatch < equation.length() && equation.charAt(afterMatch) == '[') {
+                int closeBracket = equation.indexOf(']', afterMatch);
+                if (closeBracket < 0) {
+                    // Malformed bracket — leave as-is
+                    result.append(matchedText);
+                    cursor = matcher.end();
                 } else {
-                    // Place [label] after the closing backtick if quoted
-                    String replacement = wasQuoted
-                            ? "`" + rawName + "`[" + label + "]"
-                            : rawName + "[" + label + "]";
-                    matcher.appendReplacement(result, Matcher.quoteReplacement(replacement));
+                    String existing = equation.substring(afterMatch + 1, closeBracket);
+                    int existingDims = countDimensions(existing);
+                    int expectedDims = dimensionCounts.getOrDefault(rawName, existingDims);
+                    if (existingDims < expectedDims) {
+                        // Partial subscript — append trailing dimensions from current label
+                        String[] labelParts = label.split(",");
+                        StringBuilder fullSubscript = new StringBuilder(existing);
+                        for (int i = existingDims; i < expectedDims && i < labelParts.length; i++) {
+                            fullSubscript.append(',').append(labelParts[i]);
+                        }
+                        String prefix = wasQuoted ? "`" + rawName + "`" : rawName;
+                        result.append(prefix).append('[').append(fullSubscript).append(']');
+                    } else {
+                        // Full subscript — leave name + brackets as-is
+                        result.append(equation, matcher.start(), closeBracket + 1);
+                    }
+                    cursor = closeBracket + 1;
                 }
             } else {
-                matcher.appendReplacement(result, Matcher.quoteReplacement(matchedText));
+                // No bracket — expand with full label
+                String prefix = wasQuoted ? "`" + rawName + "`" : rawName;
+                result.append(prefix).append('[').append(label).append(']');
+                cursor = matcher.end();
             }
         }
-        matcher.appendTail(result);
+        // Append remaining text after last match
+        result.append(equation, cursor, equation.length());
         return result.toString();
+    }
+
+    private static int countDimensions(String bracketContent) {
+        if (bracketContent.isEmpty()) {
+            return 0;
+        }
+        int count = 1;
+        for (int i = 0; i < bracketContent.length(); i++) {
+            if (bracketContent.charAt(i) == ',') {
+                count++;
+            }
+        }
+        return count;
     }
 
     /**
