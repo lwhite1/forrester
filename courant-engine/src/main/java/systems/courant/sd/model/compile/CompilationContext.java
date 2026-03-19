@@ -1,5 +1,8 @@
 package systems.courant.sd.model.compile;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import systems.courant.sd.measure.TimeUnit;
 import systems.courant.sd.measure.UnitRegistry;
 import systems.courant.sd.model.Flow;
@@ -24,6 +27,8 @@ import java.util.function.LongSupplier;
  * for module scoping.
  */
 public class CompilationContext {
+
+    private static final Logger logger = LoggerFactory.getLogger(CompilationContext.class);
 
     private final Map<String, Stock> stocks = new LinkedHashMap<>();
     private final Map<String, Flow> flows = new LinkedHashMap<>();
@@ -97,6 +102,9 @@ public class CompilationContext {
      * @param stock the stock instance
      */
     public void addStock(String name, Stock stock) {
+        if (stocks.containsKey(name)) {
+            logger.warn("Overwriting duplicate stock name: {}", name);
+        }
         stocks.put(name, stock);
     }
 
@@ -107,6 +115,9 @@ public class CompilationContext {
      * @param flow the flow instance
      */
     public void addFlow(String name, Flow flow) {
+        if (flows.containsKey(name)) {
+            logger.warn("Overwriting duplicate flow name: {}", name);
+        }
         flows.put(name, flow);
     }
 
@@ -117,6 +128,9 @@ public class CompilationContext {
      * @param variable the variable instance
      */
     public void addVariable(String name, Variable variable) {
+        if (variables.containsKey(name)) {
+            logger.warn("Overwriting duplicate variable name: {}", name);
+        }
         variables.put(name, variable);
     }
 
@@ -127,6 +141,9 @@ public class CompilationContext {
      * @param value the constant's numeric value
      */
     public void addLiteralConstant(String name, double value) {
+        if (literalConstants.containsKey(name)) {
+            logger.warn("Overwriting duplicate literal constant name: {}", name);
+        }
         literalConstants.put(name, value);
     }
 
@@ -150,6 +167,9 @@ public class CompilationContext {
      * @param inputHolder a single-element array used to pass input values to the table
      */
     public void addLookupTable(String name, LookupTable table, double[] inputHolder) {
+        if (lookupTables.containsKey(name)) {
+            logger.warn("Overwriting duplicate lookup table name: {}", name);
+        }
         lookupTables.put(name, table);
         lookupInputHolders.put(name, inputHolder);
     }
