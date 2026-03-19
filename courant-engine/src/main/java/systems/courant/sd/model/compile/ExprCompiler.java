@@ -221,8 +221,10 @@ public class ExprCompiler {
             case "SMOOTHI" -> compileSmoothI(args);
             case "SMOOTH3" -> compileSmooth3(args);
             case "SMOOTH3I" -> compileSmooth3I(args);
-            case "DELAY1", "DELAY1I" -> compileDelay1(args);
-            case "DELAY3", "DELAY3I" -> compileDelay3(args);
+            case "DELAY1" -> compileDelay1(args);
+            case "DELAY1I" -> compileDelay1I(args);
+            case "DELAY3" -> compileDelay3(args);
+            case "DELAY3I" -> compileDelay3I(args);
             case "STEP" -> compileStep(args);
             case "RAMP" -> compileRamp(args);
             case "PULSE" -> compilePulse(args);
@@ -710,6 +712,11 @@ public class ExprCompiler {
         return smooth3::getCurrentValue;
     }
 
+    private DoubleSupplier compileDelay1I(List<Expr> args) {
+        requireArgs("DELAY1I", args, 3);
+        return compileDelay1(args);
+    }
+
     private DoubleSupplier compileDelay1(List<Expr> args) {
         if (args.size() < 2 || args.size() > 3) {
             throw new CompilationException(
@@ -736,6 +743,11 @@ public class ExprCompiler {
         }
         resettables.add(delay1);
         return delay1::getCurrentValue;
+    }
+
+    private DoubleSupplier compileDelay3I(List<Expr> args) {
+        requireArgs("DELAY3I", args, 3);
+        return compileDelay3(args);
     }
 
     private DoubleSupplier compileDelay3(List<Expr> args) {
