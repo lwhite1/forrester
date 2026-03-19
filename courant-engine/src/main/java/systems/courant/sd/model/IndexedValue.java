@@ -281,9 +281,9 @@ public final class IndexedValue {
 
     /**
      * Divides every element by a scalar value.
+     * If the scalar is zero, elements become {@code NaN}.
      *
      * @param scalar the divisor
-     * @throws ArithmeticException if the scalar is zero
      */
     public IndexedValue divide(double scalar) {
         return divide(scalar(scalar));
