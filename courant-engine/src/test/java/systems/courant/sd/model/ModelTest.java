@@ -94,16 +94,17 @@ public class ModelTest {
     }
 
     @Test
-    public void shouldWarnButAddModuleStockWithCollidingName() {
+    public void shouldSkipDuplicateModuleStockWithCollidingName() {
         Stock stock = new Stock("Population", 100, THING);
         model.addStock(stock);
 
         Module module = new Module("SubModel");
         module.addStock(new Stock("Population", 200, THING));
 
-        // Different object with same name: added with a warning (supports multi-instance modules)
+        // Different object with same name: skipped to prevent double-update per timestep
         model.addModule(module);
-        assertThat(model.getStocks()).hasSize(2);
+        assertThat(model.getStocks()).hasSize(1);
+        assertThat(model.getStocks().getFirst().getValue()).isEqualTo(100);
     }
 
     @Test
@@ -200,14 +201,14 @@ public class ModelTest {
     }
 
     @Test
-    public void shouldWarnButAddModuleFlowWithCollidingName() {
+    public void shouldSkipDuplicateModuleFlowWithCollidingName() {
         model.addFlow(Flow.create("Birth Rate", MINUTE, () -> new Quantity(10, THING)));
 
         Module module = new Module("SubModel");
         module.addFlow(Flow.create("Birth Rate", MINUTE, () -> new Quantity(5, THING)));
 
-        // Different object with same name: added with a warning (supports multi-instance modules)
+        // Different object with same name: skipped to prevent double-update per timestep
         model.addModule(module);
-        assertThat(model.getFlows()).hasSize(2);
+        assertThat(model.getFlows()).hasSize(1);
     }
 }
