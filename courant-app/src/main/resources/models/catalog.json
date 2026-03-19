@@ -3,6 +3,7 @@
     {
       "id": "advertising",
       "name": "advertising",
+      "displayName": "Advertising",
       "description": "Advertising effectiveness model showing how ad spending drives customer awareness and sales.",
       "category": "marketing",
       "difficulty": "intermediate",
@@ -22,6 +23,7 @@
     {
       "id": "age",
       "name": "AGE",
+      "displayName": "Age Cohort",
       "description": "Age-cohort population model tracking births, aging, and deaths across demographic groups.",
       "category": "demographics",
       "difficulty": "intermediate",
@@ -40,6 +42,7 @@
     {
       "id": "age-chain",
       "name": "AGECHAIN",
+      "displayName": "Aging Chain",
       "description": "Simplified aging chain model using cascaded stocks to represent population cohort transitions.",
       "category": "demographics",
       "difficulty": "intermediate",
@@ -58,6 +61,7 @@
     {
       "id": "aging-chain",
       "name": "0604Aging",
+      "displayName": "Aging (Bossel)",
       "description": "Three-stock aging chain model demonstrating demographic cohort transitions",
       "category": "demographics",
       "difficulty": "intermediate",
@@ -76,6 +80,7 @@
     {
       "id": "arms3",
       "name": "arms3",
+      "displayName": "Arms Race",
       "description": "Arms race model with two-nation military spending feedbacks, threat perception, and escalation dynamics.",
       "category": "policy",
       "difficulty": "advanced",
@@ -94,6 +99,7 @@
     {
       "id": "ball",
       "name": "BALL",
+      "displayName": "Bouncing Ball",
       "description": "Bouncing ball simulation modeling position and velocity under gravity with elastic collisions.",
       "category": "physics",
       "difficulty": "intermediate",
@@ -112,6 +118,7 @@
     {
       "id": "bathtub",
       "name": "Bathtub",
+      "displayName": "Bathtub",
       "description": "Water drains at a fixed rate; inflow begins after a delay",
       "category": "introductory",
       "difficulty": "introductory",
@@ -130,6 +137,7 @@
     {
       "id": "bluefin-tuna-overfishing",
       "name": "1412_OverfishingOfNBFTunaEN",
+      "displayName": "Bluefin Tuna Overfishing",
       "description": "Two-stock model of North Atlantic bluefin tuna population collapse from commercial overfishing",
       "category": "ecology",
       "difficulty": "advanced",
@@ -148,6 +156,7 @@
     {
       "id": "bpr0",
       "name": "BPR0",
+      "displayName": "Business Process Reengineering (CLD)",
       "description": "Causal loop diagram of a business process reengineering problem with no stock-flow structure.",
       "category": "policy",
       "difficulty": "introductory",
@@ -166,6 +175,7 @@
     {
       "id": "bpr3",
       "name": "BPR3",
+      "displayName": "Business Process Reengineering",
       "description": "Full business process reengineering model with stocks, flows, and policy intervention levers.",
       "category": "policy",
       "difficulty": "advanced",
@@ -184,6 +194,7 @@
     {
       "id": "burnout",
       "name": "BURNOUT",
+      "displayName": "Burnout",
       "description": "Employee burnout model capturing workload pressure, fatigue accumulation, and productivity collapse.",
       "category": "management",
       "difficulty": "advanced",
@@ -202,6 +213,7 @@
     {
       "id": "burnout-homer",
       "name": "1016_BurnoutHomer1",
+      "displayName": "Burnout (Homer)",
       "description": "Five-stock model of workplace burnout dynamics based on Homer's formulation",
       "category": "management",
       "difficulty": "intermediate",
@@ -220,6 +232,7 @@
     {
       "id": "caffeine",
       "name": "CAFFEINE",
+      "displayName": "Caffeine",
       "description": "Pharmacokinetic model of caffeine absorption and elimination in the human body.",
       "category": "social",
       "difficulty": "intermediate",
@@ -238,6 +251,7 @@
     {
       "id": "cap1",
       "name": "CAP1",
+      "displayName": "Capacity Acquisition",
       "description": "Capacity acquisition model showing delays between ordering and receiving production capacity.",
       "category": "supply-chain",
       "difficulty": "intermediate",
@@ -256,6 +270,7 @@
     {
       "id": "cfc",
       "name": "CFC",
+      "displayName": "CFC Emissions",
       "description": "CFC emissions policy model exploring chlorofluorocarbon regulation and atmospheric accumulation.",
       "category": "policy",
       "difficulty": "intermediate",
@@ -274,6 +289,7 @@
     {
       "id": "change",
       "name": "change",
+      "displayName": "Change Management",
       "description": "Change management model illustrating resistance and adaptation feedback during organizational transitions.",
       "category": "control",
       "difficulty": "intermediate",
@@ -292,6 +308,7 @@
     {
       "id": "cholera",
       "name": "1409_CholeraZBwoUnits",
+      "displayName": "Cholera",
       "description": "Seven-stock cholera transmission model incorporating waterborne pathogen dynamics",
       "category": "epidemiology",
       "difficulty": "advanced",
@@ -310,6 +327,7 @@
     {
       "id": "cld-bankrun",
       "name": "0211CLDbankrun",
+      "displayName": "Bank Run (CLD)",
       "description": "Causal loop diagram of positive feedback loops driving bank run dynamics",
       "category": "causal-loop",
       "difficulty": "introductory",
@@ -328,6 +346,7 @@
     {
       "id": "cocaine-cld",
       "name": "0601Cocaine_CLD",
+      "displayName": "Cocaine (CLD)",
       "description": "Causal loop diagram of feedback loops in cocaine use and addiction dynamics",
       "category": "causal-loop",
       "difficulty": "introductory",
@@ -346,6 +365,7 @@
     {
       "id": "cocaine-flow",
       "name": "0601Cocaine_model",
+      "displayName": "Cocaine",
       "description": "Simple stock-flow model of cocaine usage dynamics with one stock representing users",
       "category": "policy",
       "difficulty": "introductory",
@@ -364,6 +384,7 @@
     {
       "id": "coffee-cooling",
       "name": "Coffee Cooling",
+      "displayName": "Coffee Cooling",
       "description": "Coffee temperature decays toward room temperature",
       "category": "introductory",
       "difficulty": "introductory",
@@ -382,6 +403,7 @@
     {
       "id": "collapse-civilisations",
       "name": "1822_CollapseOfCivilisations",
+      "displayName": "Collapse of Civilisations",
       "description": "Four-stock model of civilizational collapse through resource depletion and institutional decay",
       "category": "social",
       "difficulty": "advanced",
@@ -400,6 +422,7 @@
     {
       "id": "commod",
       "name": "COMMOD",
+      "displayName": "Commodity Market",
       "description": "Commodity market model with price cycles driven by supply-demand imbalances and production delays.",
       "category": "economics",
       "difficulty": "advanced",
@@ -418,6 +441,7 @@
     {
       "id": "compete1",
       "name": "COMPETE1",
+      "displayName": "Competitive Dynamics",
       "description": "Competitive dynamics model of two firms vying for market share through pricing and quality.",
       "category": "management",
       "difficulty": "intermediate",
@@ -436,6 +460,7 @@
     {
       "id": "competition-faculty",
       "name": "0201CompetitionFaculty",
+      "displayName": "Faculty Competition (CLD)",
       "description": "Causal loop diagram of competitive dynamics among faculty members",
       "category": "causal-loop",
       "difficulty": "introductory",
@@ -454,6 +479,7 @@
     {
       "id": "conflict-middle-east",
       "name": "0210ConflictInMiddleEast",
+      "displayName": "Middle East Conflict (CLD)",
       "description": "Causal loop diagram of escalation and de-escalation dynamics in Middle East conflicts",
       "category": "causal-loop",
       "difficulty": "introductory",
@@ -472,6 +498,7 @@
     {
       "id": "cool",
       "name": "COOL",
+      "displayName": "Newton's Cooling",
       "description": "Newton's law of cooling: a single stock model of temperature decay toward ambient.",
       "category": "introductory",
       "difficulty": "introductory",
@@ -490,6 +517,7 @@
     {
       "id": "corp-grth",
       "name": "CORPGRTH",
+      "displayName": "Corporate Growth",
       "description": "Corporate growth model exploring limits to growth from workforce, demand, and capital constraints.",
       "category": "management",
       "difficulty": "advanced",
@@ -508,6 +536,7 @@
     {
       "id": "cust3",
       "name": "CUST3",
+      "displayName": "Customer Supply Chain",
       "description": "Customer supply chain model with multi-stage ordering, backlog management, and delivery delays.",
       "category": "supply-chain",
       "difficulty": "intermediate",
@@ -526,6 +555,7 @@
     {
       "id": "customer",
       "name": "CUSTOMER",
+      "displayName": "Customer (CLD)",
       "description": "Causal loop diagram of customer acquisition and retention feedback loops.",
       "category": "causal-loop",
       "difficulty": "introductory",
@@ -544,6 +574,7 @@
     {
       "id": "debt-crisis",
       "name": "1403_DebtCrisisBasedOnZ605",
+      "displayName": "Debt Crisis",
       "description": "Four-stock model of sovereign debt accumulation, interest rate spirals, and fiscal crisis",
       "category": "economics",
       "difficulty": "advanced",
@@ -562,6 +593,7 @@
     {
       "id": "deliv",
       "name": "DELIV",
+      "displayName": "Delivery Delay",
       "description": "Delivery delay model showing how order backlogs and capacity affect fulfillment times.",
       "category": "supply-chain",
       "difficulty": "intermediate",
@@ -580,6 +612,7 @@
     {
       "id": "deradicalization",
       "name": "1416_deradicalisationI_EN",
+      "displayName": "Deradicalization",
       "description": "Four-stock model of radicalization pathways and deradicalization policy interventions",
       "category": "policy",
       "difficulty": "advanced",
@@ -598,6 +631,7 @@
     {
       "id": "deradicalization-ii",
       "name": "1813_deradicalizationII_EN_ReadNoteOnUnitErrors",
+      "displayName": "Deradicalization II",
       "description": "Extended five-stock deradicalization model with additional intervention mechanisms and social network effects",
       "category": "policy",
       "difficulty": "advanced",
@@ -616,6 +650,7 @@
     {
       "id": "district-housing",
       "name": "1414_DistrictHousingWOunits",
+      "displayName": "District Housing",
       "description": "Two-stock model of housing supply and demand dynamics within a district",
       "category": "economics",
       "difficulty": "intermediate",
@@ -634,6 +669,7 @@
     {
       "id": "ecological-overshoot",
       "name": "0603EcOvershootCollapseBasedOnEZ416Bossel",
+      "displayName": "Ecological Overshoot & Collapse",
       "description": "Two-stock ecological overshoot and collapse model based on Bossel's formulation",
       "category": "ecology",
       "difficulty": "intermediate",
@@ -653,6 +689,7 @@
     {
       "id": "eit",
       "name": "EIT",
+      "displayName": "Emerging Innovation",
       "description": "Technology adoption model exploring diffusion of emerging innovations over time.",
       "category": "technology",
       "difficulty": "intermediate",
@@ -671,6 +708,7 @@
     {
       "id": "electric",
       "name": "ELECTRIC",
+      "displayName": "Electric Utility",
       "description": "Electric utility model calibrated against historical data for capacity planning and demand forecasting.",
       "category": "technology",
       "difficulty": "intermediate",
@@ -689,6 +727,7 @@
     {
       "id": "energy-transition",
       "name": "1816_EnergyTransitionManagement_Q2b_EN",
+      "displayName": "Energy Transition",
       "description": "Twelve-stock model of energy system transition from fossil fuels to renewables with policy levers",
       "category": "technology",
       "difficulty": "advanced",
@@ -708,6 +747,7 @@
     {
       "id": "entrepreneurs-transitions",
       "name": "0212EntrepreneursAndTransitionsEnV3simple",
+      "displayName": "Entrepreneurs & Transitions (CLD)",
       "description": "Causal loop diagram of entrepreneurial activity and sociotechnical transitions",
       "category": "causal-loop",
       "difficulty": "introductory",
@@ -726,6 +766,7 @@
     {
       "id": "environmental-management",
       "name": "1404_EnvManagementInMiniworldWOcorrectunits",
+      "displayName": "Environmental Management",
       "description": "Three-stock model of environmental management trade-offs between economic growth and ecological degradation",
       "category": "environment",
       "difficulty": "advanced",
@@ -744,6 +785,7 @@
     {
       "id": "epidemic",
       "name": "EPIDEMIC",
+      "displayName": "Epidemic (SIR)",
       "description": "SIR compartmental model of infectious disease spread through a population.",
       "category": "epidemiology",
       "difficulty": "intermediate",
@@ -762,6 +804,7 @@
     {
       "id": "evs-lithium-scarcity",
       "name": "1408_EVsLithiumScarcity_EN",
+      "displayName": "EVs & Lithium Scarcity",
       "description": "Seven-stock model of electric vehicle adoption constrained by lithium resource scarcity",
       "category": "technology",
       "difficulty": "advanced",
@@ -780,6 +823,7 @@
     {
       "id": "exponential-growth",
       "name": "Exponential Growth",
+      "displayName": "Exponential Growth",
       "description": "Population growing with constant birth and death rates",
       "category": "introductory",
       "difficulty": "introductory",
@@ -798,6 +842,7 @@
     {
       "id": "family-planning",
       "name": "0607UnintendedFamilyPlanningBenefits",
+      "displayName": "Family Planning",
       "description": "Five-stock model exploring unintended consequences of family planning programs on population dynamics",
       "category": "demographics",
       "difficulty": "advanced",
@@ -816,6 +861,7 @@
     {
       "id": "feral-pigs",
       "name": "0605Feral Pigs SFD EN",
+      "displayName": "Feral Pigs",
       "description": "Models feral pig population dynamics with density-dependent birth and death rates",
       "category": "ecology",
       "difficulty": "intermediate",
@@ -835,6 +881,7 @@
     {
       "id": "finance",
       "name": "FINANCE",
+      "displayName": "Corporate Finance",
       "description": "Corporate financial model integrating income, balance sheet, and cash flow dynamics over time.",
       "category": "economics",
       "difficulty": "advanced",
@@ -853,6 +900,7 @@
     {
       "id": "fish-banks-sfd",
       "name": "0206FishBanksModelSFD",
+      "displayName": "Fish Banks (CLD)",
       "description": "Causal loop diagram of the Fish Banks game showing overfishing feedback loops",
       "category": "causal-loop",
       "difficulty": "introductory",
@@ -871,6 +919,7 @@
     {
       "id": "flicker",
       "name": "flicker",
+      "displayName": "Flicker",
       "description": "Minimal causal loop diagram demonstrating oscillatory feedback without stocks or flows.",
       "category": "causal-loop",
       "difficulty": "introductory",
@@ -889,6 +938,7 @@
     {
       "id": "flu-two-regions",
       "name": "1405_Flu2regionsV2cIFTHENELSE",
+      "displayName": "Flu (Two Regions)",
       "description": "Eight-stock SIR model of influenza spreading between two connected regions",
       "category": "epidemiology",
       "difficulty": "advanced",
@@ -907,6 +957,7 @@
     {
       "id": "globalization",
       "name": "1819_GlobalizationEZ608fromZOO",
+      "displayName": "Globalization",
       "description": "Four-stock model of globalization dynamics with trade, capital flows, and institutional feedback",
       "category": "economics",
       "difficulty": "advanced",
@@ -925,6 +976,7 @@
     {
       "id": "goal-seeking",
       "name": "Goal Seeking",
+      "displayName": "Goal Seeking",
       "description": "Inventory adjusts toward a goal via negative feedback",
       "category": "introductory",
       "difficulty": "introductory",
@@ -943,6 +995,7 @@
     {
       "id": "gravity",
       "name": "GRAVITY",
+      "displayName": "Gravity",
       "description": "Two-body gravitational interaction modeling orbital mechanics with position and velocity stocks.",
       "category": "physics",
       "difficulty": "intermediate",
@@ -961,6 +1014,7 @@
     {
       "id": "higher-education-stimuli",
       "name": "1820_HigherEducationStimuli_NL_woUnits",
+      "displayName": "Higher Education Stimuli",
       "description": "Four-stock model of higher education policy stimuli and their effects on enrollment and graduation",
       "category": "demographics",
       "difficulty": "advanced",
@@ -979,6 +1033,7 @@
     {
       "id": "hospital-management",
       "name": "1803_HospitalManagement",
+      "displayName": "Hospital Management",
       "description": "Four-stock model of hospital patient flow, staffing, and capacity management",
       "category": "social",
       "difficulty": "advanced",
@@ -997,6 +1052,7 @@
     {
       "id": "houses",
       "name": "HOUSES",
+      "displayName": "Housing Market",
       "description": "Housing market model with construction, demolition, and price feedbacks driven by supply-demand gaps.",
       "category": "economics",
       "difficulty": "intermediate",
@@ -1015,6 +1071,7 @@
     {
       "id": "housing-market-crisis",
       "name": "HousingMarket",
+      "displayName": "Housing Market Crisis",
       "description": "System dynamics model: HousingMarket",
       "category": "economics",
       "difficulty": "intermediate",
@@ -1034,6 +1091,7 @@
     {
       "id": "housing-stock",
       "name": "0611HousingStockDynamicsA",
+      "displayName": "Housing Stock Dynamics",
       "description": "Three-stock model of housing construction, aging, and demolition dynamics",
       "category": "economics",
       "difficulty": "intermediate",
@@ -1052,6 +1110,7 @@
     {
       "id": "intro",
       "name": "INTRO",
+      "displayName": "Introduction to SD",
       "description": "Introductory workforce model demonstrating hiring, quitting, and experience accumulation.",
       "category": "introductory",
       "difficulty": "introductory",
@@ -1070,6 +1129,7 @@
     {
       "id": "inventory-oscillation",
       "name": "Inventory Oscillation",
+      "displayName": "Inventory Oscillation",
       "description": "Car dealership inventory with perception and delivery delays",
       "category": "supply-chain",
       "difficulty": "advanced",
@@ -1089,6 +1149,7 @@
     {
       "id": "kaibab-deer",
       "name": "1804_Kaibab1",
+      "displayName": "Kaibab Deer",
       "description": "System dynamics model: 1804_Kaibab1",
       "category": "ecology",
       "difficulty": "intermediate",
@@ -1107,6 +1168,7 @@
     {
       "id": "managing-faculty",
       "name": "1401_ManagingFaculty",
+      "displayName": "Managing Faculty",
       "description": "Two-stock model of university faculty hiring, tenure, and retirement dynamics",
       "category": "management",
       "difficulty": "intermediate",
@@ -1125,6 +1187,7 @@
     {
       "id": "managing-fitness-club",
       "name": "0202Managing a Fitness Club CLD EN",
+      "displayName": "Managing a Fitness Club (CLD)",
       "description": "Causal loop diagram of feedback loops in fitness club membership management",
       "category": "causal-loop",
       "difficulty": "introductory",
@@ -1143,6 +1206,7 @@
     {
       "id": "market",
       "name": "MARKET",
+      "displayName": "Market Dynamics",
       "description": "Market dynamics model with product adoption, competitive pricing, and capacity expansion feedbacks.",
       "category": "economics",
       "difficulty": "advanced",
@@ -1161,6 +1225,7 @@
     {
       "id": "mental-simulation-01",
       "name": "MentalSimulation01",
+      "displayName": "Mental Simulation",
       "description": "Simple mental simulation exercise demonstrating stock-flow intuition with a single accumulator.",
       "category": "control",
       "difficulty": "introductory",
@@ -1179,6 +1244,7 @@
     {
       "id": "micro-chp-diffusion",
       "name": "0610Diffusion and Adoption of Micro-CHP",
+      "displayName": "Micro-CHP Diffusion",
       "description": "Bass diffusion model applied to adoption of micro combined heat and power technology",
       "category": "technology",
       "difficulty": "intermediate",
@@ -1198,6 +1264,7 @@
     {
       "id": "mineral-metal-scarcity",
       "name": "1415_MineralMetalScarcityI_EN",
+      "displayName": "Mineral & Metal Scarcity",
       "description": "Seven-stock model of mineral and metal resource depletion driven by demand growth and recycling limits",
       "category": "economics",
       "difficulty": "advanced",
@@ -1216,6 +1283,7 @@
     {
       "id": "mplayer",
       "name": "mplayer",
+      "displayName": "Multi-Player Game",
       "description": "Multi-player game theory model with interacting decision-makers and feedback-driven strategies.",
       "category": "control",
       "difficulty": "intermediate",
@@ -1234,6 +1302,7 @@
     {
       "id": "munro-lane",
       "name": "0204MunroLane",
+      "displayName": "Munro Lane (CLD)",
       "description": "Causal loop diagram illustrating neighborhood dynamics and tipping points",
       "category": "causal-loop",
       "difficulty": "introductory",
@@ -1252,6 +1321,7 @@
     {
       "id": "muskrat-plague",
       "name": "0602Muskrats1",
+      "displayName": "Muskrat Plague",
       "description": "Models muskrat population growth and plague-driven collapse in the Netherlands",
       "category": "ecology",
       "difficulty": "introductory",
@@ -1272,6 +1342,7 @@
     {
       "id": "new-towns",
       "name": "1406_NewTownsNL_v2",
+      "displayName": "New Towns",
       "description": "Three-stock model of Dutch new town development with population aging and infrastructure dynamics",
       "category": "demographics",
       "difficulty": "advanced",
@@ -1290,6 +1361,7 @@
     {
       "id": "nutrient-cycle",
       "name": "Nutrient Cycle",
+      "displayName": "Nutrient Cycle",
       "description": "Nitrogen cycling through soil, plants, and litter with a closed-loop material flow",
       "category": "ecology",
       "difficulty": "intermediate",
@@ -1308,6 +1380,7 @@
     {
       "id": "oostvaardersplassen",
       "name": "1013Mass starvation Oostvaardersplassen",
+      "displayName": "Oostvaardersplassen",
       "description": "Models large herbivore population and mass starvation events in the Oostvaardersplassen nature reserve",
       "category": "ecology",
       "difficulty": "intermediate",
@@ -1326,6 +1399,7 @@
     {
       "id": "orchestrated-bank-run",
       "name": "1812_OrchestratedBankRun",
+      "displayName": "Orchestrated Bank Run",
       "description": "Five-stock model of deliberately orchestrated bank runs through coordinated depositor withdrawal",
       "category": "economics",
       "difficulty": "advanced",
@@ -1344,6 +1418,7 @@
     {
       "id": "pneumonic-plague",
       "name": "0608PneumonicPlagueChinaA",
+      "displayName": "Pneumonic Plague",
       "description": "Four-stock SIR-based model of pneumonic plague transmission in China",
       "category": "epidemiology",
       "difficulty": "intermediate",
@@ -1362,6 +1437,7 @@
     {
       "id": "pop",
       "name": "POP",
+      "displayName": "Population",
       "description": "Simple population model with birth and death flows driven by fractional rates.",
       "category": "introductory",
       "difficulty": "introductory",
@@ -1380,6 +1456,7 @@
     {
       "id": "pop-game",
       "name": "POPGAME",
+      "displayName": "Population Game",
       "description": "Interactive population growth game illustrating birth and death rate dynamics.",
       "category": "introductory",
       "difficulty": "introductory",
@@ -1398,6 +1475,7 @@
     {
       "id": "predator-prey",
       "name": "Predator Prey",
+      "displayName": "Predator Prey",
       "description": "Lotka-Volterra model of predator-prey oscillation",
       "category": "ecology",
       "difficulty": "intermediate",
@@ -1416,6 +1494,7 @@
     {
       "id": "price1",
       "name": "price1",
+      "displayName": "Price & Demand (CLD)",
       "description": "Causal loop diagram of price and demand interactions in a simple market.",
       "category": "causal-loop",
       "difficulty": "introductory",
@@ -1434,6 +1513,7 @@
     {
       "id": "price3",
       "name": "price3",
+      "displayName": "Market Pricing",
       "description": "Stock-flow market pricing model with inventory adjustments driving price changes over time.",
       "category": "economics",
       "difficulty": "intermediate",
@@ -1453,6 +1533,7 @@
     {
       "id": "procrast",
       "name": "PROCRAST",
+      "displayName": "Procrastination",
       "description": "Procrastination dynamics model showing how delay, pressure, and deadlines interact in task completion.",
       "category": "management",
       "difficulty": "advanced",
@@ -1471,6 +1552,7 @@
     {
       "id": "production-management",
       "name": "1413_ProductionManagement",
+      "displayName": "Production Management",
       "description": "Six-stock production and inventory management model with workforce and backlog dynamics",
       "category": "management",
       "difficulty": "advanced",
@@ -1489,6 +1571,7 @@
     {
       "id": "products",
       "name": "Products",
+      "displayName": "Product Lifecycle",
       "description": "Product lifecycle model tracking production, inventory, and market demand interactions.",
       "category": "marketing",
       "difficulty": "intermediate",
@@ -1507,6 +1590,7 @@
     {
       "id": "proj",
       "name": "PROJ",
+      "displayName": "Project (Advanced)",
       "description": "Project management model with rework cycles, staffing dynamics, and schedule pressure feedbacks.",
       "category": "management",
       "difficulty": "advanced",
@@ -1525,6 +1609,7 @@
     {
       "id": "proj3",
       "name": "PROJ3",
+      "displayName": "Project (Rework)",
       "description": "Project management model with rework discovery, staffing adjustments, and schedule pressure feedbacks.",
       "category": "management",
       "difficulty": "advanced",
@@ -1543,6 +1628,7 @@
     {
       "id": "project",
       "name": "PROJECT",
+      "displayName": "Project Dynamics (CLD)",
       "description": "Causal loop diagram of project dynamics showing feedback between schedule pressure, overtime, and errors.",
       "category": "causal-loop",
       "difficulty": "introductory",
@@ -1561,6 +1647,7 @@
     {
       "id": "project-management",
       "name": "1814_ProjectManagement_EN",
+      "displayName": "Project Management",
       "description": "Five-stock model of project schedule and effort dynamics with rework and Brooks's Law effects",
       "category": "management",
       "difficulty": "advanced",
@@ -1579,6 +1666,7 @@
     {
       "id": "prostitution-trafficking",
       "name": "1805_ProstitutionHumanTraffickingEN_withoutSolvingUnitErrors",
+      "displayName": "Human Trafficking",
       "description": "Three-stock model of human trafficking supply chains and policy intervention effectiveness",
       "category": "social",
       "difficulty": "advanced",
@@ -1597,6 +1685,7 @@
     {
       "id": "pulse-and-pulse-train",
       "name": "1008_PULSEandPULSETRAIN",
+      "displayName": "Pulse & Pulse Train",
       "description": "Demonstrates PULSE and PULSE TRAIN built-in functions with a simple accumulator",
       "category": "introductory",
       "difficulty": "introductory",
@@ -1615,6 +1704,7 @@
     {
       "id": "rab-fox",
       "name": "RABFOX",
+      "displayName": "Rabbit & Fox",
       "description": "Classic Lotka-Volterra predator-prey model of rabbit and fox population dynamics.",
       "category": "ecology",
       "difficulty": "intermediate",
@@ -1633,6 +1723,7 @@
     {
       "id": "rabbit",
       "name": "RABBIT",
+      "displayName": "Rabbit Population",
       "description": "Rabbit population model demonstrating exponential growth with birth and death rates.",
       "category": "introductory",
       "difficulty": "introductory",
@@ -1651,6 +1742,7 @@
     {
       "id": "random-vs-randomized",
       "name": "1009_RANDOMvsRANDOMIZED",
+      "displayName": "Random vs. Randomized",
       "description": "Demonstrates the difference between RANDOM and RANDOMIZED functions in Vensim",
       "category": "causal-loop",
       "difficulty": "introductory",
@@ -1669,6 +1761,7 @@
     {
       "id": "real-estate-boom",
       "name": "1807_RealEstateBoomAndBust_EN",
+      "displayName": "Real Estate Boom & Bust",
       "description": "Four-stock model of speculative real estate boom-bust cycles with credit feedback",
       "category": "economics",
       "difficulty": "advanced",
@@ -1687,6 +1780,7 @@
     {
       "id": "rem-aggregated-cld",
       "name": "0203REMaggregatedCLDen1",
+      "displayName": "Real Estate Market (CLD)",
       "description": "Aggregated causal loop diagram of real estate market feedback structure",
       "category": "causal-loop",
       "difficulty": "introductory",
@@ -1705,6 +1799,7 @@
     {
       "id": "repair01",
       "name": "repair01",
+      "displayName": "Equipment Repair (CLD)",
       "description": "Causal loop diagram of equipment repair feedback showing failure rates and maintenance capacity.",
       "category": "causal-loop",
       "difficulty": "introductory",
@@ -1723,6 +1818,7 @@
     {
       "id": "repair02",
       "name": "repair02",
+      "displayName": "Equipment Repair",
       "description": "Stock-flow equipment repair model with maintenance workforce, failure rates, and repair throughput.",
       "category": "control",
       "difficulty": "intermediate",
@@ -1742,6 +1838,7 @@
     {
       "id": "s-shaped-growth",
       "name": "S-Shaped Growth",
+      "displayName": "S-Shaped Growth",
       "description": "Logistic population growth limited by carrying capacity",
       "category": "population",
       "difficulty": "introductory",
@@ -1760,6 +1857,7 @@
     {
       "id": "sales",
       "name": "SALES",
+      "displayName": "Sales Forecasting",
       "description": "Sales forecasting model using exponential smoothing to track and predict demand trends.",
       "category": "marketing",
       "difficulty": "intermediate",
@@ -1779,6 +1877,7 @@
     {
       "id": "sd-education",
       "name": "0609SDEducationVersion1",
+      "displayName": "SD Education",
       "description": "Models student flow through a system dynamics education program with enrollment and graduation",
       "category": "education",
       "difficulty": "introductory",
@@ -1797,6 +1896,7 @@
     {
       "id": "sfd-diagram",
       "name": "0205sfd",
+      "displayName": "Stock-Flow Diagram (CLD)",
       "description": "Introductory stock-and-flow diagram illustrating the relationship between CLDs and SFDs",
       "category": "causal-loop",
       "difficulty": "introductory",
@@ -1815,6 +1915,7 @@
     {
       "id": "shale-gas",
       "name": "1012_ShaleGASwoUnits",
+      "displayName": "Shale Gas",
       "description": "Models shale gas extraction dynamics including well depletion and drilling rates",
       "category": "technology",
       "difficulty": "intermediate",
@@ -1833,6 +1934,7 @@
     {
       "id": "signalled-bank-run",
       "name": "1410_SignalledBankRun",
+      "displayName": "Signalled Bank Run",
       "description": "Two-stock model of bank runs triggered by signals of institutional weakness and depositor panic",
       "category": "economics",
       "difficulty": "advanced",
@@ -1851,6 +1953,7 @@
     {
       "id": "sir-epidemic",
       "name": "SIR Epidemic",
+      "displayName": "SIR Epidemic",
       "description": "Classic Susceptible-Infectious-Recovered compartmental model",
       "category": "epidemiology",
       "difficulty": "intermediate",
@@ -1869,6 +1972,7 @@
     {
       "id": "snowball",
       "name": "SNOWBALL",
+      "displayName": "Snowball",
       "description": "Exponential growth analogy: a rolling snowball that accumulates mass as it grows.",
       "category": "introductory",
       "difficulty": "introductory",
@@ -1888,6 +1992,7 @@
     {
       "id": "speed",
       "name": "SPEED",
+      "displayName": "Speed Adjustment",
       "description": "Simple vehicle speed adjustment model demonstrating goal-seeking behavior.",
       "category": "introductory",
       "difficulty": "introductory",
@@ -1906,6 +2011,7 @@
     {
       "id": "stock",
       "name": "STOCK",
+      "displayName": "Stock Management",
       "description": "Stock management policy model with complex ordering rules, pipeline delays, and optimization analysis.",
       "category": "technology",
       "difficulty": "advanced",
@@ -1924,6 +2030,7 @@
     {
       "id": "supply-chain-bullwhip",
       "name": "SupplyChain",
+      "displayName": "Supply Chain Bullwhip",
       "description": "System dynamics model: SupplyChain",
       "category": "supply-chain",
       "difficulty": "intermediate",
@@ -1942,6 +2049,7 @@
     {
       "id": "supply-chain-management",
       "name": "1402_SCM",
+      "displayName": "Supply Chain Management",
       "description": "Six-stock supply chain model demonstrating the bullwhip effect across multiple echelons",
       "category": "supply-chain",
       "difficulty": "intermediate",
@@ -1960,6 +2068,7 @@
     {
       "id": "tolerance-hate-aggression",
       "name": "1407_ToleranceHateAggressionEZ509versionEP",
+      "displayName": "Tolerance, Hate & Aggression",
       "description": "Four-stock model of tolerance erosion, hate accumulation, and aggression feedback dynamics",
       "category": "social",
       "difficulty": "advanced",
@@ -1978,6 +2087,7 @@
     {
       "id": "tubs",
       "name": "TUBS",
+      "displayName": "Connected Bathtubs",
       "description": "Bathtub analogy demonstrating stock-flow relationships with multiple connected reservoirs.",
       "category": "social",
       "difficulty": "intermediate",
@@ -1996,6 +2106,7 @@
     {
       "id": "unemployment",
       "name": "1802_UnemploymentBasedOnEZ511",
+      "displayName": "Unemployment",
       "description": "Five-stock model of unemployment dynamics with labor market feedback and skill deterioration",
       "category": "social",
       "difficulty": "advanced",
@@ -2014,6 +2125,7 @@
     {
       "id": "urban",
       "name": "URBAN",
+      "displayName": "Urban Dynamics",
       "description": "Forrester's urban dynamics model of city lifecycle with industry, housing, and population sectors.",
       "category": "urban",
       "difficulty": "advanced",
@@ -2032,6 +2144,7 @@
     {
       "id": "wf-inv",
       "name": "WFINV",
+      "displayName": "Workforce & Inventory",
       "description": "Workforce and inventory management model balancing production, hiring, and stock levels.",
       "category": "economics",
       "difficulty": "intermediate",
@@ -2050,6 +2163,7 @@
     {
       "id": "wf-kal",
       "name": "WFKAL",
+      "displayName": "Workforce Kalman Filter",
       "description": "Kalman filter implementation for workforce estimation under noisy observations.",
       "category": "control",
       "difficulty": "advanced",
@@ -2068,6 +2182,7 @@
     {
       "id": "white-pink-noise",
       "name": "1010_whitepinknoise",
+      "displayName": "White & Pink Noise",
       "description": "Seven-stock reference model comparing white noise and pink noise generation techniques",
       "category": "introductory",
       "difficulty": "intermediate",
@@ -2086,6 +2201,7 @@
     {
       "id": "wom4",
       "name": "WOM4",
+      "displayName": "Word of Mouth",
       "description": "Word-of-mouth diffusion model capturing adoption spread through social contact and communication.",
       "category": "marketing",
       "difficulty": "intermediate",
@@ -2104,6 +2220,7 @@
     {
       "id": "world",
       "name": "WORLD",
+      "displayName": "World2",
       "description": "Forrester's World2 model of global population, pollution, resources, and capital interactions.",
       "category": "urban",
       "difficulty": "advanced",
@@ -2122,6 +2239,7 @@
     {
       "id": "world-app",
       "name": "WORLDAPP",
+      "displayName": "World2 (Application)",
       "description": "Vensim application version of the World2 model with interactive controls and scenario settings.",
       "category": "urban",
       "difficulty": "advanced",
@@ -2140,6 +2258,7 @@
     {
       "id": "wrld3-03",
       "name": "wrld3-03",
+      "displayName": "World3",
       "description": "World3 model (2003 revision) from Limits to Growth exploring long-term global sustainability scenarios.",
       "category": "urban",
       "difficulty": "advanced",
@@ -2158,6 +2277,7 @@
     {
       "id": "yeast4",
       "name": "YEAST4",
+      "displayName": "Yeast Population",
       "description": "Yeast population model with nutrient depletion, toxin accumulation, and carrying capacity limits.",
       "category": "ecology",
       "difficulty": "advanced",

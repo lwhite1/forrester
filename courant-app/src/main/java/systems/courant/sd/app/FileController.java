@@ -158,6 +158,7 @@ final class FileController {
             Map<String, Menu> categoryMenus = new TreeMap<>();
             for (JsonNode model : models) {
                 String name = model.path("name").asText(null);
+                String displayName = model.path("displayName").asText(name);
                 String category = model.path("category").asText(null);
                 String path = model.path("path").asText(null);
                 if (name == null || category == null || path == null) {
@@ -166,7 +167,7 @@ final class FileController {
                 }
 
                 Menu categoryMenu = categoryMenus.computeIfAbsent(category, c -> new Menu(c));
-                MenuItem item = new MenuItem(name);
+                MenuItem item = new MenuItem(displayName);
                 item.setOnAction(e -> openExample(name, path));
                 categoryMenu.getItems().add(item);
             }
