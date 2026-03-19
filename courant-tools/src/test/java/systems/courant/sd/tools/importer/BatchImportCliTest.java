@@ -112,6 +112,31 @@ class BatchImportCliTest {
     }
 
     @Nested
+    @DisplayName("isRemoteUrl (#1059)")
+    class IsRemoteUrl {
+
+        @Test
+        void shouldReturnTrueForHttpUrl() {
+            assertThat(BatchImportCli.isRemoteUrl("http://example.com/model.mdl")).isTrue();
+        }
+
+        @Test
+        void shouldReturnTrueForHttpsUrl() {
+            assertThat(BatchImportCli.isRemoteUrl("https://example.com/model.mdl")).isTrue();
+        }
+
+        @Test
+        void shouldReturnFalseForLocalPath() {
+            assertThat(BatchImportCli.isRemoteUrl("/tmp/model.mdl")).isFalse();
+        }
+
+        @Test
+        void shouldReturnFalseForRelativePath() {
+            assertThat(BatchImportCli.isRemoteUrl("models/model.mdl")).isFalse();
+        }
+    }
+
+    @Nested
     @DisplayName("parseArgs error paths (#333)")
     class ParseArgsErrorPaths {
 

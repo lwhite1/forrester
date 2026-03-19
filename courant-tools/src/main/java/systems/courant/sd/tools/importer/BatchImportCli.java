@@ -89,8 +89,8 @@ public class BatchImportCli {
             try {
                 // Resolve source: local path or remote download
                 sourceFile = resolveSource(entry.url());
-                if (!sourceFile.equals(Path.of(entry.url()))) {
-                    isTemp = true;
+                isTemp = isRemoteUrl(entry.url());
+                if (isTemp) {
                     tempDir = sourceFile.getParent();
                     log.info("  Downloaded to {}", sourceFile);
                 } else {
@@ -224,12 +224,16 @@ public class BatchImportCli {
         return entries;
     }
 
+    static boolean isRemoteUrl(String source) {
+        return source.startsWith("http://") || source.startsWith("https://");
+    }
+
     /**
      * Resolves a source string to a local file path. If the source is a local file path,
      * returns it directly. If it is an HTTP/HTTPS URL, downloads to a temporary file.
      */
     static Path resolveSource(String source) throws IOException {
-        if (source.startsWith("http://") || source.startsWith("https://")) {
+        if (isRemoteUrl(source)) {
             return downloadToTemp(source);
         }
         // Treat as local file path
