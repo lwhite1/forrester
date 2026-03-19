@@ -119,9 +119,11 @@ final class ElementCascadeManager {
             }
         }
 
+        // Underscore-form tokens used by both binding and equation updates
+        String oldToken = oldName.replace(' ', '_');
+        String newToken = newName.replace(' ', '_');
+
         // Update module input/output bindings that reference the old name
-        String oldUnderscore = oldName.replace(' ', '_');
-        String newUnderscore = newName.replace(' ', '_');
         for (int i = 0; i < modules.size(); i++) {
             ModuleInstanceDef m = modules.get(i);
             boolean changed = false;
@@ -130,8 +132,8 @@ final class ElementCascadeManager {
                 if (oldName.equals(entry.getValue())) {
                     entry.setValue(newName);
                     changed = true;
-                } else if (oldUnderscore.equals(entry.getValue())) {
-                    entry.setValue(newUnderscore);
+                } else if (oldToken.equals(entry.getValue())) {
+                    entry.setValue(newToken);
                     changed = true;
                 }
             }
@@ -140,8 +142,8 @@ final class ElementCascadeManager {
                 if (oldName.equals(entry.getValue())) {
                     entry.setValue(newName);
                     changed = true;
-                } else if (oldUnderscore.equals(entry.getValue())) {
-                    entry.setValue(newUnderscore);
+                } else if (oldToken.equals(entry.getValue())) {
+                    entry.setValue(newToken);
                     changed = true;
                 }
             }
@@ -152,8 +154,6 @@ final class ElementCascadeManager {
         }
 
         // Update equation references (underscore convention)
-        String oldToken = oldName.replace(' ', '_');
-        String newToken = newName.replace(' ', '_');
         equationRefManager.updateEquationReferences(oldToken, newToken);
 
         return true;
