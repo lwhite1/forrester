@@ -74,7 +74,7 @@ XMILE files can contain multiple `<model>` elements. Named models define reusabl
 | Time units | `time_units` attribute | Capitalized (e.g. "day" becomes "Day") |
 | Start time | `<start>` | Always reset to 0 internally |
 | Stop time | `<stop>` | Converted to duration (`stop - start`) |
-| dt | `<dt>` | Extracted but **not used** -- Courant uses fixed step dt=1 |
+| dt | `<dt>` | Applied as simulation time step (defaults to 1 if absent) |
 
 ### Model Metadata
 
@@ -201,14 +201,6 @@ The following pass through and are supported by the Courant expression compiler:
 
 ## Known Limitations
 
-### Time Step (dt)
-
-The `<dt>` value from the XMILE file is extracted and stored as metadata but **not used in simulation**. Courant uses fixed Euler integration with dt=1 regardless. A warning is issued if dt is not 1.0:
-
-> "dt = X (Courant uses fixed step; value preserved as metadata only)"
-
-Models designed for smaller dt values may produce numerically different results.
-
 ### Stock Initial Values
 
 - Only numeric literals accepted
@@ -266,7 +258,6 @@ All import errors are non-fatal. The importer returns `ImportResult` containing 
 | Non-linear interpolation | "Graphical function 'X' uses interpolation type 'Y' (only LINEAR/continuous is supported)" |
 | Range specifications | "Range specification on stock 'X' ignored" |
 | Unsupported functions | "SAFEDIV function not supported (left in equation as-is)" |
-| dt not 1.0 | "dt = 0.25 (Courant uses fixed step; value preserved as metadata only)" |
 | Invalid time range | "stop (0) <= start (10), defaulting duration to 100" |
 | Function approximations | "SMTH3 approximated as SMOOTH" |
 | Element processing errors | "Error processing stock 'X': message" |
@@ -281,7 +272,7 @@ All import errors are non-fatal. The importer returns `ImportResult` containing 
 
 - Constants are exported as `<aux>` with numeric equations (re-imported correctly)
 - Start time is always 0
-- dt is always written as 1.0
+- dt is always written as the model's configured time step
 - Subscripts and module instances are not exported
 - Display attributes (color, font, size) are not exported
 
@@ -302,7 +293,7 @@ All import errors are non-fatal. The importer returns `ImportResult` containing 
 
 ### Lost or Modified
 
-- dt value (always written as 1.0 on export)
+- dt value (written as model's time step, which may differ from original if changed)
 - Conveyor/queue/oven stock attributes
 - Subscripted variable dimensions
 - Display attributes (color, font, size)
@@ -354,7 +345,7 @@ All import errors are non-fatal. The importer returns `ImportResult` containing 
 | Lookup tables | Full (LINEAR interpolation only) |
 | Graphical functions | Full (standalone and embedded) |
 | Views and connectors | Full |
-| Simulation specs | Full (dt metadata only) |
+| Simulation specs | Full |
 | Expression translation | Full (bidirectional) |
 | SMTH3 / SMTH1 | Approximated as SMOOTH (with warnings) |
 | Modules / submodels | Full (input/output bindings, nested modules) |

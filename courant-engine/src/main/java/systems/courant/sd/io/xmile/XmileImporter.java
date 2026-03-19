@@ -128,10 +128,6 @@ public class XmileImporter implements ModelImporter {
             duration = 100;
         }
 
-        if (dt != 1.0) {
-            warnings.add("dt = " + dt
-                    + " (Courant uses fixed step; value preserved as metadata only)");
-        }
 
         // Collect all <model> elements — named ones are module types
         Map<String, Element> namedModels = new HashMap<>();
