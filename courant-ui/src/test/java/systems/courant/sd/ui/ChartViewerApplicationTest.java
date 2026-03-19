@@ -12,6 +12,7 @@ import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.util.WaitForAsyncUtils;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
@@ -162,6 +163,14 @@ class ChartViewerApplicationTest {
         assertThat(snap.series().get(0).getData()).hasSize(1);
         assertThat(snap.series().get(1).getData()).hasSize(1);
         assertThat(snap.series().get(2).getData()).hasSize(1);
+    }
+
+    @Test
+    @DisplayName("snapshot captures formatter field (#1060)")
+    void shouldCaptureFormatterInSnapshot() {
+        ChartViewerApplication.ChartData snap = ChartViewerApplication.snapshot();
+        assertThat(snap.formatter()).isNotNull();
+        assertThat(snap.formatter()).isEqualTo(DateTimeFormatter.BASIC_ISO_DATE);
     }
 
     @Test

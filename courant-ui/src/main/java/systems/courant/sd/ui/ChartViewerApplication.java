@@ -38,6 +38,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -73,10 +74,12 @@ public class ChartViewerApplication extends Application {
             double width,
             double height,
             String title,
-            String xAxisLabel) {
+            String xAxisLabel,
+            DateTimeFormatter formatter) {
 
         ChartData {
             series = Collections.unmodifiableList(series);
+            Objects.requireNonNull(formatter, "formatter");
         }
     }
 
@@ -127,7 +130,7 @@ public class ChartViewerApplication extends Application {
                 }
                 deepCopy.add(copy);
             }
-            return new ChartData(deepCopy, width, height, title, xAxisLabel);
+            return new ChartData(deepCopy, width, height, title, xAxisLabel, formatter);
         }
     }
 
