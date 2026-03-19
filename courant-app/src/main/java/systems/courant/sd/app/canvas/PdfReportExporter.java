@@ -1,9 +1,12 @@
 package systems.courant.sd.app.canvas;
 
+import com.lowagie.text.DocumentException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xhtmlrenderer.pdf.ITextRenderer;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
@@ -43,7 +46,7 @@ public final class PdfReportExporter {
             renderer.layout();
             renderer.createPDF(out);
             log.info("PDF report exported to {}", outputPath);
-        } catch (Exception e) {
+        } catch (DocumentException e) {
             throw new IOException("Failed to generate PDF: " + e.getMessage(), e);
         }
     }
@@ -61,10 +64,10 @@ public final class PdfReportExporter {
             ITextRenderer renderer = new ITextRenderer();
             renderer.setDocumentFromString(xhtml);
             renderer.layout();
-            java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream(32768);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream(32768);
             renderer.createPDF(baos);
             return baos.toByteArray();
-        } catch (Exception e) {
+        } catch (DocumentException e) {
             throw new IOException("Failed to generate PDF: " + e.getMessage(), e);
         }
     }
@@ -88,6 +91,8 @@ public final class PdfReportExporter {
 
         // Close self-closing tags that are not closed in HTML5
         xhtml = xhtml.replaceAll("<meta ([^>]*[^/])>", "<meta $1/>");
+        xhtml = xhtml.replaceAll("<link ([^>]*[^/])>", "<link $1/>");
+        xhtml = xhtml.replaceAll("<input ([^>]*[^/])>", "<input $1/>");
         xhtml = xhtml.replaceAll("<br>", "<br/>");
         xhtml = xhtml.replaceAll("<hr>", "<hr/>");
         xhtml = xhtml.replaceAll("<img ([^>]*[^/])>", "<img $1/>");

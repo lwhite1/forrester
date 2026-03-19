@@ -397,6 +397,10 @@ public final class ResultReportGenerator {
 
     static void writeDominanceTransitionTable(StringBuilder html,
                                               LoopDominanceAnalysis dominance) {
+        if (dominance.stepCount() == 0) {
+            return;
+        }
+
         html.append("<h3>Dominance Transitions</h3>\n");
         html.append("<table class=\"element-table\">\n");
         html.append("<thead><tr><th>Step Range</th><th>Dominant Loop</th>");
@@ -507,13 +511,9 @@ public final class ResultReportGenerator {
             }
 
             // Bottom edge (cumulative from loop 0..loop-1, right to left)
-            sampleIdx = sampleCount - 1;
-            for (int step = (sampleCount - 1) * sampleInterval; step >= 0;
-                 step -= sampleInterval) {
-                if (step >= stepCount) {
-                    sampleIdx--;
-                    continue;
-                }
+            // Mirror top edge sampling: iterate same sample indices in reverse
+            for (sampleIdx = sampleCount - 1; sampleIdx >= 0; sampleIdx--) {
+                int step = Math.min(sampleIdx * sampleInterval, stepCount - 1);
                 double cumulative = 0;
                 for (int l = 0; l < loop; l++) {
                     cumulative += normalized[l][step];
@@ -522,7 +522,6 @@ public final class ResultReportGenerator {
                 double y = chart.mapY(cumulative);
                 points.append(' ');
                 points.append(String.format(Locale.US, "%.1f,%.1f", x, y));
-                sampleIdx--;
             }
 
             svgLine(svg,

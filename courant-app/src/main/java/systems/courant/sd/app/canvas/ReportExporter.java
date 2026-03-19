@@ -48,7 +48,7 @@ public final class ReportExporter {
                 && !"Untitled".equals(modelName))
                 ? modelName.replaceAll("[^a-zA-Z0-9_\\-]", "_")
                 : "report";
-        chooser.setInitialFileName(baseName + "_report.html");
+        chooser.setInitialFileName(baseName + "_report");
         LastDirectoryStore.applyExportDirectory(chooser);
 
         File file = chooser.showSaveDialog(ownerWindow);

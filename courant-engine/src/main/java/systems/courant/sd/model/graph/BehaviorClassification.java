@@ -150,7 +150,8 @@ public final class BehaviorClassification {
         // Monotone increasing
         if (monotoneIncreasing || isWeaklyMonotone(d1, true)) {
             double avgD2 = average(d2);
-            double d2Magnitude = Math.abs(avgD2) / (range / clean.length);
+            double avgStep = range / clean.length;
+            double d2Magnitude = avgStep > 0 ? Math.abs(avgD2) / avgStep : 0;
             if (d2Magnitude < 0.1) {
                 return Mode.LINEAR_GROWTH;
             }
@@ -163,7 +164,8 @@ public final class BehaviorClassification {
         // Monotone decreasing
         if (monotoneDecreasing || isWeaklyMonotone(d1, false)) {
             double avgD2 = average(d2);
-            double d2Magnitude = Math.abs(avgD2) / (range / clean.length);
+            double avgStep = range / clean.length;
+            double d2Magnitude = avgStep > 0 ? Math.abs(avgD2) / avgStep : 0;
             if (d2Magnitude < 0.1) {
                 return Mode.LINEAR_DECLINE;
             }
@@ -173,10 +175,7 @@ public final class BehaviorClassification {
             return Mode.GOAL_SEEKING;
         }
 
-        // Fallback: check dominant trend
-        if (clean[clean.length - 1] > clean[0]) {
-            return Mode.GOAL_SEEKING;
-        }
+        // Fallback
         return Mode.GOAL_SEEKING;
     }
 
