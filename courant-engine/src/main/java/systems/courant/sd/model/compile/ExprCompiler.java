@@ -893,6 +893,10 @@ public class ExprCompiler {
             double elapsed = t - start;
             if (repeat > 0) {
                 double phase = elapsed % repeat;
+                double tol = dtH[0] * 1e-6;
+                if (repeat - phase < tol) {
+                    phase = 0.0;
+                }
                 return phase < dur ? 1.0 : 0.0;
             }
             return elapsed < dur ? 1.0 : 0.0;
