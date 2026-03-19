@@ -511,7 +511,20 @@ public final class FunctionDocRegistry {
                 "Evaluates the condition and returns 'a' if true (non-zero), 'b' if false (zero). "
                         + "Comparisons return 1 for true and 0 for false.",
                 "IF(Population > 1000, Growth_Rate, 0)",
-                List.of());
+                List.of("IF_SHORT"));
+
+        add(m, "IF_SHORT", "IF_SHORT(condition, a, b)", "Short-circuit conditional expression",
+                "Special",
+                List.of(p("condition", "expression that evaluates to true (non-zero) or false (zero)"),
+                        p("a", "value returned when condition is true"),
+                        p("b", "value returned when condition is false")),
+                "Like IF, but only evaluates the taken branch (short-circuit). "
+                        + "Use IF_SHORT when branches may cause errors (e.g. division by zero) "
+                        + "that should be avoided. Caution: stateful functions (SMOOTH, DELAY) "
+                        + "in the untaken branch will not be updated, causing stale values when "
+                        + "the condition flips.",
+                "IF_SHORT(x > 0, y / x, 0)",
+                List.of("IF"));
 
         DOCS = Collections.unmodifiableMap(m);
     }
