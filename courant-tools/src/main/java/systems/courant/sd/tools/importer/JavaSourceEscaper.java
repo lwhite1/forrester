@@ -34,7 +34,22 @@ public final class JavaSourceEscaper {
     }
 
     /**
+     * Formats a double value for use in Java source code.
+     * Handles NaN and Infinity which cannot be written as bare numeric literals.
+     */
+    public static String formatDoubleForSource(double value) {
+        if (Double.isNaN(value)) {
+            return "Double.NaN";
+        }
+        if (Double.isInfinite(value)) {
+            return value > 0 ? "Double.POSITIVE_INFINITY" : "Double.NEGATIVE_INFINITY";
+        }
+        return String.valueOf(value);
+    }
+
+    /**
      * Formats a double array as a Java source literal, e.g. {@code new double[]{1.0, 2.5, 3.7}}.
+     * Handles special values (NaN, Infinity) correctly.
      */
     public static String doubleArrayLiteral(double[] values) {
         if (values == null) {
@@ -46,7 +61,7 @@ public final class JavaSourceEscaper {
             if (i > 0) {
                 sb.append(", ");
             }
-            sb.append(values[i]);
+            sb.append(formatDoubleForSource(values[i]));
         }
         sb.append('}');
         return sb.toString();

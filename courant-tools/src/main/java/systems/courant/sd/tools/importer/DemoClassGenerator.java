@@ -454,18 +454,8 @@ public class DemoClassGenerator {
         sb.append("));\n");
     }
 
-    /**
-     * Formats a double for Java source code. Handles NaN and Infinity which cannot be
-     * written as bare literals.
-     */
     private static String formatDoubleForSource(double value) {
-        if (Double.isNaN(value)) {
-            return "Double.NaN";
-        }
-        if (Double.isInfinite(value)) {
-            return value > 0 ? "Double.POSITIVE_INFINITY" : "Double.NEGATIVE_INFINITY";
-        }
-        return String.valueOf(value);
+        return JavaSourceEscaper.formatDoubleForSource(value);
     }
 
     /**
