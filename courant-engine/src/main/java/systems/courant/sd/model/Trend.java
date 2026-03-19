@@ -35,6 +35,7 @@ public class Trend implements Formula, Resettable {
 
     private double averageInput;
     private double trend;
+    private double lastInputVal;
     private boolean initialized;
     private long lastStep = -1;
 
@@ -71,6 +72,7 @@ public class Trend implements Formula, Resettable {
     public void reset() {
         averageInput = 0;
         trend = 0;
+        lastInputVal = 0;
         initialized = false;
         lastStep = -1;
     }
@@ -86,19 +88,20 @@ public class Trend implements Formula, Resettable {
     public double getCurrentValue() {
         long step = currentStep.getAsLong();
         if (!initialized) {
-            double inputVal = input.getAsDouble();
+            lastInputVal = input.getAsDouble();
             // Initialize average so that the initial trend is correct:
             // trend = (input - avg) / (avg * avgTime)
             // => avg = input / (1 + initialTrend * avgTime)
             double denom = 1 + initialTrend * averagingTime;
-            averageInput = denom != 0 ? inputVal / denom : inputVal;
+            averageInput = denom != 0 ? lastInputVal / denom : lastInputVal;
             trend = initialTrend;
             initialized = true;
             lastStep = step;
         } else if (step > lastStep) {
             long delta = step - lastStep;
+            double currentInput = input.getAsDouble();
             for (long d = 0; d < delta; d++) {
-                double inputVal = input.getAsDouble();
+                double inputVal = (d < delta - 1) ? lastInputVal : currentInput;
                 averageInput += (inputVal - averageInput) / averagingTime;
                 double denom = averageInput * averagingTime;
                 if (Math.abs(denom) > 1e-15) {
@@ -109,6 +112,7 @@ public class Trend implements Formula, Resettable {
                     trend = 0;
                 }
             }
+            lastInputVal = currentInput;
             lastStep = step;
         }
         return trend;

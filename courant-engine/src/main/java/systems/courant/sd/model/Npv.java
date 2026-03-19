@@ -37,6 +37,7 @@ public class Npv implements Formula, Resettable {
 
     private double accumulated;
     private double cumulativeDiscount;
+    private double lastStreamVal;
     private boolean initialized;
     private long lastStep = -1;
 
@@ -102,6 +103,7 @@ public class Npv implements Formula, Resettable {
     public void reset() {
         accumulated = initialValue;
         cumulativeDiscount = 1.0;
+        lastStreamVal = 0;
         initialized = false;
         lastStep = -1;
     }
@@ -117,19 +119,21 @@ public class Npv implements Formula, Resettable {
         long step = currentStep.getAsLong();
         if (!initialized) {
             cumulativeDiscount = 1.0;
-            accumulated = initialValue + stream.getAsDouble() * factor;
+            lastStreamVal = stream.getAsDouble();
+            accumulated = initialValue + lastStreamVal * factor;
             initialized = true;
             lastStep = step;
         } else if (step > lastStep) {
             long delta = step - lastStep;
             double discountMultiplier = 1 + discountRate;
-            double streamVal = stream.getAsDouble();
-            // Compound discount for all elapsed steps
+            double currentStreamVal = stream.getAsDouble();
+            // Compound discount and accumulate payment at each sub-step
             for (long d = 0; d < delta; d++) {
+                double streamVal = (d < delta - 1) ? lastStreamVal : currentStreamVal;
                 cumulativeDiscount *= discountMultiplier;
+                accumulated += streamVal * factor / cumulativeDiscount;
             }
-            // Add only the current step's payment at the final discount level
-            accumulated += streamVal * factor / cumulativeDiscount;
+            lastStreamVal = currentStreamVal;
             lastStep = step;
         }
         return accumulated;

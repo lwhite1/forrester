@@ -51,6 +51,7 @@ public class Smooth3 implements Formula, Resettable {
     private double stage1;
     private double stage2;
     private double stage3;
+    private double lastInputVal;
     private boolean initialized;
     private long lastStep = -1;
     private boolean warnedNonPositive;
@@ -122,6 +123,7 @@ public class Smooth3 implements Formula, Resettable {
         stage1 = 0;
         stage2 = 0;
         stage3 = 0;
+        lastInputVal = 0;
         initialized = false;
         lastStep = -1;
         warnedNonPositive = false;
@@ -138,10 +140,12 @@ public class Smooth3 implements Formula, Resettable {
     public double getCurrentValue() {
         long step = currentStep.getAsLong();
         if (!initialized) {
-            double init = hasExplicitInitial ? explicitInitial : input.getAsDouble();
+            double inputAtInit = input.getAsDouble();
+            double init = hasExplicitInitial ? explicitInitial : inputAtInit;
             stage1 = init;
             stage2 = init;
             stage3 = init;
+            lastInputVal = inputAtInit;
             initialized = true;
             lastStep = step;
         } else if (step > lastStep) {
@@ -155,12 +159,14 @@ public class Smooth3 implements Formula, Resettable {
             }
             double stageTime = st / 3.0;
             long delta = step - lastStep;
-            double inputVal = input.getAsDouble();
+            double currentInput = input.getAsDouble();
             for (long i = 0; i < delta; i++) {
+                double inputVal = (i < delta - 1) ? lastInputVal : currentInput;
                 stage1 += (inputVal - stage1) / stageTime;
                 stage2 += (stage1 - stage2) / stageTime;
                 stage3 += (stage2 - stage3) / stageTime;
             }
+            lastInputVal = currentInput;
             lastStep = step;
         }
         return stage3;

@@ -50,6 +50,7 @@ public class Delay1 implements Formula, Resettable {
 
     private double stage;
     private double output;
+    private double lastInputVal;
     private boolean initialized;
     private long lastStep = -1;
 
@@ -100,6 +101,7 @@ public class Delay1 implements Formula, Resettable {
     public void reset() {
         stage = 0;
         output = 0;
+        lastInputVal = 0;
         initialized = false;
         lastStep = -1;
     }
@@ -115,19 +117,23 @@ public class Delay1 implements Formula, Resettable {
     public double getCurrentValue() {
         long step = currentStep.getAsLong();
         if (!initialized) {
-            double init = hasExplicitInitial ? explicitInitial : input.getAsDouble();
+            double inputAtInit = input.getAsDouble();
+            double init = hasExplicitInitial ? explicitInitial : inputAtInit;
             stage = init * delayTime;
             output = init;
+            lastInputVal = inputAtInit;
             initialized = true;
             lastStep = step;
         } else if (step > lastStep) {
             long delta = step - lastStep;
+            double currentInput = input.getAsDouble();
             for (long d = 0; d < delta; d++) {
-                double inputVal = input.getAsDouble();
+                double inputVal = (d < delta - 1) ? lastInputVal : currentInput;
                 double rate = stage / delayTime;
                 stage += inputVal - rate;
                 output = rate;
             }
+            lastInputVal = currentInput;
             lastStep = step;
         }
         return output;
