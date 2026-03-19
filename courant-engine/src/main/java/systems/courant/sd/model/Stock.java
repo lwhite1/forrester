@@ -2,6 +2,8 @@ package systems.courant.sd.model;
 
 import systems.courant.sd.measure.Quantity;
 import systems.courant.sd.measure.Unit;
+
+import com.carrotsearch.hppc.DoubleArrayList;
 import com.google.common.base.Preconditions;
 
 import org.slf4j.Logger;
@@ -21,6 +23,7 @@ public class Stock extends Element {
     private final Set<Flow> inflows = new LinkedHashSet<>();
     private final Set<Flow> outflows = new LinkedHashSet<>();
 
+    private final DoubleArrayList history = new DoubleArrayList();
     private final Unit unit;
     private final double initialAmount;
     private double value;
@@ -158,6 +161,32 @@ public class Stock extends Element {
      */
     public void resetWarnings() {
         warnedNonFinite = false;
+    }
+
+    /**
+     * Records the current value of this stock in its history for the current time step.
+     */
+    public void recordValue() {
+        history.add(value);
+    }
+
+    /**
+     * Returns the recorded stock value at the given time step index, or 0 if the index is out of range.
+     *
+     * @param i the zero-based time step index
+     */
+    public double getHistoryAtTimeStep(long i) {
+        if (i < 0 || i >= history.size()) {
+            return 0;
+        }
+        return history.get((int) i);
+    }
+
+    /**
+     * Clears this stock's recorded history. Useful when re-running simulations.
+     */
+    public void clearHistory() {
+        history.clear();
     }
 
     /**
