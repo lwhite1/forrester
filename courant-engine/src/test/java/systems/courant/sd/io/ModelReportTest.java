@@ -149,7 +149,7 @@ class ModelReportTest {
         }
 
         @Test
-        void shouldPrintSharedSubModuleOnlyOnce() {
+        void shouldNotReportCycleForDiamondDependency() {
             Module parent = new Module("Parent");
             Module siblingA = new Module("SiblingA");
             Module siblingB = new Module("SiblingB");
@@ -163,10 +163,9 @@ class ModelReportTest {
 
             String report = ModelReport.create(model);
 
-            // "Module: Shared" should appear in the report, but the second occurrence
-            // should be detected as a cycle and skipped
+            // Diamond dependencies should not trigger false cycle detection
             assertThat(report).contains("Module: Shared");
-            assertThat(report).contains("cycle detected, skipping");
+            assertThat(report).doesNotContain("cycle detected");
         }
 
         @Test
