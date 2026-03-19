@@ -17,7 +17,9 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import systems.courant.sd.app.canvas.HelpContextResolver;
 import systems.courant.sd.app.canvas.Styles;
 
@@ -155,14 +157,19 @@ public class DefinePortsDialog extends Dialog<ModuleInterface> {
 
     private List<PortDef> collectPorts(List<PortRow> rows) {
         List<PortDef> ports = new ArrayList<>();
+        Set<String> seen = new LinkedHashSet<>();
         for (PortRow row : rows) {
             String name = row.nameField().getText();
             if (name != null && !name.isBlank()) {
+                String trimmed = name.trim();
+                if (!seen.add(trimmed)) {
+                    continue;
+                }
                 String unit = row.unitField().getText();
                 if (unit != null && unit.isBlank()) {
                     unit = null;
                 }
-                ports.add(new PortDef(name.trim(), unit != null ? unit.trim() : null));
+                ports.add(new PortDef(trimmed, unit != null ? unit.trim() : null));
             }
         }
         return ports;
