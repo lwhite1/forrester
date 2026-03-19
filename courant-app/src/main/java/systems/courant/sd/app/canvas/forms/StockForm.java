@@ -106,9 +106,10 @@ public class StockForm implements ElementForm {
     }
 
     private void commitUnit(ComboBox<String> box) {
-        String unit = box.getValue() != null ? box.getValue().trim() : "";
+        String raw = box.getValue() != null ? box.getValue().trim() : "";
+        String unit = raw.isEmpty() ? null : raw;
         Optional<StockDef> stockOpt = ctx.getEditor().getStockByName(ctx.getElementName());
-        if (stockOpt.isPresent() && unit.equals(stockOpt.get().unit())) {
+        if (stockOpt.isPresent() && Objects.equals(unit, stockOpt.get().unit())) {
             return;
         }
         ctx.getCanvas().applyMutation(() -> ctx.getEditor().setStockUnit(ctx.getElementName(), unit));

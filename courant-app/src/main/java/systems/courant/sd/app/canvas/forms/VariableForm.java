@@ -106,9 +106,10 @@ public class VariableForm implements ElementForm {
     }
 
     private void commitUnit(ComboBox<String> box) {
-        String unit = box.getValue() != null ? box.getValue().trim() : "";
+        String raw = box.getValue() != null ? box.getValue().trim() : "";
+        String unit = raw.isEmpty() ? null : raw;
         Optional<VariableDef> varOpt = ctx.getEditor().getVariableByName(ctx.getElementName());
-        if (varOpt.isPresent() && unit.equals(varOpt.get().unit())) {
+        if (varOpt.isPresent() && Objects.equals(unit, varOpt.get().unit())) {
             return;
         }
         ctx.getCanvas().applyMutation(() -> ctx.getEditor().setVariableUnit(ctx.getElementName(), unit));
