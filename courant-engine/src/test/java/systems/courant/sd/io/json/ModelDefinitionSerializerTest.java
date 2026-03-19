@@ -273,6 +273,39 @@ class ModelDefinitionSerializerTest {
     }
 
     @Test
+    void shouldSynthesizeCldVariablesFromCausalLinksWhenMissing() {
+        String json = """
+                {
+                  "name": "Legacy CLD",
+                  "causalLinks": [
+                    { "from": "A", "to": "B", "polarity": "POSITIVE" },
+                    { "from": "B", "to": "C", "polarity": "NEGATIVE" },
+                    { "from": "C", "to": "A", "polarity": "POSITIVE" }
+                  ]
+                }
+                """;
+        ModelDefinition def = serializer.fromJson(json);
+        assertThat(def.cldVariables()).hasSize(3);
+        assertThat(def.cldVariables().stream().map(CldVariableDef::name))
+                .containsExactlyInAnyOrder("A", "B", "C");
+        assertThat(def.causalLinks()).hasSize(3);
+    }
+
+    @Test
+    void shouldNotSynthesizeCldVariablesWhenAlreadyPresent() {
+        ModelDefinition def = new ModelDefinitionBuilder()
+                .name("Explicit")
+                .cldVariable("X", "described")
+                .cldVariable("Y")
+                .causalLink("X", "Y", CausalLinkDef.Polarity.POSITIVE)
+                .build();
+
+        ModelDefinition roundTripped = serializer.fromJson(serializer.toJson(def));
+        assertThat(roundTripped.cldVariables()).hasSize(2);
+        assertThat(roundTripped.cldVariables().get(0).comment()).isEqualTo("described");
+    }
+
+    @Test
     void shouldRoundTripCausalLinkWithComment() {
         ModelDefinition def = new ModelDefinitionBuilder()
                 .name("Test")
