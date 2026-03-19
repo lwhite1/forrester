@@ -329,6 +329,7 @@ class DependencyGraphTest {
                 assertThat(warnings.get(1).getFormattedMessage()).contains("BadAux");
             } finally {
                 logger.detachAppender(appender);
+                appender.stop();
             }
         }
 
