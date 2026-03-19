@@ -18,7 +18,7 @@ public final class BehaviorModeClassifier {
      * @return a short label describing the behavior, or empty string if unclassifiable
      */
     public static String classify(double[] values) {
-        if (values.length < 4) {
+        if (values == null || values.length < 4) {
             return "";
         }
 
