@@ -212,6 +212,14 @@ public class CompilationContext {
                 return val.getAsDouble();
             }
         }
+        // Try space→underscore fallback
+        if (name.contains(" ")) {
+            String underscoreName = name.replace(' ', '_');
+            val = resolveValueLocal(underscoreName);
+            if (val.isPresent()) {
+                return val.getAsDouble();
+            }
+        }
         // Try parent
         if (parent != null) {
             return parent.resolveValue(name);
