@@ -142,5 +142,10 @@ class BehaviorModeClassifierTest {
         void shouldReturnEmptyForFourPointMixedSeries() {
             assertThat(BehaviorModeClassifier.classify(new double[]{1, 5, 2, 8})).isEmpty();
         }
+
+        @Test
+        void shouldReturnEmptyForNullInput() {
+            assertThat(BehaviorModeClassifier.classify(null)).isEmpty();
+        }
     }
 }
