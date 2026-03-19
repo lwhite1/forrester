@@ -166,7 +166,11 @@ public class MultiParameterSweepDialog extends Dialog<MultiParameterSweepDialog.
         long product = 1;
         for (ParamConfig p : params) {
             int count = ParameterSweep.linspace(p.start(), p.end(), p.step()).length;
-            product *= count;
+            try {
+                product = Math.multiplyExact(product, count);
+            } catch (ArithmeticException e) {
+                return Long.MAX_VALUE;
+            }
             if (product > 10_000_000) {
                 return product;
             }
