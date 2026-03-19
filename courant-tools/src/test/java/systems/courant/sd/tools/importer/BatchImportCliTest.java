@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -133,6 +134,41 @@ class BatchImportCliTest {
         @Test
         void shouldReturnFalseForRelativePath() {
             assertThat(BatchImportCli.isRemoteUrl("models/model.mdl")).isFalse();
+        }
+    }
+
+    @Nested
+    @DisplayName("rejectPrivateAddress SSRF prevention (#957)")
+    class RejectPrivateAddress {
+
+        @Test
+        void shouldRejectLocalhostUrl() {
+            assertThatThrownBy(() ->
+                    BatchImportCli.rejectPrivateAddress(URI.create("http://localhost/model.mdl")))
+                    .isInstanceOf(java.io.IOException.class)
+                    .hasMessageContaining("private/reserved");
+        }
+
+        @Test
+        void shouldRejectLoopbackIp() {
+            assertThatThrownBy(() ->
+                    BatchImportCli.rejectPrivateAddress(URI.create("http://127.0.0.1/model.mdl")))
+                    .isInstanceOf(java.io.IOException.class)
+                    .hasMessageContaining("private/reserved");
+        }
+
+        @Test
+        void shouldRejectUrlWithNoHost() {
+            assertThatThrownBy(() ->
+                    BatchImportCli.rejectPrivateAddress(URI.create("http:///model.mdl")))
+                    .isInstanceOf(java.io.IOException.class)
+                    .hasMessageContaining("no host");
+        }
+
+        @Test
+        void shouldAcceptPublicUrl() throws Exception {
+            // google.com resolves to a public IP; should not throw
+            BatchImportCli.rejectPrivateAddress(URI.create("https://google.com/model.mdl"));
         }
     }
 

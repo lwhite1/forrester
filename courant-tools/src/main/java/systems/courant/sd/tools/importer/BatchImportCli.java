@@ -12,7 +12,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetAddress;
 import java.net.URI;
+import java.net.UnknownHostException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -244,12 +246,38 @@ public class BatchImportCli {
         return local;
     }
 
+    /**
+     * Validates that the given URI does not resolve to a private, loopback,
+     * or link-local address (SSRF prevention).
+     */
+    static void rejectPrivateAddress(URI uri) throws IOException {
+        String host = uri.getHost();
+        if (host == null || host.isBlank()) {
+            throw new IOException("URL has no host: " + uri);
+        }
+        InetAddress[] addresses;
+        try {
+            addresses = InetAddress.getAllByName(host);
+        } catch (UnknownHostException e) {
+            throw new IOException("Cannot resolve host: " + host, e);
+        }
+        for (InetAddress addr : addresses) {
+            if (addr.isLoopbackAddress() || addr.isSiteLocalAddress()
+                    || addr.isLinkLocalAddress() || addr.isAnyLocalAddress()) {
+                throw new IOException(
+                        "URL resolves to a private/reserved address (" + addr.getHostAddress()
+                                + "), which is not allowed: " + uri);
+            }
+        }
+    }
+
     static Path downloadToTemp(String url) throws IOException {
         URI uri = URI.create(url);
         String scheme = uri.getScheme();
         if (scheme == null || !(scheme.equalsIgnoreCase("http") || scheme.equalsIgnoreCase("https"))) {
             throw new IOException("Only http and https URLs are allowed, got: " + url);
         }
+        rejectPrivateAddress(uri);
         String rawName = uri.getPath().substring(uri.getPath().lastIndexOf('/') + 1);
         // Sanitize: extract leaf name only to prevent path traversal (e.g. "../")
         String fileName = "model.mdl";
