@@ -1,36 +1,26 @@
 package systems.courant.sd.app.canvas.charts;
 
-import systems.courant.sd.app.LastDirectoryStore;
-
 import javafx.collections.FXCollections;
-import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.SnapshotParameters;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
-import javafx.scene.control.Alert;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tooltip;
-import javafx.scene.image.WritableImage;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
-import javafx.stage.FileChooser;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import javax.imageio.ImageIO;
 import systems.courant.sd.app.canvas.ChartUtils;
 import systems.courant.sd.app.canvas.GhostRun;
 import systems.courant.sd.app.canvas.SimulationRunner;
@@ -276,26 +266,7 @@ public class PhasePlotPane extends BorderPane {
     }
 
     private void saveChartAsPng() {
-        if (chart == null) {
-            return;
-        }
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Save Phase Plot as PNG");
-        fileChooser.getExtensionFilters().add(
-                new FileChooser.ExtensionFilter("PNG Image", "*.png"));
-        fileChooser.setInitialFileName("phase_plot.png");
-        LastDirectoryStore.applyExportDirectory(fileChooser);
-
-        File file = fileChooser.showSaveDialog(getScene() != null ? getScene().getWindow() : null);
-        if (file != null) {
-            LastDirectoryStore.recordExportDirectory(file);
-            WritableImage image = chart.snapshot(new SnapshotParameters(), null);
-            try {
-                ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", file);
-            } catch (IOException e) {
-                new Alert(Alert.AlertType.ERROR,
-                        "Failed to save image: " + e.getMessage()).showAndWait();
-            }
-        }
+        ChartUtils.saveNodeAsPng(chart, "phase_plot.png",
+                getScene() != null ? getScene().getWindow() : null);
     }
 }

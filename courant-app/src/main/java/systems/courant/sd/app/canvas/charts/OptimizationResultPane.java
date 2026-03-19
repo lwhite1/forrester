@@ -3,8 +3,6 @@ package systems.courant.sd.app.canvas.charts;
 import systems.courant.sd.sweep.OptimizationResult;
 import systems.courant.sd.sweep.RunResult;
 
-import com.opencsv.CSVWriter;
-
 import javafx.geometry.Insets;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
@@ -16,14 +14,13 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 
-import java.io.OutputStreamWriter;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
 import systems.courant.sd.app.canvas.ChartUtils;
 import systems.courant.sd.app.canvas.ClipboardExporter;
+import systems.courant.sd.app.canvas.CsvExportHelper;
 import systems.courant.sd.app.canvas.Styles;
 
 /**
@@ -126,32 +123,8 @@ public class OptimizationResultPane extends BorderPane {
 
     private void exportBestRunCsv() {
         ChartUtils.showCsvSaveDialog("Export Best Run CSV", "optimization_best_run.csv",
-                getScene() != null ? getScene().getWindow() : null, file -> {
-                    RunResult bestRun = result.getBestRunResult();
-                    List<String> stockNames = bestRun.getStockNames();
-                    List<String> varNames = bestRun.getVariableNames();
-
-                    try (CSVWriter writer = new CSVWriter(new OutputStreamWriter(
-                            Files.newOutputStream(file.toPath()), StandardCharsets.UTF_8))) {
-                        List<String> header = new ArrayList<>();
-                        header.add("Step");
-                        header.addAll(stockNames);
-                        header.addAll(varNames);
-                        writer.writeNext(header.toArray(new String[0]));
-
-                        for (int s = 0; s < bestRun.getStepCount(); s++) {
-                            List<String> row = new ArrayList<>();
-                            row.add(String.valueOf(bestRun.getStep(s)));
-                            for (double v : bestRun.getStockValuesAtStep(s)) {
-                                row.add(String.valueOf(v));
-                            }
-                            for (double v : bestRun.getVariableValuesAtStep(s)) {
-                                row.add(String.valueOf(v));
-                            }
-                            writer.writeNext(row.toArray(new String[0]));
-                        }
-                    }
-                });
+                getScene() != null ? getScene().getWindow() : null,
+                file -> CsvExportHelper.writeRunResult(file, result.getBestRunResult()));
     }
 
     private static Label boldLabel(String text) {
