@@ -636,6 +636,30 @@ class ModelEditorTest {
             assertThat(editor.getFlows().get(0).equation()).isEqualTo("Infectious * Infectivity");
             assertThat(editor.getVariableByName("A").orElseThrow().equation()).isEqualTo("Infectious + 1");
         }
+
+        @Test
+        void shouldUpdateUnderscoreFormModuleBindingsOnRename() {
+            editor.addStock(); // "Stock 1"
+            ModelDefinition innerDef = new ModelDefinitionBuilder()
+                    .name("Inner")
+                    .build();
+            ModuleInstanceDef moduleDef = new ModuleInstanceDef(
+                    "Mod", innerDef,
+                    Map.of("in", "Stock_1"),
+                    Map.of("out", "Stock_1"));
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Outer")
+                    .stock("Stock 1", 100, "u")
+                    .module(moduleDef)
+                    .build();
+            editor.loadFrom(def);
+
+            editor.renameElement("Stock 1", "Tank");
+
+            ModuleInstanceDef m = editor.getModules().get(0);
+            assertThat(m.inputBindings()).containsEntry("in", "Tank");
+            assertThat(m.outputBindings()).containsEntry("out", "Tank");
+        }
     }
 
     @Nested

@@ -119,6 +119,10 @@ final class ElementCascadeManager {
             }
         }
 
+        // Underscore-form tokens used by both binding and equation updates
+        String oldToken = oldName.replace(' ', '_');
+        String newToken = newName.replace(' ', '_');
+
         // Update module input/output bindings that reference the old name
         for (int i = 0; i < modules.size(); i++) {
             ModuleInstanceDef m = modules.get(i);
@@ -128,12 +132,18 @@ final class ElementCascadeManager {
                 if (oldName.equals(entry.getValue())) {
                     entry.setValue(newName);
                     changed = true;
+                } else if (oldToken.equals(entry.getValue())) {
+                    entry.setValue(newToken);
+                    changed = true;
                 }
             }
             Map<String, String> newOutputs = new java.util.LinkedHashMap<>(m.outputBindings());
             for (Map.Entry<String, String> entry : newOutputs.entrySet()) {
                 if (oldName.equals(entry.getValue())) {
                     entry.setValue(newName);
+                    changed = true;
+                } else if (oldToken.equals(entry.getValue())) {
+                    entry.setValue(newToken);
                     changed = true;
                 }
             }
@@ -144,8 +154,6 @@ final class ElementCascadeManager {
         }
 
         // Update equation references (underscore convention)
-        String oldToken = oldName.replace(' ', '_');
-        String newToken = newName.replace(' ', '_');
         equationRefManager.updateEquationReferences(oldToken, newToken);
 
         return true;
