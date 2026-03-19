@@ -27,6 +27,9 @@ import java.util.List;
 import systems.courant.sd.app.canvas.HelpContextResolver;
 import systems.courant.sd.app.canvas.ParameterRowBase;
 import systems.courant.sd.app.canvas.Styles;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import systems.courant.sd.io.ReferenceDataCsvReader;
 import systems.courant.sd.model.def.ReferenceDataset;
 
@@ -35,6 +38,8 @@ import systems.courant.sd.model.def.ReferenceDataset;
  * map columns to model stocks, set parameter bounds, and choose algorithm.
  */
 public class CalibrateDialog extends Dialog<CalibrateDialog.Config> {
+
+    private static final Logger logger = LoggerFactory.getLogger(CalibrateDialog.class);
 
     public record FitTarget(String stockName, String csvColumnName, double[] observedData) {
     }
@@ -241,6 +246,7 @@ public class CalibrateDialog extends Dialog<CalibrateDialog.Config> {
                 datasetLabel.setText("No columns mapped — import again");
             }
         } catch (IOException ex) {
+            logger.error("Failed to import CSV dataset: {}", ex.getMessage(), ex);
             datasetLabel.setText("Error: " + ex.getMessage());
         }
         fieldChangeCounter.set(fieldChangeCounter.get() + 1);
