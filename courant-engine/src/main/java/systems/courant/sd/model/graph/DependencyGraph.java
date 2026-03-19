@@ -9,6 +9,9 @@ import systems.courant.sd.model.expr.ExprDependencies;
 import systems.courant.sd.model.expr.ExprParser;
 import systems.courant.sd.model.expr.ParseException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -25,6 +28,8 @@ import java.util.Set;
  * then there is an edge from B → A (B influences A).
  */
 public class DependencyGraph {
+
+    private static final Logger log = LoggerFactory.getLogger(DependencyGraph.class);
 
     private final Map<String, Set<String>> adjacency; // from → {to}
     private final Map<String, Set<String>> reverseAdjacency; // to → {from}
@@ -76,8 +81,8 @@ public class DependencyGraph {
                         adj.computeIfAbsent(resolvedDep, k -> new LinkedHashSet<>()).add(f.name());
                     }
                 }
-            } catch (ParseException ignored) {
-                // Skip unparseable equations — cycle detection proceeds with parseable ones
+            } catch (ParseException e) {
+                log.warn("Unparseable equation for flow '{}': {}", f.name(), e.getMessage());
             }
             // Flow → stock connections (source and sink)
             if (f.source() != null) {
@@ -98,8 +103,8 @@ public class DependencyGraph {
                         adj.computeIfAbsent(resolvedDep, k -> new LinkedHashSet<>()).add(a.name());
                     }
                 }
-            } catch (ParseException ignored) {
-                // Skip unparseable equations — cycle detection proceeds with parseable ones
+            } catch (ParseException e) {
+                log.warn("Unparseable equation for variable '{}': {}", a.name(), e.getMessage());
             }
         }
 
