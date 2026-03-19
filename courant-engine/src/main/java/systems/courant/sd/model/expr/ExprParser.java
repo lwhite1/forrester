@@ -296,6 +296,23 @@ public class ExprParser {
         if (name.isEmpty()) {
             throw new ParseException("Empty quoted identifier", start - 1 + trimOffset);
         }
+
+        // Check for function-call syntax: `Quoted Name`(args)
+        skipWhitespace();
+        if (pos < input.length() && input.charAt(pos) == '(') {
+            pos++; // skip '('
+            List<Expr> args = new ArrayList<>();
+            skipWhitespace();
+            if (pos < input.length() && input.charAt(pos) != ')') {
+                args.add(parseExpr());
+                while (matchChar(',')) {
+                    args.add(parseExpr());
+                }
+            }
+            expectChar(')');
+            return new Expr.FunctionCall(name, args);
+        }
+
         return new Expr.Ref(name);
     }
 

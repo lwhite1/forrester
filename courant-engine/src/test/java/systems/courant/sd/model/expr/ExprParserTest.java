@@ -84,6 +84,16 @@ class ExprParserTest {
             Expr result = ExprParser.parse("`Coffee Temperature`");
             assertThat(result).isEqualTo(new Expr.Ref("Coffee Temperature"));
         }
+
+        @Test
+        void shouldParseQuotedIdentifierAsFunctionCall() {
+            Expr result = ExprParser.parse("`Effect of Density`(density)");
+            assertThat(result).isInstanceOf(Expr.FunctionCall.class);
+            Expr.FunctionCall call = (Expr.FunctionCall) result;
+            assertThat(call.name()).isEqualTo("Effect of Density");
+            assertThat(call.arguments()).hasSize(1);
+            assertThat(call.arguments().get(0)).isEqualTo(new Expr.Ref("density"));
+        }
     }
 
     @Nested
