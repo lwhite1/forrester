@@ -20,9 +20,9 @@ import java.util.function.LongSupplier;
  *
  * <pre>
  *     stageTime = smoothingTime / 3
- *     stage1 += (input  - stage1) / stageTime
- *     stage2 += (stage1 - stage2) / stageTime
- *     stage3 += (stage2 - stage3) / stageTime
+ *     stage1 += (input  - stage1) * dt / stageTime
+ *     stage2 += (stage1 - stage2) * dt / stageTime
+ *     stage3 += (stage2 - stage3) * dt / stageTime
  *     output = stage3
  * </pre>
  *
@@ -41,10 +41,12 @@ import java.util.function.LongSupplier;
 public class Smooth3 implements Formula, Resettable {
 
     private static final Logger log = LoggerFactory.getLogger(Smooth3.class);
+    private static final double[] UNIT_DT = {1.0};
 
     private final DoubleSupplier input;
     private final DoubleSupplier smoothingTime;
     private final LongSupplier currentStep;
+    private final double[] dtHolder;
     private final double explicitInitial;
     private final boolean hasExplicitInitial;
 
@@ -57,13 +59,14 @@ public class Smooth3 implements Formula, Resettable {
     private boolean warnedNonPositive;
 
     private Smooth3(DoubleSupplier input, DoubleSupplier smoothingTime, LongSupplier currentStep,
-                    double explicitInitial, boolean hasExplicitInitial) {
+                    double[] dtHolder, double explicitInitial, boolean hasExplicitInitial) {
         Preconditions.checkNotNull(input, "input supplier must not be null");
         Preconditions.checkNotNull(smoothingTime, "smoothingTime supplier must not be null");
         Preconditions.checkNotNull(currentStep, "currentStep supplier must not be null");
         this.input = input;
         this.smoothingTime = smoothingTime;
         this.currentStep = currentStep;
+        this.dtHolder = dtHolder;
         this.explicitInitial = explicitInitial;
         this.hasExplicitInitial = hasExplicitInitial;
     }
@@ -78,7 +81,15 @@ public class Smooth3 implements Formula, Resettable {
      */
     public static Smooth3 of(DoubleSupplier input, DoubleSupplier smoothingTime,
                              LongSupplier currentStep) {
-        return new Smooth3(input, smoothingTime, currentStep, 0, false);
+        return new Smooth3(input, smoothingTime, currentStep, UNIT_DT, 0, false);
+    }
+
+    /**
+     * Creates a SMOOTH3 formula with runtime DT support.
+     */
+    public static Smooth3 of(DoubleSupplier input, DoubleSupplier smoothingTime,
+                             double[] dtHolder, LongSupplier currentStep) {
+        return new Smooth3(input, smoothingTime, currentStep, dtHolder, 0, false);
     }
 
     /**
@@ -88,7 +99,7 @@ public class Smooth3 implements Formula, Resettable {
                              LongSupplier currentStep) {
         Preconditions.checkArgument(smoothingTime > 0,
                 "smoothingTime must be positive, but got %s", smoothingTime);
-        return new Smooth3(input, () -> smoothingTime, currentStep, 0, false);
+        return new Smooth3(input, () -> smoothingTime, currentStep, UNIT_DT, 0, false);
     }
 
     /**
@@ -102,7 +113,15 @@ public class Smooth3 implements Formula, Resettable {
      */
     public static Smooth3 of(DoubleSupplier input, DoubleSupplier smoothingTime,
                              double initialValue, LongSupplier currentStep) {
-        return new Smooth3(input, smoothingTime, currentStep, initialValue, true);
+        return new Smooth3(input, smoothingTime, currentStep, UNIT_DT, initialValue, true);
+    }
+
+    /**
+     * Creates a SMOOTH3 formula with an explicit initial value and runtime DT support.
+     */
+    public static Smooth3 of(DoubleSupplier input, DoubleSupplier smoothingTime,
+                             double initialValue, double[] dtHolder, LongSupplier currentStep) {
+        return new Smooth3(input, smoothingTime, currentStep, dtHolder, initialValue, true);
     }
 
     /**
@@ -112,7 +131,7 @@ public class Smooth3 implements Formula, Resettable {
                              LongSupplier currentStep) {
         Preconditions.checkArgument(smoothingTime > 0,
                 "smoothingTime must be positive, but got %s", smoothingTime);
-        return new Smooth3(input, () -> smoothingTime, currentStep, initialValue, true);
+        return new Smooth3(input, () -> smoothingTime, currentStep, UNIT_DT, initialValue, true);
     }
 
     /**
@@ -162,9 +181,10 @@ public class Smooth3 implements Formula, Resettable {
             double currentInput = input.getAsDouble();
             for (long i = 0; i < delta; i++) {
                 double inputVal = (i < delta - 1) ? lastInputVal : currentInput;
-                stage1 += (inputVal - stage1) / stageTime;
-                stage2 += (stage1 - stage2) / stageTime;
-                stage3 += (stage2 - stage3) / stageTime;
+                double dt = dtHolder[0];
+                stage1 += (inputVal - stage1) * dt / stageTime;
+                stage2 += (stage1 - stage2) * dt / stageTime;
+                stage3 += (stage2 - stage3) * dt / stageTime;
             }
             lastInputVal = currentInput;
             lastStep = step;

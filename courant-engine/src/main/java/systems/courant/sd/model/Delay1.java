@@ -21,11 +21,12 @@ import java.util.function.LongSupplier;
  *
  * <pre>
  *     rate = stage / delayTime
- *     stage += input - rate
+ *     stage += (input - rate) * dt
  *     output = rate
  * </pre>
  *
- * <p>where {@code delayTime} is the delay expressed in simulation timesteps.
+ * <p>where {@code delayTime} is the delay expressed in simulation time units and {@code dt} is
+ * the integration time step.
  *
  * <p>If no initial value is provided, the first input value is used (standard SD convention).
  * The stage is initialized so that the output equals the initial value at time zero.
@@ -42,9 +43,12 @@ import java.util.function.LongSupplier;
  */
 public class Delay1 implements Formula, Resettable {
 
+    private static final double[] UNIT_DT = {1.0};
+
     private final DoubleSupplier input;
     private final double delayTime;
     private final LongSupplier currentStep;
+    private final double[] dtHolder;
     private final double explicitInitial;
     private final boolean hasExplicitInitial;
 
@@ -55,7 +59,7 @@ public class Delay1 implements Formula, Resettable {
     private long lastStep = -1;
 
     private Delay1(DoubleSupplier input, double delayTime, LongSupplier currentStep,
-                   double explicitInitial, boolean hasExplicitInitial) {
+                   double[] dtHolder, double explicitInitial, boolean hasExplicitInitial) {
         Preconditions.checkNotNull(input, "input supplier must not be null");
         Preconditions.checkNotNull(currentStep, "currentStep supplier must not be null");
         Preconditions.checkArgument(delayTime > 0,
@@ -63,6 +67,7 @@ public class Delay1 implements Formula, Resettable {
         this.input = input;
         this.delayTime = delayTime;
         this.currentStep = currentStep;
+        this.dtHolder = dtHolder;
         this.explicitInitial = explicitInitial;
         this.hasExplicitInitial = hasExplicitInitial;
     }
@@ -76,7 +81,15 @@ public class Delay1 implements Formula, Resettable {
      * @return a new Delay1 formula
      */
     public static Delay1 of(DoubleSupplier input, double delayTime, LongSupplier currentStep) {
-        return new Delay1(input, delayTime, currentStep, 0, false);
+        return new Delay1(input, delayTime, currentStep, UNIT_DT, 0, false);
+    }
+
+    /**
+     * Creates a DELAY1 formula with runtime DT support.
+     */
+    public static Delay1 of(DoubleSupplier input, double delayTime,
+                            double[] dtHolder, LongSupplier currentStep) {
+        return new Delay1(input, delayTime, currentStep, dtHolder, 0, false);
     }
 
     /**
@@ -90,7 +103,15 @@ public class Delay1 implements Formula, Resettable {
      */
     public static Delay1 of(DoubleSupplier input, double delayTime, double initialValue,
                             LongSupplier currentStep) {
-        return new Delay1(input, delayTime, currentStep, initialValue, true);
+        return new Delay1(input, delayTime, currentStep, UNIT_DT, initialValue, true);
+    }
+
+    /**
+     * Creates a DELAY1 formula with an explicit initial value and runtime DT support.
+     */
+    public static Delay1 of(DoubleSupplier input, double delayTime, double initialValue,
+                            double[] dtHolder, LongSupplier currentStep) {
+        return new Delay1(input, delayTime, currentStep, dtHolder, initialValue, true);
     }
 
     /**
@@ -130,7 +151,7 @@ public class Delay1 implements Formula, Resettable {
             for (long d = 0; d < delta; d++) {
                 double inputVal = (d < delta - 1) ? lastInputVal : currentInput;
                 double rate = stage / delayTime;
-                stage += inputVal - rate;
+                stage += (inputVal - rate) * dtHolder[0];
                 output = rate;
             }
             lastInputVal = currentInput;

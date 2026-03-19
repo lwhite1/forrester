@@ -8,12 +8,9 @@ import systems.courant.sd.model.Forecast;
 import systems.courant.sd.model.Formula;
 import systems.courant.sd.model.LookupTable;
 import systems.courant.sd.model.Npv;
-import systems.courant.sd.model.Pulse;
-import systems.courant.sd.model.Ramp;
 import systems.courant.sd.model.SampleIfTrue;
 import systems.courant.sd.model.Smooth;
 import systems.courant.sd.model.Smooth3;
-import systems.courant.sd.model.Step;
 import systems.courant.sd.model.Trend;
 import systems.courant.sd.model.expr.BinaryOperator;
 import systems.courant.sd.model.expr.Expr;
@@ -29,6 +26,7 @@ import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.DoubleSupplier;
+import java.util.function.LongSupplier;
 
 /**
  * Compiles an {@link Expr} AST into executable {@link Formula} lambdas using a
@@ -651,6 +649,7 @@ public class ExprCompiler {
         }
         DoubleSupplier input = compileExpr(args.get(0));
         DoubleSupplier smoothingTime = compileExpr(args.get(1));
+        double[] dtH = context.getDtHolder();
         Smooth smooth;
         if (args.size() == 3) {
             double initial = evaluateAtCompileTime(args.get(2), "SMOOTH initialValue");
@@ -660,9 +659,9 @@ public class ExprCompiler {
                 context.addWarning(msg);
                 initial = 0.0;
             }
-            smooth = Smooth.of(input, smoothingTime, initial, context.getCurrentStep());
+            smooth = Smooth.of(input, smoothingTime, initial, dtH, context.getCurrentStep());
         } else {
-            smooth = Smooth.of(input, smoothingTime, context.getCurrentStep());
+            smooth = Smooth.of(input, smoothingTime, dtH, context.getCurrentStep());
         }
         resettables.add(smooth);
         return smooth::getCurrentValue;
@@ -679,7 +678,8 @@ public class ExprCompiler {
             context.addWarning(msg);
             initial = 0.0;
         }
-        Smooth smooth = Smooth.of(input, smoothingTime, initial, context.getCurrentStep());
+        double[] dtH = context.getDtHolder();
+        Smooth smooth = Smooth.of(input, smoothingTime, initial, dtH, context.getCurrentStep());
         resettables.add(smooth);
         return smooth::getCurrentValue;
     }
@@ -691,6 +691,7 @@ public class ExprCompiler {
         }
         DoubleSupplier input = compileExpr(args.get(0));
         DoubleSupplier smoothingTime = compileExpr(args.get(1));
+        double[] dtH = context.getDtHolder();
         Smooth3 smooth3;
         if (args.size() == 3) {
             double initial = evaluateAtCompileTime(args.get(2), "SMOOTH3 initialValue");
@@ -700,9 +701,9 @@ public class ExprCompiler {
                 context.addWarning(msg);
                 initial = 0.0;
             }
-            smooth3 = Smooth3.of(input, smoothingTime, initial, context.getCurrentStep());
+            smooth3 = Smooth3.of(input, smoothingTime, initial, dtH, context.getCurrentStep());
         } else {
-            smooth3 = Smooth3.of(input, smoothingTime, context.getCurrentStep());
+            smooth3 = Smooth3.of(input, smoothingTime, dtH, context.getCurrentStep());
         }
         resettables.add(smooth3);
         return smooth3::getCurrentValue;
@@ -719,7 +720,8 @@ public class ExprCompiler {
             context.addWarning(msg);
             initial = 0.0;
         }
-        Smooth3 smooth3 = Smooth3.of(input, smoothingTime, initial, context.getCurrentStep());
+        double[] dtH = context.getDtHolder();
+        Smooth3 smooth3 = Smooth3.of(input, smoothingTime, initial, dtH, context.getCurrentStep());
         resettables.add(smooth3);
         return smooth3::getCurrentValue;
     }
@@ -743,6 +745,7 @@ public class ExprCompiler {
             context.addWarning(msg);
             delayTime = 1.0;
         }
+        double[] dtH = context.getDtHolder();
         Delay1 delay1;
         if (args.size() == 3) {
             double initial = evaluateAtCompileTime(args.get(2), "DELAY1 initialValue");
@@ -752,9 +755,9 @@ public class ExprCompiler {
                 context.addWarning(msg);
                 initial = 0.0;
             }
-            delay1 = Delay1.of(input, delayTime, initial, context.getCurrentStep());
+            delay1 = Delay1.of(input, delayTime, initial, dtH, context.getCurrentStep());
         } else {
-            delay1 = Delay1.of(input, delayTime, context.getCurrentStep());
+            delay1 = Delay1.of(input, delayTime, dtH, context.getCurrentStep());
         }
         resettables.add(delay1);
         return delay1::getCurrentValue;
@@ -779,6 +782,7 @@ public class ExprCompiler {
             context.addWarning(msg);
             delayTime = 1.0;
         }
+        double[] dtH = context.getDtHolder();
         Delay3 delay3;
         if (args.size() == 3) {
             double initial = evaluateAtCompileTime(args.get(2), "DELAY3 initialValue");
@@ -788,9 +792,9 @@ public class ExprCompiler {
                 context.addWarning(msg);
                 initial = 0.0;
             }
-            delay3 = Delay3.of(input, delayTime, initial, context.getCurrentStep());
+            delay3 = Delay3.of(input, delayTime, initial, dtH, context.getCurrentStep());
         } else {
-            delay3 = Delay3.of(input, delayTime, context.getCurrentStep());
+            delay3 = Delay3.of(input, delayTime, dtH, context.getCurrentStep());
         }
         resettables.add(delay3);
         return delay3::getCurrentValue;
@@ -800,9 +804,9 @@ public class ExprCompiler {
         requireArgs("STEP", args, 2);
         double height = evaluateConstant(args.get(0), "STEP height");
         double time = evaluateConstant(args.get(1), "STEP time");
-        double dt = context.getDt();
-        Step step = Step.of(height, Math.round(time / dt), context.getCurrentStep());
-        return step::getCurrentValue;
+        double[] dtH = context.getDtHolder();
+        LongSupplier stepSupplier = context.getCurrentStep();
+        return () -> stepSupplier.getAsLong() * dtH[0] >= time ? height : 0;
     }
 
     private DoubleSupplier compileRamp(List<Expr> args) {
@@ -811,17 +815,28 @@ public class ExprCompiler {
                     "RAMP requires 2-3 arguments, got " + args.size(), "RAMP");
         }
         double slope = evaluateConstant(args.get(0), "RAMP slope");
-        double start = evaluateConstant(args.get(1), "RAMP startTime");
-        double dt = context.getDt();
-        Ramp ramp;
+        double startTime = evaluateConstant(args.get(1), "RAMP startTime");
+        double[] dtH = context.getDtHolder();
+        LongSupplier stepSupplier = context.getCurrentStep();
         if (args.size() == 3) {
-            double end = evaluateConstant(args.get(2), "RAMP endTime");
-            ramp = Ramp.of(slope * dt, Math.round(start / dt), Math.round(end / dt),
-                    context.getCurrentStep());
+            double endTime = evaluateConstant(args.get(2), "RAMP endTime");
+            return () -> {
+                double t = stepSupplier.getAsLong() * dtH[0];
+                if (t < startTime) {
+                    return 0.0;
+                }
+                double elapsed = Math.min(t, endTime) - startTime;
+                return slope * elapsed;
+            };
         } else {
-            ramp = Ramp.of(slope * dt, Math.round(start / dt), context.getCurrentStep());
+            return () -> {
+                double t = stepSupplier.getAsLong() * dtH[0];
+                if (t < startTime) {
+                    return 0.0;
+                }
+                return slope * (t - startTime);
+            };
         }
-        return ramp::getCurrentValue;
     }
 
     private DoubleSupplier compilePulse(List<Expr> args) {
@@ -830,17 +845,33 @@ public class ExprCompiler {
                     "PULSE requires 2-3 arguments, got " + args.size(), "PULSE");
         }
         double magnitude = evaluateConstant(args.get(0), "PULSE magnitude");
-        double start = evaluateConstant(args.get(1), "PULSE startTime");
-        double dt = context.getDt();
-        Pulse pulse;
+        double startTime = evaluateConstant(args.get(1), "PULSE startTime");
+        double[] dtH = context.getDtHolder();
+        LongSupplier stepSupplier = context.getCurrentStep();
         if (args.size() == 3) {
             double interval = evaluateConstant(args.get(2), "PULSE interval");
-            pulse = Pulse.of(magnitude, Math.round(start / dt),
-                    Math.round(interval / dt), context.getCurrentStep());
+            return () -> {
+                long step = stepSupplier.getAsLong();
+                long startStep = Math.round(startTime / dtH[0]);
+                if (step < startStep) {
+                    return 0.0;
+                }
+                if (step == startStep) {
+                    return magnitude;
+                }
+                long intervalSteps = Math.round(interval / dtH[0]);
+                if (intervalSteps > 0 && (step - startStep) % intervalSteps == 0) {
+                    return magnitude;
+                }
+                return 0.0;
+            };
         } else {
-            pulse = Pulse.of(magnitude, Math.round(start / dt), context.getCurrentStep());
+            return () -> {
+                long step = stepSupplier.getAsLong();
+                long startStep = Math.round(startTime / dtH[0]);
+                return step == startStep ? magnitude : 0.0;
+            };
         }
-        return pulse::getCurrentValue;
     }
 
     private DoubleSupplier compilePulseTrain(List<Expr> args) {
@@ -872,21 +903,26 @@ public class ExprCompiler {
         requireArgs("DELAY_FIXED", args, 3);
         DoubleSupplier input = compileExpr(args.get(0));
         double delayTime = evaluateConstant(args.get(1), "DELAY_FIXED delayTime");
-        if (Double.isNaN(delayTime)) {
-            delayTime = 0;
-        }
-        int delaySteps = (int) Math.round(delayTime);
-        if (delaySteps <= 0) {
+        if (Double.isNaN(delayTime) || delayTime <= 0) {
             String msg = "DELAY_FIXED delayTime evaluated to " + delayTime
-                    + " (rounded to " + delaySteps
-                    + ") at compile time; using default of 1 step"
+                    + " at compile time; using default of 1.0"
                     + " — simulation results may be inaccurate";
             logger.warn(msg);
             context.addWarning(msg);
-            delaySteps = 1;
+            delayTime = 1.0;
+        } else {
+            int estimatedSteps = (int) Math.round(delayTime / context.getDt());
+            if (estimatedSteps <= 0) {
+                String msg = "DELAY_FIXED delayTime " + delayTime
+                        + " rounds to 0 steps at current DT; will default to 1 step"
+                        + " — simulation results may be inaccurate";
+                logger.warn(msg);
+                context.addWarning(msg);
+            }
         }
         DoubleSupplier initial = compileExpr(args.get(2));
-        DelayFixed delayFixed = DelayFixed.of(input, delaySteps,
+        double[] dtH = context.getDtHolder();
+        DelayFixed delayFixed = DelayFixed.of(input, delayTime, dtH,
                 initial, context.getCurrentStep());
         resettables.add(delayFixed);
         return delayFixed::getCurrentValue;

@@ -100,7 +100,7 @@ class FormulaGuardTest {
         void shouldRejectNonPositiveDelaySteps(int delaySteps) {
             assertThatThrownBy(() -> DelayFixed.of(() -> 1, delaySteps, 0, () -> 0))
                     .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessageContaining("delaySteps");
+                    .hasMessageContaining("delayTime");
         }
 
         @Test
