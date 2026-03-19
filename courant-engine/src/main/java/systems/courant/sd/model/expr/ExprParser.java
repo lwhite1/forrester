@@ -128,6 +128,9 @@ public class ExprParser {
         if (match(">")) {
             return BinaryOperator.GT;
         }
+        if (match("=")) {
+            return BinaryOperator.EQ;
+        }
         return null;
     }
 

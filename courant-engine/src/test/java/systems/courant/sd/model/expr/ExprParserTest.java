@@ -149,6 +149,23 @@ class ExprParserTest {
         }
 
         @Test
+        void shouldParseSingleEqualsAsEquality() {
+            Expr result = ExprParser.parse("x = 5");
+            assertThat(result).isInstanceOf(Expr.BinaryOp.class);
+            Expr.BinaryOp bin = (Expr.BinaryOp) result;
+            assertThat(bin.operator()).isEqualTo(BinaryOperator.EQ);
+            assertThat(bin.left()).isEqualTo(new Expr.Ref("x"));
+            assertThat(bin.right()).isEqualTo(new Expr.Literal(5.0));
+        }
+
+        @Test
+        void shouldParseDoubleEqualsAsEquality() {
+            Expr result = ExprParser.parse("x == 5");
+            assertThat(result).isInstanceOf(Expr.BinaryOp.class);
+            assertThat(((Expr.BinaryOp) result).operator()).isEqualTo(BinaryOperator.EQ);
+        }
+
+        @Test
         void shouldParseLogicalOr() {
             Expr result = ExprParser.parse("a or b");
             assertThat(result).isEqualTo(
