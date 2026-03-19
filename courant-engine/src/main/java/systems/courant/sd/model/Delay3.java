@@ -20,13 +20,14 @@ import java.util.function.LongSupplier;
  *
  * <pre>
  *     stageTime = delayTime / 3
- *     rate1 = stage1 / stageTime     stage1 += input - rate1
- *     rate2 = stage2 / stageTime     stage2 += rate1 - rate2
- *     rate3 = stage3 / stageTime     stage3 += rate2 - rate3
+ *     rate1 = stage1 / stageTime     stage1 += (input - rate1) * dt
+ *     rate2 = stage2 / stageTime     stage2 += (rate1 - rate2) * dt
+ *     rate3 = stage3 / stageTime     stage3 += (rate2 - rate3) * dt
  *     output = rate3
  * </pre>
  *
- * <p>where {@code delayTime} is the total delay expressed in simulation timesteps.
+ * <p>where {@code delayTime} is the total delay expressed in simulation time units and
+ * {@code dt} is the integration time step.
  *
  * <p>If no initial value is provided, the first input value is used (standard SD convention).
  * The three stages are initialized so that the output equals the initial value at time zero.
@@ -44,9 +45,12 @@ import java.util.function.LongSupplier;
  */
 public class Delay3 implements Formula, Resettable {
 
+    private static final double[] UNIT_DT = {1.0};
+
     private final DoubleSupplier input;
     private final double delayTime;
     private final LongSupplier currentStep;
+    private final double[] dtHolder;
     private final double explicitInitial;
     private final boolean hasExplicitInitial;
 
@@ -59,7 +63,7 @@ public class Delay3 implements Formula, Resettable {
     private long lastStep = -1;
 
     private Delay3(DoubleSupplier input, double delayTime, LongSupplier currentStep,
-                   double explicitInitial, boolean hasExplicitInitial) {
+                   double[] dtHolder, double explicitInitial, boolean hasExplicitInitial) {
         Preconditions.checkNotNull(input, "input supplier must not be null");
         Preconditions.checkNotNull(currentStep, "currentStep supplier must not be null");
         Preconditions.checkArgument(delayTime > 0,
@@ -67,6 +71,7 @@ public class Delay3 implements Formula, Resettable {
         this.input = input;
         this.delayTime = delayTime;
         this.currentStep = currentStep;
+        this.dtHolder = dtHolder;
         this.explicitInitial = explicitInitial;
         this.hasExplicitInitial = hasExplicitInitial;
     }
@@ -80,7 +85,15 @@ public class Delay3 implements Formula, Resettable {
      * @return a new Delay3 formula
      */
     public static Delay3 of(DoubleSupplier input, double delayTime, LongSupplier currentStep) {
-        return new Delay3(input, delayTime, currentStep, 0, false);
+        return new Delay3(input, delayTime, currentStep, UNIT_DT, 0, false);
+    }
+
+    /**
+     * Creates a DELAY3 formula with runtime DT support.
+     */
+    public static Delay3 of(DoubleSupplier input, double delayTime,
+                            double[] dtHolder, LongSupplier currentStep) {
+        return new Delay3(input, delayTime, currentStep, dtHolder, 0, false);
     }
 
     /**
@@ -94,7 +107,15 @@ public class Delay3 implements Formula, Resettable {
      */
     public static Delay3 of(DoubleSupplier input, double delayTime, double initialValue,
                             LongSupplier currentStep) {
-        return new Delay3(input, delayTime, currentStep, initialValue, true);
+        return new Delay3(input, delayTime, currentStep, UNIT_DT, initialValue, true);
+    }
+
+    /**
+     * Creates a DELAY3 formula with an explicit initial value and runtime DT support.
+     */
+    public static Delay3 of(DoubleSupplier input, double delayTime, double initialValue,
+                            double[] dtHolder, LongSupplier currentStep) {
+        return new Delay3(input, delayTime, currentStep, dtHolder, initialValue, true);
     }
 
     /**
@@ -144,10 +165,11 @@ public class Delay3 implements Formula, Resettable {
                 double rate2 = stage2 / stageTime;
                 double rate3 = stage3 / stageTime;
 
-                // Update stage levels (Euler integration, dt = 1 timestep)
-                stage1 += inputVal - rate1;
-                stage2 += rate1 - rate2;
-                stage3 += rate2 - rate3;
+                // Update stage levels (Euler integration)
+                double dt = dtHolder[0];
+                stage1 += (inputVal - rate1) * dt;
+                stage2 += (rate1 - rate2) * dt;
+                stage3 += (rate2 - rate3) * dt;
 
                 output = rate3;
             }

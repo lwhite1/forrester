@@ -15,13 +15,14 @@ import java.util.function.LongSupplier;
  * SD SMOOTH builtin (also known as a first-order information delay).
  *
  * <p>SMOOTH progressively adjusts toward its input over a specified smoothing time.
- * The underlying equation (Euler integration, dt = 1 timestep) is:
+ * The underlying equation (Euler integration) is:
  *
  * <pre>
- *     smoothed += (input - smoothed) / smoothingTime
+ *     smoothed += (input - smoothed) * dt / smoothingTime
  * </pre>
  *
- * <p>where {@code smoothingTime} is expressed in simulation timesteps.
+ * <p>where {@code smoothingTime} is expressed in simulation time units and {@code dt} is the
+ * integration time step.
  *
  * <p>If no initial value is provided, the first input value is used (standard SD convention).
  *
@@ -38,10 +39,12 @@ import java.util.function.LongSupplier;
 public class Smooth implements Formula, Resettable {
 
     private static final Logger log = LoggerFactory.getLogger(Smooth.class);
+    private static final double[] UNIT_DT = {1.0};
 
     private final DoubleSupplier input;
     private final DoubleSupplier smoothingTime;
     private final LongSupplier currentStep;
+    private final double[] dtHolder;
     private final double explicitInitial;
     private final boolean hasExplicitInitial;
 
@@ -52,13 +55,14 @@ public class Smooth implements Formula, Resettable {
     private boolean warnedNonPositive;
 
     private Smooth(DoubleSupplier input, DoubleSupplier smoothingTime, LongSupplier currentStep,
-                   double explicitInitial, boolean hasExplicitInitial) {
+                   double[] dtHolder, double explicitInitial, boolean hasExplicitInitial) {
         Preconditions.checkNotNull(input, "input supplier must not be null");
         Preconditions.checkNotNull(smoothingTime, "smoothingTime supplier must not be null");
         Preconditions.checkNotNull(currentStep, "currentStep supplier must not be null");
         this.input = input;
         this.smoothingTime = smoothingTime;
         this.currentStep = currentStep;
+        this.dtHolder = dtHolder;
         this.explicitInitial = explicitInitial;
         this.hasExplicitInitial = hasExplicitInitial;
     }
@@ -73,7 +77,21 @@ public class Smooth implements Formula, Resettable {
      */
     public static Smooth of(DoubleSupplier input, DoubleSupplier smoothingTime,
                             LongSupplier currentStep) {
-        return new Smooth(input, smoothingTime, currentStep, 0, false);
+        return new Smooth(input, smoothingTime, currentStep, UNIT_DT, 0, false);
+    }
+
+    /**
+     * Creates a SMOOTH formula with runtime DT support.
+     *
+     * @param input         supplies the current input value to smooth
+     * @param smoothingTime supplies the averaging time (re-evaluated each step)
+     * @param dtHolder      mutable single-element array holding the integration time step
+     * @param currentStep   supplies the current simulation timestep
+     * @return a new Smooth formula
+     */
+    public static Smooth of(DoubleSupplier input, DoubleSupplier smoothingTime,
+                            double[] dtHolder, LongSupplier currentStep) {
+        return new Smooth(input, smoothingTime, currentStep, dtHolder, 0, false);
     }
 
     /**
@@ -89,7 +107,7 @@ public class Smooth implements Formula, Resettable {
                             LongSupplier currentStep) {
         Preconditions.checkArgument(smoothingTime > 0,
                 "smoothingTime must be positive, but got %s", smoothingTime);
-        return new Smooth(input, () -> smoothingTime, currentStep, 0, false);
+        return new Smooth(input, () -> smoothingTime, currentStep, UNIT_DT, 0, false);
     }
 
     /**
@@ -103,7 +121,22 @@ public class Smooth implements Formula, Resettable {
      */
     public static Smooth of(DoubleSupplier input, DoubleSupplier smoothingTime,
                             double initialValue, LongSupplier currentStep) {
-        return new Smooth(input, smoothingTime, currentStep, initialValue, true);
+        return new Smooth(input, smoothingTime, currentStep, UNIT_DT, initialValue, true);
+    }
+
+    /**
+     * Creates a SMOOTH formula with an explicit initial value and runtime DT support.
+     *
+     * @param input         supplies the current input value to smooth
+     * @param smoothingTime supplies the averaging time (re-evaluated each step)
+     * @param initialValue  the smoothed value at time zero
+     * @param dtHolder      mutable single-element array holding the integration time step
+     * @param currentStep   supplies the current simulation timestep
+     * @return a new Smooth formula
+     */
+    public static Smooth of(DoubleSupplier input, DoubleSupplier smoothingTime,
+                            double initialValue, double[] dtHolder, LongSupplier currentStep) {
+        return new Smooth(input, smoothingTime, currentStep, dtHolder, initialValue, true);
     }
 
     /**
@@ -119,7 +152,7 @@ public class Smooth implements Formula, Resettable {
                             LongSupplier currentStep) {
         Preconditions.checkArgument(smoothingTime > 0,
                 "smoothingTime must be positive, but got %s", smoothingTime);
-        return new Smooth(input, () -> smoothingTime, currentStep, initialValue, true);
+        return new Smooth(input, () -> smoothingTime, currentStep, UNIT_DT, initialValue, true);
     }
 
     /**
@@ -138,7 +171,7 @@ public class Smooth implements Formula, Resettable {
     /**
      * Returns the exponentially smoothed value for the current timestep.
      * On the first call, initializes from the input or explicit initial value.
-     * On subsequent calls, adjusts toward the input by {@code (input - smoothed) / smoothingTime}
+     * On subsequent calls, adjusts toward the input by {@code (input - smoothed) * dt / smoothingTime}
      * for each elapsed timestep.
      *
      * @return the smoothed value
@@ -165,7 +198,7 @@ public class Smooth implements Formula, Resettable {
             }
             for (long i = 0; i < delta; i++) {
                 double inputVal = (i < delta - 1) ? lastInputVal : currentInput;
-                smoothed += (inputVal - smoothed) / st;
+                smoothed += (inputVal - smoothed) * dtHolder[0] / st;
             }
             lastInputVal = currentInput;
             lastStep = step;

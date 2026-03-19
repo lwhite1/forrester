@@ -1553,4 +1553,197 @@ class ExprCompilerTest {
             assertThat(formula.getCurrentValue()).isEqualTo(1.0);
         }
     }
+
+    @Nested
+    @DisplayName("DT consistency across time-dependent functions (#1062)")
+    class DtConsistency {
+
+        /**
+         * Verifies that all time-dependent functions produce the same simulation-time
+         * behavior regardless of DT. Each function is compiled at DT=1.0 and DT=0.25,
+         * and both must agree on the value at a given simulation time.
+         */
+
+        private Formula compileWithDt(double dt, String expr, long[] stepHolder,
+                                      double[] dtHolder) {
+            dtHolder[0] = dt;
+            UnitRegistry registry = new UnitRegistry();
+            CompilationContext ctx = new CompilationContext(
+                    registry, () -> stepHolder[0], null, dtHolder);
+            ctx.addLiteralConstant("Population", 1000);
+            ctx.addLiteralConstant("Input", 100);
+            ExprCompiler comp = new ExprCompiler(ctx, new ArrayList<>());
+            return comp.compile(expr);
+        }
+
+        @Test
+        @DisplayName("STEP fires at same simulation time for DT=1.0 and DT=0.25")
+        void stepFiresAtSameSimulationTime() {
+            long[] step1 = {0};
+            double[] dt1 = {1.0};
+            Formula f1 = compileWithDt(1.0, "STEP(10, 5)", step1, dt1);
+
+            long[] step025 = {0};
+            double[] dt025 = {0.25};
+            Formula f025 = compileWithDt(0.25, "STEP(10, 5)", step025, dt025);
+
+            // Before time 5: both return 0
+            step1[0] = 4;       // time 4.0
+            step025[0] = 16;    // time 4.0
+            assertThat(f1.getCurrentValue()).isEqualTo(0.0);
+            assertThat(f025.getCurrentValue()).isEqualTo(0.0);
+
+            // At time 5: both return 10
+            step1[0] = 5;       // time 5.0
+            step025[0] = 20;    // time 5.0
+            assertThat(f1.getCurrentValue()).isEqualTo(10.0);
+            assertThat(f025.getCurrentValue()).isEqualTo(10.0);
+        }
+
+        @Test
+        @DisplayName("RAMP produces same value at same simulation time for DT=1.0 and DT=0.25")
+        void rampProducesSameValueAtSameTime() {
+            long[] step1 = {0};
+            double[] dt1 = {1.0};
+            Formula f1 = compileWithDt(1.0, "RAMP(2, 4, 10)", step1, dt1);
+
+            long[] step025 = {0};
+            double[] dt025 = {0.25};
+            Formula f025 = compileWithDt(0.25, "RAMP(2, 4, 10)", step025, dt025);
+
+            // Before start: both return 0
+            step1[0] = 3;       // time 3
+            step025[0] = 12;    // time 3
+            assertThat(f1.getCurrentValue()).isEqualTo(0.0);
+            assertThat(f025.getCurrentValue()).isEqualTo(0.0);
+
+            // At time 7: elapsed = 3, value = 2 * 3 = 6
+            step1[0] = 7;
+            step025[0] = 28;
+            assertThat(f1.getCurrentValue()).isCloseTo(6.0, within(1e-10));
+            assertThat(f025.getCurrentValue()).isCloseTo(6.0, within(1e-10));
+
+            // After end (time 12): clamped at elapsed = 6, value = 2 * 6 = 12
+            step1[0] = 12;
+            step025[0] = 48;
+            assertThat(f1.getCurrentValue()).isCloseTo(12.0, within(1e-10));
+            assertThat(f025.getCurrentValue()).isCloseTo(12.0, within(1e-10));
+        }
+
+        @Test
+        @DisplayName("PULSE fires at same simulation time for DT=1.0 and DT=0.25")
+        void pulseFiresAtSameSimulationTime() {
+            long[] step1 = {0};
+            double[] dt1 = {1.0};
+            Formula f1 = compileWithDt(1.0, "PULSE(100, 3, 5)", step1, dt1);
+
+            long[] step025 = {0};
+            double[] dt025 = {0.25};
+            Formula f025 = compileWithDt(0.25, "PULSE(100, 3, 5)", step025, dt025);
+
+            // At time 3: both fire
+            step1[0] = 3;
+            step025[0] = 12;
+            assertThat(f1.getCurrentValue()).isEqualTo(100.0);
+            assertThat(f025.getCurrentValue()).isEqualTo(100.0);
+
+            // At time 4: neither fires
+            step1[0] = 4;
+            step025[0] = 16;
+            assertThat(f1.getCurrentValue()).isEqualTo(0.0);
+            assertThat(f025.getCurrentValue()).isEqualTo(0.0);
+
+            // At time 8: both fire (second pulse: 3 + 5 = 8)
+            step1[0] = 8;
+            step025[0] = 32;
+            assertThat(f1.getCurrentValue()).isEqualTo(100.0);
+            assertThat(f025.getCurrentValue()).isEqualTo(100.0);
+        }
+
+        @Test
+        @DisplayName("DELAY_FIXED divides delay_time by DT (#1031)")
+        void delayFixedDividesByDt() {
+            long[] step025 = {0};
+            double[] dt025 = {0.25};
+            Formula f025 = compileWithDt(0.25, "DELAY_FIXED(Input, 2, 0)", step025, dt025);
+
+            // delay = 2 time units = 8 steps at DT=0.25
+            // Steps 0-7: should return initial value (0)
+            step025[0] = 0;
+            assertThat(f025.getCurrentValue()).isEqualTo(0.0);
+            for (int s = 1; s <= 7; s++) {
+                step025[0] = s;
+                f025.getCurrentValue(); // advance
+            }
+            // Step 8 (time 2.0): delay elapsed, should return the input from step 0
+            step025[0] = 8;
+            assertThat(f025.getCurrentValue()).isEqualTo(100.0);
+        }
+
+        @Test
+        @DisplayName("SMOOTH converges at same rate regardless of DT (#940)")
+        void smoothConvergesAtSameRate() {
+            long[] step1 = {0};
+            double[] dt1 = {1.0};
+            Formula f1 = compileWithDt(1.0, "SMOOTH(Input, 5, 0)", step1, dt1);
+
+            long[] step025 = {0};
+            double[] dt025 = {0.25};
+            Formula f025 = compileWithDt(0.25, "SMOOTH(Input, 5, 0)", step025, dt025);
+
+            // Initialize both
+            step1[0] = 0;
+            f1.getCurrentValue();
+            step025[0] = 0;
+            f025.getCurrentValue();
+
+            // Advance both to time = 10 (2 smoothing times)
+            // DT=1: step 10, DT=0.25: step 40
+            for (long s = 1; s <= 10; s++) {
+                step1[0] = s;
+                f1.getCurrentValue();
+            }
+            for (long s = 1; s <= 40; s++) {
+                step025[0] = s;
+                f025.getCurrentValue();
+            }
+            double val1 = f1.getCurrentValue();
+            double val025 = f025.getCurrentValue();
+            // Both should be close to the same value (approaching 100)
+            // Allow 5% tolerance due to Euler discretization differences
+            assertThat(val025).isCloseTo(val1, within(val1 * 0.05));
+        }
+
+        @Test
+        @DisplayName("DELAY1 produces similar dynamics regardless of DT (#940)")
+        void delay1ProducesSimilarDynamics() {
+            long[] step1 = {0};
+            double[] dt1 = {1.0};
+            Formula f1 = compileWithDt(1.0, "DELAY1(Input, 6, 0)", step1, dt1);
+
+            long[] step025 = {0};
+            double[] dt025 = {0.25};
+            Formula f025 = compileWithDt(0.25, "DELAY1(Input, 6, 0)", step025, dt025);
+
+            // Initialize both
+            step1[0] = 0;
+            f1.getCurrentValue();
+            step025[0] = 0;
+            f025.getCurrentValue();
+
+            // Advance both to time = 12 (2 delay times)
+            for (long s = 1; s <= 12; s++) {
+                step1[0] = s;
+                f1.getCurrentValue();
+            }
+            for (long s = 1; s <= 48; s++) {
+                step025[0] = s;
+                f025.getCurrentValue();
+            }
+            double val1 = f1.getCurrentValue();
+            double val025 = f025.getCurrentValue();
+            // Both should be close (approaching 100)
+            assertThat(val025).isCloseTo(val1, within(val1 * 0.05));
+        }
+    }
 }
