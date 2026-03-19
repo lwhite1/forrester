@@ -80,4 +80,25 @@ class TarjanSCCTest {
         assertThat(sccs).hasSize(1);
         assertThat(sccs.get(0)).containsExactlyInAnyOrder("X", "Y", "Z");
     }
+
+    @Test
+    void shouldNotCrashOnDeepChainExceedingMaxDepth() {
+        // Build a linear chain of 250 nodes (exceeds MAX_DEPTH=200)
+        int count = 250;
+        Set<String> nodes = new LinkedHashSet<>();
+        Map<String, Set<String>> graph = new LinkedHashMap<>();
+        for (int i = 0; i < count; i++) {
+            String name = "N" + i;
+            nodes.add(name);
+            if (i < count - 1) {
+                graph.put(name, Set.of("N" + (i + 1)));
+            }
+        }
+        // Close the cycle so all nodes form one SCC
+        graph.put("N" + (count - 1), Set.of("N0"));
+
+        // Should complete without StackOverflowError
+        List<Set<String>> sccs = TarjanSCC.findAll(nodes, graph);
+        assertThat(sccs).isNotEmpty();
+    }
 }

@@ -1,5 +1,8 @@
 package systems.courant.sd.model.graph;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,6 +20,8 @@ import java.util.Set;
  * to avoid duplicating the algorithm.
  */
 public final class TarjanSCC {
+
+    private static final Logger log = LoggerFactory.getLogger(TarjanSCC.class);
 
     /** Maximum recursion depth for graph traversal, matching ExprParser.MAX_DEPTH. */
     private static final int MAX_DEPTH = 200;
@@ -73,6 +78,8 @@ public final class TarjanSCC {
             Map<String, Integer> lowlink, Set<String> onStack,
             Deque<String> stack, List<Set<String>> result, int depth) {
         if (depth > MAX_DEPTH) {
+            log.warn("SCC traversal truncated at depth {} for node '{}' — "
+                    + "feedback loops in deep dependency chains may go undetected", depth, v);
             nodeIndex.put(v, index[0]);
             lowlink.put(v, index[0]);
             index[0]++;
