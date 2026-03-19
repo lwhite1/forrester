@@ -166,10 +166,9 @@ class ChartViewerApplicationTest {
     }
 
     @Test
-    @DisplayName("snapshot captures formatter field (#1060)")
-    void shouldCaptureFormatterInSnapshot() {
+    @DisplayName("snapshot captures default formatter field (#1060)")
+    void shouldCaptureDefaultFormatterInSnapshot() {
         ChartViewerApplication.ChartData snap = ChartViewerApplication.snapshot();
-        assertThat(snap.formatter()).isNotNull();
         assertThat(snap.formatter()).isEqualTo(DateTimeFormatter.BASIC_ISO_DATE);
     }
 
