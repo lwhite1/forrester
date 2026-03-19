@@ -232,6 +232,20 @@ class CompiledModelTest {
             // After reset, history should be cleared — returns 0 for out-of-range
             assertThat(rate.getHistoryAtTimeStep(0)).isEqualTo(0.0);
         }
+
+        @Test
+        void shouldClearStockHistory() {
+            population.recordValue();
+            population.setValue(200.0);
+            population.recordValue();
+            assertThat(population.getHistoryAtTimeStep(0)).isEqualTo(100.0);
+            assertThat(population.getHistoryAtTimeStep(1)).isEqualTo(200.0);
+
+            compiled.reset();
+
+            assertThat(population.getHistoryAtTimeStep(0)).isEqualTo(0.0);
+            assertThat(population.getHistoryAtTimeStep(1)).isEqualTo(0.0);
+        }
     }
 
     @Nested

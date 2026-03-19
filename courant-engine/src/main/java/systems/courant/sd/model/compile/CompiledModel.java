@@ -179,6 +179,7 @@ public class CompiledModel {
         }
         for (Stock stock : model.getStocks()) {
             stock.resetToInitialValue();
+            stock.clearHistory();
         }
         for (Module module : model.getModules()) {
             resetModuleStocks(module);
@@ -219,6 +220,7 @@ public class CompiledModel {
     private static void resetModuleStocks(Module module) {
         for (Stock stock : module.getStocks()) {
             stock.resetToInitialValue();
+            stock.clearHistory();
         }
         for (Module child : module.getSubModules().values()) {
             resetModuleStocks(child);

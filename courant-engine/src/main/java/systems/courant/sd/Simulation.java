@@ -425,10 +425,13 @@ public class Simulation {
     }
 
     /**
-     * Clears recorded history from all flows and variables in the model.
+     * Clears recorded history from all stocks, flows, and variables in the model.
      * Call this before re-running a simulation to avoid stale history data.
      */
     public void clearHistory() {
+        for (Stock stock : model.getStocks()) {
+            stock.clearHistory();
+        }
         Set<Flow> seenFlows = Collections.newSetFromMap(new IdentityHashMap<>());
         Set<Variable> seenVars = Collections.newSetFromMap(new IdentityHashMap<>());
         for (Flow flow : model.getFlows()) {
@@ -495,6 +498,9 @@ public class Simulation {
     }
 
     private static void clearModuleHistory(Module module, Set<Flow> seenFlows, Set<Variable> seenVars) {
+        for (Stock stock : module.getStocks()) {
+            stock.clearHistory();
+        }
         for (Flow flow : module.getFlows()) {
             if (seenFlows.add(flow)) {
                 flow.clearHistory();
