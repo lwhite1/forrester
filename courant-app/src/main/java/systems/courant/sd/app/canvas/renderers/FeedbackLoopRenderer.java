@@ -27,6 +27,9 @@ public final class FeedbackLoopRenderer {
             LayoutMetrics.LOOP_LABEL_FONT_SIZE);
     private static final double LABEL_PADDING = LayoutMetrics.LOOP_LABEL_PADDING;
 
+    /** Reusable Text node for measuring label width — avoids allocation per frame. */
+    private static final ThreadLocal<Text> MEASURE_TEXT = ThreadLocal.withInitial(Text::new);
+
     private FeedbackLoopRenderer() {
     }
 
@@ -52,8 +55,9 @@ public final class FeedbackLoopRenderer {
             case INDETERMINATE -> ColorPalette.LOOP_INDETERMINATE;
         };
 
-        Text textNode = new Text(label);
+        Text textNode = MEASURE_TEXT.get();
         textNode.setFont(LOOP_LABEL_FONT);
+        textNode.setText(label);
         double textWidth = textNode.getLayoutBounds().getWidth();
         double badgeW = textWidth + LABEL_PADDING * 2;
         double badgeH = 20;
