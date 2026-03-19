@@ -16,7 +16,7 @@ class FunctionDocRegistryTest {
     void shouldContainAllCoreFunctions() {
         List<String> names = FunctionDocRegistry.allNames();
         assertThat(names).contains(
-                "TIME", "DT", "IF",
+                "TIME", "DT", "IF", "IF_SHORT",
                 "ABS", "SQRT", "LN", "EXP", "LOG", "SIN", "COS", "TAN",
                 "ARCSIN", "ARCCOS", "ARCTAN", "SIGN", "PI",
                 "INT", "ROUND", "MIN", "MAX", "MODULO", "QUANTUM", "POWER",
