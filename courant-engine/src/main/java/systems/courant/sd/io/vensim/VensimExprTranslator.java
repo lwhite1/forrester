@@ -1051,6 +1051,10 @@ public final class VensimExprTranslator {
                 expanded.add(innerExpr.replace(dimName + "!", label));
             }
 
+            if (expanded.isEmpty()) {
+                break;
+            }
+
             String replacement;
             if (joinOp != null) {
                 replacement = "(" + String.join(joinOp, expanded) + ")";
