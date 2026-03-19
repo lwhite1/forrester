@@ -338,7 +338,7 @@ public class VensimImporter implements ModelImporter {
             if (subMatcher.matches()) {
                 if (preClassifySubscriptedEquation(subMatcher, eq,
                         subscripts.subscriptDimensions, stockNames,
-                        constantValues)) {
+                        constantValues, allNormalizedNames)) {
                     continue;
                 }
             }
@@ -348,6 +348,7 @@ public class VensimImporter implements ModelImporter {
             if (eq.operator().equals(":") || eq.operator().equals("<->")) {
                 continue;
             }
+
             if (eq.operator().equals("()")) {
                 lookupNames.add(eqName);
                 continue;
@@ -376,7 +377,8 @@ public class VensimImporter implements ModelImporter {
             Matcher subMatcher, MdlEquation eq,
             Map<String, List<String>> subscriptDimensions,
             Set<String> stockNames,
-            Map<String, Double> constantValues) {
+            Map<String, Double> constantValues,
+            Set<String> allNormalizedNames) {
         String baseName = subMatcher.group(1).strip();
         String dimNameRaw = subMatcher.group(2).strip();
         String dimKey = VensimExprTranslator.normalizeName(dimNameRaw);
@@ -388,6 +390,7 @@ public class VensimImporter implements ModelImporter {
                     eq.expression(), labels.size());
             for (int li = 0; li < labels.size(); li++) {
                 String expandedName = normalizedBase + "_" + labels.get(li);
+                allNormalizedNames.add(expandedName);
                 if (isInteg) {
                     stockNames.add(expandedName);
                 }
@@ -415,6 +418,7 @@ public class VensimImporter implements ModelImporter {
             for (int ci = 0; ci < combos.size(); ci++) {
                 String expandedName = normalizedBase + "_"
                         + String.join("_", combos.get(ci));
+                allNormalizedNames.add(expandedName);
                 if (isInteg) {
                     stockNames.add(expandedName);
                 }
@@ -435,6 +439,7 @@ public class VensimImporter implements ModelImporter {
         if (isLabel) {
             String normalizedBase = VensimExprTranslator.normalizeName(baseName);
             String expandedName = normalizedBase + "_" + normalizedSub;
+            allNormalizedNames.add(expandedName);
             boolean isInteg = INTEG_PATTERN.matcher(eq.expression()).find();
             if (isInteg) {
                 stockNames.add(expandedName);
