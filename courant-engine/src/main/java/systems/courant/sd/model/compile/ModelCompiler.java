@@ -84,18 +84,19 @@ public class ModelCompiler {
                     def.name() != null ? def.name() : "");
         }
 
+        // Pre-expand subscripted elements into scalar elements
+        ModelDefinition expandedDef = SubscriptExpander.expand(def);
+
         // Detect algebraic loops (cycles among variables) and warn.
         // Cycles are handled at runtime by Variable's re-entrancy guard, which
         // returns the previous timestep's value to break the loop.
-        DependencyGraph depGraph = DependencyGraph.fromDefinition(def);
+        // Runs on the expanded definition so cross-dimensional dependencies are visible.
+        DependencyGraph depGraph = DependencyGraph.fromDefinition(expandedDef);
         List<Set<String>> sccs = depGraph.findSCCs();
         for (Set<String> scc : sccs) {
             log.warn("Algebraic loop detected (will use previous-step values to converge): {}",
                     scc);
         }
-
-        // Pre-expand subscripted elements into scalar elements
-        ModelDefinition expandedDef = SubscriptExpander.expand(def);
 
         Model model = new Model(expandedDef.name());
         if (def.metadata() != null) {

@@ -11,6 +11,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 import static systems.courant.sd.measure.Units.DAY;
 import static systems.courant.sd.measure.Units.PEOPLE;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -679,6 +681,31 @@ class ModelCompilerTest {
                     .stream().filter(f -> f.getName().equals("Drain")).findFirst().orElseThrow();
             assertThat(flow.getMaterialUnit()).isNotNull();
             assertThat(flow.getMaterialUnit().getName()).isEqualTo("Liter");
+        }
+    }
+
+    @Nested
+    @DisplayName("Subscript expansion and dependency graph ordering")
+    class SubscriptDependencyGraph {
+
+        @Test
+        void shouldCompileSubscriptedModelWithCrossDimensionalReference() {
+            // Ensures the dependency graph runs on the expanded definition,
+            // so cross-dimensional references are visible (#1039)
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("CrossDim")
+                    .subscript("Region", List.of("North", "South"))
+                    .stock("Pop", 100, "Person", List.of("Region"))
+                    .flow("migration", "Pop * 0.01", "Year", "Pop", null,
+                            List.of("Region"))
+                    .defaultSimulation("Year", 10, "Year")
+                    .build();
+
+            CompiledModel compiled = compiler.compile(def);
+
+            assertThat(compiled.getModel().getStocks()).hasSize(2);
+            assertThat(compiled.getModel().getStocks().stream().map(Stock::getName))
+                    .containsExactlyInAnyOrder("Pop[North]", "Pop[South]");
         }
     }
 }
