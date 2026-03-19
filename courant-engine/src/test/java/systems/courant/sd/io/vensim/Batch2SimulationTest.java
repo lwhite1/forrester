@@ -46,12 +46,13 @@ class Batch2SimulationTest {
         Simulation sim = compiled.createSimulation();
         sim.execute();
 
-        // Check that at least one stock has a finite value (not NaN/Infinity)
-        boolean anyFinite = compiled.getModel().getStocks().stream()
-                .anyMatch(s -> Double.isFinite(s.getValue()));
-        assertThat(anyFinite)
-                .as("At least one stock should have a finite value after simulation of " + modelName)
-                .isTrue();
+        // Check that ALL stocks have finite values (not NaN/Infinity)
+        for (Stock stock : compiled.getModel().getStocks()) {
+            assertThat(Double.isFinite(stock.getValue()))
+                    .as("Stock '%s' should have a finite value after simulation of %s, but was %s",
+                            stock.getName(), modelName, stock.getValue())
+                    .isTrue();
+        }
     }
 
     private String loadResource(String path) throws IOException {
