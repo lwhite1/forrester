@@ -144,7 +144,22 @@ public final class VensimExprTranslator {
      * @param xValues the x-axis data points
      * @param yValues the y-axis data points
      */
-    public record ExtractedLookup(String name, double[] xValues, double[] yValues) {}
+    public record ExtractedLookup(String name, double[] xValues, double[] yValues) {
+        public ExtractedLookup {
+            xValues = xValues.clone();
+            yValues = yValues.clone();
+        }
+
+        @Override
+        public double[] xValues() {
+            return xValues.clone();
+        }
+
+        @Override
+        public double[] yValues() {
+            return yValues.clone();
+        }
+    }
 
     private VensimExprTranslator() {
     }
