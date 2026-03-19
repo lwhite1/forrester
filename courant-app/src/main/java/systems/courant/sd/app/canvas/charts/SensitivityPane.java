@@ -6,31 +6,21 @@ import systems.courant.sd.sweep.SensitivitySummary.ParameterImpact;
 import com.opencsv.CSVWriter;
 
 import javafx.collections.FXCollections;
-import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Insets;
-import javafx.scene.SnapshotParameters;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
-import javafx.scene.control.Alert;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
-import javafx.scene.image.WritableImage;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
-import javafx.stage.FileChooser;
-import systems.courant.sd.app.LastDirectoryStore;
 
-import javax.imageio.ImageIO;
-
-import java.io.File;
-import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -38,6 +28,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.BiFunction;
+
+import systems.courant.sd.app.canvas.ChartUtils;
 
 /**
  * Displays a sensitivity analysis as a tornado chart (horizontal bar chart ranked
@@ -158,58 +150,31 @@ public class SensitivityPane extends BorderPane {
     }
 
     private void saveChartAsPng(VBox content) {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Save Chart as PNG");
-        fileChooser.getExtensionFilters().add(
-                new FileChooser.ExtensionFilter("PNG Image", "*.png"));
-        fileChooser.setInitialFileName("sensitivity_chart.png");
-        LastDirectoryStore.applyExportDirectory(fileChooser);
-
-        File file = fileChooser.showSaveDialog(getScene() != null ? getScene().getWindow() : null);
-        if (file != null) {
-            LastDirectoryStore.recordExportDirectory(file);
-            WritableImage image = content.snapshot(new SnapshotParameters(), null);
-            try {
-                ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", file);
-            } catch (IOException e) {
-                new Alert(Alert.AlertType.ERROR,
-                        "Failed to save image: " + e.getMessage()).showAndWait();
-            }
-        }
+        ChartUtils.saveNodeAsPng(content, "sensitivity_chart.png",
+                getScene() != null ? getScene().getWindow() : null);
     }
 
     private void exportCsv() {
         if (currentImpacts == null || currentImpacts.isEmpty()) {
             return;
         }
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Export Sensitivity CSV");
-        fileChooser.getExtensionFilters().add(
-                new FileChooser.ExtensionFilter("CSV Files", "*.csv"));
-        fileChooser.setInitialFileName("sensitivity.csv");
-        LastDirectoryStore.applyExportDirectory(fileChooser);
-
-        File file = fileChooser.showSaveDialog(getScene() != null ? getScene().getWindow() : null);
-        if (file != null) {
-            LastDirectoryStore.recordExportDirectory(file);
-            try (CSVWriter writer = new CSVWriter(new OutputStreamWriter(
-                    Files.newOutputStream(file.toPath()), StandardCharsets.UTF_8))) {
-                writer.writeNext(new String[]{
-                        "Parameter", "Target Variable", "Impact (%)",
-                        "Min Output", "Max Output", "Baseline Output"});
-                for (ParameterImpact impact : currentImpacts) {
-                    writer.writeNext(new String[]{
-                            impact.parameterName(),
-                            impact.targetVariable(),
-                            String.valueOf(impact.impactFraction() * 100.0),
-                            String.valueOf(impact.minOutput()),
-                            String.valueOf(impact.maxOutput()),
-                            String.valueOf(impact.baselineOutput())});
-                }
-            } catch (IOException e) {
-                new Alert(Alert.AlertType.ERROR,
-                        "Failed to export CSV: " + e.getMessage()).showAndWait();
-            }
-        }
+        ChartUtils.showCsvSaveDialog("Export Sensitivity CSV", "sensitivity.csv",
+                getScene() != null ? getScene().getWindow() : null, file -> {
+                    try (CSVWriter writer = new CSVWriter(new OutputStreamWriter(
+                            Files.newOutputStream(file.toPath()), StandardCharsets.UTF_8))) {
+                        writer.writeNext(new String[]{
+                                "Parameter", "Target Variable", "Impact (%)",
+                                "Min Output", "Max Output", "Baseline Output"});
+                        for (ParameterImpact impact : currentImpacts) {
+                            writer.writeNext(new String[]{
+                                    impact.parameterName(),
+                                    impact.targetVariable(),
+                                    String.valueOf(impact.impactFraction() * 100.0),
+                                    String.valueOf(impact.minOutput()),
+                                    String.valueOf(impact.maxOutput()),
+                                    String.valueOf(impact.baselineOutput())});
+                        }
+                    }
+                });
     }
 }
