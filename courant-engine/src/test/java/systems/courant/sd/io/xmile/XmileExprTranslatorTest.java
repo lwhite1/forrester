@@ -50,6 +50,12 @@ class XmileExprTranslatorTest {
         }
 
         @Test
+        void shouldTranslateEqualityOperatorWithoutSpaces() {
+            var result = XmileExprTranslator.toCourant("x=5");
+            assertThat(result.expression()).isEqualTo("x==5");
+        }
+
+        @Test
         void shouldTranslateInequalityOperator() {
             var result = XmileExprTranslator.toCourant("x <> 5");
             assertThat(result.expression()).isEqualTo("x != 5");
