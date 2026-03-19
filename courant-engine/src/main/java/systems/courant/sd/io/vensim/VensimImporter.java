@@ -75,6 +75,9 @@ public class VensimImporter implements ModelImporter {
         } catch (CharacterCodingException e) {
             content = Files.readString(path, Charset.forName("windows-1252"));
         }
+        if (content.indexOf('\0') >= 0) {
+            throw new IOException("File appears to be binary, not a valid Vensim .mdl file: " + path);
+        }
         Path fileName = path.getFileName();
         String modelName = fileName != null ? fileName.toString() : path.toString();
         int dotPos = modelName.lastIndexOf('.');
