@@ -16,7 +16,7 @@ import java.nio.file.Files;
 import java.util.List;
 
 /**
- * Handles the UI flow for exporting an HTML model report:
+ * Handles the UI flow for exporting model reports as HTML or PDF:
  * shows a file chooser, generates the report, and writes it to disk.
  */
 public final class ReportExporter {
@@ -41,13 +41,14 @@ public final class ReportExporter {
                                     String modelName) {
         FileChooser chooser = new FileChooser();
         chooser.setTitle("Export Report");
-        chooser.getExtensionFilters().add(
-                new FileChooser.ExtensionFilter("HTML Report (*.html)", "*.html"));
+        chooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("HTML Report (*.html)", "*.html"),
+                new FileChooser.ExtensionFilter("PDF Report (*.pdf)", "*.pdf"));
         String baseName = (modelName != null && !modelName.isBlank()
                 && !"Untitled".equals(modelName))
                 ? modelName.replaceAll("[^a-zA-Z0-9_\\-]", "_")
                 : "report";
-        chooser.setInitialFileName(baseName + "_report.html");
+        chooser.setInitialFileName(baseName + "_report");
         LastDirectoryStore.applyExportDirectory(chooser);
 
         File file = chooser.showSaveDialog(ownerWindow);
@@ -64,7 +65,12 @@ public final class ReportExporter {
                     canvasState, editor, connectors, loopAnalysis);
 
             String html = ReportGenerator.generate(definition, svgDiagram);
-            Files.writeString(file.toPath(), html, StandardCharsets.UTF_8);
+
+            if (file.getName().toLowerCase().endsWith(".pdf")) {
+                PdfReportExporter.exportToPdf(html, file.toPath());
+            } else {
+                Files.writeString(file.toPath(), html, StandardCharsets.UTF_8);
+            }
         } catch (IOException e) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Export Error");

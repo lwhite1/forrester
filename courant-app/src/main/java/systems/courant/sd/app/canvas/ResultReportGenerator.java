@@ -1,5 +1,9 @@
 package systems.courant.sd.app.canvas;
 
+import systems.courant.sd.model.graph.BehaviorClassification;
+import systems.courant.sd.model.graph.BehaviorClassification.Mode;
+import systems.courant.sd.model.graph.FeedbackAnalysis;
+import systems.courant.sd.model.graph.LoopDominanceAnalysis;
 import systems.courant.sd.sweep.MonteCarloResult;
 import systems.courant.sd.sweep.OptimizationResult;
 import systems.courant.sd.sweep.RunResult;
@@ -17,10 +21,11 @@ import java.util.Map;
  * parameter sweeps, Monte Carlo analyses, sensitivity rankings, and
  * optimization outcomes. Charts are rendered as inline SVG for vector quality.
  *
- * <p>Covers report generation phases 2 and 3:
+ * <p>Covers report generation phases 2, 3, and 4:
  * <ul>
  *   <li>Phase 2: time series charts, summary statistics, raw data tables</li>
  *   <li>Phase 3: sweep charts, fan charts, tornado charts, optimization summary</li>
+ *   <li>Phase 4: loop dominance charts, behavior mode classification, custom templates</li>
  * </ul>
  */
 public final class ResultReportGenerator {
@@ -42,6 +47,12 @@ public final class ResultReportGenerator {
     private static final int TORNADO_RIGHT_MARGIN = 60;
     private static final int TORNADO_TOP = 40;
     private static final int TORNADO_BAR_GAP = 6;
+
+    private static final String[] REINFORCING_COLORS = {"#27ae60", "#2ecc71", "#1abc9c", "#16a085"};
+    private static final String[] BALANCING_COLORS = {"#2980b9", "#3498db", "#2c3e50", "#34495e"};
+    private static final String[] NEUTRAL_COLORS = {"#7f8c8d", "#95a5a6", "#bdc3c7"};
+
+    private static final int AREA_CHART_HEIGHT = 350;
 
     private ResultReportGenerator() {
     }
@@ -65,13 +76,48 @@ public final class ResultReportGenerator {
                                   MonteCarloResult monteCarlo,
                                   List<ParameterImpact> sensitivity,
                                   OptimizationResult optimization) {
+        return generate(modelName, singleRun, sweep, monteCarlo, sensitivity,
+                optimization, null, null, null);
+    }
+
+    /**
+     * Generates a full HTML result report with phase 4 features.
+     *
+     * @param modelName     the model name for the report title
+     * @param singleRun     single simulation run result (null to omit)
+     * @param sweep         parameter sweep result (null to omit)
+     * @param monteCarlo    Monte Carlo result (null to omit)
+     * @param sensitivity   sensitivity impacts list (null or empty to omit)
+     * @param optimization  optimization result (null to omit)
+     * @param dominance     loop dominance analysis (null to omit)
+     * @param behaviors     behavior classifications (null or empty to omit)
+     * @param template      report template for custom styling (null for defaults)
+     * @return self-contained HTML string
+     */
+    public static String generate(String modelName,
+                                  RunResult singleRun,
+                                  SweepResult sweep,
+                                  MonteCarloResult monteCarlo,
+                                  List<ParameterImpact> sensitivity,
+                                  OptimizationResult optimization,
+                                  LoopDominanceAnalysis dominance,
+                                  List<BehaviorClassification.Result> behaviors,
+                                  ReportTemplate template) {
         StringBuilder html = new StringBuilder(16384);
-        writeHeader(html, modelName);
+        writeHeader(html, modelName, template);
         html.append("<body>\n<div class=\"container\">\n");
+
+        if (template != null && template.headerHtml() != null && !template.headerHtml().isBlank()) {
+            html.append("<div class=\"report-header\">").append(template.headerHtml()).append("</div>\n");
+        }
+
         html.append("<h1>").append(esc(modelName)).append(" — Simulation Results</h1>\n");
 
         if (singleRun != null && singleRun.getStepCount() > 0) {
             writeSimulationSection(html, singleRun);
+        }
+        if (behaviors != null && !behaviors.isEmpty()) {
+            writeBehaviorSection(html, behaviors);
         }
         if (sweep != null && sweep.getRunCount() > 0) {
             writeSweepSection(html, sweep);
@@ -82,8 +128,15 @@ public final class ResultReportGenerator {
         if (sensitivity != null && !sensitivity.isEmpty()) {
             writeSensitivitySection(html, sensitivity);
         }
+        if (dominance != null && dominance.loopCount() > 0) {
+            writeLoopDominanceSection(html, dominance);
+        }
         if (optimization != null) {
             writeOptimizationSection(html, optimization);
+        }
+
+        if (template != null && template.footerHtml() != null && !template.footerHtml().isBlank()) {
+            html.append("<div class=\"report-footer\">").append(template.footerHtml()).append("</div>\n");
         }
 
         html.append("</div>\n</body>\n</html>\n");
@@ -295,6 +348,251 @@ public final class ResultReportGenerator {
         }
 
         html.append("</tbody></table>\n");
+    }
+
+    // ── Phase 4: Behavior Classification ────────────────────────────────
+
+    static void writeBehaviorSection(StringBuilder html,
+                                     List<BehaviorClassification.Result> behaviors) {
+        html.append("<section>\n<h2>Behavior Mode Classification</h2>\n");
+        html.append("<table class=\"element-table\">\n");
+        html.append("<thead><tr><th>Variable</th><th>Behavior Mode</th></tr></thead>\n");
+        html.append("<tbody>\n");
+
+        for (BehaviorClassification.Result result : behaviors) {
+            html.append("<tr>");
+            html.append("<td class=\"name\">").append(esc(result.variableName())).append("</td>");
+            html.append("<td><span class=\"behavior-badge behavior-")
+                    .append(badgeClass(result.mode())).append("\">")
+                    .append(esc(result.mode().displayName()))
+                    .append("</span></td>");
+            html.append("</tr>\n");
+        }
+
+        html.append("</tbody></table>\n");
+        html.append("</section>\n\n");
+    }
+
+    private static String badgeClass(Mode mode) {
+        return switch (mode) {
+            case EXPONENTIAL_GROWTH, LINEAR_GROWTH -> "growth";
+            case EXPONENTIAL_DECAY, LINEAR_DECLINE -> "decay";
+            case GOAL_SEEKING -> "goal";
+            case OSCILLATION -> "oscillation";
+            case S_SHAPED_GROWTH -> "s-shaped";
+            case OVERSHOOT_AND_COLLAPSE -> "overshoot";
+            case EQUILIBRIUM -> "equilibrium";
+        };
+    }
+
+    // ── Phase 4: Loop Dominance ──────────────────────────────────────
+
+    static void writeLoopDominanceSection(StringBuilder html,
+                                          LoopDominanceAnalysis dominance) {
+        html.append("<section>\n<h2>Loop Dominance</h2>\n");
+        html.append(stackedAreaChartSvg(dominance));
+        writeDominanceTransitionTable(html, dominance);
+        html.append("</section>\n\n");
+    }
+
+    static void writeDominanceTransitionTable(StringBuilder html,
+                                              LoopDominanceAnalysis dominance) {
+        if (dominance.stepCount() == 0) {
+            return;
+        }
+
+        html.append("<h3>Dominance Transitions</h3>\n");
+        html.append("<table class=\"element-table\">\n");
+        html.append("<thead><tr><th>Step Range</th><th>Dominant Loop</th>");
+        html.append("<th>Type</th></tr></thead>\n");
+        html.append("<tbody>\n");
+
+        int prevDominant = dominance.dominantLoopAt(0);
+        int rangeStart = 0;
+
+        for (int step = 1; step < dominance.stepCount(); step++) {
+            int dominant = dominance.dominantLoopAt(step);
+            if (dominant != prevDominant) {
+                writeTransitionRow(html, dominance, rangeStart, step - 1, prevDominant);
+                prevDominant = dominant;
+                rangeStart = step;
+            }
+        }
+        // Write final range
+        writeTransitionRow(html, dominance, rangeStart, dominance.stepCount() - 1, prevDominant);
+
+        html.append("</tbody></table>\n");
+    }
+
+    private static void writeTransitionRow(StringBuilder html,
+                                           LoopDominanceAnalysis dominance,
+                                           int from, int to, int loopIdx) {
+        html.append("<tr>");
+        if (from == to) {
+            html.append("<td>").append(from).append("</td>");
+        } else {
+            html.append("<td>").append(from).append("–").append(to).append("</td>");
+        }
+        if (loopIdx >= 0 && loopIdx < dominance.loopCount()) {
+            html.append("<td class=\"name\">")
+                    .append(esc(dominance.loopLabels().get(loopIdx))).append("</td>");
+            FeedbackAnalysis.LoopType type = dominance.loopTypes().get(loopIdx);
+            html.append("<td>").append(type != null ? type.label() : "—").append("</td>");
+        } else {
+            html.append("<td class=\"name\">None</td><td>—</td>");
+        }
+        html.append("</tr>\n");
+    }
+
+    // ── SVG: Stacked Area Chart ─────────────────────────────────────
+
+    static String stackedAreaChartSvg(LoopDominanceAnalysis dominance) {
+        int loopCount = dominance.loopCount();
+        int stepCount = dominance.stepCount();
+        if (loopCount == 0 || stepCount <= 1) {
+            return "<p>Not enough data for loop dominance chart.</p>\n";
+        }
+
+        // Normalize activity at each step (stacked to 100%)
+        double[][] normalized = new double[loopCount][stepCount];
+        for (int step = 0; step < stepCount; step++) {
+            double total = 0;
+            for (int loop = 0; loop < loopCount; loop++) {
+                total += dominance.score(loop, step);
+            }
+            for (int loop = 0; loop < loopCount; loop++) {
+                normalized[loop][step] = total > 0
+                        ? dominance.score(loop, step) / total
+                        : 0;
+            }
+        }
+
+        // Sample for large step counts
+        int sampleInterval = Math.max(1, stepCount / 500);
+        int sampleCount = 0;
+        for (int s = 0; s < stepCount; s += sampleInterval) {
+            sampleCount++;
+        }
+
+        ChartScaffold chart = new ChartScaffold(
+                MARGIN_LEFT, CHART_WIDTH - MARGIN_RIGHT,
+                MARGIN_TOP, AREA_CHART_HEIGHT - MARGIN_BOTTOM,
+                CHART_WIDTH - MARGIN_RIGHT - MARGIN_LEFT,
+                AREA_CHART_HEIGHT - MARGIN_BOTTOM - MARGIN_TOP,
+                0, 1.0);
+
+        StringBuilder svg = new StringBuilder(8192);
+        svgLine(svg,
+                "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 %d %d\" "
+                        + "class=\"chart-svg\">",
+                CHART_WIDTH, AREA_CHART_HEIGHT);
+
+        chart.writeBackground(svg, "#fafafa");
+
+        // Draw stacked areas from bottom to top
+        for (int loop = loopCount - 1; loop >= 0; loop--) {
+            String color = loopColor(dominance, loop);
+            StringBuilder points = new StringBuilder();
+
+            // Top edge (cumulative from loop 0..loop)
+            int sampleIdx = 0;
+            for (int step = 0; step < stepCount; step += sampleInterval) {
+                double cumulative = 0;
+                for (int l = 0; l <= loop; l++) {
+                    cumulative += normalized[l][step];
+                }
+                double x = chart.mapX((double) sampleIdx / Math.max(1, sampleCount - 1));
+                double y = chart.mapY(cumulative);
+                if (!points.isEmpty()) {
+                    points.append(' ');
+                }
+                points.append(String.format(Locale.US, "%.1f,%.1f", x, y));
+                sampleIdx++;
+            }
+
+            // Bottom edge (cumulative from loop 0..loop-1, right to left)
+            // Mirror top edge sampling: iterate same sample indices in reverse
+            for (sampleIdx = sampleCount - 1; sampleIdx >= 0; sampleIdx--) {
+                int step = Math.min(sampleIdx * sampleInterval, stepCount - 1);
+                double cumulative = 0;
+                for (int l = 0; l < loop; l++) {
+                    cumulative += normalized[l][step];
+                }
+                double x = chart.mapX((double) sampleIdx / Math.max(1, sampleCount - 1));
+                double y = chart.mapY(cumulative);
+                points.append(' ');
+                points.append(String.format(Locale.US, "%.1f,%.1f", x, y));
+            }
+
+            svgLine(svg,
+                    "<polygon points=\"%s\" fill=\"%s\" fill-opacity=\"0.6\" stroke=\"%s\" "
+                            + "stroke-width=\"0.5\"/>",
+                    points, color, color);
+        }
+
+        chart.writeAxes(svg);
+
+        // Y-axis ticks as percentages
+        for (int i = 0; i <= 5; i++) {
+            double frac = i / 5.0;
+            double y = chart.mapY(frac);
+            svgLine(svg,
+                    "<text x=\"%d\" y=\"%.1f\" text-anchor=\"end\" "
+                            + "font-size=\"11\" fill=\"#4a5568\">%d%%</text>",
+                    MARGIN_LEFT - 8, y + 4, (int) (frac * 100));
+        }
+
+        // X-axis: step labels
+        int xTicks = Math.min(10, sampleCount - 1);
+        if (xTicks > 0) {
+            for (int i = 0; i <= xTicks; i++) {
+                int step = (int) Math.round((double) i * (stepCount - 1) / xTicks);
+                double x = chart.mapX((double) i / xTicks);
+                svgLine(svg,
+                        "<text x=\"%.1f\" y=\"%d\" text-anchor=\"middle\" "
+                                + "font-size=\"11\" fill=\"#4a5568\">%d</text>",
+                        x, AREA_CHART_HEIGHT - MARGIN_BOTTOM + 18, step);
+            }
+        }
+
+        chart.writeTitle(svg, "Loop Dominance Over Time");
+
+        // Step label
+        svgLine(svg,
+                "<text x=\"%d\" y=\"%d\" text-anchor=\"middle\" "
+                        + "font-size=\"12\" fill=\"#4a5568\">Step</text>",
+                MARGIN_LEFT + chart.plotWidth() / 2, AREA_CHART_HEIGHT - 5);
+
+        // Legend
+        int legendX = chart.plotRight() - 160;
+        int legendY = chart.plotTop() + 10;
+        for (int i = 0; i < loopCount && i < 10; i++) {
+            String color = loopColor(dominance, i);
+            int ly = legendY + i * 16;
+            svgLine(svg,
+                    "<rect x=\"%d\" y=\"%d\" width=\"14\" height=\"10\" "
+                            + "fill=\"%s\" fill-opacity=\"0.6\"/>",
+                    legendX, ly, color);
+            String label = dominance.loopLabels().get(i);
+            FeedbackAnalysis.LoopType type = dominance.loopTypes().get(i);
+            String typeLabel = type != null ? " (" + type.label() + ")" : "";
+            svgLine(svg,
+                    "<text x=\"%d\" y=\"%d\" font-size=\"10\" fill=\"#4a5568\">%s</text>",
+                    legendX + 18, ly + 9, esc(label + typeLabel));
+        }
+
+        svg.append("</svg>\n");
+        return svg.toString();
+    }
+
+    private static String loopColor(LoopDominanceAnalysis dominance, int loopIdx) {
+        FeedbackAnalysis.LoopType type = dominance.loopTypes().get(loopIdx);
+        if (type == FeedbackAnalysis.LoopType.REINFORCING) {
+            return REINFORCING_COLORS[loopIdx % REINFORCING_COLORS.length];
+        } else if (type == FeedbackAnalysis.LoopType.BALANCING) {
+            return BALANCING_COLORS[loopIdx % BALANCING_COLORS.length];
+        }
+        return NEUTRAL_COLORS[loopIdx % NEUTRAL_COLORS.length];
     }
 
     // ── Phase 3: Optimization ─────────────────────────────────────────
@@ -715,7 +1013,8 @@ public final class ResultReportGenerator {
 
     // ── HTML Header & CSS ───────────────────────────────────────────────
 
-    private static void writeHeader(StringBuilder html, String title) {
+    private static void writeHeader(StringBuilder html, String title,
+                                    ReportTemplate template) {
         html.append("""
                 <!DOCTYPE html>
                 <html lang="en">
@@ -725,6 +1024,9 @@ public final class ResultReportGenerator {
                 """);
         html.append("<title>").append(esc(title)).append(" — Simulation Results</title>\n");
         html.append(CSS);
+        if (template != null && template.customCss() != null && !template.customCss().isBlank()) {
+            html.append("<style>\n").append(template.customCss()).append("\n</style>\n");
+        }
         html.append("</head>\n");
     }
 
@@ -915,6 +1217,33 @@ public final class ResultReportGenerator {
                 font-size: 0.95rem;
                 color: #4a5568;
                 line-height: 1.5;
+            }
+            .behavior-badge {
+                display: inline-block;
+                padding: 0.15rem 0.5rem;
+                border-radius: 3px;
+                font-size: 0.8rem;
+                font-weight: 600;
+                color: white;
+            }
+            .behavior-growth { background: #27ae60; }
+            .behavior-decay { background: #e67e22; }
+            .behavior-goal { background: #2980b9; }
+            .behavior-oscillation { background: #8e44ad; }
+            .behavior-s-shaped { background: #16a085; }
+            .behavior-overshoot { background: #c0392b; }
+            .behavior-equilibrium { background: #95a5a6; }
+            .report-header {
+                margin-bottom: 1.5rem;
+                padding-bottom: 0.5rem;
+                border-bottom: 1px solid #e2e8f0;
+            }
+            .report-footer {
+                margin-top: 2rem;
+                padding-top: 0.5rem;
+                border-top: 1px solid #e2e8f0;
+                font-size: 0.85rem;
+                color: #718096;
             }
             @media print {
                 body { padding: 0; font-size: 10pt; }
