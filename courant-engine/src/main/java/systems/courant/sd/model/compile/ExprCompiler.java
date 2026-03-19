@@ -655,6 +655,9 @@ public class ExprCompiler {
         if (args.size() == 3) {
             double initial = evaluateAtCompileTime(args.get(2), "SMOOTH initialValue");
             if (Double.isNaN(initial)) {
+                String msg = "SMOOTH initialValue evaluated to NaN at compile time; using 0.0";
+                logger.warn(msg);
+                context.addWarning(msg);
                 initial = 0.0;
             }
             smooth = Smooth.of(input, smoothingTime, initial, context.getCurrentStep());
@@ -671,6 +674,9 @@ public class ExprCompiler {
         DoubleSupplier smoothingTime = compileExpr(args.get(1));
         double initial = evaluateAtCompileTime(args.get(2), "SMOOTHI initialValue");
         if (Double.isNaN(initial)) {
+            String msg = "SMOOTHI initialValue evaluated to NaN at compile time; using 0.0";
+            logger.warn(msg);
+            context.addWarning(msg);
             initial = 0.0;
         }
         Smooth smooth = Smooth.of(input, smoothingTime, initial, context.getCurrentStep());
@@ -689,6 +695,9 @@ public class ExprCompiler {
         if (args.size() == 3) {
             double initial = evaluateAtCompileTime(args.get(2), "SMOOTH3 initialValue");
             if (Double.isNaN(initial)) {
+                String msg = "SMOOTH3 initialValue evaluated to NaN at compile time; using 0.0";
+                logger.warn(msg);
+                context.addWarning(msg);
                 initial = 0.0;
             }
             smooth3 = Smooth3.of(input, smoothingTime, initial, context.getCurrentStep());
@@ -705,6 +714,9 @@ public class ExprCompiler {
         DoubleSupplier smoothingTime = compileExpr(args.get(1));
         double initial = evaluateAtCompileTime(args.get(2), "SMOOTH3I initialValue");
         if (Double.isNaN(initial)) {
+            String msg = "SMOOTH3I initialValue evaluated to NaN at compile time; using 0.0";
+            logger.warn(msg);
+            context.addWarning(msg);
             initial = 0.0;
         }
         Smooth3 smooth3 = Smooth3.of(input, smoothingTime, initial, context.getCurrentStep());
@@ -735,6 +747,9 @@ public class ExprCompiler {
         if (args.size() == 3) {
             double initial = evaluateAtCompileTime(args.get(2), "DELAY1 initialValue");
             if (Double.isNaN(initial)) {
+                String msg = "DELAY1 initialValue evaluated to NaN at compile time; using 0.0";
+                logger.warn(msg);
+                context.addWarning(msg);
                 initial = 0.0;
             }
             delay1 = Delay1.of(input, delayTime, initial, context.getCurrentStep());
@@ -768,6 +783,9 @@ public class ExprCompiler {
         if (args.size() == 3) {
             double initial = evaluateAtCompileTime(args.get(2), "DELAY3 initialValue");
             if (Double.isNaN(initial)) {
+                String msg = "DELAY3 initialValue evaluated to NaN at compile time; using 0.0";
+                logger.warn(msg);
+                context.addWarning(msg);
                 initial = 0.0;
             }
             delay3 = Delay3.of(input, delayTime, initial, context.getCurrentStep());
@@ -957,6 +975,9 @@ public class ExprCompiler {
         DoubleSupplier input = compileExpr(args.get(1));
         double initial = evaluateAtCompileTime(args.get(2), "SAMPLE_IF_TRUE initialValue");
         if (Double.isNaN(initial)) {
+            String msg = "SAMPLE_IF_TRUE initialValue evaluated to NaN at compile time; using 0.0";
+            logger.warn(msg);
+            context.addWarning(msg);
             initial = 0.0;
         }
         SampleIfTrue sampler = SampleIfTrue.of(condition, input, initial,

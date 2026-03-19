@@ -490,6 +490,20 @@ class ExprCompilerTest {
             Formula formula = compiler.compile("SMOOTH3(Population, avg_life)");
             assertThat(formula.getCurrentValue()).isCloseTo(1000.0, within(1.0));
         }
+
+        @Test
+        void shouldWarnWhenSmoothInitialValueIsNaN() {
+            compiler.compile("SMOOTH(Population, 5, 0/0)");
+            assertThat(context.getWarnings())
+                    .anyMatch(w -> w.contains("SMOOTH initialValue") && w.contains("NaN"));
+        }
+
+        @Test
+        void shouldWarnWhenDelay1InitialValueIsNaN() {
+            compiler.compile("DELAY1(Population, 5, 0/0)");
+            assertThat(context.getWarnings())
+                    .anyMatch(w -> w.contains("DELAY1 initialValue") && w.contains("NaN"));
+        }
     }
 
     @Nested
