@@ -8,6 +8,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.Tooltip;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
@@ -317,8 +318,10 @@ final class StartScreen extends VBox {
             }
         });
 
-        Label nameLabel = new Label(example.name);
+        Label nameLabel = new Label(example.displayName);
         nameLabel.setStyle("-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #2C3E50;");
+
+        Tooltip.install(card, new Tooltip(example.name));
 
         Label descLabel = new Label(example.description);
         descLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: #7F8C8D;");
@@ -356,12 +359,13 @@ final class StartScreen extends VBox {
             }
             for (JsonNode model : models) {
                 String name = model.path("name").asText(null);
+                String displayName = model.path("displayName").asText(name);
                 String description = model.path("description").asText("");
                 String category = model.path("category").asText("");
                 String difficulty = model.path("difficulty").asText("");
                 String path = model.path("path").asText(null);
                 if (name != null && path != null) {
-                    entries.add(new ExampleEntry(name, description, category, difficulty, path));
+                    entries.add(new ExampleEntry(name, displayName, description, category, difficulty, path));
                 }
             }
         } catch (IOException ex) {
@@ -374,7 +378,7 @@ final class StartScreen extends VBox {
             if (da != db) {
                 return Integer.compare(da, db);
             }
-            return a.name.compareToIgnoreCase(b.name);
+            return a.displayName.compareToIgnoreCase(b.displayName);
         });
         return entries;
     }
@@ -418,7 +422,7 @@ final class StartScreen extends VBox {
         this.onOpenExample = handler;
     }
 
-    private record ExampleEntry(String name, String description, String category,
-                                String difficulty, String path) {
+    private record ExampleEntry(String name, String displayName, String description,
+                                String category, String difficulty, String path) {
     }
 }
