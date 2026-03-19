@@ -730,6 +730,47 @@ class VensimImporterTest {
             ImportResult result = importer.importModel(mdl, "Test");
             assertThat(result.warnings()).anyMatch(w -> w.contains("Duplicate normalized name"));
         }
+
+        @Test
+        void shouldWarnWhenStandaloneVariableClashesWithSubscriptExpandedName() {
+            // "Pop[Region]" expands to Pop_North, Pop_South in pre-classification.
+            // A standalone "Pop_North" variable should be detected as a duplicate.
+            String mdl = """
+                    Region : North, South
+                    \t~\t
+                    \t~\t
+                    \t|
+
+                    Pop[Region] = INTEG(1, 100)
+                    \t~\tPerson
+                    \t~\t
+                    \t|
+
+                    Pop_North = 42
+                    \t~\tPerson
+                    \t~\t
+                    \t|
+
+                    INITIAL TIME = 0
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    FINAL TIME = 10
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    TIME STEP = 1
+                    \t~\tDay
+                    \t~\t
+                    \t|
+                    """;
+
+            ImportResult result = importer.importModel(mdl, "Test");
+            assertThat(result.warnings()).anyMatch(w ->
+                    w.contains("Duplicate") && w.contains("Pop_North"));
+        }
     }
 
     @Nested
