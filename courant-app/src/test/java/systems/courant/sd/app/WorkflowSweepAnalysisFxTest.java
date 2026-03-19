@@ -23,6 +23,8 @@ import org.testfx.util.WaitForAsyncUtils;
 
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -94,44 +96,21 @@ class WorkflowSweepAnalysisFxTest {
         WaitForAsyncUtils.waitForFxEvents();
     }
 
-    private void waitForDashboardResults(FxRobot robot) {
-        long deadline = System.currentTimeMillis() + 15_000;
-        while (System.currentTimeMillis() < deadline) {
+    private void waitForDashboardResults(FxRobot robot) throws TimeoutException {
+        WaitForAsyncUtils.waitFor(15, TimeUnit.SECONDS, () -> {
             WaitForAsyncUtils.waitForFxEvents();
             var tabs = robot.lookup("#dashboardResultTabs").tryQueryAs(TabPane.class);
-            if (tabs.isPresent() && tabs.get().isVisible() && !tabs.get().getTabs().isEmpty()) {
-                return;
-            }
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                break;
-            }
-        }
-        throw new AssertionError("Dashboard results did not appear within 15 seconds");
+            return tabs.isPresent() && tabs.get().isVisible() && !tabs.get().getTabs().isEmpty();
+        });
     }
 
-    private void waitForDashboardTab(FxRobot robot, String tabName) {
-        long deadline = System.currentTimeMillis() + 15_000;
-        while (System.currentTimeMillis() < deadline) {
+    private void waitForDashboardTab(FxRobot robot, String tabName) throws TimeoutException {
+        WaitForAsyncUtils.waitFor(15, TimeUnit.SECONDS, () -> {
             WaitForAsyncUtils.waitForFxEvents();
             var tabs = robot.lookup("#dashboardResultTabs").tryQueryAs(TabPane.class);
-            if (tabs.isPresent() && tabs.get().isVisible()) {
-                boolean found = tabs.get().getTabs().stream()
-                        .anyMatch(t -> tabName.equals(t.getText()));
-                if (found) {
-                    return;
-                }
-            }
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                break;
-            }
-        }
-        throw new AssertionError("Dashboard tab '" + tabName + "' did not appear within 15 seconds");
+            return tabs.isPresent() && tabs.get().isVisible()
+                    && tabs.get().getTabs().stream().anyMatch(t -> tabName.equals(t.getText()));
+        });
     }
 
     // ── Parameter identification ─────────────────────────────────────────
@@ -183,7 +162,7 @@ class WorkflowSweepAnalysisFxTest {
 
     @Test
     @DisplayName("Simulate model, then open sweep dialog — both workflows accessible")
-    void shouldAccessBothSimAndSweepWorkflows(FxRobot robot) {
+    void shouldAccessBothSimAndSweepWorkflows(FxRobot robot) throws Exception {
         buildSweepableModel();
 
         // Run simulation
@@ -335,7 +314,7 @@ class WorkflowSweepAnalysisFxTest {
 
     @Test
     @DisplayName("Build → validate → simulate → modify → re-simulate (full cycle)")
-    void shouldCompleteFullAnalysisCycle(FxRobot robot) {
+    void shouldCompleteFullAnalysisCycle(FxRobot robot) throws Exception {
         buildSweepableModel();
 
         // Validate
@@ -346,12 +325,10 @@ class WorkflowSweepAnalysisFxTest {
         WaitForAsyncUtils.waitForFxEvents();
         robot.push(KeyCode.CONTROL, KeyCode.B);
         WaitForAsyncUtils.waitForFxEvents();
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-        WaitForAsyncUtils.waitForFxEvents();
+        WaitForAsyncUtils.waitFor(5, TimeUnit.SECONDS, () -> {
+            WaitForAsyncUtils.waitForFxEvents();
+            return robot.lookup("#validationTable").tryQuery().isPresent();
+        });
 
         Label validationLabel = robot.lookup("#statusValidation").queryAs(Label.class);
         assertThat(validationLabel.getText()).contains("No issues");

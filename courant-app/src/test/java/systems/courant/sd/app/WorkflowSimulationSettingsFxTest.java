@@ -20,6 +20,7 @@ import org.testfx.framework.junit5.Start;
 import org.testfx.util.WaitForAsyncUtils;
 
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -54,22 +55,12 @@ class WorkflowSimulationSettingsFxTest {
         WaitForAsyncUtils.waitForFxEvents();
     }
 
-    private void waitForDashboardResults(FxRobot robot) {
-        long deadline = System.currentTimeMillis() + 15_000;
-        while (System.currentTimeMillis() < deadline) {
+    private void waitForDashboardResults(FxRobot robot) throws TimeoutException {
+        WaitForAsyncUtils.waitFor(30, TimeUnit.SECONDS, () -> {
             WaitForAsyncUtils.waitForFxEvents();
             var tabs = robot.lookup("#dashboardResultTabs").tryQueryAs(TabPane.class);
-            if (tabs.isPresent() && tabs.get().isVisible() && !tabs.get().getTabs().isEmpty()) {
-                return;
-            }
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                break;
-            }
-        }
-        throw new AssertionError("Dashboard results did not appear within 15 seconds");
+            return tabs.isPresent() && tabs.get().isVisible() && !tabs.get().getTabs().isEmpty();
+        });
     }
 
     // ── Settings dialog via menu ─────────────────────────────────────────
@@ -98,7 +89,7 @@ class WorkflowSimulationSettingsFxTest {
 
     @Test
     @DisplayName("Change duration in settings, then simulate successfully")
-    void shouldApplyChangedDuration(FxRobot robot) {
+    void shouldApplyChangedDuration(FxRobot robot) throws Exception {
         loadExample("Bathtub", "introductory/bathtub.json");
 
         robot.clickOn("Simulate");
@@ -210,7 +201,7 @@ class WorkflowSimulationSettingsFxTest {
 
     @Test
     @DisplayName("Setting settings programmatically then running succeeds")
-    void shouldRunWithProgrammaticSettings(FxRobot robot) {
+    void shouldRunWithProgrammaticSettings(FxRobot robot) throws Exception {
         Platform.runLater(() -> window.getFileController().newModel());
         WaitForAsyncUtils.waitForFxEvents();
         ModelEditor editor = window.getEditor();

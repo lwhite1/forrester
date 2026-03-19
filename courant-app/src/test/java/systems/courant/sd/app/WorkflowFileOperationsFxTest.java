@@ -18,6 +18,7 @@ import org.testfx.framework.junit5.Start;
 import org.testfx.util.WaitForAsyncUtils;
 
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -52,22 +53,12 @@ class WorkflowFileOperationsFxTest {
         WaitForAsyncUtils.waitForFxEvents();
     }
 
-    private void waitForDashboardResults(FxRobot robot) {
-        long deadline = System.currentTimeMillis() + 15_000;
-        while (System.currentTimeMillis() < deadline) {
+    private void waitForDashboardResults(FxRobot robot) throws TimeoutException {
+        WaitForAsyncUtils.waitFor(30, TimeUnit.SECONDS, () -> {
             WaitForAsyncUtils.waitForFxEvents();
             var tabs = robot.lookup("#dashboardResultTabs").tryQueryAs(TabPane.class);
-            if (tabs.isPresent() && tabs.get().isVisible() && !tabs.get().getTabs().isEmpty()) {
-                return;
-            }
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                break;
-            }
-        }
-        throw new AssertionError("Dashboard results did not appear within 15 seconds");
+            return tabs.isPresent() && tabs.get().isVisible() && !tabs.get().getTabs().isEmpty();
+        });
     }
 
     // ── New model ────────────────────────────────────────────────────────
@@ -122,7 +113,7 @@ class WorkflowFileOperationsFxTest {
 
     @Test
     @DisplayName("New model clears dashboard results")
-    void shouldClearDashboardOnNew(FxRobot robot) {
+    void shouldClearDashboardOnNew(FxRobot robot) throws Exception {
         loadExample("Bathtub", "introductory/bathtub.json");
 
         robot.push(KeyCode.CONTROL, KeyCode.R);

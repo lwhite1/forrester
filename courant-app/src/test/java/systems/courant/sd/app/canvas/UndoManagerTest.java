@@ -364,9 +364,7 @@ class UndoManagerTest {
             UndoManager.Snapshot original = new UndoManager.Snapshot(model, view);
 
             manager.pushUndo(original, "Add water");
-
-            // Wait for background compression to finish
-            Thread.sleep(200);
+            manager.awaitCompression();
 
             UndoManager.Snapshot restored = manager.undo(snapshot("Current")).orElseThrow();
 
@@ -381,7 +379,7 @@ class UndoManagerTest {
         void shouldNotBlockIndefinitelyOnDecompress() throws Exception {
             // Push and wait for compression, then undo — should complete without blocking
             manager.pushUndo(snapshot("S1"), "Test");
-            Thread.sleep(200); // wait for compression
+            manager.awaitCompression();
             UndoManager.Snapshot result = manager.undo(snapshot("Current")).orElseThrow();
             assertSnapshotName(result, "S1");
         }
@@ -471,9 +469,7 @@ class UndoManagerTest {
             UndoManager.Snapshot original = new UndoManager.Snapshot(model, view);
 
             manager.pushUndo(original, "With metadata");
-
-            // Wait for background compression to complete
-            Thread.sleep(200);
+            manager.awaitCompression();
 
             UndoManager.Snapshot restored = manager.undo(snapshot("Current")).orElseThrow();
 
@@ -665,9 +661,7 @@ class UndoManagerTest {
         void shouldClearRawSnapshotAfterCompression() throws Exception {
             UndoManager.Snapshot snap = snapshot("S1");
             manager.pushUndo(snap, "Test");
-
-            // Wait for compression to complete and callback to fire
-            Thread.sleep(300);
+            manager.awaitCompression();
 
             // Undo should still work — it will use the compressed data path
             UndoManager.Snapshot result = manager.undo(snapshot("Current")).orElseThrow();

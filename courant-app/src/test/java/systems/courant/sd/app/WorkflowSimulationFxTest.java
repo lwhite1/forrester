@@ -17,6 +17,7 @@ import org.testfx.framework.junit5.Start;
 import org.testfx.util.WaitForAsyncUtils;
 
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -55,33 +56,21 @@ class WorkflowSimulationFxTest {
         robot.push(KeyCode.CONTROL, KeyCode.R);
     }
 
-    private void waitForDashboardResults(FxRobot robot) {
-        long deadline = System.currentTimeMillis() + 15_000;
-        while (System.currentTimeMillis() < deadline) {
+    private void waitForDashboardResults(FxRobot robot) throws TimeoutException {
+        WaitForAsyncUtils.waitFor(30, TimeUnit.SECONDS, () -> {
             WaitForAsyncUtils.waitForFxEvents();
             var tabs = robot.lookup("#dashboardResultTabs").tryQueryAs(TabPane.class);
-            if (tabs.isPresent() && tabs.get().isVisible() && !tabs.get().getTabs().isEmpty()) {
-                return;
-            }
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                break;
-            }
-        }
-        throw new AssertionError("Dashboard results did not appear within 15 seconds");
+            return tabs.isPresent() && tabs.get().isVisible() && !tabs.get().getTabs().isEmpty();
+        });
     }
 
-    private void triggerValidation(FxRobot robot) {
+    private void triggerValidation(FxRobot robot) throws TimeoutException {
         robot.push(KeyCode.CONTROL, KeyCode.B);
         WaitForAsyncUtils.waitForFxEvents();
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-        WaitForAsyncUtils.waitForFxEvents();
+        WaitForAsyncUtils.waitFor(5, TimeUnit.SECONDS, () -> {
+            WaitForAsyncUtils.waitForFxEvents();
+            return robot.lookup("#validationTable").tryQuery().isPresent();
+        });
         // Restore focus to main window (validation dialog is a separate stage)
         Platform.runLater(() -> {
             stage.toFront();
@@ -95,7 +84,7 @@ class WorkflowSimulationFxTest {
 
     @Test
     @DisplayName("Bathtub: dashboard shows results after Ctrl+R")
-    void shouldShowResultsAfterSimulation(FxRobot robot) {
+    void shouldShowResultsAfterSimulation(FxRobot robot) throws Exception {
         loadExample("Bathtub", "introductory/bathtub.json");
         assertThat(stage.getTitle()).contains("Bathtub");
 
@@ -110,7 +99,7 @@ class WorkflowSimulationFxTest {
 
     @Test
     @DisplayName("Bathtub: placeholder disappears after simulation")
-    void shouldHidePlaceholderAfterSimulation(FxRobot robot) {
+    void shouldHidePlaceholderAfterSimulation(FxRobot robot) throws Exception {
         loadExample("Bathtub", "introductory/bathtub.json");
 
         triggerSimulation(robot);
@@ -122,7 +111,7 @@ class WorkflowSimulationFxTest {
 
     @Test
     @DisplayName("Coffee Cooling: simulation runs successfully")
-    void shouldRunCoffeeCooling(FxRobot robot) {
+    void shouldRunCoffeeCooling(FxRobot robot) throws Exception {
         loadExample("Coffee Cooling", "introductory/coffee-cooling.json");
         assertThat(stage.getTitle()).contains("Coffee Cooling");
 
@@ -135,7 +124,7 @@ class WorkflowSimulationFxTest {
 
     @Test
     @DisplayName("Exponential Growth: simulation runs successfully")
-    void shouldRunExponentialGrowth(FxRobot robot) {
+    void shouldRunExponentialGrowth(FxRobot robot) throws Exception {
         loadExample("Exponential Growth", "introductory/exponential-growth.json");
         assertThat(stage.getTitle()).contains("Exponential Growth");
 
@@ -148,7 +137,7 @@ class WorkflowSimulationFxTest {
 
     @Test
     @DisplayName("Goal Seeking: simulation runs successfully")
-    void shouldRunGoalSeeking(FxRobot robot) {
+    void shouldRunGoalSeeking(FxRobot robot) throws Exception {
         loadExample("Goal Seeking", "introductory/goal-seeking.json");
 
         triggerSimulation(robot);
@@ -162,7 +151,7 @@ class WorkflowSimulationFxTest {
 
     @Test
     @DisplayName("Dashboard tab is automatically selected after simulation")
-    void shouldSwitchToDashboardTab(FxRobot robot) {
+    void shouldSwitchToDashboardTab(FxRobot robot) throws Exception {
         loadExample("Bathtub", "introductory/bathtub.json");
 
         triggerSimulation(robot);
@@ -177,7 +166,7 @@ class WorkflowSimulationFxTest {
 
     @Test
     @DisplayName("Running simulation twice produces ghost overlay header")
-    void shouldShowGhostRunsAfterSecondRun(FxRobot robot) {
+    void shouldShowGhostRunsAfterSecondRun(FxRobot robot) throws Exception {
         loadExample("Bathtub", "introductory/bathtub.json");
 
         triggerSimulation(robot);
@@ -194,7 +183,7 @@ class WorkflowSimulationFxTest {
 
     @Test
     @DisplayName("Editing model after simulation shows stale banner")
-    void shouldShowStaleBannerAfterEdit(FxRobot robot) {
+    void shouldShowStaleBannerAfterEdit(FxRobot robot) throws Exception {
         loadExample("Bathtub", "introductory/bathtub.json");
 
         triggerSimulation(robot);
@@ -212,7 +201,7 @@ class WorkflowSimulationFxTest {
 
     @Test
     @DisplayName("Re-running simulation clears stale banner")
-    void shouldClearStaleBannerOnRerun(FxRobot robot) {
+    void shouldClearStaleBannerOnRerun(FxRobot robot) throws Exception {
         loadExample("Bathtub", "introductory/bathtub.json");
 
         triggerSimulation(robot);
@@ -230,7 +219,7 @@ class WorkflowSimulationFxTest {
 
     @Test
     @DisplayName("Clicking Re-run link triggers new simulation")
-    void shouldRerunViaLink(FxRobot robot) {
+    void shouldRerunViaLink(FxRobot robot) throws Exception {
         loadExample("Bathtub", "introductory/bathtub.json");
 
         triggerSimulation(robot);
@@ -250,7 +239,7 @@ class WorkflowSimulationFxTest {
 
     @Test
     @DisplayName("Loading new example clears previous simulation results")
-    void shouldClearResultsOnNewModel(FxRobot robot) {
+    void shouldClearResultsOnNewModel(FxRobot robot) throws Exception {
         loadExample("Bathtub", "introductory/bathtub.json");
 
         triggerSimulation(robot);
@@ -264,7 +253,7 @@ class WorkflowSimulationFxTest {
 
     @Test
     @DisplayName("Can run simulation on new model after switching")
-    void shouldRunAfterSwitchingModels(FxRobot robot) {
+    void shouldRunAfterSwitchingModels(FxRobot robot) throws Exception {
         loadExample("Bathtub", "introductory/bathtub.json");
         triggerSimulation(robot);
         waitForDashboardResults(robot);
@@ -283,7 +272,7 @@ class WorkflowSimulationFxTest {
 
     @Test
     @DisplayName("Valid model shows clean validation status")
-    void shouldShowCleanValidation(FxRobot robot) {
+    void shouldShowCleanValidation(FxRobot robot) throws Exception {
         loadExample("Bathtub", "introductory/bathtub.json");
 
         triggerValidation(robot);
@@ -294,7 +283,7 @@ class WorkflowSimulationFxTest {
 
     @Test
     @DisplayName("Can run simulation after successful validation")
-    void shouldRunAfterValidation(FxRobot robot) {
+    void shouldRunAfterValidation(FxRobot robot) throws Exception {
         loadExample("Bathtub", "introductory/bathtub.json");
 
         triggerValidation(robot);

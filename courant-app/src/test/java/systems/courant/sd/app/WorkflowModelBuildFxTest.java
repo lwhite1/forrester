@@ -18,6 +18,9 @@ import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
 import org.testfx.util.WaitForAsyncUtils;
 
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -55,29 +58,19 @@ class WorkflowModelBuildFxTest {
         robot.push(KeyCode.CONTROL, KeyCode.R);
     }
 
-    private void waitForDashboardResults(FxRobot robot) {
-        long deadline = System.currentTimeMillis() + 15_000;
-        while (System.currentTimeMillis() < deadline) {
+    private void waitForDashboardResults(FxRobot robot) throws TimeoutException {
+        WaitForAsyncUtils.waitFor(30, TimeUnit.SECONDS, () -> {
             WaitForAsyncUtils.waitForFxEvents();
             var tabs = robot.lookup("#dashboardResultTabs").tryQueryAs(TabPane.class);
-            if (tabs.isPresent() && tabs.get().isVisible() && !tabs.get().getTabs().isEmpty()) {
-                return;
-            }
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                break;
-            }
-        }
-        throw new AssertionError("Dashboard results did not appear within 15 seconds");
+            return tabs.isPresent() && tabs.get().isVisible() && !tabs.get().getTabs().isEmpty();
+        });
     }
 
     // ── Simple model builds ──────────────────────────────────────────────
 
     @Test
     @DisplayName("Single stock with constant drain: build → configure → simulate")
-    void shouldBuildAndSimulateDrainModel(FxRobot robot) {
+    void shouldBuildAndSimulateDrainModel(FxRobot robot) throws Exception {
         initEditor();
         ModelEditor editor = window.getEditor();
 
@@ -104,7 +97,7 @@ class WorkflowModelBuildFxTest {
 
     @Test
     @DisplayName("Stock with inflow and outflow: build → simulate → verify dirty")
-    void shouldBuildBathtubFromScratch(FxRobot robot) {
+    void shouldBuildBathtubFromScratch(FxRobot robot) throws Exception {
         initEditor();
         ModelEditor editor = window.getEditor();
 
@@ -130,7 +123,7 @@ class WorkflowModelBuildFxTest {
 
     @Test
     @DisplayName("Two interacting stocks: build → simulate")
-    void shouldBuildTwoStockModel(FxRobot robot) {
+    void shouldBuildTwoStockModel(FxRobot robot) throws Exception {
         initEditor();
         ModelEditor editor = window.getEditor();
 
@@ -156,7 +149,7 @@ class WorkflowModelBuildFxTest {
 
     @Test
     @DisplayName("Stock + auxiliary + flow referencing auxiliary")
-    void shouldBuildModelWithAuxiliary(FxRobot robot) {
+    void shouldBuildModelWithAuxiliary(FxRobot robot) throws Exception {
         initEditor();
         ModelEditor editor = window.getEditor();
 
@@ -180,7 +173,7 @@ class WorkflowModelBuildFxTest {
 
     @Test
     @DisplayName("Exponential growth model with renamed elements")
-    void shouldBuildExponentialGrowthModel(FxRobot robot) {
+    void shouldBuildExponentialGrowthModel(FxRobot robot) throws Exception {
         initEditor();
         ModelEditor editor = window.getEditor();
 
@@ -213,7 +206,7 @@ class WorkflowModelBuildFxTest {
 
     @Test
     @DisplayName("Build → simulate → add element → simulate again")
-    void shouldSupportIterativeRefinement(FxRobot robot) {
+    void shouldSupportIterativeRefinement(FxRobot robot) throws Exception {
         initEditor();
         ModelEditor editor = window.getEditor();
 
@@ -249,7 +242,7 @@ class WorkflowModelBuildFxTest {
 
     @Test
     @DisplayName("Build → simulate → rename element → simulate again")
-    void shouldSimulateAfterRenaming(FxRobot robot) {
+    void shouldSimulateAfterRenaming(FxRobot robot) throws Exception {
         initEditor();
         ModelEditor editor = window.getEditor();
 
@@ -280,7 +273,7 @@ class WorkflowModelBuildFxTest {
 
     @Test
     @DisplayName("Build → simulate → change equation → simulate → verify ghost runs")
-    void shouldTrackGhostRunsAcrossChanges(FxRobot robot) {
+    void shouldTrackGhostRunsAcrossChanges(FxRobot robot) throws Exception {
         initEditor();
         ModelEditor editor = window.getEditor();
 
@@ -310,7 +303,7 @@ class WorkflowModelBuildFxTest {
 
     @Test
     @DisplayName("Valid hand-built model passes validation")
-    void shouldValidateCorrectModel(FxRobot robot) {
+    void shouldValidateCorrectModel(FxRobot robot) throws Exception {
         initEditor();
         ModelEditor editor = window.getEditor();
 
@@ -325,12 +318,10 @@ class WorkflowModelBuildFxTest {
 
         robot.push(KeyCode.CONTROL, KeyCode.B);
         WaitForAsyncUtils.waitForFxEvents();
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-        WaitForAsyncUtils.waitForFxEvents();
+        WaitForAsyncUtils.waitFor(5, TimeUnit.SECONDS, () -> {
+            WaitForAsyncUtils.waitForFxEvents();
+            return robot.lookup("#validationTable").tryQuery().isPresent();
+        });
         Platform.runLater(() -> window.getCanvas().requestFocus());
         WaitForAsyncUtils.waitForFxEvents();
 
@@ -340,7 +331,7 @@ class WorkflowModelBuildFxTest {
 
     @Test
     @DisplayName("Model with undefined reference shows validation errors")
-    void shouldDetectUndefinedReference(FxRobot robot) {
+    void shouldDetectUndefinedReference(FxRobot robot) throws Exception {
         initEditor();
         ModelEditor editor = window.getEditor();
 
@@ -358,12 +349,10 @@ class WorkflowModelBuildFxTest {
         WaitForAsyncUtils.waitForFxEvents();
         robot.push(KeyCode.CONTROL, KeyCode.B);
         WaitForAsyncUtils.waitForFxEvents();
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-        WaitForAsyncUtils.waitForFxEvents();
+        WaitForAsyncUtils.waitFor(5, TimeUnit.SECONDS, () -> {
+            WaitForAsyncUtils.waitForFxEvents();
+            return robot.lookup("#validationTable").tryQuery().isPresent();
+        });
         Platform.runLater(() -> window.getCanvas().requestFocus());
         WaitForAsyncUtils.waitForFxEvents();
 

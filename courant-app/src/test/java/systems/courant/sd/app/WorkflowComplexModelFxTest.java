@@ -17,6 +17,7 @@ import org.testfx.framework.junit5.Start;
 import org.testfx.util.WaitForAsyncUtils;
 
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -51,33 +52,21 @@ class WorkflowComplexModelFxTest {
         WaitForAsyncUtils.waitForFxEvents();
     }
 
-    private void waitForDashboardResults(FxRobot robot) {
-        long deadline = System.currentTimeMillis() + 30_000;
-        while (System.currentTimeMillis() < deadline) {
+    private void waitForDashboardResults(FxRobot robot) throws TimeoutException {
+        WaitForAsyncUtils.waitFor(30, TimeUnit.SECONDS, () -> {
             WaitForAsyncUtils.waitForFxEvents();
             var tabs = robot.lookup("#dashboardResultTabs").tryQueryAs(TabPane.class);
-            if (tabs.isPresent() && tabs.get().isVisible() && !tabs.get().getTabs().isEmpty()) {
-                return;
-            }
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                break;
-            }
-        }
-        throw new AssertionError("Dashboard results did not appear within 30 seconds");
+            return tabs.isPresent() && tabs.get().isVisible() && !tabs.get().getTabs().isEmpty();
+        });
     }
 
-    private void triggerValidation(FxRobot robot) {
+    private void triggerValidation(FxRobot robot) throws TimeoutException {
         robot.push(KeyCode.CONTROL, KeyCode.B);
         WaitForAsyncUtils.waitForFxEvents();
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-        WaitForAsyncUtils.waitForFxEvents();
+        WaitForAsyncUtils.waitFor(5, TimeUnit.SECONDS, () -> {
+            WaitForAsyncUtils.waitForFxEvents();
+            return robot.lookup("#validationTable").tryQuery().isPresent();
+        });
         // Restore focus to main window (validation dialog is a separate stage)
         Platform.runLater(() -> {
             stage.toFront();
@@ -91,7 +80,7 @@ class WorkflowComplexModelFxTest {
 
     @Test
     @DisplayName("Aging Chain: load → validate → simulate")
-    void shouldSimulateAgingChain(FxRobot robot) {
+    void shouldSimulateAgingChain(FxRobot robot) throws Exception {
         loadExample("Aging Chain", "demographics/aging-chain.json");
         assertThat(stage.getTitle()).contains("Aging");
 
@@ -111,7 +100,7 @@ class WorkflowComplexModelFxTest {
 
     @Test
     @DisplayName("Predator Prey: load → simulate → verify multiple stocks")
-    void shouldSimulatePredatorPrey(FxRobot robot) {
+    void shouldSimulatePredatorPrey(FxRobot robot) throws Exception {
         loadExample("Predator Prey", "ecology/predator-prey.json");
         assertThat(stage.getTitle()).contains("Predator Prey");
 
@@ -129,7 +118,7 @@ class WorkflowComplexModelFxTest {
 
     @Test
     @DisplayName("S-Shaped Growth: load → simulate")
-    void shouldSimulateSShapedGrowth(FxRobot robot) {
+    void shouldSimulateSShapedGrowth(FxRobot robot) throws Exception {
         loadExample("S-Shaped Growth", "population/s-shaped-growth.json");
 
         Platform.runLater(() -> {
@@ -148,7 +137,7 @@ class WorkflowComplexModelFxTest {
 
     @Test
     @DisplayName("Kaibab Deer: load → validate → simulate")
-    void shouldSimulateKaibabDeer(FxRobot robot) {
+    void shouldSimulateKaibabDeer(FxRobot robot) throws Exception {
         loadExample("Kaibab Deer", "ecology/kaibab-deer.json");
 
         triggerValidation(robot);
@@ -167,7 +156,7 @@ class WorkflowComplexModelFxTest {
 
     @Test
     @DisplayName("Supply Chain Bullwhip: load → simulate")
-    void shouldSimulateSupplyChain(FxRobot robot) {
+    void shouldSimulateSupplyChain(FxRobot robot) throws Exception {
         loadExample("Supply Chain Bullwhip", "supply-chain/supply-chain-bullwhip.json");
 
         Platform.runLater(() -> {
@@ -186,7 +175,7 @@ class WorkflowComplexModelFxTest {
 
     @Test
     @DisplayName("Load and simulate four models in sequence")
-    void shouldHandleSequentialModelSimulations(FxRobot robot) {
+    void shouldHandleSequentialModelSimulations(FxRobot robot) throws Exception {
         loadExample("Bathtub", "introductory/bathtub.json");
         Platform.runLater(() -> {
             stage.toFront();
@@ -230,7 +219,7 @@ class WorkflowComplexModelFxTest {
 
     @Test
     @DisplayName("Load → simulate → validate → switch model — no state leaks")
-    void shouldNotLeakStateBetweenModels(FxRobot robot) {
+    void shouldNotLeakStateBetweenModels(FxRobot robot) throws Exception {
         loadExample("Bathtub", "introductory/bathtub.json");
         triggerValidation(robot);
         Platform.runLater(() -> {
@@ -292,7 +281,7 @@ class WorkflowComplexModelFxTest {
 
     @Test
     @DisplayName("Predator Prey simulation creates Phase Plot tab")
-    void shouldShowPhasePlotForTwoStockModel(FxRobot robot) {
+    void shouldShowPhasePlotForTwoStockModel(FxRobot robot) throws Exception {
         loadExample("Predator Prey", "ecology/predator-prey.json");
 
         Platform.runLater(() -> {
