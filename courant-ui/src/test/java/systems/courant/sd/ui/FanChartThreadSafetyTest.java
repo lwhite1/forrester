@@ -11,7 +11,6 @@ import systems.courant.sd.sweep.RunResult;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -30,33 +29,30 @@ class FanChartThreadSafetyTest {
 
     @Test
     @DisplayName("constructor atomically pairs result and variable name")
-    void shouldAtomicallyPairResultAndVariableName() throws Exception {
+    void shouldAtomicallyPairResultAndVariableName() {
         MonteCarloResult result1 = buildMonteCarloResult(5, 3, "Model1");
         MonteCarloResult result2 = buildMonteCarloResult(5, 3, "Model2");
 
         FanChart chart1 = new FanChart(result1, "Population");
         FanChart chart2 = new FanChart(result2, "Infected");
 
-        // Verify each instance holds the correct result and variable name
-        assertThat(getField(chart1, "result")).isSameAs(result1);
-        assertThat(getField(chart1, "variableName")).isEqualTo("Population");
-        assertThat(getField(chart2, "result")).isSameAs(result2);
-        assertThat(getField(chart2, "variableName")).isEqualTo("Infected");
+        assertThat(chart1.getResult()).isSameAs(result1);
+        assertThat(chart1.getVariableName()).isEqualTo("Population");
+        assertThat(chart2.getResult()).isSameAs(result2);
+        assertThat(chart2.getVariableName()).isEqualTo("Infected");
     }
 
     @Test
     @DisplayName("no-arg constructor creates instance with null fields")
-    void shouldCreateNullInstanceWithNoArgConstructor() throws Exception {
+    void shouldCreateNullInstanceWithNoArgConstructor() {
         FanChart chart = new FanChart();
-        // No-arg constructor exists for Application.launch() compatibility
-        // but should not be used directly — the instance will have null fields
-        assertThat(getField(chart, "result")).isNull();
-        assertThat(getField(chart, "variableName")).isNull();
+        assertThat(chart.getResult()).isNull();
+        assertThat(chart.getVariableName()).isNull();
     }
 
     @Test
     @DisplayName("rapid concurrent construction does not cross-contaminate instances")
-    void shouldNotCrossContaminateInstances() throws Exception {
+    void shouldNotCrossContaminateInstances() throws InterruptedException {
         int iterations = 100;
         Map<Integer, MonteCarloResult> expectedResults = new ConcurrentHashMap<>();
         Map<Integer, FanChart> charts = new ConcurrentHashMap<>();
@@ -82,22 +78,15 @@ class FanChartThreadSafetyTest {
 
         assertThat(charts).hasSize(iterations);
 
-        // Verify every instance holds the correct result and variable name
         for (int i = 0; i < iterations; i++) {
             FanChart chart = charts.get(i);
-            assertThat(getField(chart, "result"))
+            assertThat(chart.getResult())
                     .as("chart %d should hold its own MonteCarloResult", i)
                     .isSameAs(expectedResults.get(i));
-            assertThat(getField(chart, "variableName"))
+            assertThat(chart.getVariableName())
                     .as("chart %d should hold variable name Var%d", i, i)
                     .isEqualTo("Var" + i);
         }
-    }
-
-    private static Object getField(FanChart chart, String fieldName) throws Exception {
-        Field field = FanChart.class.getDeclaredField(fieldName);
-        field.setAccessible(true);
-        return field.get(chart);
     }
 
     private static MonteCarloResult buildMonteCarloResult(int runs, int steps, String modelName) {
