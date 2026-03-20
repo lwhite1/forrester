@@ -542,7 +542,7 @@ public class VensimImporter implements ModelImporter {
                 for (ConnectorRoute connector : view.connectors()) {
                     builder.causalLink(new CausalLinkDef(
                             connector.from(), connector.to(),
-                            CausalLinkDef.Polarity.UNKNOWN));
+                            connector.polarity()));
                 }
             }
         }
