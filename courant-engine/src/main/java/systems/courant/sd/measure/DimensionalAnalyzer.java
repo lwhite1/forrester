@@ -177,8 +177,7 @@ public class DimensionalAnalyzer {
                     boolean allEven = arg.exponents().values().stream()
                             .allMatch(e -> e % 2 == 0);
                     if (allEven) {
-                        return arg.power(1).divide(arg.power(1)).multiply(
-                                new CompositeUnit(halveExponents(arg.exponents())));
+                        return new CompositeUnit(halveExponents(arg.exponents()));
                     }
                     // Odd exponents — result has fractional dimensions; propagate the
                     // original unit so downstream operations still produce mismatch warnings
