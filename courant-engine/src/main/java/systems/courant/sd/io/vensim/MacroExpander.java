@@ -3,6 +3,7 @@ package systems.courant.sd.io.vensim;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -98,7 +99,7 @@ public final class MacroExpander {
     }
 
     private static Map<String, MacroDef> buildMacroMap(List<MacroDef> macroDefs) {
-        Map<String, MacroDef> macroMap = new HashMap<>();
+        Map<String, MacroDef> macroMap = new LinkedHashMap<>();
         for (MacroDef def : macroDefs) {
             macroMap.put(def.name().toLowerCase(java.util.Locale.ROOT).strip(), def);
         }
@@ -106,7 +107,7 @@ public final class MacroExpander {
     }
 
     private static Map<String, Pattern> buildMacroPatterns(List<MacroDef> macroDefs) {
-        Map<String, Pattern> macroPatterns = new HashMap<>();
+        Map<String, Pattern> macroPatterns = new LinkedHashMap<>();
         for (MacroDef def : macroDefs) {
             String escaped = Pattern.quote(def.name());
             Pattern p = Pattern.compile(
