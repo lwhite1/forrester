@@ -243,7 +243,7 @@ public class Simulation {
                             "Simulation cancelled at step " + currentStep);
                 }
 
-                if (currentStep % 100 == 0 && System.currentTimeMillis() > deadlineMs) {
+                if (currentStep % 10 == 0 && System.currentTimeMillis() > deadlineMs) {
                     log.warn("Simulation timed out after {}ms at step {}/{}",
                             timeoutMs, currentStep, totalSteps);
                     throw new SimulationTimeoutException(
