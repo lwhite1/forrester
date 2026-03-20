@@ -517,39 +517,57 @@ public class LookupForm implements ElementForm {
             return;
         }
         LookupTableDef lt = ltOpt.get();
-        try {
-            double newX = Double.parseDouble(xField.getText().trim());
-            double newY = Double.parseDouble(yField.getText().trim());
-            double[] xs = lt.xValues();
-            double[] ys = lt.yValues();
-            if (index >= xs.length) {
-                return;
-            }
-            if (xs[index] == newX && ys[index] == newY) {
-                return;
-            }
-            // Work on copies so original arrays stay intact if validation fails
-            double[] newXs = xs.clone();
-            double[] newYs = ys.clone();
-            newXs[index] = newX;
-            newYs[index] = newY;
-            // Validate: x values must be strictly increasing
-            for (int i = 1; i < newXs.length; i++) {
-                if (newXs[i] <= newXs[i - 1]) {
-                    xField.setText(ElementRenderer.formatValue(xs[index]));
-                    yField.setText(ElementRenderer.formatValue(ys[index]));
-                    return;
-                }
-            }
-            LookupTableDef updated = new LookupTableDef(
-                    ctx.getElementName(), lt.comment(), newXs, newYs, lt.interpolation(), lt.unit());
-            ctx.getCanvas().applyMutation(() -> ctx.getEditor().setLookupTable(ctx.getElementName(), updated));
-        } catch (NumberFormatException ignored) {
-            xField.setText(ElementRenderer.formatValue(lt.xValues()[index]));
-            yField.setText(ElementRenderer.formatValue(lt.yValues()[index]));
-            fields.flashInvalidInput(xField);
-            fields.flashInvalidInput(yField);
+        double[] xs = lt.xValues();
+        double[] ys = lt.yValues();
+        if (index >= xs.length) {
+            return;
         }
+        double newX;
+        boolean xValid = true;
+        try {
+            newX = Double.parseDouble(xField.getText().trim());
+        } catch (NumberFormatException e) {
+            newX = xs[index];
+            xValid = false;
+        }
+        double newY;
+        boolean yValid = true;
+        try {
+            newY = Double.parseDouble(yField.getText().trim());
+        } catch (NumberFormatException e) {
+            newY = ys[index];
+            yValid = false;
+        }
+        if (!xValid || !yValid) {
+            if (!xValid) {
+                xField.setText(ElementRenderer.formatValue(xs[index]));
+                fields.flashInvalidInput(xField);
+            }
+            if (!yValid) {
+                yField.setText(ElementRenderer.formatValue(ys[index]));
+                fields.flashInvalidInput(yField);
+            }
+            return;
+        }
+        if (xs[index] == newX && ys[index] == newY) {
+            return;
+        }
+        // Work on copies so original arrays stay intact if validation fails
+        double[] newXs = xs.clone();
+        double[] newYs = ys.clone();
+        newXs[index] = newX;
+        newYs[index] = newY;
+        // Validate: x values must be strictly increasing
+        for (int i = 1; i < newXs.length; i++) {
+            if (newXs[i] <= newXs[i - 1]) {
+                xField.setText(ElementRenderer.formatValue(xs[index]));
+                fields.flashInvalidInput(xField);
+                return;
+            }
+        }
+        LookupTableDef updated = new LookupTableDef(
+                ctx.getElementName(), lt.comment(), newXs, newYs, lt.interpolation(), lt.unit());
+        ctx.getCanvas().applyMutation(() -> ctx.getEditor().setLookupTable(ctx.getElementName(), updated));
     }
 
     private void addRow() {
