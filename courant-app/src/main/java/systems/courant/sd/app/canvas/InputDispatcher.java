@@ -54,8 +54,7 @@ final class InputDispatcher {
             Map.entry(KeyCode.DIGIT6, CanvasToolBar.Tool.PLACE_LOOKUP),
             Map.entry(KeyCode.DIGIT7, CanvasToolBar.Tool.PLACE_CLD_VARIABLE),
             Map.entry(KeyCode.DIGIT8, CanvasToolBar.Tool.PLACE_CAUSAL_LINK),
-            Map.entry(KeyCode.DIGIT9, CanvasToolBar.Tool.PLACE_COMMENT),
-            Map.entry(KeyCode.DIGIT0, CanvasToolBar.Tool.PLACE_INFO_LINK)
+            Map.entry(KeyCode.DIGIT9, CanvasToolBar.Tool.PLACE_COMMENT)
     );
 
     private final DragController dragController;
