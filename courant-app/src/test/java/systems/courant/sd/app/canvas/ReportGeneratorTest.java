@@ -103,7 +103,8 @@ class ReportGeneratorTest {
             ModelDefinition def = buildFullModel();
             String html = ReportGenerator.generate(def, "<svg>diagram</svg>",
                     EnumSet.of(ReportGenerator.Section.STOCKS,
-                            ReportGenerator.Section.SIMULATION_SETTINGS));
+                            ReportGenerator.Section.SIMULATION_SETTINGS),
+                    null, null);
 
             assertThat(html).contains(">Stocks</h2>");
             assertThat(html).contains("Simulation Settings");
@@ -120,7 +121,8 @@ class ReportGeneratorTest {
         void shouldOmitDiagramWhenExcluded() {
             ModelDefinition def = buildFullModel();
             String html = ReportGenerator.generate(def, "<svg>diagram</svg>",
-                    EnumSet.of(ReportGenerator.Section.MODEL_INFO));
+                    EnumSet.of(ReportGenerator.Section.MODEL_INFO),
+                    null, null);
 
             assertThat(html).doesNotContain("Model Diagram");
             assertThat(html).doesNotContain("<svg>");

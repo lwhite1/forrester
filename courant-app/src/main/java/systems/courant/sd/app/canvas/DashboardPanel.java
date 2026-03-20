@@ -6,6 +6,7 @@ import systems.courant.sd.model.graph.LoopDominanceAnalysis;
 import systems.courant.sd.sweep.MonteCarloResult;
 import systems.courant.sd.sweep.MultiSweepResult;
 import systems.courant.sd.sweep.OptimizationResult;
+import systems.courant.sd.sweep.SensitivitySummary;
 import systems.courant.sd.sweep.SweepResult;
 
 import javafx.geometry.Insets;
@@ -85,6 +86,14 @@ public class DashboardPanel extends VBox {
     private final List<GhostRun> runHistory = new ArrayList<>();
     private static final int MAX_HISTORY = 5;
     private int runCounter;
+
+    // ── Stored results for report export ──────────────────────────────────
+    private SimulationRunner.SimulationResult lastSimResult;
+    private SweepResult lastSweepResult;
+    private MonteCarloResult lastMonteCarloResult;
+    private OptimizationResult lastOptimizationResult;
+    private LoopDominanceAnalysis lastDominanceResult;
+    private List<SensitivitySummary.ParameterImpact> lastSensitivityImpacts;
 
     public DashboardPanel() {
         Label placeholderLabel = new Label("Run a simulation to see results.");
@@ -183,6 +192,7 @@ public class DashboardPanel extends VBox {
                                      List<FlowDef> flows,
                                      List<ReferenceDataset> referenceDatasets) {
         clearStale();
+        this.lastSimResult = result;
         List<GhostRun> ghosts = List.copyOf(runHistory);
         SimulationResultPane pane = new SimulationResultPane(result, flows, ghosts,
                 this::clearRunHistory, referenceDatasets);
@@ -217,6 +227,7 @@ public class DashboardPanel extends VBox {
 
     public void showSweepResult(SweepResult result, String paramName) {
         clearStale();
+        this.lastSweepResult = result;
         SweepResultPane pane = new SweepResultPane(result, paramName);
         sweepTab = ensureTab(sweepTab, "Sweep", pane);
         resultTabs.getSelectionModel().select(sweepTab);
@@ -224,6 +235,7 @@ public class DashboardPanel extends VBox {
 
     public void showMonteCarloResult(MonteCarloResult result) {
         clearStale();
+        this.lastMonteCarloResult = result;
         MonteCarloResultPane pane = new MonteCarloResultPane(result);
         monteCarloTab = ensureTab(monteCarloTab, "Monte Carlo", pane);
         resultTabs.getSelectionModel().select(monteCarloTab);
@@ -231,6 +243,7 @@ public class DashboardPanel extends VBox {
 
     public void showOptimizationResult(OptimizationResult result) {
         clearStale();
+        this.lastOptimizationResult = result;
         OptimizationResultPane pane = new OptimizationResultPane(result);
         optimizationTab = ensureTab(optimizationTab, "Optimization", pane);
         resultTabs.getSelectionModel().select(optimizationTab);
@@ -257,10 +270,18 @@ public class DashboardPanel extends VBox {
         resultTabs.getSelectionModel().select(sensitivityTab);
     }
 
+    /**
+     * Stores sensitivity impacts for inclusion in exported reports.
+     */
+    public void storeSensitivityImpacts(List<SensitivitySummary.ParameterImpact> impacts) {
+        this.lastSensitivityImpacts = impacts;
+    }
+
     public void showLoopDominance(LoopDominanceAnalysis dominance) {
         if (dominance == null) {
             return;
         }
+        this.lastDominanceResult = dominance;
         LoopDominancePane pane = new LoopDominancePane(dominance);
         unbindCursors();
         dominanceCursor = pane.cursorTimeStepProperty();
@@ -314,6 +335,32 @@ public class DashboardPanel extends VBox {
      */
     public boolean hasResults() {
         return !resultTabs.getTabs().isEmpty();
+    }
+
+    // ── Result accessors for report export ──────────────────────────────
+
+    public SimulationRunner.SimulationResult getLastSimResult() {
+        return lastSimResult;
+    }
+
+    public SweepResult getLastSweepResult() {
+        return lastSweepResult;
+    }
+
+    public MonteCarloResult getLastMonteCarloResult() {
+        return lastMonteCarloResult;
+    }
+
+    public OptimizationResult getLastOptimizationResult() {
+        return lastOptimizationResult;
+    }
+
+    public LoopDominanceAnalysis getLastDominanceResult() {
+        return lastDominanceResult;
+    }
+
+    public List<SensitivitySummary.ParameterImpact> getLastSensitivityImpacts() {
+        return lastSensitivityImpacts;
     }
 
     private Tab ensureTab(Tab existing, String title, Node content) {
@@ -372,6 +419,12 @@ public class DashboardPanel extends VBox {
         runHistory.clear();
         runCounter = 0;
         stale = false;
+        lastSimResult = null;
+        lastSweepResult = null;
+        lastMonteCarloResult = null;
+        lastOptimizationResult = null;
+        lastDominanceResult = null;
+        lastSensitivityImpacts = null;
         staleBanner.setVisible(false);
         staleBanner.setManaged(false);
         resultTabs.setStyle("");

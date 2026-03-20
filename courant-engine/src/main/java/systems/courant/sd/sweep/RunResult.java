@@ -206,6 +206,38 @@ public class RunResult implements EventHandler {
         return max;
     }
 
+    /**
+     * Creates a RunResult from pre-captured time-series data.
+     * Used to convert UI-level simulation results into the engine result format
+     * for report generation.
+     *
+     * @param stockNames        ordered stock names
+     * @param variableNames     ordered variable names
+     * @param steps             step values for each recorded time step
+     * @param stockSnapshots    stock value arrays per step (same order as stockNames)
+     * @param variableSnapshots variable value arrays per step (same order as variableNames)
+     * @return a populated RunResult
+     */
+    public static RunResult fromTimeSeries(List<String> stockNames,
+                                           List<String> variableNames,
+                                           long[] steps,
+                                           List<double[]> stockSnapshots,
+                                           List<double[]> variableSnapshots) {
+        RunResult result = new RunResult(0.0);
+        result.stockNames = new ArrayList<>(stockNames);
+        result.variableNames = new ArrayList<>(variableNames);
+        for (long step : steps) {
+            result.steps.add(step);
+        }
+        for (double[] snapshot : stockSnapshots) {
+            result.stockSnapshots.add(snapshot.clone());
+        }
+        for (double[] snapshot : variableSnapshots) {
+            result.variableSnapshots.add(snapshot.clone());
+        }
+        return result;
+    }
+
     private static double[] toDoubleArray(List<Double> values) {
         double[] arr = new double[values.size()];
         for (int i = 0; i < arr.length; i++) {

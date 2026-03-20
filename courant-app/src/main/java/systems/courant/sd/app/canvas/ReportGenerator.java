@@ -45,21 +45,39 @@ public final class ReportGenerator {
      * @return self-contained HTML string
      */
     public static String generate(ModelDefinition definition, String svgDiagram) {
-        return generate(definition, svgDiagram, EnumSet.allOf(Section.class));
+        return generate(definition, svgDiagram, EnumSet.allOf(Section.class), null, null);
+    }
+
+    /**
+     * Generates a complete HTML report with all sections plus additional content.
+     *
+     * @param definition        the model definition
+     * @param svgDiagram        optional SVG diagram content (null to omit diagram section)
+     * @param extraCss          additional CSS rules to include (null to omit)
+     * @param extraBodySections additional HTML sections to append after model sections (null to omit)
+     * @return self-contained HTML string
+     */
+    public static String generate(ModelDefinition definition, String svgDiagram,
+                                  String extraCss, String extraBodySections) {
+        return generate(definition, svgDiagram, EnumSet.allOf(Section.class),
+                extraCss, extraBodySections);
     }
 
     /**
      * Generates an HTML report with selected sections.
      *
-     * @param definition the model definition
-     * @param svgDiagram optional SVG diagram content (null to omit diagram section)
-     * @param sections   which sections to include
+     * @param definition        the model definition
+     * @param svgDiagram        optional SVG diagram content (null to omit diagram section)
+     * @param sections          which sections to include
+     * @param extraCss          additional CSS rules to include (null to omit)
+     * @param extraBodySections additional HTML sections to append after model sections (null to omit)
      * @return self-contained HTML string
      */
     public static String generate(ModelDefinition definition, String svgDiagram,
-                                  Set<Section> sections) {
+                                  Set<Section> sections, String extraCss,
+                                  String extraBodySections) {
         StringBuilder html = new StringBuilder(8192);
-        writeHeader(html, definition.name());
+        writeHeader(html, definition.name(), extraCss);
 
         html.append("<body>\n");
         html.append("<div class=\"container\">\n");
@@ -94,6 +112,13 @@ public final class ReportGenerator {
             writeSimulationSettings(html, definition.defaultSimulation());
         }
 
+        if (extraBodySections != null && !extraBodySections.isBlank()) {
+            html.append("\n<hr style=\"border:none;border-top:2px solid #2c5282;"
+                    + "margin:2rem 0;\">\n");
+            html.append("<h1 style=\"margin-top:1.5rem;\">Simulation Results</h1>\n");
+            html.append(extraBodySections);
+        }
+
         html.append("</div>\n");
         html.append("</body>\n</html>\n");
         return html.toString();
@@ -101,7 +126,7 @@ public final class ReportGenerator {
 
     // ── Header & CSS ────────────────────────────────────────────────────
 
-    private static void writeHeader(StringBuilder html, String title) {
+    private static void writeHeader(StringBuilder html, String title, String extraCss) {
         html.append("""
                 <!DOCTYPE html>
                 <html lang="en">
@@ -111,6 +136,9 @@ public final class ReportGenerator {
                 """);
         html.append("<title>").append(esc(title)).append(" — Model Report</title>\n");
         html.append(CSS);
+        if (extraCss != null && !extraCss.isBlank()) {
+            html.append("<style>\n").append(extraCss).append("</style>\n");
+        }
         html.append("</head>\n");
     }
 
