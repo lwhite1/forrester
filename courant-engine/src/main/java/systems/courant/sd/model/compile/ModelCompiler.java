@@ -20,6 +20,7 @@ import systems.courant.sd.model.def.LookupTableDef;
 import systems.courant.sd.model.def.ModelDefinition;
 import systems.courant.sd.model.def.ModuleInstanceDef;
 import systems.courant.sd.model.def.PortDef;
+import systems.courant.sd.model.def.SimulationSettings;
 import systems.courant.sd.model.def.StockDef;
 import systems.courant.sd.model.expr.ExprParser;
 import systems.courant.sd.model.expr.ParseException;
@@ -122,6 +123,10 @@ public class ModelCompiler {
     private void compileInto(ModelDefinition def, Model model,
                              CompilationContext context,
                              List<Resettable> resettables, long[] stepHolder) {
+        // Inject simulation-derived constants (TIME_STEP, INITIAL_TIME, FINAL_TIME)
+        // so formulas can reference them without requiring explicit variable definitions.
+        injectSimulationConstants(def, context);
+
         // Stocks — create all first, then evaluate initial expressions
         // (expressions may reference other stocks)
         for (StockDef sDef : def.stocks()) {
@@ -246,6 +251,16 @@ public class ModelCompiler {
         }
 
         parentModel.addModule(module);
+    }
+
+    private void injectSimulationConstants(ModelDefinition def, CompilationContext context) {
+        SimulationSettings sim = def.defaultSimulation();
+        if (sim == null) {
+            return;
+        }
+        context.addLiteralConstant("TIME_STEP", sim.dt());
+        context.addLiteralConstant("INITIAL_TIME", sim.initialTime());
+        context.addLiteralConstant("FINAL_TIME", sim.initialTime() + sim.duration());
     }
 
     // === Shared helpers ===

@@ -125,11 +125,15 @@ public final class DefinitionValidator {
         }
     }
 
+    private static final Set<String> SIMULATION_CONSTANTS =
+            Set.of("TIME_STEP", "INITIAL_TIME", "FINAL_TIME");
+
     private static Set<String> buildKnownNames(Set<String> allNames, ModelDefinition def) {
         Set<String> knownNames = new HashSet<>(allNames);
         for (ModuleInstanceDef module : def.modules()) {
             knownNames.addAll(module.outputBindings().values());
         }
+        knownNames.addAll(SIMULATION_CONSTANTS);
         return knownNames;
     }
 

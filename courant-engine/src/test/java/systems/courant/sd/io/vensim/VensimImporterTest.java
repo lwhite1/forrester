@@ -106,7 +106,7 @@ class VensimImporterTest {
                     """;
 
             ImportResult result = importer.importModel(mdl, "Test");
-            assertThat(result.definition().parameters()).hasSize(1 + 3); // +3 built-in constants
+            assertThat(result.definition().parameters()).hasSize(1);
             VariableDef c = result.definition().parameters().stream()
                     .filter(cd -> cd.name().equals("alpha"))
                     .findFirst().orElseThrow();
@@ -138,7 +138,7 @@ class VensimImporterTest {
                     """;
 
             ImportResult result = importer.importModel(mdl, "Test");
-            assertThat(result.definition().parameters()).hasSize(1 + 3); // +3 built-in constants
+            assertThat(result.definition().parameters()).hasSize(1);
             assertThat(result.definition().parameters().stream()
                     .map(VariableDef::name)).contains("Pi");
         }
@@ -178,8 +178,8 @@ class VensimImporterTest {
                     """;
 
             ImportResult result = importer.importModel(mdl, "Test");
-            // 1 formula variable + 2 user constants + 3 built-in constants = 6
-            assertThat(result.definition().variables()).hasSize(6);
+            // 1 formula variable + 2 user constants
+            assertThat(result.definition().variables()).hasSize(3);
             VariableDef v = result.definition().variables().stream()
                     .filter(a -> !a.isLiteral()).findFirst().orElseThrow();
             assertThat(v.name()).isEqualTo("rate");
@@ -212,8 +212,8 @@ class VensimImporterTest {
 
             ImportResult result = importer.importModel(mdl, "Test");
             assertThat(result.warnings()).anyMatch(w -> w.contains("imported as constant 0"));
-            // Data variable creates a placeholder variable (value 0) plus 3 built-in constants
-            assertThat(result.definition().variables()).hasSize(4);
+            // Data variable creates a placeholder variable (value 0)
+            assertThat(result.definition().variables()).hasSize(1);
             // All variables are literal (no formula auxes)
             assertThat(result.definition().variables().stream().filter(a -> !a.isLiteral()).toList())
                     .isEmpty();
@@ -475,17 +475,14 @@ class VensimImporterTest {
             assertThat(stock.name()).isEqualTo("Teacup Temperature");
             assertThat(stock.initialValue()).isEqualTo(180.0);
 
-            // 2 user constants + 3 built-in constants (TIME_STEP, INITIAL_TIME, FINAL_TIME)
-            assertThat(def.parameters()).hasSize(2 + 3);
+            assertThat(def.parameters()).hasSize(2);
             Set<String> constantNames = def.parameters().stream()
                     .map(VariableDef::name)
                     .collect(Collectors.toSet());
-            assertThat(constantNames).contains(
-                    "Room Temperature", "Characteristic Time",
-                    "TIME_STEP", "INITIAL_TIME", "FINAL_TIME");
+            assertThat(constantNames).contains("Room Temperature", "Characteristic Time");
 
-            // All variables: 1 formula + 2 user constants + 3 built-in constants = 6
-            assertThat(def.variables()).hasSize(6);
+            // All variables: 1 formula + 2 user constants
+            assertThat(def.variables()).hasSize(3);
             assertThat(def.variables().stream().filter(a -> !a.isLiteral()).toList())
                     .hasSize(1)
                     .first().extracting(VariableDef::name).isEqualTo("Heat Loss to Room");
@@ -520,17 +517,15 @@ class VensimImporterTest {
             assertThat(stockNames).containsExactlyInAnyOrder(
                     "Susceptible", "Infected", "Recovered");
 
-            // 3 user constants + 3 built-in constants (TIME_STEP, INITIAL_TIME, FINAL_TIME)
-            assertThat(def.parameters()).hasSize(3 + 3);
+            assertThat(def.parameters()).hasSize(3);
             Set<String> constantNames = def.parameters().stream()
                     .map(VariableDef::name)
                     .collect(Collectors.toSet());
             assertThat(constantNames).contains(
-                    "Contact Rate", "Recovery Time", "Total Population",
-                    "TIME_STEP", "INITIAL_TIME", "FINAL_TIME");
+                    "Contact Rate", "Recovery Time", "Total Population");
 
-            // 6 literal-valued constants (Infection Rate and Recovery Rate are now flows)
-            assertThat(def.variables()).hasSize(6);
+            // 3 literal-valued constants (Infection Rate and Recovery Rate are now flows)
+            assertThat(def.variables()).hasSize(3);
             assertThat(def.variables().stream().filter(a -> !a.isLiteral()).toList()).isEmpty();
 
             // 4 flows: Susceptible/Recovered each get a net flow,
@@ -615,7 +610,7 @@ class VensimImporterTest {
                     """;
 
             ImportResult result = importer.importModel(mdl, "Test");
-            assertThat(result.definition().parameters()).hasSize(1 + 3); // +3 built-in constants
+            assertThat(result.definition().parameters()).hasSize(1);
             VariableDef c = result.definition().parameters().stream()
                     .filter(cd -> cd.name().equals("alpha"))
                     .findFirst().orElseThrow();
@@ -647,7 +642,7 @@ class VensimImporterTest {
                     """;
 
             ImportResult result = importer.importModel(mdl, "Test");
-            assertThat(result.definition().parameters()).hasSize(1 + 3); // +3 built-in constants
+            assertThat(result.definition().parameters()).hasSize(1);
             VariableDef c = result.definition().parameters().stream()
                     .filter(cd -> cd.name().equals("alpha"))
                     .findFirst().orElseThrow();
@@ -684,12 +679,10 @@ class VensimImporterTest {
                     """;
 
             ImportResult result = importer.importModel(mdl, "Test");
-            // System vars should not appear as user model elements, but 3 built-in constants are injected
-            assertThat(result.definition().parameters()).hasSize(1 + 3); // +3 built-in constants
+            // System vars should not appear as model elements
+            assertThat(result.definition().parameters()).hasSize(1);
             assertThat(result.definition().parameters().stream()
-                    .map(VariableDef::name)
-                    .filter(n -> !Set.of("TIME_STEP", "INITIAL_TIME", "FINAL_TIME").contains(n))
-                    .toList()).containsExactly("x");
+                    .map(VariableDef::name).toList()).containsExactly("x");
             assertThat(result.definition().defaultSimulation().duration()).isEqualTo(10.0);
         }
     }
@@ -853,8 +846,8 @@ class VensimImporterTest {
             // No stocks, flows, or formula variables in CLD mode; only built-in constants
             assertThat(def.stocks()).isEmpty();
             assertThat(def.flows()).isEmpty();
-            assertThat(def.variables().stream().filter(a -> !a.isLiteral()).toList()).isEmpty();
-            assertThat(def.parameters()).hasSize(3); // only built-in constants
+            assertThat(def.variables()).isEmpty();
+            assertThat(def.parameters()).isEmpty();
 
             // Should have CLD variables
             assertThat(def.cldVariables()).hasSize(2);
@@ -983,11 +976,11 @@ class VensimImporterTest {
             assertThat(names).containsExactlyInAnyOrder(
                     "Population", "Birth Rate", "Death Rate", "Resources");
 
-            // No stocks, flows, or formula variables; only built-in constants
+            // No stocks, flows, formula variables, or parameters
             assertThat(def.stocks()).isEmpty();
             assertThat(def.flows()).isEmpty();
-            assertThat(def.variables().stream().filter(a -> !a.isLiteral()).toList()).isEmpty();
-            assertThat(def.parameters()).hasSize(3); // only built-in constants
+            assertThat(def.variables()).isEmpty();
+            assertThat(def.parameters()).isEmpty();
 
             // 4 causal links from sketch connectors
             assertThat(def.causalLinks()).hasSize(4);

@@ -480,7 +480,7 @@ class VensimExporterTest {
 
             assertThat(result.definition().cldVariables()).hasSize(3);
             assertThat(result.definition().causalLinks()).hasSize(1);
-            assertThat(result.definition().parameters()).hasSize(3); // only built-in constants
+            assertThat(result.definition().parameters()).isEmpty();
         }
     }
 
