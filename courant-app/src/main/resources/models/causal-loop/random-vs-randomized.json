@@ -1,18 +1,5 @@
 {
   "name" : "1009_RANDOMvsRANDOMIZED",
-  "variables" : [ {
-    "name" : "TIME_STEP",
-    "equation" : "0.25",
-    "unit" : "Month"
-  }, {
-    "name" : "INITIAL_TIME",
-    "equation" : "0",
-    "unit" : "Month"
-  }, {
-    "name" : "FINAL_TIME",
-    "equation" : "10",
-    "unit" : "Month"
-  } ],
   "cldVariables" : [ {
     "name" : "difference between random variables",
     "comment" : "difference between random variables"

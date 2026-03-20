@@ -79,10 +79,10 @@ class WorkflowComplexModelFxTest {
     // ── Intermediate models ──────────────────────────────────────────────
 
     @Test
-    @DisplayName("Aging Chain: load → validate → simulate")
-    void shouldSimulateAgingChain(FxRobot robot) throws Exception {
-        loadExample("Aging Chain", "demographics/aging-chain.json");
-        assertThat(stage.getTitle()).contains("Aging");
+    @DisplayName("SIR Epidemic: load → validate → simulate")
+    void shouldSimulateSirEpidemic(FxRobot robot) throws Exception {
+        loadExample("SIR Epidemic", "epidemiology/sir-epidemic.json");
+        assertThat(stage.getTitle()).contains("SIR");
 
         triggerValidation(robot);
 
@@ -136,9 +136,9 @@ class WorkflowComplexModelFxTest {
     // ── Advanced models ──────────────────────────────────────────────────
 
     @Test
-    @DisplayName("Kaibab Deer: load → validate → simulate")
-    void shouldSimulateKaibabDeer(FxRobot robot) throws Exception {
-        loadExample("Kaibab Deer", "ecology/kaibab-deer.json");
+    @DisplayName("Market: load → validate → simulate")
+    void shouldSimulateMarket(FxRobot robot) throws Exception {
+        loadExample("Market", "economics/market.json");
 
         triggerValidation(robot);
 
@@ -155,9 +155,9 @@ class WorkflowComplexModelFxTest {
     }
 
     @Test
-    @DisplayName("Supply Chain Bullwhip: load → simulate")
-    void shouldSimulateSupplyChain(FxRobot robot) throws Exception {
-        loadExample("Supply Chain Bullwhip", "supply-chain/supply-chain-bullwhip.json");
+    @DisplayName("Inventory Oscillation: load → simulate")
+    void shouldSimulateInventoryOscillation(FxRobot robot) throws Exception {
+        loadExample("Inventory Oscillation", "supply-chain/inventory-oscillation.json");
 
         Platform.runLater(() -> {
             stage.toFront();
@@ -270,11 +270,11 @@ class WorkflowComplexModelFxTest {
         String bathtubText = robot.lookup("#statusElements")
                 .queryAs(Label.class).getText();
 
-        loadExample("Aging Chain", "demographics/aging-chain.json");
-        String agingText = robot.lookup("#statusElements")
+        loadExample("SIR Epidemic", "epidemiology/sir-epidemic.json");
+        String sirText = robot.lookup("#statusElements")
                 .queryAs(Label.class).getText();
 
-        assertThat(agingText).isNotEqualTo(bathtubText);
+        assertThat(sirText).isNotEqualTo(bathtubText);
     }
 
     // ── Phase plot ───────────────────────────────────────────────────────
