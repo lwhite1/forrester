@@ -106,6 +106,9 @@ public class ChartViewerApplication extends Application {
      */
     public static void showChart() {
         ChartData snapshot = snapshot();
+        synchronized (LOCK) {
+            resetInternal();
+        }
         ensureFxRunning();
         Platform.runLater(() -> {
             ChartViewerApplication app = new ChartViewerApplication();
