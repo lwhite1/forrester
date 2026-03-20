@@ -201,6 +201,38 @@ public class ModelTest {
     }
 
     @Test
+    public void shouldRemoveOrphanedFlowsWhenStockRemoved() {
+        Stock stockA = new Stock("A", 100, THING);
+        Stock stockB = new Stock("B", 50, THING);
+        Flow flowAB = Flow.create("AB", MINUTE, () -> new Quantity(1, THING));
+        Flow flowOnly = Flow.create("OnlyA", MINUTE, () -> new Quantity(2, THING));
+
+        model.addStock(stockA);
+        model.addStock(stockB);
+        model.addFlow(flowAB);
+        model.addFlow(flowOnly);
+
+        // AB: A → B (source=A, sink=B)
+        stockA.addOutflow(flowAB);
+        stockB.addInflow(flowAB);
+
+        // OnlyA: outflow from A to cloud (source=A, sink=null)
+        stockA.addOutflow(flowOnly);
+
+        assertThat(model.getFlows()).hasSize(2);
+
+        // Remove stock A: AB loses source but keeps sink B; OnlyA loses its only endpoint
+        model.removeStock(stockA);
+
+        assertThat(model.getStocks()).containsExactly(stockB);
+        // AB should survive (still connected to B), OnlyA should be removed (orphaned)
+        assertThat(model.getFlows()).hasSize(1);
+        assertThat(model.getFlows().getFirst().getName()).isEqualTo("AB");
+        assertThat(flowAB.getSource()).isNull();
+        assertThat(flowAB.getSink()).isEqualTo(stockB);
+    }
+
+    @Test
     public void shouldSkipDuplicateModuleFlowWithCollidingName() {
         model.addFlow(Flow.create("Birth Rate", MINUTE, () -> new Quantity(10, THING)));
 
