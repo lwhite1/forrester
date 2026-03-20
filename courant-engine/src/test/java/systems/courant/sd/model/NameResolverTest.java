@@ -47,6 +47,21 @@ class NameResolverTest {
             Map<String, String> map = Map.of("other", "value");
             assertThat(NameResolver.resolve("nounderscore", map::get)).isNull();
         }
+
+        @Test
+        void shouldFallbackSpaceToUnderscore() {
+            Map<String, String> map = Map.of("My_Table", "value");
+            assertThat(NameResolver.resolve("My Table", map::get)).isEqualTo("value");
+        }
+
+        @Test
+        void shouldPreferUnderscoreToSpaceFallbackOverSpaceToUnderscore() {
+            Map<String, String> map = new HashMap<>();
+            map.put("a b", "spaced");
+            map.put("a_b", "underscored");
+            // Exact match "a_b" wins
+            assertThat(NameResolver.resolve("a_b", map::get)).isEqualTo("underscored");
+        }
     }
 
     @Nested
@@ -63,6 +78,12 @@ class NameResolverTest {
         void shouldFallbackUnderscoreToSpace() {
             Set<String> names = Set.of("birth rate", "death rate");
             assertThat(NameResolver.resolveInSet("birth_rate", names)).isEqualTo("birth rate");
+        }
+
+        @Test
+        void shouldFallbackSpaceToUnderscore() {
+            Set<String> names = Set.of("My_Table");
+            assertThat(NameResolver.resolveInSet("My Table", names)).isEqualTo("My_Table");
         }
 
         @Test

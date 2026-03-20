@@ -18,14 +18,13 @@ public final class NameResolver {
     }
 
     /**
-     * Tries {@code lookup.apply(name)}; if the result is {@code null} and
-     * the name contains an underscore, retries with underscores replaced by
-     * spaces.
+     * Tries {@code lookup.apply(name)}; if the result is {@code null},
+     * retries with underscores replaced by spaces and vice-versa.
      *
-     * @param name   the reference name (may contain underscores)
+     * @param name   the reference name (may contain underscores or spaces)
      * @param lookup a function that returns a value for a known name, or {@code null}
      * @param <V>    the value type
-     * @return the first non-null result, or {@code null} if neither form matches
+     * @return the first non-null result, or {@code null} if no form matches
      */
     public static <V> V resolve(String name, Function<String, V> lookup) {
         V value = lookup.apply(name);
@@ -33,14 +32,21 @@ public final class NameResolver {
             return value;
         }
         if (name.contains("_")) {
-            return lookup.apply(name.replace('_', ' '));
+            value = lookup.apply(name.replace('_', ' '));
+            if (value != null) {
+                return value;
+            }
+        }
+        if (name.contains(" ")) {
+            return lookup.apply(name.replace(' ', '_'));
         }
         return null;
     }
 
     /**
      * Returns the matching form of {@code name} present in {@code names},
-     * trying the exact name first, then the underscore-to-space variant.
+     * trying the exact name first, then underscore-to-space, then
+     * space-to-underscore.
      *
      * @param name  the reference name
      * @param names the set of known element names
@@ -53,6 +59,10 @@ public final class NameResolver {
         String spaced = name.replace('_', ' ');
         if (names.contains(spaced)) {
             return spaced;
+        }
+        String underscored = name.replace(' ', '_');
+        if (names.contains(underscored)) {
+            return underscored;
         }
         return null;
     }
