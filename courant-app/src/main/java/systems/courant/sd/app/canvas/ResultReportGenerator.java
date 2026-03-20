@@ -143,6 +143,55 @@ public final class ResultReportGenerator {
         return html.toString();
     }
 
+    /**
+     * Generates only the result section HTML fragments (no HTML/head/body wrapper).
+     * Used by {@link ReportExporter} to embed result sections into a combined report.
+     *
+     * @param singleRun     single simulation run result (null to omit)
+     * @param sweep         parameter sweep result (null to omit)
+     * @param monteCarlo    Monte Carlo result (null to omit)
+     * @param sensitivity   sensitivity impacts list (null or empty to omit)
+     * @param optimization  optimization result (null to omit)
+     * @param dominance     loop dominance analysis (null to omit)
+     * @return HTML section fragments
+     */
+    static String generateSections(RunResult singleRun,
+                                   SweepResult sweep,
+                                   MonteCarloResult monteCarlo,
+                                   List<ParameterImpact> sensitivity,
+                                   OptimizationResult optimization,
+                                   LoopDominanceAnalysis dominance) {
+        StringBuilder html = new StringBuilder(8192);
+        if (singleRun != null && singleRun.getStepCount() > 0) {
+            writeSimulationSection(html, singleRun);
+        }
+        if (sweep != null && sweep.getRunCount() > 0) {
+            writeSweepSection(html, sweep);
+        }
+        if (monteCarlo != null && monteCarlo.getRunCount() > 0) {
+            writeMonteCarloSection(html, monteCarlo);
+        }
+        if (sensitivity != null && !sensitivity.isEmpty()) {
+            writeSensitivitySection(html, sensitivity);
+        }
+        if (dominance != null && dominance.loopCount() > 0) {
+            writeLoopDominanceSection(html, dominance);
+        }
+        if (optimization != null) {
+            writeOptimizationSection(html, optimization);
+        }
+        return html.toString();
+    }
+
+    /**
+     * Returns the additional CSS rules needed for result report sections
+     * (charts, collapsible details, behavior badges, etc.) that are not
+     * included in the base model report CSS.
+     */
+    static String getResultsCSS() {
+        return RESULTS_EXTRA_CSS;
+    }
+
     // ── Phase 2: Single Run ────────────────────────────────────────────
 
     static void writeSimulationSection(StringBuilder html, RunResult run) {
@@ -1128,6 +1177,60 @@ public final class ResultReportGenerator {
     }
 
     // ── CSS ─────────────────────────────────────────────────────────────
+
+    /** Extra CSS rules needed by result sections but not present in ReportGenerator. */
+    private static final String RESULTS_EXTRA_CSS = """
+            h3 {
+                font-size: 1rem;
+                color: #4a5568;
+                margin-top: 1rem;
+                margin-bottom: 0.5rem;
+            }
+            .chart-svg {
+                width: 100%;
+                max-width: 800px;
+                height: auto;
+                margin: 1rem 0;
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            }
+            details {
+                margin: 0.75rem 0;
+                border: 1px solid #e2e8f0;
+                border-radius: 4px;
+            }
+            details summary {
+                cursor: pointer;
+                padding: 0.5rem 0.75rem;
+                font-weight: 600;
+                color: #4a5568;
+                background: #f7fafc;
+                user-select: none;
+            }
+            details summary:hover { background: #edf2f7; }
+            details[open] summary { border-bottom: 1px solid #e2e8f0; }
+            details .element-table { margin-bottom: 0; }
+            .summary-text {
+                margin: 0.75rem 0;
+                font-size: 0.95rem;
+                color: #4a5568;
+                line-height: 1.5;
+            }
+            .behavior-badge {
+                display: inline-block;
+                padding: 0.15rem 0.5rem;
+                border-radius: 3px;
+                font-size: 0.8rem;
+                font-weight: 600;
+                color: white;
+            }
+            .behavior-growth { background: #27ae60; }
+            .behavior-decay { background: #e67e22; }
+            .behavior-goal { background: #2980b9; }
+            .behavior-oscillation { background: #8e44ad; }
+            .behavior-s-shaped { background: #16a085; }
+            .behavior-overshoot { background: #c0392b; }
+            .behavior-equilibrium { background: #95a5a6; }
+            """;
 
     private static final String CSS = """
             <style>

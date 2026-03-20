@@ -552,6 +552,11 @@ final class SimulationController {
                 (target, unused) -> SensitivitySummary.fromMonteCarlo(mcResult, target),
                 trackable.getFirst());
         dashboardPanel.showSensitivity(pane);
+
+        // Store sensitivity impacts for report export (using first trackable variable)
+        List<SensitivitySummary.ParameterImpact> impacts =
+                SensitivitySummary.fromMonteCarlo(mcResult, trackable.getFirst());
+        dashboardPanel.storeSensitivityImpacts(impacts);
     }
 
     private static List<String> collectTrackableNames(List<String> stocks, List<String> variables) {

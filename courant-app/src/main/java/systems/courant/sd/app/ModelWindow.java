@@ -573,7 +573,8 @@ public class ModelWindow {
                         canvas.getCanvasState(), canvas.getEditor(),
                         canvas.getConnectors(),
                         canvas.analysis().getActiveLoopAnalysis(),
-                        stage, editor != null ? editor.getModelName() : null),
+                        stage, editor != null ? editor.getModelName() : null,
+                        dashboardPanel),
                 null, "menuExportReport");
         commandRegistry.add("Model Info", "File",
                 () -> ModelInfoDialog.show(editor, stage, this::updateTitle));
