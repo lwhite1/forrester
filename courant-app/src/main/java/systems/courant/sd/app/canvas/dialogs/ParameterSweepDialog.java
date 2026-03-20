@@ -140,7 +140,7 @@ public class ParameterSweepDialog extends Dialog<ParameterSweepDialog.Config> {
                 return "Step must be greater than zero.";
             }
             long pointCount = start == end ? 1
-                    : (long) Math.ceil((end - start) / step) + 1;
+                    : Math.round((end - start) / step) + 1;
             if (pointCount > 10_000) {
                 return "Too many points (" + pointCount + "). Maximum is 10,000.";
             }
