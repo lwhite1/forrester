@@ -233,7 +233,8 @@ final class FileController {
                     return;
                 }
             }
-            currentFile = file.toPath();
+            // Non-JSON exports are "export" operations — do not update currentFile,
+            // so that Ctrl+S continues to save in native JSON format.
             dirty = false;
             updateTitle.run();
             fireLogEvent.accept(l -> l.onModelSaved(name));
