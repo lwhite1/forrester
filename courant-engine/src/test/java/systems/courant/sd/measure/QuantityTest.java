@@ -4,6 +4,7 @@ import systems.courant.sd.measure.units.length.LengthUnits;
 import org.junit.jupiter.api.Test;
 
 import static systems.courant.sd.measure.Units.GALLON_US;
+import static systems.courant.sd.measure.Units.KILOMETER;
 import static systems.courant.sd.measure.Units.LITER;
 import static systems.courant.sd.measure.Units.METER;
 import static systems.courant.sd.measure.Units.MILE;
@@ -138,6 +139,23 @@ public class QuantityTest {
         Quantity c = new Quantity(1, GALLON_US);
         assertTrue(a.isCompatibleWith(b));
         assertFalse(a.isCompatibleWith(c));
+    }
+
+    @Test
+    public void shouldMaintainEqualsHashCodeContractForCrossUnitEquality() {
+        Quantity meters = new Quantity(1000, METER);
+        Quantity km = new Quantity(1, KILOMETER);
+        // Cross-unit equals must imply same hashCode
+        assertEquals(meters, km);
+        assertEquals(meters.hashCode(), km.hashCode());
+    }
+
+    @Test
+    public void shouldMaintainEqualsHashCodeContractForSameUnit() {
+        Quantity a = new Quantity(500, METER);
+        Quantity b = new Quantity(500, METER);
+        assertEquals(a, b);
+        assertEquals(a.hashCode(), b.hashCode());
     }
 
     @Test

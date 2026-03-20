@@ -274,14 +274,13 @@ public final class Quantity {
         Quantity quantity = (Quantity) o;
 
         if (!getDimension().equals(quantity.getDimension())) return false;
-        if (unit.equals(quantity.unit)) {
-            return Double.compare(value, quantity.value) == 0;
-        }
         if (!unit.supportsBaseConversion() || !quantity.unit.supportsBaseConversion()) {
-            // Units that don't support base-unit conversion (e.g., Fahrenheit vs Celsius)
-            return false;
+            // Units that don't support base-unit conversion (e.g., Fahrenheit):
+            // only equal if same unit and same raw value
+            return unit.equals(quantity.unit)
+                    && Double.compare(value, quantity.value) == 0;
         }
-        return Double.compare(quantity.inBaseUnits().getValue(), inBaseUnits().getValue()) == 0;
+        return Double.compare(inBaseUnits().getValue(), quantity.inBaseUnits().getValue()) == 0;
     }
 
     /**
