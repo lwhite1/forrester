@@ -3,6 +3,8 @@ package systems.courant.sd.model;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import systems.courant.sd.measure.Quantity;
+
 import static systems.courant.sd.measure.Units.MINUTE;
 import static systems.courant.sd.measure.Units.THING;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -57,6 +59,27 @@ public class ModuleTest {
     @Test
     public void shouldReturnNullForMissingVariableViaGet() {
         assertThat(module.getVariable("nonexistent")).isEmpty();
+    }
+
+    @Test
+    public void shouldRejectDuplicateStock() {
+        module.addStock(new Stock("S1", 10, THING));
+        assertThrows(IllegalArgumentException.class,
+                () -> module.addStock(new Stock("S1", 20, THING)));
+    }
+
+    @Test
+    public void shouldRejectDuplicateFlow() {
+        module.addFlow(Flow.create("F1", MINUTE, () -> new Quantity(1.0, THING)));
+        assertThrows(IllegalArgumentException.class,
+                () -> module.addFlow(Flow.create("F1", MINUTE, () -> new Quantity(2.0, THING))));
+    }
+
+    @Test
+    public void shouldRejectDuplicateVariable() {
+        module.addVariable(new Variable("V1", THING, () -> 1.0));
+        assertThrows(IllegalArgumentException.class,
+                () -> module.addVariable(new Variable("V1", THING, () -> 2.0)));
     }
 
     @Test

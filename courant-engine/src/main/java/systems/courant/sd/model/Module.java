@@ -58,8 +58,14 @@ public class Module extends Element {
 
     /**
      * Adds a stock to this module.
+     *
+     * @throws IllegalArgumentException if a stock with the same name already exists
      */
     public void addStock(Stock stock) {
+        if (stocks.containsKey(stock.getName())) {
+            throw new IllegalArgumentException(
+                    "Duplicate stock name '" + stock.getName() + "' in module '" + getName() + "'");
+        }
         stocks.put(stock.getName(), stock);
     }
 
@@ -92,9 +98,15 @@ public class Module extends Element {
 
     /**
      * Adds a flow to this module.
+     *
+     * @throws IllegalArgumentException if a flow with the same name already exists
      */
-    public void addFlow(Flow rate) {
-        flows.put(rate.getName(), rate);
+    public void addFlow(Flow flow) {
+        if (flows.containsKey(flow.getName())) {
+            throw new IllegalArgumentException(
+                    "Duplicate flow name '" + flow.getName() + "' in module '" + getName() + "'");
+        }
+        flows.put(flow.getName(), flow);
     }
 
     /**
@@ -113,8 +125,14 @@ public class Module extends Element {
 
     /**
      * Adds a variable to this module.
+     *
+     * @throws IllegalArgumentException if a variable with the same name already exists
      */
     public void addVariable(Variable variable) {
+        if (variables.containsKey(variable.getName())) {
+            throw new IllegalArgumentException(
+                    "Duplicate variable name '" + variable.getName() + "' in module '" + getName() + "'");
+        }
         variables.put(variable.getName(), variable);
     }
 
