@@ -372,7 +372,7 @@ public final class ReportGenerator {
         if (!Double.isFinite(value)) {
             return String.valueOf(value);
         }
-        if (value == (long) value) {
+        if (Math.abs(value) <= Long.MAX_VALUE && value == (long) value) {
             return String.valueOf((long) value);
         }
         return String.valueOf(value);

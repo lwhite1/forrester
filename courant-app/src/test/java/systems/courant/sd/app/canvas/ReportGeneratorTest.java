@@ -274,6 +274,29 @@ class ReportGeneratorTest {
     }
 
     @Nested
+    @DisplayName("number formatting")
+    class NumberFormatting {
+
+        @Test
+        @DisplayName("should not corrupt extreme values beyond Long.MAX_VALUE")
+        void shouldHandleExtremeValues() {
+            double extreme = 1e19;
+            LookupTableDef lt = new LookupTableDef("extreme", null,
+                    new double[]{0, extreme}, new double[]{0, extreme}, "LINEAR");
+            ModelDefinition def = new ModelDefinition(
+                    "Test", null, null,
+                    List.of(), List.of(), List.of(), List.of(lt), List.of(), List.of(),
+                    List.of(), List.of(), List.of(), List.of(), null, null, List.of());
+
+            String html = ReportGenerator.generate(def, null);
+
+            assertThat(html).contains("1.0E19");
+            // Must NOT display the corrupted long overflow value
+            assertThat(html).doesNotContain(String.valueOf(Long.MAX_VALUE));
+        }
+    }
+
+    @Nested
     @DisplayName("subscripts section")
     class SubscriptsSection {
 
