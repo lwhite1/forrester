@@ -41,7 +41,13 @@ import static org.assertj.core.api.Assumptions.assumeThat;
 class CatalogModelValidationTest {
 
     private static final ModelDefinitionSerializer SERIALIZER = new ModelDefinitionSerializer();
-    private static final List<String> WARNING_REPORT = new ArrayList<>();
+    private static final List<String> REPORT = new ArrayList<>();
+    private static int totalModels;
+    private static int modelsClean;
+    private static int totalErrors;
+    private static int totalWarnings;
+    private static int modelsWithErrors;
+    private static int modelsWithWarnings;
 
     @BeforeAll
     static void onlyWhenRequested() {
@@ -81,25 +87,41 @@ class CatalogModelValidationTest {
     void shouldHaveNoValidationErrors(CatalogEntry entry) throws IOException {
         ModelDefinition def = loadModel(entry.path);
         ValidationResult result = ModelValidator.validate(def);
+        synchronized (REPORT) {
+            totalModels++;
+        }
 
-        // Collect warnings for the report (don't fail on them)
+        List<ValidationIssue> errors = result.issues().stream()
+                .filter(i -> i.severity() == Severity.ERROR).toList();
         List<ValidationIssue> warnings = result.issues().stream()
-                .filter(i -> i.severity() == Severity.WARNING)
-                .toList();
-        if (!warnings.isEmpty()) {
-            synchronized (WARNING_REPORT) {
-                WARNING_REPORT.add(entry.id + " (" + warnings.size() + " warnings):");
-                for (ValidationIssue w : warnings) {
-                    WARNING_REPORT.add("  [WARNING] " + w.elementName() + ": " + w.message());
+                .filter(i -> i.severity() == Severity.WARNING).toList();
+
+        if (errors.isEmpty() && warnings.isEmpty()) {
+            synchronized (REPORT) {
+                modelsClean++;
+            }
+        } else {
+            synchronized (REPORT) {
+                REPORT.add(entry.id + " (" + errors.size() + " errors, "
+                        + warnings.size() + " warnings):");
+                for (ValidationIssue e : errors) {
+                    REPORT.add("  [ERROR]   " + e.elementName() + ": " + e.message());
                 }
-                WARNING_REPORT.add("");
+                for (ValidationIssue w : warnings) {
+                    REPORT.add("  [WARNING] " + w.elementName() + ": " + w.message());
+                }
+                REPORT.add("");
+                totalErrors += errors.size();
+                totalWarnings += warnings.size();
+                if (!errors.isEmpty()) {
+                    modelsWithErrors++;
+                }
+                if (!warnings.isEmpty()) {
+                    modelsWithWarnings++;
+                }
             }
         }
 
-        // Errors fail the test — include full details in the assertion message
-        List<ValidationIssue> errors = result.issues().stream()
-                .filter(i -> i.severity() == Severity.ERROR)
-                .toList();
         assertThat(errors)
                 .as("Model '%s' should have no validation errors, but found %d:\n%s",
                         entry.id, errors.size(), formatIssues(errors))
@@ -107,21 +129,30 @@ class CatalogModelValidationTest {
     }
 
     @AfterAll
-    static void writeWarningReport() throws IOException {
-        if (WARNING_REPORT.isEmpty()) {
+    static void writeReport() throws IOException {
+        if (REPORT.isEmpty()) {
             return;
         }
         Path reportDir = Path.of("target");
         Files.createDirectories(reportDir);
-        Path reportFile = reportDir.resolve("catalog-validation-warnings.txt");
+        Path reportFile = reportDir.resolve("catalog-validation-report.txt");
 
         List<String> lines = new ArrayList<>();
-        lines.add("Catalog Model Validation Warnings");
+        lines.add("Catalog Model Validation Report");
         lines.add("Generated: " + LocalDateTime.now()
                 .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
         lines.add("=".repeat(60));
         lines.add("");
-        lines.addAll(WARNING_REPORT);
+        lines.add("Total models:         " + totalModels);
+        lines.add("Models clean:         " + modelsClean);
+        lines.add("Models with errors:   " + modelsWithErrors);
+        lines.add("Models with warnings: " + modelsWithWarnings);
+        lines.add("Total errors:         " + totalErrors);
+        lines.add("Total warnings:       " + totalWarnings);
+        lines.add("");
+        lines.add("=".repeat(60));
+        lines.add("");
+        lines.addAll(REPORT);
         Files.write(reportFile, lines);
     }
 
