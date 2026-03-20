@@ -128,6 +128,7 @@ public class CompiledModel {
      * Installs an event handler that keeps the compiled model's step counter in sync.
      */
     public Simulation createSimulation(TimeUnit timeStep, double duration, TimeUnit durationUnit) {
+        stepHolder[0] = 0;
         simTimeUnitHolder[0] = timeStep;
         Simulation sim = new Simulation(model, timeStep, durationUnit, duration);
         sim.setDt(dtHolder[0]);
@@ -140,6 +141,7 @@ public class CompiledModel {
      * Installs an event handler that keeps the compiled model's step counter in sync.
      */
     public Simulation createSimulation(TimeUnit timeStep, Quantity duration) {
+        stepHolder[0] = 0;
         simTimeUnitHolder[0] = timeStep;
         Simulation sim = new Simulation(model, timeStep, duration);
         sim.setDt(dtHolder[0]);
@@ -159,6 +161,7 @@ public class CompiledModel {
         }
         TimeUnit timeStep = unitRegistry.resolveTimeUnit(settings.timeStep());
         TimeUnit durationUnit = unitRegistry.resolveTimeUnit(settings.durationUnit());
+        stepHolder[0] = 0;
         simTimeUnitHolder[0] = timeStep;
         setDt(settings.dt());
         Simulation sim = new Simulation(model, timeStep, new Quantity(settings.duration(), durationUnit));

@@ -52,6 +52,31 @@ class ModelCompilerTest {
             // After draining, stock should be well below initial value
             assertThat(tank.getValue()).isBetween(25.0, 40.0);
         }
+
+        @Test
+        void shouldProduceSameResultsWhenSimulationRecreatedWithoutExplicitReset() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Drain Rerun")
+                    .stock("Tank", 100, "Thing")
+                    .flow("Drain", "Tank * 0.1", "Day", "Tank", null)
+                    .defaultSimulation("Day", 10, "Day")
+                    .build();
+
+            CompiledModel compiled = compiler.compile(def);
+
+            // First run
+            Simulation sim1 = compiled.createSimulation();
+            sim1.execute();
+            double firstResult = findStock(compiled.getModel(), "Tank").getValue();
+
+            // Second run — createSimulation should reset stepHolder internally
+            compiled.reset();
+            Simulation sim2 = compiled.createSimulation();
+            sim2.execute();
+            double secondResult = findStock(compiled.getModel(), "Tank").getValue();
+
+            assertThat(secondResult).isCloseTo(firstResult, within(1e-10));
+        }
     }
 
     @Nested
