@@ -204,14 +204,17 @@ final class InputDispatcher {
             hoveredConnection = connHit;
             canvas.requestRedraw();
             canvas.updateTooltip(hit, event);
+        }
 
-            // Cloud tooltip when no element is hovered
-            if (hit == null && canvas.getEditor() != null) {
-                FlowEndpointCalculator.CloudHit cloudHit =
-                        FlowEndpointCalculator.hitTestClouds(
-                                worldX, worldY, canvasState, canvas.getEditor());
-                canvas.updateCloudTooltip(cloudHit, event);
-            }
+        // Cloud tooltip — checked independently of element/connection hover
+        // changes, since clouds don't affect hit/connHit state (#1191)
+        if (hit == null && connHit == null && canvas.getEditor() != null) {
+            FlowEndpointCalculator.CloudHit cloudHit =
+                    FlowEndpointCalculator.hitTestClouds(
+                            worldX, worldY, canvasState, canvas.getEditor());
+            canvas.updateCloudTooltip(cloudHit, event);
+        } else {
+            canvas.updateCloudTooltip(null, event);
         }
 
         updateCursor(canvas);
