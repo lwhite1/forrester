@@ -526,6 +526,23 @@ public final class FunctionDocRegistry {
                 "IF_SHORT(x > 0, y / x, 0)",
                 List.of("IF"));
 
+        // ── Logic constants ──────────────────────────────────────────────
+        add(m, "TRUE", "TRUE", "Boolean true (1)",
+                "Special",
+                List.of(),
+                "Returns 1.0 (true). Useful in conditional expressions and as a "
+                        + "constant for readability.",
+                "IF(TRUE, a, b) → a",
+                List.of("FALSE", "IF"));
+
+        add(m, "FALSE", "FALSE", "Boolean false (0)",
+                "Special",
+                List.of(),
+                "Returns 0.0 (false). Useful in conditional expressions and as a "
+                        + "constant for readability.",
+                "IF(FALSE, a, b) → b",
+                List.of("TRUE", "IF"));
+
         DOCS = Collections.unmodifiableMap(m);
     }
 
