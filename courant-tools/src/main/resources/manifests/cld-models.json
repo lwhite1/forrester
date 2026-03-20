@@ -1,0 +1,119 @@
+[
+  {
+    "url": "models/Delft/02_11/0211CLDbankrun.mdl",
+    "className": "CldBankrun",
+    "id": "cld-bankrun",
+    "category": "causal-loop",
+    "comment": "Causal loop diagram of positive feedback loops driving bank run dynamics. Depositor panic, withdrawals, and bank liquidity interact through reinforcing loops.",
+    "metadata": {
+      "author": "Dr. Erik Pruyt",
+      "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
+      "license": "CC-BY-NC-SA-4.0",
+      "url": "https://simulation.tudelft.nl/SD/model_files_nested/02_11"
+    }
+  },
+  {
+    "url": "models/Delft/06_01/0601Cocaine_CLD.mdl",
+    "className": "CocaineCld",
+    "id": "cocaine-cld",
+    "category": "causal-loop",
+    "comment": "Causal loop diagram of feedback loops in cocaine use and addiction dynamics, including supply, demand, and enforcement interactions.",
+    "metadata": {
+      "author": "Dr. Erik Pruyt",
+      "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
+      "license": "CC-BY-NC-SA-4.0",
+      "url": "https://simulation.tudelft.nl/SD/model_files_nested/06_01"
+    }
+  },
+  {
+    "url": "models/Delft/02_01/0201CompetitionFaculty.mdl",
+    "className": "CompetitionFaculty",
+    "id": "competition-faculty",
+    "category": "causal-loop",
+    "comment": "Causal loop diagram of competitive dynamics among faculty members, illustrating reinforcing and balancing feedback in academic competition.",
+    "metadata": {
+      "author": "Dr. Erik Pruyt",
+      "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
+      "license": "CC-BY-NC-SA-4.0",
+      "url": "https://simulation.tudelft.nl/SD/model_files_nested/02_01"
+    }
+  },
+  {
+    "url": "models/Delft/02_10/0210ConflictInMiddleEast.mdl",
+    "className": "ConflictMiddleEast",
+    "id": "conflict-middle-east",
+    "category": "causal-loop",
+    "comment": "Causal loop diagram of escalation and de-escalation dynamics in Middle East conflicts, showing reinforcing cycles of violence and intervention.",
+    "metadata": {
+      "author": "Dr. Erik Pruyt",
+      "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
+      "license": "CC-BY-NC-SA-4.0",
+      "url": "https://simulation.tudelft.nl/SD/model_files_nested/02_10"
+    }
+  },
+  {
+    "url": "models/Delft/02_04/0204MunroLane.mdl",
+    "className": "MunroLane",
+    "id": "munro-lane",
+    "category": "causal-loop",
+    "comment": "Causal loop diagram illustrating neighborhood dynamics and tipping points in urban change processes.",
+    "metadata": {
+      "author": "Dr. Erik Pruyt",
+      "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
+      "license": "CC-BY-NC-SA-4.0",
+      "url": "https://simulation.tudelft.nl/SD/model_files_nested/02_04"
+    }
+  },
+  {
+    "url": "models/Delft/02_03/0203REMaggregatedCLDen1.mdl",
+    "className": "RemAggregatedCld",
+    "id": "rem-aggregated-cld",
+    "category": "causal-loop",
+    "comment": "Aggregated causal loop diagram of real estate market feedback structure, showing price, supply, and demand interactions.",
+    "metadata": {
+      "author": "Dr. Erik Pruyt",
+      "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
+      "license": "CC-BY-NC-SA-4.0",
+      "url": "https://simulation.tudelft.nl/SD/model_files_nested/02_03"
+    }
+  },
+  {
+    "url": "models/Vensim/UserGuide/chap20/complete/repair01.mdl",
+    "className": "Repair01",
+    "id": "repair01",
+    "category": "causal-loop",
+    "comment": "Causal loop diagram of equipment repair feedback showing failure rates and maintenance capacity interactions.",
+    "metadata": {
+      "author": "Ventana Systems, Inc.",
+      "source": "Vensim User's Guide, Chapter 20",
+      "license": "Proprietary — bundled with Vensim distribution",
+      "url": "https://vensim.com/documentation/"
+    }
+  },
+  {
+    "url": "models/Delft/10_09/1009_RANDOMvsRANDOMIZED.mdl",
+    "className": "RandomVsRandomized",
+    "id": "random-vs-randomized",
+    "category": "causal-loop",
+    "comment": "Causal loop diagram demonstrating the structural difference between RANDOM and RANDOMIZED functions in Vensim.",
+    "metadata": {
+      "author": "Dr. Erik Pruyt",
+      "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
+      "license": "CC-BY-NC-SA-4.0",
+      "url": "https://simulation.tudelft.nl/SD/model_files_nested/10_09"
+    }
+  },
+  {
+    "url": "models/Vensim/Sample/BPR/BPR0.mdl",
+    "className": "Bpr0",
+    "id": "bpr0",
+    "category": "causal-loop",
+    "comment": "Causal loop diagram of a business process reengineering problem. Pure CLD with no stock-flow structure.",
+    "metadata": {
+      "author": "Ventana Systems, Inc.",
+      "source": "Vensim Sample Models — Business Process Reengineering",
+      "license": "Proprietary — bundled with Vensim distribution",
+      "url": "https://vensim.com/documentation/"
+    }
+  }
+]
