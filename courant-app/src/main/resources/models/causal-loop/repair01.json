@@ -107,5 +107,11 @@
     "timeStep" : "Month",
     "duration" : 100.0,
     "durationUnit" : "Month"
+  },
+  "metadata" : {
+    "author" : "Ventana Systems, Inc.",
+    "source" : "Vensim User's Guide, Chapter 20",
+    "license" : "Proprietary — bundled with Vensim distribution",
+    "url" : "https://vensim.com/documentation/"
   }
 }

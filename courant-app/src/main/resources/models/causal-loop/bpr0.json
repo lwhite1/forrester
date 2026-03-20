@@ -1,5 +1,27 @@
 {
   "name" : "BPR0",
+  "cldVariables" : [ {
+    "name" : "Activate Service",
+    "comment" : "Activate Service"
+  }, {
+    "name" : "dedicated facilities",
+    "comment" : "dedicated facilities"
+  }, {
+    "name" : "Dispatch Service Technician",
+    "comment" : "Dispatch Service Technician"
+  }, {
+    "name" : "Process Order",
+    "comment" : "Process Order"
+  }, {
+    "name" : "Set Program Switch",
+    "comment" : "Set Program Switch"
+  }, {
+    "name" : "Take Order",
+    "comment" : "Take Order"
+  }, {
+    "name" : "Test",
+    "comment" : "Test"
+  } ],
   "causalLinks" : [ {
     "from" : "Set Program Switch",
     "to" : "Test",
@@ -41,37 +63,37 @@
     "name" : "1",
     "elements" : [ {
       "name" : "Activate Service",
-      "type" : "aux",
+      "type" : "cld_variable",
       "x" : 842.0,
       "y" : 417.0
     }, {
       "name" : "Test",
-      "type" : "aux",
+      "type" : "cld_variable",
       "x" : 788.0,
       "y" : 311.0
     }, {
       "name" : "Set Program Switch",
-      "type" : "aux",
+      "type" : "cld_variable",
       "x" : 659.0,
       "y" : 235.0
     }, {
       "name" : "dedicated facilities",
-      "type" : "aux",
+      "type" : "cld_variable",
       "x" : 395.0,
       "y" : 207.0
     }, {
       "name" : "Process Order",
-      "type" : "aux",
+      "type" : "cld_variable",
       "x" : 282.0,
       "y" : 151.0
     }, {
       "name" : "Take Order",
-      "type" : "aux",
+      "type" : "cld_variable",
       "x" : 199.0,
       "y" : 98.0
     }, {
       "name" : "Dispatch Service Technician",
-      "type" : "aux",
+      "type" : "cld_variable",
       "x" : 508.0,
       "y" : 342.0
     }, {
@@ -114,8 +136,9 @@
     "durationUnit" : "Month"
   },
   "metadata" : {
-    "author" : "Ventana Systems",
-    "source" : "Vensim Sample Models",
-    "license" : "MIT"
+    "author" : "Ventana Systems, Inc.",
+    "source" : "Vensim Sample Models — Business Process Reengineering",
+    "license" : "Proprietary — bundled with Vensim distribution",
+    "url" : "https://vensim.com/documentation/"
   }
 }

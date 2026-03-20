@@ -156,7 +156,7 @@
     {
       "id": "cld-bankrun",
       "name": "0211CLDbankrun",
-      "displayName": "Cld Bankrun",
+      "displayName": "Bank Run",
       "description": "Causal loop diagram of positive feedback loops driving bank run dynamics",
       "category": "causal-loop",
       "difficulty": "introductory",
@@ -165,14 +165,14 @@
       "elements": {
         "stocks": 0,
         "flows": 0,
-        "variables": 3,
-        "parameters": 3
+        "cldVariables": 13,
+        "causalLinks": 15
       }
     },
     {
       "id": "cocaine-cld",
       "name": "0601Cocaine_CLD",
-      "displayName": "Cocaine Cld",
+      "displayName": "Cocaine CLD",
       "description": "Causal loop diagram of feedback loops in cocaine use and addiction dynamics",
       "category": "causal-loop",
       "difficulty": "introductory",
@@ -181,14 +181,14 @@
       "elements": {
         "stocks": 0,
         "flows": 0,
-        "variables": 3,
-        "parameters": 3
+        "cldVariables": 5,
+        "causalLinks": 5
       }
     },
     {
       "id": "competition-faculty",
       "name": "0201CompetitionFaculty",
-      "displayName": "Competition Faculty",
+      "displayName": "Competition Among Faculty",
       "description": "Causal loop diagram of competitive dynamics among faculty members",
       "category": "causal-loop",
       "difficulty": "introductory",
@@ -197,14 +197,14 @@
       "elements": {
         "stocks": 0,
         "flows": 0,
-        "variables": 3,
-        "parameters": 3
+        "cldVariables": 8,
+        "causalLinks": 10
       }
     },
     {
       "id": "conflict-middle-east",
       "name": "0210ConflictInMiddleEast",
-      "displayName": "Conflict Middle East",
+      "displayName": "Conflict in the Middle East",
       "description": "Causal loop diagram of escalation and de-escalation dynamics in Middle East conflicts",
       "category": "causal-loop",
       "difficulty": "introductory",
@@ -213,24 +213,8 @@
       "elements": {
         "stocks": 0,
         "flows": 0,
-        "variables": 3,
-        "parameters": 3
-      }
-    },
-    {
-      "id": "flicker",
-      "name": "flicker",
-      "displayName": "Flicker",
-      "description": "Minimal causal loop diagram demonstrating oscillatory feedback without stocks or flows.",
-      "category": "causal-loop",
-      "difficulty": "introductory",
-      "path": "causal-loop/flicker.json",
-      "tags": [],
-      "elements": {
-        "stocks": 0,
-        "flows": 0,
-        "variables": 3,
-        "parameters": 3
+        "cldVariables": 14,
+        "causalLinks": 23
       }
     },
     {
@@ -245,14 +229,14 @@
       "elements": {
         "stocks": 0,
         "flows": 0,
-        "variables": 3,
-        "parameters": 3
+        "cldVariables": 10,
+        "causalLinks": 9
       }
     },
     {
       "id": "random-vs-randomized",
       "name": "1009_RANDOMvsRANDOMIZED",
-      "displayName": "Random Vs Randomized",
+      "displayName": "RANDOM vs RANDOMIZED",
       "description": "Demonstrates the difference between RANDOM and RANDOMIZED functions in Vensim",
       "category": "causal-loop",
       "difficulty": "introductory",
@@ -261,14 +245,14 @@
       "elements": {
         "stocks": 0,
         "flows": 0,
-        "variables": 3,
-        "parameters": 3
+        "cldVariables": 7,
+        "causalLinks": 5
       }
     },
     {
       "id": "rem-aggregated-cld",
       "name": "0203REMaggregatedCLDen1",
-      "displayName": "Rem Aggregated Cld",
+      "displayName": "Real Estate Market (Aggregated CLD)",
       "description": "Aggregated causal loop diagram of real estate market feedback structure",
       "category": "causal-loop",
       "difficulty": "introductory",
@@ -277,15 +261,15 @@
       "elements": {
         "stocks": 0,
         "flows": 0,
-        "variables": 3,
-        "parameters": 3
+        "cldVariables": 5,
+        "causalLinks": 4
       }
     },
     {
       "id": "repair01",
       "name": "repair01",
-      "displayName": "Repair01",
-      "description": "Causal loop diagram of equipment repair feedback showing failure rates and maintenance capacity.",
+      "displayName": "Repair",
+      "description": "Causal loop diagram of equipment repair feedback showing failure rates and maintenance capacity",
       "category": "causal-loop",
       "difficulty": "introductory",
       "path": "causal-loop/repair01.json",
@@ -293,8 +277,8 @@
       "elements": {
         "stocks": 0,
         "flows": 0,
-        "variables": 3,
-        "parameters": 3
+        "cldVariables": 6,
+        "causalLinks": 6
       }
     },
     {
@@ -348,17 +332,17 @@
     {
       "id": "bpr0",
       "name": "BPR0",
-      "displayName": "Bpr0",
-      "description": "Causal loop diagram of a business process reengineering problem with no stock-flow structure.",
-      "category": "policy",
+      "displayName": "Business Process Reengineering",
+      "description": "Causal loop diagram of a business process reengineering problem with no stock-flow structure",
+      "category": "causal-loop",
       "difficulty": "introductory",
-      "path": "policy/bpr0.json",
+      "path": "causal-loop/bpr0.json",
       "tags": [],
       "elements": {
         "stocks": 0,
         "flows": 0,
-        "variables": 3,
-        "parameters": 3
+        "cldVariables": 7,
+        "causalLinks": 8
       }
     }
   ]
