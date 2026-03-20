@@ -261,6 +261,11 @@ public class ModelCompiler {
         context.addLiteralConstant("TIME_STEP", sim.dt());
         context.addLiteralConstant("INITIAL_TIME", sim.initialTime());
         context.addLiteralConstant("FINAL_TIME", sim.initialTime() + sim.duration());
+        // Pre-set simulation time unit so compile-time flow resolution uses
+        // the correct unit (not the flow's own unit as fallback).
+        if (sim.timeStep() != null) {
+            context.getSimTimeUnitHolder()[0] = unitRegistry.resolveTimeUnit(sim.timeStep());
+        }
     }
 
     // === Shared helpers ===
