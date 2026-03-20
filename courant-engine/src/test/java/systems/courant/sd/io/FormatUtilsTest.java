@@ -81,7 +81,13 @@ class FormatUtilsTest {
         }
 
         @Test
-        void shouldReturnMinusOneOnClosingParenAtDepthZero() {
+        void shouldIgnoreUnbalancedClosingParenAtDepthZero() {
+            // Unbalanced ) should be ignored, not abort the search
+            assertThat(FormatUtils.findTopLevelComma("abc), d", 0)).isEqualTo(4);
+        }
+
+        @Test
+        void shouldReturnMinusOneWhenNoCommaAfterUnbalancedParen() {
             assertThat(FormatUtils.findTopLevelComma("abc)", 0)).isEqualTo(-1);
         }
 
