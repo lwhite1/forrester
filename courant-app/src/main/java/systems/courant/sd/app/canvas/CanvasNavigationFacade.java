@@ -138,6 +138,9 @@ public final class CanvasNavigationFacade {
     private void popNavigationLevel(boolean saveUndo) {
         ModelDefinition childDef = canvas.editor.toModelDefinition(canvas.canvasState().toViewDef());
         NavigationStack.Frame frame = navController.pop();
+        if (frame == null) {
+            return;
+        }
 
         canvas.undoManager.close();
         canvas.editor = frame.editor();
