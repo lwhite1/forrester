@@ -104,9 +104,9 @@ public final class XmileExprTranslator {
         // 4. Comparison operators: <> → !=, = → == (single = only)
         //    Protect named arguments (e.g. delay=5) before converting = to ==
         expr = INEQUALITY_PATTERN.matcher(expr).replaceAll("!=");
-        expr = NAMED_ARG_PATTERN.matcher(expr).replaceAll("$1$2\u0000");
+        expr = NAMED_ARG_PATTERN.matcher(expr).replaceAll("$1$2\u00AB\u00BB");
         expr = EQUALITY_SINGLE_PATTERN.matcher(expr).replaceAll("==");
-        expr = expr.replace('\u0000', '=');
+        expr = expr.replace("\u00AB\u00BB", "=");
 
         // 5. SMTH3 → SMOOTH3, SMTH1 → SMOOTH
         expr = SMTH3_PATTERN.matcher(expr).replaceAll("SMOOTH3(");
