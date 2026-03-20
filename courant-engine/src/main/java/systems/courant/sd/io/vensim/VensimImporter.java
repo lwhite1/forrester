@@ -131,7 +131,7 @@ public class VensimImporter implements ModelImporter {
         Set<String> sketchValveNames = extractSketchFlowValveNames(
                 parsed.sketchLines());
         Map<String, MdlEquation> equationsByName = buildEquationsByNameIndex(
-                equations);
+                equations, warnings);
 
         Set<String> sketchFlowNames = buildModelDefinitions(
                 equations, isCld, builder, subscripts, preClassification,
@@ -460,13 +460,23 @@ public class VensimImporter implements ModelImporter {
     }
 
     private Map<String, MdlEquation> buildEquationsByNameIndex(
-            List<MdlEquation> equations) {
+            List<MdlEquation> equations, List<String> warnings) {
         Map<String, MdlEquation> equationsByName = new LinkedHashMap<>();
         for (MdlEquation eq : equations) {
             String name = eq.name().strip();
             if (!name.isEmpty()) {
                 String norm = VensimExprTranslator.normalizeName(name);
-                equationsByName.put(norm, eq);
+                MdlEquation previous = equationsByName.put(norm, eq);
+                if (previous != null
+                        && !":".equals(eq.operator())
+                        && !":".equals(previous.operator())
+                        && !"<->".equals(eq.operator())
+                        && !"<->".equals(previous.operator())
+                        && !isDocumentationBlock(previous.expression())) {
+                    warnings.add("Duplicate normalized equation name '" + norm
+                            + "' (from '" + name + "', previously from '"
+                            + previous.name().strip() + "') \u2014 later definition wins");
+                }
             }
         }
         return equationsByName;
