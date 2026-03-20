@@ -296,9 +296,12 @@ public class ModelCompiler {
                     stock.setValue(initVal);
                 }
             } catch (ParseException | CompilationException | ArithmeticException e) {
-                log.warn("Stock '{}': failed to evaluate initialExpression '{}', "
-                                + "falling back to numeric initialValue ({}). Reason: {}",
+                String msg = String.format(
+                        "Stock '%s': failed to evaluate initialExpression '%s', "
+                                + "falling back to numeric initialValue (%s). Reason: %s",
                         sDef.name(), sDef.initialExpression(), sDef.initialValue(), e.toString());
+                log.warn(msg);
+                context.addWarning(msg);
             }
         }
     }

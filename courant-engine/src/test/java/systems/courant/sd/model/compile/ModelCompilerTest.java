@@ -7,6 +7,7 @@ import systems.courant.sd.model.Stock;
 import systems.courant.sd.model.Variable;
 import systems.courant.sd.model.def.ModelDefinition;
 import systems.courant.sd.model.def.ModelDefinitionBuilder;
+import systems.courant.sd.model.def.StockDef;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -192,6 +193,30 @@ class ModelCompilerTest {
             // After 1 step: S = 100 - 210 is clamped to 0
             Stock s = findStock(compiled.getModel(), "S");
             assertThat(s.getValue()).isLessThan(100);
+        }
+    }
+
+    @Nested
+    @DisplayName("Initial expression fallback warning")
+    class InitialExpressionFallback {
+
+        @Test
+        void shouldSurfaceWarningWhenInitialExpressionFails() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("BadInit")
+                    .stock(new StockDef("S", null, 42.0,
+                            "UNDEFINED_VAR * 2", "Thing", null, List.of()))
+                    .defaultSimulation("Day", 1, "Day")
+                    .build();
+
+            CompiledModel compiled = compiler.compile(def);
+
+            assertThat(compiled.getCompilationWarnings())
+                    .anyMatch(w -> w.contains("Stock 'S'") && w.contains("initialExpression"));
+
+            // Should fall back to numeric initialValue
+            Stock s = findStock(compiled.getModel(), "S");
+            assertThat(s.getValue()).isEqualTo(42.0);
         }
     }
 
