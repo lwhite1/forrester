@@ -18,6 +18,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static systems.courant.sd.measure.Units.MINUTE;
 import static systems.courant.sd.measure.Units.THING;
@@ -172,6 +174,45 @@ public class CsvSubscriberTest {
         } finally {
             csvLogger.detachAppender(appender);
             appender.stop();
+        }
+    }
+
+    @Test
+    public void shouldNotThrowWhenClosedConcurrentlyWithWrite() throws Exception {
+        Model model = new Model("Concurrent");
+        Stock stock = new Stock("S", 50, THING);
+        model.addStock(stock);
+
+        String csvPath = tempDir.resolve("concurrent.csv").toString();
+        CsvSubscriber csv = new CsvSubscriber(csvPath);
+
+        Simulation sim = new Simulation(model, MINUTE, MINUTE, 1);
+        sim.addEventHandler(csv);
+
+        // Start simulation to initialize the writer
+        CountDownLatch started = new CountDownLatch(1);
+        AtomicReference<Throwable> error = new AtomicReference<>();
+
+        Thread closer = new Thread(() -> {
+            try {
+                started.await();
+                csv.close();
+            } catch (Throwable t) {
+                error.set(t);
+            }
+        });
+        closer.start();
+        started.countDown();
+
+        // Run simulation concurrently with close — should not throw NPE
+        try {
+            sim.execute();
+        } catch (CsvOutputException ignored) {
+            // Acceptable — writer was closed mid-write
+        }
+        closer.join(5000);
+        if (error.get() != null) {
+            throw new AssertionError("Close thread threw", error.get());
         }
     }
 
