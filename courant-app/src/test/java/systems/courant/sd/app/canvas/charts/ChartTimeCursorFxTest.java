@@ -2,10 +2,12 @@ package systems.courant.sd.app.canvas.charts;
 
 import javafx.application.Platform;
 import javafx.beans.property.DoubleProperty;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Line;
 import javafx.stage.Stage;
@@ -149,5 +151,17 @@ class ChartTimeCursorFxTest {
         double value = cursor.cursorTimeStepProperty().get();
         // Should have a valid numeric value (not NaN) since we're over the chart
         assertThat(value).isNotNaN();
+    }
+
+    @Test
+    @DisplayName("Overlay is mouse-transparent so chart receives context menu events")
+    void overlayIsMouseTransparent(FxRobot robot) {
+        StackPane wrapper = (StackPane) chart.getParent();
+        // The overlay is the second child in the StackPane (after the chart)
+        Node overlay = wrapper.getChildren().get(1);
+        assertThat(overlay).isInstanceOf(Pane.class);
+        assertThat(overlay.isMouseTransparent())
+                .as("Overlay must be mouse-transparent to allow context menu events through")
+                .isTrue();
     }
 }

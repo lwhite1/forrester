@@ -8,6 +8,7 @@ import javafx.scene.Node;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Label;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
@@ -66,11 +67,10 @@ public final class ChartTimeCursor {
         cursorLabel.setMouseTransparent(true);
 
         overlay = new Pane(cursorLine, cursorLabel);
-        overlay.setMouseTransparent(false);
+        overlay.setMouseTransparent(true);
         overlay.setPickOnBounds(false);
-        overlay.setStyle("-fx-background-color: transparent;");
 
-        overlay.setOnMouseMoved(event -> {
+        chart.addEventHandler(MouseEvent.MOUSE_MOVED, event -> {
             Node plotArea = chart.lookup(".chart-plot-background");
             if (plotArea == null) {
                 return;
@@ -85,7 +85,7 @@ public final class ChartTimeCursor {
             }
         });
 
-        overlay.setOnMouseExited(event -> cursorTimeStep.set(Double.NaN));
+        chart.addEventHandler(MouseEvent.MOUSE_EXITED, event -> cursorTimeStep.set(Double.NaN));
 
         cursorTimeStep.addListener((obs, oldVal, newVal) -> updateCursorDisplay(newVal.doubleValue()));
     }
