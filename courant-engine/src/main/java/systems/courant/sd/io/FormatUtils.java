@@ -56,10 +56,9 @@ public final class FormatUtils {
             if (c == '(') {
                 depth++;
             } else if (c == ')') {
-                if (depth == 0) {
-                    return -1;
+                if (depth > 0) {
+                    depth--;
                 }
-                depth--;
             } else if (c == ',' && depth == 0) {
                 return i;
             }
