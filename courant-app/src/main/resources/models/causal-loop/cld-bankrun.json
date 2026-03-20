@@ -1,18 +1,5 @@
 {
   "name" : "0211CLDbankrun",
-  "variables" : [ {
-    "name" : "TIME_STEP",
-    "equation" : "1",
-    "unit" : "Month"
-  }, {
-    "name" : "INITIAL_TIME",
-    "equation" : "0",
-    "unit" : "Month"
-  }, {
-    "name" : "FINAL_TIME",
-    "equation" : "100",
-    "unit" : "Month"
-  } ],
   "causalLinks" : [ {
     "from" : "fear of bank failure",
     "to" : "tendency to withdraw personal savings",

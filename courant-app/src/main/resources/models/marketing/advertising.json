@@ -15,18 +15,6 @@
     "sink" : "Adv Budget Effective"
   } ],
   "variables" : [ {
-    "name" : "TIME_STEP",
-    "equation" : "1",
-    "unit" : "Month"
-  }, {
-    "name" : "INITIAL_TIME",
-    "equation" : "0",
-    "unit" : "Month"
-  }, {
-    "name" : "FINAL_TIME",
-    "equation" : "60",
-    "unit" : "Month"
-  }, {
     "name" : "adv budget",
     "comment" : "adv budget",
     "equation" : "percent_budget_adv/100 * cash_revenue",
@@ -72,7 +60,15 @@
     "comment" : "table for effect of adv",
     "xValues" : [ 0.0, 40.0, 80.0, 120.0, 160.0, 200.0, 240.0, 280.0, 320.0, 360.0, 400.0 ],
     "yValues" : [ 0.01, 0.2, 0.5, 0.7, 0.8, 1.0, 1.03, 1.06, 1.08, 1.09, 1.1 ],
-    "interpolation" : "LINEAR"
+    "interpolation" : "LINEAR",
+    "unit" : "Dimensionless"
+  } ],
+  "comments" : [ {
+    "name" : "Comment 1",
+    "text" : "Advertising Model"
+  }, {
+    "name" : "Comment 2",
+    "text" : "Advertising"
   } ],
   "views" : [ {
     "name" : "Advertising",
@@ -126,6 +122,20 @@
       "type" : "aux",
       "x" : 830.0,
       "y" : 637.0
+    }, {
+      "name" : "Comment 1",
+      "type" : "comment",
+      "x" : 411.0,
+      "y" : 364.0,
+      "width" : 160.0,
+      "height" : 80.0
+    }, {
+      "name" : "Comment 2",
+      "type" : "comment",
+      "x" : 1335.0,
+      "y" : 393.0,
+      "width" : 600.0,
+      "height" : 400.0
     } ],
     "connectors" : [ {
       "from" : "adv budget",

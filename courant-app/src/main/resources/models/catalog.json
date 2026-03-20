@@ -1,121 +1,6 @@
 {
   "models": [
     {
-      "id": "advertising",
-      "name": "advertising",
-      "displayName": "Advertising",
-      "description": "Advertising effectiveness model showing how ad spending drives customer awareness and sales.",
-      "category": "marketing",
-      "difficulty": "intermediate",
-      "path": "marketing/advertising.json",
-      "tags": [
-        "marketing",
-        "advertising",
-        "stock-and-flow"
-      ],
-      "elements": {
-        "stocks": 1,
-        "flows": 1,
-        "variables": 3,
-        "parameters": 8
-      }
-    },
-    {
-      "id": "age",
-      "name": "AGE",
-      "displayName": "Age Cohort",
-      "description": "Age-cohort population model tracking births, aging, and deaths across demographic groups.",
-      "category": "demographics",
-      "difficulty": "intermediate",
-      "path": "demographics/age.json",
-      "tags": [
-        "demographics",
-        "stock-and-flow"
-      ],
-      "elements": {
-        "stocks": 5,
-        "flows": 6,
-        "variables": 6,
-        "parameters": 14
-      }
-    },
-    {
-      "id": "age-chain",
-      "name": "AGECHAIN",
-      "displayName": "Aging Chain",
-      "description": "Simplified aging chain model using cascaded stocks to represent population cohort transitions.",
-      "category": "demographics",
-      "difficulty": "intermediate",
-      "path": "demographics/age-chain.json",
-      "tags": [
-        "demographics",
-        "aging-chain"
-      ],
-      "elements": {
-        "stocks": 3,
-        "flows": 6,
-        "variables": 4,
-        "parameters": 10
-      }
-    },
-    {
-      "id": "aging-chain",
-      "name": "0604Aging",
-      "displayName": "Aging (Bossel)",
-      "description": "Three-stock aging chain model demonstrating demographic cohort transitions",
-      "category": "demographics",
-      "difficulty": "intermediate",
-      "path": "demographics/aging-chain.json",
-      "tags": [
-        "demographics",
-        "aging-chain"
-      ],
-      "elements": {
-        "stocks": 3,
-        "flows": 6,
-        "variables": 11,
-        "parameters": 10
-      }
-    },
-    {
-      "id": "arms3",
-      "name": "arms3",
-      "displayName": "Arms Race",
-      "description": "Arms race model with two-nation military spending feedbacks, threat perception, and escalation dynamics.",
-      "category": "policy",
-      "difficulty": "advanced",
-      "path": "policy/arms3.json",
-      "tags": [
-        "policy",
-        "arms-race"
-      ],
-      "elements": {
-        "stocks": 4,
-        "flows": 8,
-        "variables": 20,
-        "parameters": 21
-      }
-    },
-    {
-      "id": "ball",
-      "name": "BALL",
-      "displayName": "Bouncing Ball",
-      "description": "Bouncing ball simulation modeling position and velocity under gravity with elastic collisions.",
-      "category": "physics",
-      "difficulty": "intermediate",
-      "path": "physics/ball.json",
-      "tags": [
-        "physics",
-        "elastic-collision"
-      ],
-      "elements": {
-        "stocks": 2,
-        "flows": 2,
-        "variables": 3,
-        "parameters": 8
-      }
-    },
-    {
       "id": "bathtub",
       "name": "Bathtub",
       "displayName": "Bathtub",
@@ -132,253 +17,6 @@
         "flows": 2,
         "variables": 0,
         "parameters": 2
-      }
-    },
-    {
-      "id": "bluefin-tuna-overfishing",
-      "name": "1412_OverfishingOfNBFTunaEN",
-      "displayName": "Bluefin Tuna Overfishing",
-      "description": "Two-stock model of North Atlantic bluefin tuna population collapse from commercial overfishing",
-      "category": "ecology",
-      "difficulty": "advanced",
-      "path": "ecology/bluefin-tuna-overfishing.json",
-      "tags": [
-        "ecology",
-        "fisheries"
-      ],
-      "elements": {
-        "stocks": 2,
-        "flows": 5,
-        "variables": 13,
-        "parameters": 11
-      }
-    },
-    {
-      "id": "bpr0",
-      "name": "BPR0",
-      "displayName": "Business Process Reengineering (CLD)",
-      "description": "Causal loop diagram of a business process reengineering problem with no stock-flow structure.",
-      "category": "policy",
-      "difficulty": "introductory",
-      "path": "policy/bpr0.json",
-      "tags": [
-        "causal-loop",
-        "policy"
-      ],
-      "elements": {
-        "stocks": 0,
-        "flows": 0,
-        "variables": 0,
-        "parameters": 3
-      }
-    },
-    {
-      "id": "bpr3",
-      "name": "BPR3",
-      "displayName": "Business Process Reengineering",
-      "description": "Full business process reengineering model with stocks, flows, and policy intervention levers.",
-      "category": "policy",
-      "difficulty": "advanced",
-      "path": "policy/bpr3.json",
-      "tags": [
-        "policy",
-        "stock-and-flow"
-      ],
-      "elements": {
-        "stocks": 9,
-        "flows": 15,
-        "variables": 5,
-        "parameters": 14
-      }
-    },
-    {
-      "id": "burnout",
-      "name": "BURNOUT",
-      "displayName": "Burnout",
-      "description": "Employee burnout model capturing workload pressure, fatigue accumulation, and productivity collapse.",
-      "category": "management",
-      "difficulty": "advanced",
-      "path": "management/burnout.json",
-      "tags": [
-        "management",
-        "burnout"
-      ],
-      "elements": {
-        "stocks": 6,
-        "flows": 6,
-        "variables": 18,
-        "parameters": 13
-      }
-    },
-    {
-      "id": "burnout-homer",
-      "name": "1016_BurnoutHomer1",
-      "displayName": "Burnout (Homer)",
-      "description": "Five-stock model of workplace burnout dynamics based on Homer's formulation",
-      "category": "management",
-      "difficulty": "intermediate",
-      "path": "management/burnout-homer.json",
-      "tags": [
-        "management",
-        "burnout"
-      ],
-      "elements": {
-        "stocks": 5,
-        "flows": 6,
-        "variables": 18,
-        "parameters": 9
-      }
-    },
-    {
-      "id": "caffeine",
-      "name": "CAFFEINE",
-      "displayName": "Caffeine",
-      "description": "Pharmacokinetic model of caffeine absorption and elimination in the human body.",
-      "category": "social",
-      "difficulty": "intermediate",
-      "path": "social/caffeine.json",
-      "tags": [
-        "social",
-        "pharmacokinetics"
-      ],
-      "elements": {
-        "stocks": 2,
-        "flows": 3,
-        "variables": 4,
-        "parameters": 7
-      }
-    },
-    {
-      "id": "cap1",
-      "name": "CAP1",
-      "displayName": "Capacity Acquisition",
-      "description": "Capacity acquisition model showing delays between ordering and receiving production capacity.",
-      "category": "supply-chain",
-      "difficulty": "intermediate",
-      "path": "supply-chain/cap1.json",
-      "tags": [
-        "supply-chain",
-        "stock-and-flow"
-      ],
-      "elements": {
-        "stocks": 1,
-        "flows": 2,
-        "variables": 7,
-        "parameters": 5
-      }
-    },
-    {
-      "id": "cfc",
-      "name": "CFC",
-      "displayName": "CFC Emissions",
-      "description": "CFC emissions policy model exploring chlorofluorocarbon regulation and atmospheric accumulation.",
-      "category": "policy",
-      "difficulty": "intermediate",
-      "path": "policy/cfc.json",
-      "tags": [
-        "policy",
-        "environmental-policy"
-      ],
-      "elements": {
-        "stocks": 2,
-        "flows": 4,
-        "variables": 2,
-        "parameters": 6
-      }
-    },
-    {
-      "id": "change",
-      "name": "change",
-      "displayName": "Change Management",
-      "description": "Change management model illustrating resistance and adaptation feedback during organizational transitions.",
-      "category": "control",
-      "difficulty": "intermediate",
-      "path": "control/change.json",
-      "tags": [
-        "control",
-        "organizational-change"
-      ],
-      "elements": {
-        "stocks": 2,
-        "flows": 4,
-        "variables": 5,
-        "parameters": 8
-      }
-    },
-    {
-      "id": "cholera",
-      "name": "1409_CholeraZBwoUnits",
-      "displayName": "Cholera",
-      "description": "Seven-stock cholera transmission model incorporating waterborne pathogen dynamics",
-      "category": "epidemiology",
-      "difficulty": "advanced",
-      "path": "epidemiology/cholera.json",
-      "tags": [
-        "epidemiology",
-        "SIR"
-      ],
-      "elements": {
-        "stocks": 7,
-        "flows": 15,
-        "variables": 15,
-        "parameters": 10
-      }
-    },
-    {
-      "id": "cld-bankrun",
-      "name": "0211CLDbankrun",
-      "displayName": "Bank Run (CLD)",
-      "description": "Causal loop diagram of positive feedback loops driving bank run dynamics",
-      "category": "causal-loop",
-      "difficulty": "introductory",
-      "path": "causal-loop/cld-bankrun.json",
-      "tags": [
-        "causal-loop",
-        "bank-run"
-      ],
-      "elements": {
-        "stocks": 0,
-        "flows": 0,
-        "variables": 0,
-        "parameters": 3
-      }
-    },
-    {
-      "id": "cocaine-cld",
-      "name": "0601Cocaine_CLD",
-      "displayName": "Cocaine (CLD)",
-      "description": "Causal loop diagram of feedback loops in cocaine use and addiction dynamics",
-      "category": "causal-loop",
-      "difficulty": "introductory",
-      "path": "causal-loop/cocaine-cld.json",
-      "tags": [
-        "causal-loop",
-        "system-dynamics"
-      ],
-      "elements": {
-        "stocks": 0,
-        "flows": 0,
-        "variables": 0,
-        "parameters": 3
-      }
-    },
-    {
-      "id": "cocaine-flow",
-      "name": "0601Cocaine_model",
-      "displayName": "Cocaine",
-      "description": "Simple stock-flow model of cocaine usage dynamics with one stock representing users",
-      "category": "policy",
-      "difficulty": "introductory",
-      "path": "policy/cocaine-flow.json",
-      "tags": [
-        "policy",
-        "stock-and-flow"
-      ],
-      "elements": {
-        "stocks": 1,
-        "flows": 3,
-        "variables": 1,
-        "parameters": 6
       }
     },
     {
@@ -401,426 +39,6 @@
       }
     },
     {
-      "id": "collapse-civilisations",
-      "name": "1822_CollapseOfCivilisations",
-      "displayName": "Collapse of Civilisations",
-      "description": "Four-stock model of civilizational collapse through resource depletion and institutional decay",
-      "category": "social",
-      "difficulty": "advanced",
-      "path": "social/collapse-civilisations.json",
-      "tags": [
-        "social",
-        "collapse"
-      ],
-      "elements": {
-        "stocks": 4,
-        "flows": 5,
-        "variables": 7,
-        "parameters": 7
-      }
-    },
-    {
-      "id": "commod",
-      "name": "COMMOD",
-      "displayName": "Commodity Market",
-      "description": "Commodity market model with price cycles driven by supply-demand imbalances and production delays.",
-      "category": "economics",
-      "difficulty": "advanced",
-      "path": "economics/commod.json",
-      "tags": [
-        "economics",
-        "commodity"
-      ],
-      "elements": {
-        "stocks": 5,
-        "flows": 10,
-        "variables": 25,
-        "parameters": 18
-      }
-    },
-    {
-      "id": "compete1",
-      "name": "COMPETE1",
-      "displayName": "Competitive Dynamics",
-      "description": "Competitive dynamics model of two firms vying for market share through pricing and quality.",
-      "category": "management",
-      "difficulty": "intermediate",
-      "path": "management/compete1.json",
-      "tags": [
-        "management",
-        "competition"
-      ],
-      "elements": {
-        "stocks": 3,
-        "flows": 4,
-        "variables": 10,
-        "parameters": 13
-      }
-    },
-    {
-      "id": "competition-faculty",
-      "name": "0201CompetitionFaculty",
-      "displayName": "Faculty Competition (CLD)",
-      "description": "Causal loop diagram of competitive dynamics among faculty members",
-      "category": "causal-loop",
-      "difficulty": "introductory",
-      "path": "causal-loop/competition-faculty.json",
-      "tags": [
-        "causal-loop",
-        "competition"
-      ],
-      "elements": {
-        "stocks": 0,
-        "flows": 0,
-        "variables": 0,
-        "parameters": 3
-      }
-    },
-    {
-      "id": "conflict-middle-east",
-      "name": "0210ConflictInMiddleEast",
-      "displayName": "Middle East Conflict (CLD)",
-      "description": "Causal loop diagram of escalation and de-escalation dynamics in Middle East conflicts",
-      "category": "causal-loop",
-      "difficulty": "introductory",
-      "path": "causal-loop/conflict-middle-east.json",
-      "tags": [
-        "causal-loop",
-        "conflict"
-      ],
-      "elements": {
-        "stocks": 0,
-        "flows": 0,
-        "variables": 0,
-        "parameters": 3
-      }
-    },
-    {
-      "id": "cool",
-      "name": "COOL",
-      "displayName": "Newton's Cooling",
-      "description": "Newton's law of cooling: a single stock model of temperature decay toward ambient.",
-      "category": "introductory",
-      "difficulty": "introductory",
-      "path": "introductory/cool.json",
-      "tags": [
-        "exponential-decay",
-        "stock-and-flow"
-      ],
-      "elements": {
-        "stocks": 1,
-        "flows": 1,
-        "variables": 1,
-        "parameters": 6
-      }
-    },
-    {
-      "id": "corp-grth",
-      "name": "CORPGRTH",
-      "displayName": "Corporate Growth",
-      "description": "Corporate growth model exploring limits to growth from workforce, demand, and capital constraints.",
-      "category": "management",
-      "difficulty": "advanced",
-      "path": "management/corp-grth.json",
-      "tags": [
-        "management",
-        "corporate"
-      ],
-      "elements": {
-        "stocks": 3,
-        "flows": 4,
-        "variables": 11,
-        "parameters": 11
-      }
-    },
-    {
-      "id": "cust3",
-      "name": "CUST3",
-      "displayName": "Customer Supply Chain",
-      "description": "Customer supply chain model with multi-stage ordering, backlog management, and delivery delays.",
-      "category": "supply-chain",
-      "difficulty": "intermediate",
-      "path": "supply-chain/cust3.json",
-      "tags": [
-        "supply-chain",
-        "stock-and-flow"
-      ],
-      "elements": {
-        "stocks": 4,
-        "flows": 5,
-        "variables": 15,
-        "parameters": 9
-      }
-    },
-    {
-      "id": "customer",
-      "name": "CUSTOMER",
-      "displayName": "Customer (CLD)",
-      "description": "Causal loop diagram of customer acquisition and retention feedback loops.",
-      "category": "causal-loop",
-      "difficulty": "introductory",
-      "path": "causal-loop/customer.json",
-      "tags": [
-        "causal-loop",
-        "customer-dynamics"
-      ],
-      "elements": {
-        "stocks": 0,
-        "flows": 0,
-        "variables": 0,
-        "parameters": 3
-      }
-    },
-    {
-      "id": "debt-crisis",
-      "name": "1403_DebtCrisisBasedOnZ605",
-      "displayName": "Debt Crisis",
-      "description": "Four-stock model of sovereign debt accumulation, interest rate spirals, and fiscal crisis",
-      "category": "economics",
-      "difficulty": "advanced",
-      "path": "economics/debt-crisis.json",
-      "tags": [
-        "economics",
-        "debt"
-      ],
-      "elements": {
-        "stocks": 4,
-        "flows": 6,
-        "variables": 18,
-        "parameters": 13
-      }
-    },
-    {
-      "id": "deliv",
-      "name": "DELIV",
-      "displayName": "Delivery Delay",
-      "description": "Delivery delay model showing how order backlogs and capacity affect fulfillment times.",
-      "category": "supply-chain",
-      "difficulty": "intermediate",
-      "path": "supply-chain/deliv.json",
-      "tags": [
-        "supply-chain",
-        "stock-and-flow"
-      ],
-      "elements": {
-        "stocks": 2,
-        "flows": 3,
-        "variables": 6,
-        "parameters": 8
-      }
-    },
-    {
-      "id": "deradicalization",
-      "name": "1416_deradicalisationI_EN",
-      "displayName": "Deradicalization",
-      "description": "Four-stock model of radicalization pathways and deradicalization policy interventions",
-      "category": "policy",
-      "difficulty": "advanced",
-      "path": "policy/deradicalization.json",
-      "tags": [
-        "policy",
-        "radicalization"
-      ],
-      "elements": {
-        "stocks": 4,
-        "flows": 4,
-        "variables": 19,
-        "parameters": 16
-      }
-    },
-    {
-      "id": "deradicalization-ii",
-      "name": "1813_deradicalizationII_EN_ReadNoteOnUnitErrors",
-      "displayName": "Deradicalization II",
-      "description": "Extended five-stock deradicalization model with additional intervention mechanisms and social network effects",
-      "category": "policy",
-      "difficulty": "advanced",
-      "path": "policy/deradicalization-ii.json",
-      "tags": [
-        "policy",
-        "radicalization"
-      ],
-      "elements": {
-        "stocks": 5,
-        "flows": 7,
-        "variables": 18,
-        "parameters": 18
-      }
-    },
-    {
-      "id": "district-housing",
-      "name": "1414_DistrictHousingWOunits",
-      "displayName": "District Housing",
-      "description": "Two-stock model of housing supply and demand dynamics within a district",
-      "category": "economics",
-      "difficulty": "intermediate",
-      "path": "economics/district-housing.json",
-      "tags": [
-        "economics",
-        "housing"
-      ],
-      "elements": {
-        "stocks": 2,
-        "flows": 4,
-        "variables": 8,
-        "parameters": 8
-      }
-    },
-    {
-      "id": "ecological-overshoot",
-      "name": "0603EcOvershootCollapseBasedOnEZ416Bossel",
-      "displayName": "Ecological Overshoot & Collapse",
-      "description": "Two-stock ecological overshoot and collapse model based on Bossel's formulation",
-      "category": "ecology",
-      "difficulty": "intermediate",
-      "path": "ecology/ecological-overshoot.json",
-      "tags": [
-        "ecology",
-        "overshoot",
-        "collapse"
-      ],
-      "elements": {
-        "stocks": 2,
-        "flows": 4,
-        "variables": 6,
-        "parameters": 12
-      }
-    },
-    {
-      "id": "eit",
-      "name": "EIT",
-      "displayName": "Emerging Innovation",
-      "description": "Technology adoption model exploring diffusion of emerging innovations over time.",
-      "category": "technology",
-      "difficulty": "intermediate",
-      "path": "technology/eit.json",
-      "tags": [
-        "technology",
-        "stock-and-flow"
-      ],
-      "elements": {
-        "stocks": 2,
-        "flows": 2,
-        "variables": 2,
-        "parameters": 7
-      }
-    },
-    {
-      "id": "electric",
-      "name": "ELECTRIC",
-      "displayName": "Electric Utility",
-      "description": "Electric utility model calibrated against historical data for capacity planning and demand forecasting.",
-      "category": "technology",
-      "difficulty": "intermediate",
-      "path": "technology/electric.json",
-      "tags": [
-        "technology",
-        "utility"
-      ],
-      "elements": {
-        "stocks": 3,
-        "flows": 5,
-        "variables": 7,
-        "parameters": 9
-      }
-    },
-    {
-      "id": "energy-transition",
-      "name": "1816_EnergyTransitionManagement_Q2b_EN",
-      "displayName": "Energy Transition",
-      "description": "Twelve-stock model of energy system transition from fossil fuels to renewables with policy levers",
-      "category": "technology",
-      "difficulty": "advanced",
-      "path": "technology/energy-transition.json",
-      "tags": [
-        "technology",
-        "energy",
-        "transition"
-      ],
-      "elements": {
-        "stocks": 12,
-        "flows": 21,
-        "variables": 34,
-        "parameters": 28
-      }
-    },
-    {
-      "id": "entrepreneurs-transitions",
-      "name": "0212EntrepreneursAndTransitionsEnV3simple",
-      "displayName": "Entrepreneurs & Transitions (CLD)",
-      "description": "Causal loop diagram of entrepreneurial activity and sociotechnical transitions",
-      "category": "causal-loop",
-      "difficulty": "introductory",
-      "path": "causal-loop/entrepreneurs-transitions.json",
-      "tags": [
-        "causal-loop",
-        "transition"
-      ],
-      "elements": {
-        "stocks": 0,
-        "flows": 0,
-        "variables": 0,
-        "parameters": 3
-      }
-    },
-    {
-      "id": "environmental-management",
-      "name": "1404_EnvManagementInMiniworldWOcorrectunits",
-      "displayName": "Environmental Management",
-      "description": "Three-stock model of environmental management trade-offs between economic growth and ecological degradation",
-      "category": "environment",
-      "difficulty": "advanced",
-      "path": "environment/environmental-management.json",
-      "tags": [
-        "environment",
-        "world-dynamics"
-      ],
-      "elements": {
-        "stocks": 3,
-        "flows": 5,
-        "variables": 7,
-        "parameters": 13
-      }
-    },
-    {
-      "id": "epidemic",
-      "name": "EPIDEMIC",
-      "displayName": "Epidemic (SIR)",
-      "description": "SIR compartmental model of infectious disease spread through a population.",
-      "category": "epidemiology",
-      "difficulty": "intermediate",
-      "path": "epidemiology/epidemic.json",
-      "tags": [
-        "epidemiology",
-        "SIR"
-      ],
-      "elements": {
-        "stocks": 2,
-        "flows": 2,
-        "variables": 5,
-        "parameters": 7
-      }
-    },
-    {
-      "id": "evs-lithium-scarcity",
-      "name": "1408_EVsLithiumScarcity_EN",
-      "displayName": "EVs & Lithium Scarcity",
-      "description": "Seven-stock model of electric vehicle adoption constrained by lithium resource scarcity",
-      "category": "technology",
-      "difficulty": "advanced",
-      "path": "technology/evs-lithium-scarcity.json",
-      "tags": [
-        "technology",
-        "resource-scarcity"
-      ],
-      "elements": {
-        "stocks": 7,
-        "flows": 12,
-        "variables": 14,
-        "parameters": 17
-      }
-    },
-    {
       "id": "exponential-growth",
       "name": "Exponential Growth",
       "displayName": "Exponential Growth",
@@ -840,140 +58,6 @@
       }
     },
     {
-      "id": "family-planning",
-      "name": "0607UnintendedFamilyPlanningBenefits",
-      "displayName": "Family Planning",
-      "description": "Five-stock model exploring unintended consequences of family planning programs on population dynamics",
-      "category": "demographics",
-      "difficulty": "advanced",
-      "path": "demographics/family-planning.json",
-      "tags": [
-        "demographics",
-        "stock-and-flow"
-      ],
-      "elements": {
-        "stocks": 5,
-        "flows": 11,
-        "variables": 13,
-        "parameters": 25
-      }
-    },
-    {
-      "id": "feral-pigs",
-      "name": "0605Feral Pigs SFD EN",
-      "displayName": "Feral Pigs",
-      "description": "Models feral pig population dynamics with density-dependent birth and death rates",
-      "category": "ecology",
-      "difficulty": "intermediate",
-      "path": "ecology/feral-pigs.json",
-      "tags": [
-        "ecology",
-        "harvest",
-        "stock-and-flow"
-      ],
-      "elements": {
-        "stocks": 1,
-        "flows": 2,
-        "variables": 7,
-        "parameters": 7
-      }
-    },
-    {
-      "id": "finance",
-      "name": "FINANCE",
-      "displayName": "Corporate Finance",
-      "description": "Corporate financial model integrating income, balance sheet, and cash flow dynamics over time.",
-      "category": "economics",
-      "difficulty": "advanced",
-      "path": "economics/finance.json",
-      "tags": [
-        "economics",
-        "finance"
-      ],
-      "elements": {
-        "stocks": 13,
-        "flows": 25,
-        "variables": 41,
-        "parameters": 35
-      }
-    },
-    {
-      "id": "fish-banks-sfd",
-      "name": "0206FishBanksModelSFD",
-      "displayName": "Fish Banks (CLD)",
-      "description": "Causal loop diagram of the Fish Banks game showing overfishing feedback loops",
-      "category": "causal-loop",
-      "difficulty": "introductory",
-      "path": "causal-loop/fish-banks-sfd.json",
-      "tags": [
-        "causal-loop",
-        "fisheries"
-      ],
-      "elements": {
-        "stocks": 0,
-        "flows": 0,
-        "variables": 0,
-        "parameters": 3
-      }
-    },
-    {
-      "id": "flicker",
-      "name": "flicker",
-      "displayName": "Flicker",
-      "description": "Minimal causal loop diagram demonstrating oscillatory feedback without stocks or flows.",
-      "category": "causal-loop",
-      "difficulty": "introductory",
-      "path": "causal-loop/flicker.json",
-      "tags": [
-        "causal-loop",
-        "system-dynamics"
-      ],
-      "elements": {
-        "stocks": 0,
-        "flows": 0,
-        "variables": 0,
-        "parameters": 3
-      }
-    },
-    {
-      "id": "flu-two-regions",
-      "name": "1405_Flu2regionsV2cIFTHENELSE",
-      "displayName": "Flu (Two Regions)",
-      "description": "Eight-stock SIR model of influenza spreading between two connected regions",
-      "category": "epidemiology",
-      "difficulty": "advanced",
-      "path": "epidemiology/flu-two-regions.json",
-      "tags": [
-        "epidemiology",
-        "stock-and-flow"
-      ],
-      "elements": {
-        "stocks": 8,
-        "flows": 12,
-        "variables": 14,
-        "parameters": 19
-      }
-    },
-    {
-      "id": "globalization",
-      "name": "1819_GlobalizationEZ608fromZOO",
-      "displayName": "Globalization",
-      "description": "Four-stock model of globalization dynamics with trade, capital flows, and institutional feedback",
-      "category": "economics",
-      "difficulty": "advanced",
-      "path": "economics/globalization.json",
-      "tags": [
-        "economics",
-        "stock-and-flow"
-      ],
-      "elements": {
-        "stocks": 4,
-        "flows": 8,
-        "variables": 36,
-        "parameters": 29
-      }
-    },
-    {
       "id": "goal-seeking",
       "name": "Goal Seeking",
       "displayName": "Goal Seeking",
@@ -990,140 +74,6 @@
         "flows": 1,
         "variables": 0,
         "parameters": 2
-      }
-    },
-    {
-      "id": "gravity",
-      "name": "GRAVITY",
-      "displayName": "Gravity",
-      "description": "Two-body gravitational interaction modeling orbital mechanics with position and velocity stocks.",
-      "category": "physics",
-      "difficulty": "intermediate",
-      "path": "physics/gravity.json",
-      "tags": [
-        "physics",
-        "orbital-mechanics"
-      ],
-      "elements": {
-        "stocks": 4,
-        "flows": 4,
-        "variables": 4,
-        "parameters": 7
-      }
-    },
-    {
-      "id": "higher-education-stimuli",
-      "name": "1820_HigherEducationStimuli_NL_woUnits",
-      "displayName": "Higher Education Stimuli",
-      "description": "Four-stock model of higher education policy stimuli and their effects on enrollment and graduation",
-      "category": "demographics",
-      "difficulty": "advanced",
-      "path": "demographics/higher-education-stimuli.json",
-      "tags": [
-        "demographics",
-        "education"
-      ],
-      "elements": {
-        "stocks": 4,
-        "flows": 9,
-        "variables": 30,
-        "parameters": 13
-      }
-    },
-    {
-      "id": "hospital-management",
-      "name": "1803_HospitalManagement",
-      "displayName": "Hospital Management",
-      "description": "Four-stock model of hospital patient flow, staffing, and capacity management",
-      "category": "social",
-      "difficulty": "advanced",
-      "path": "social/hospital-management.json",
-      "tags": [
-        "social",
-        "healthcare"
-      ],
-      "elements": {
-        "stocks": 4,
-        "flows": 13,
-        "variables": 10,
-        "parameters": 13
-      }
-    },
-    {
-      "id": "houses",
-      "name": "HOUSES",
-      "displayName": "Housing Market",
-      "description": "Housing market model with construction, demolition, and price feedbacks driven by supply-demand gaps.",
-      "category": "economics",
-      "difficulty": "intermediate",
-      "path": "economics/houses.json",
-      "tags": [
-        "economics",
-        "stock-and-flow"
-      ],
-      "elements": {
-        "stocks": 3,
-        "flows": 6,
-        "variables": 7,
-        "parameters": 7
-      }
-    },
-    {
-      "id": "housing-market-crisis",
-      "name": "HousingMarket",
-      "displayName": "Housing Market Crisis",
-      "description": "System dynamics model: HousingMarket",
-      "category": "economics",
-      "difficulty": "intermediate",
-      "path": "economics/housing-market-crisis.json",
-      "tags": [
-        "economics",
-        "housing",
-        "market-dynamics"
-      ],
-      "elements": {
-        "stocks": 4,
-        "flows": 4,
-        "variables": 21,
-        "parameters": 11
-      }
-    },
-    {
-      "id": "housing-stock",
-      "name": "0611HousingStockDynamicsA",
-      "displayName": "Housing Stock Dynamics",
-      "description": "Three-stock model of housing construction, aging, and demolition dynamics",
-      "category": "economics",
-      "difficulty": "intermediate",
-      "path": "economics/housing-stock.json",
-      "tags": [
-        "economics",
-        "housing"
-      ],
-      "elements": {
-        "stocks": 3,
-        "flows": 6,
-        "variables": 7,
-        "parameters": 7
-      }
-    },
-    {
-      "id": "intro",
-      "name": "INTRO",
-      "displayName": "Introduction to SD",
-      "description": "Introductory workforce model demonstrating hiring, quitting, and experience accumulation.",
-      "category": "introductory",
-      "difficulty": "introductory",
-      "path": "introductory/intro.json",
-      "tags": [
-        "stock-and-flow",
-        "system-dynamics"
-      ],
-      "elements": {
-        "stocks": 2,
-        "flows": 2,
-        "variables": 9,
-        "parameters": 7
       }
     },
     {
@@ -1147,332 +97,6 @@
       }
     },
     {
-      "id": "kaibab-deer",
-      "name": "1804_Kaibab1",
-      "displayName": "Kaibab Deer",
-      "description": "System dynamics model: 1804_Kaibab1",
-      "category": "ecology",
-      "difficulty": "intermediate",
-      "path": "ecology/kaibab-deer.json",
-      "tags": [
-        "ecology",
-        "stock-and-flow"
-      ],
-      "elements": {
-        "stocks": 1,
-        "flows": 1,
-        "variables": 4,
-        "parameters": 4
-      }
-    },
-    {
-      "id": "managing-faculty",
-      "name": "1401_ManagingFaculty",
-      "displayName": "Managing Faculty",
-      "description": "Two-stock model of university faculty hiring, tenure, and retirement dynamics",
-      "category": "management",
-      "difficulty": "intermediate",
-      "path": "management/managing-faculty.json",
-      "tags": [
-        "management",
-        "aging-chain"
-      ],
-      "elements": {
-        "stocks": 2,
-        "flows": 4,
-        "variables": 8,
-        "parameters": 10
-      }
-    },
-    {
-      "id": "managing-fitness-club",
-      "name": "0202Managing a Fitness Club CLD EN",
-      "displayName": "Managing a Fitness Club (CLD)",
-      "description": "Causal loop diagram of feedback loops in fitness club membership management",
-      "category": "causal-loop",
-      "difficulty": "introductory",
-      "path": "causal-loop/managing-fitness-club.json",
-      "tags": [
-        "causal-loop",
-        "aging-chain"
-      ],
-      "elements": {
-        "stocks": 0,
-        "flows": 0,
-        "variables": 0,
-        "parameters": 3
-      }
-    },
-    {
-      "id": "market",
-      "name": "MARKET",
-      "displayName": "Market Dynamics",
-      "description": "Market dynamics model with product adoption, competitive pricing, and capacity expansion feedbacks.",
-      "category": "economics",
-      "difficulty": "advanced",
-      "path": "economics/market.json",
-      "tags": [
-        "economics",
-        "market-dynamics"
-      ],
-      "elements": {
-        "stocks": 8,
-        "flows": 17,
-        "variables": 22,
-        "parameters": 23
-      }
-    },
-    {
-      "id": "mental-simulation-01",
-      "name": "MentalSimulation01",
-      "displayName": "Mental Simulation",
-      "description": "Simple mental simulation exercise demonstrating stock-flow intuition with a single accumulator.",
-      "category": "control",
-      "difficulty": "introductory",
-      "path": "control/mental-simulation-01.json",
-      "tags": [
-        "control",
-        "stock-and-flow"
-      ],
-      "elements": {
-        "stocks": 1,
-        "flows": 1,
-        "variables": 0,
-        "parameters": 4
-      }
-    },
-    {
-      "id": "micro-chp-diffusion",
-      "name": "0610Diffusion and Adoption of Micro-CHP",
-      "displayName": "Micro-CHP Diffusion",
-      "description": "Bass diffusion model applied to adoption of micro combined heat and power technology",
-      "category": "technology",
-      "difficulty": "intermediate",
-      "path": "technology/micro-chp-diffusion.json",
-      "tags": [
-        "technology",
-        "diffusion",
-        "adoption"
-      ],
-      "elements": {
-        "stocks": 2,
-        "flows": 2,
-        "variables": 6,
-        "parameters": 5
-      }
-    },
-    {
-      "id": "mineral-metal-scarcity",
-      "name": "1415_MineralMetalScarcityI_EN",
-      "displayName": "Mineral & Metal Scarcity",
-      "description": "Seven-stock model of mineral and metal resource depletion driven by demand growth and recycling limits",
-      "category": "economics",
-      "difficulty": "advanced",
-      "path": "economics/mineral-metal-scarcity.json",
-      "tags": [
-        "economics",
-        "resource-scarcity"
-      ],
-      "elements": {
-        "stocks": 7,
-        "flows": 14,
-        "variables": 21,
-        "parameters": 18
-      }
-    },
-    {
-      "id": "mplayer",
-      "name": "mplayer",
-      "displayName": "Multi-Player Game",
-      "description": "Multi-player game theory model with interacting decision-makers and feedback-driven strategies.",
-      "category": "control",
-      "difficulty": "intermediate",
-      "path": "control/mplayer.json",
-      "tags": [
-        "control",
-        "stock-and-flow"
-      ],
-      "elements": {
-        "stocks": 3,
-        "flows": 3,
-        "variables": 12,
-        "parameters": 11
-      }
-    },
-    {
-      "id": "munro-lane",
-      "name": "0204MunroLane",
-      "displayName": "Munro Lane (CLD)",
-      "description": "Causal loop diagram illustrating neighborhood dynamics and tipping points",
-      "category": "causal-loop",
-      "difficulty": "introductory",
-      "path": "causal-loop/munro-lane.json",
-      "tags": [
-        "causal-loop",
-        "system-dynamics"
-      ],
-      "elements": {
-        "stocks": 0,
-        "flows": 0,
-        "variables": 0,
-        "parameters": 3
-      }
-    },
-    {
-      "id": "muskrat-plague",
-      "name": "0602Muskrats1",
-      "displayName": "Muskrat Plague",
-      "description": "Models muskrat population growth and plague-driven collapse in the Netherlands",
-      "category": "ecology",
-      "difficulty": "introductory",
-      "path": "ecology/muskrat-plague.json",
-      "tags": [
-        "ecology",
-        "SIR",
-        "harvest",
-        "stock-and-flow"
-      ],
-      "elements": {
-        "stocks": 1,
-        "flows": 2,
-        "variables": 3,
-        "parameters": 8
-      }
-    },
-    {
-      "id": "new-towns",
-      "name": "1406_NewTownsNL_v2",
-      "displayName": "New Towns",
-      "description": "Three-stock model of Dutch new town development with population aging and infrastructure dynamics",
-      "category": "demographics",
-      "difficulty": "advanced",
-      "path": "demographics/new-towns.json",
-      "tags": [
-        "demographics",
-        "stock-and-flow"
-      ],
-      "elements": {
-        "stocks": 3,
-        "flows": 8,
-        "variables": 25,
-        "parameters": 19
-      }
-    },
-    {
-      "id": "nutrient-cycle",
-      "name": "Nutrient Cycle",
-      "displayName": "Nutrient Cycle",
-      "description": "Nitrogen cycling through soil, plants, and litter with a closed-loop material flow",
-      "category": "ecology",
-      "difficulty": "intermediate",
-      "path": "ecology/nutrient-cycle.json",
-      "tags": [
-        "ecology",
-        "biogeochemistry"
-      ],
-      "elements": {
-        "stocks": 3,
-        "flows": 3,
-        "variables": 0,
-        "parameters": 3
-      }
-    },
-    {
-      "id": "oostvaardersplassen",
-      "name": "1013Mass starvation Oostvaardersplassen",
-      "displayName": "Oostvaardersplassen",
-      "description": "Models large herbivore population and mass starvation events in the Oostvaardersplassen nature reserve",
-      "category": "ecology",
-      "difficulty": "intermediate",
-      "path": "ecology/oostvaardersplassen.json",
-      "tags": [
-        "ecology",
-        "stock-and-flow"
-      ],
-      "elements": {
-        "stocks": 1,
-        "flows": 2,
-        "variables": 11,
-        "parameters": 5
-      }
-    },
-    {
-      "id": "orchestrated-bank-run",
-      "name": "1812_OrchestratedBankRun",
-      "displayName": "Orchestrated Bank Run",
-      "description": "Five-stock model of deliberately orchestrated bank runs through coordinated depositor withdrawal",
-      "category": "economics",
-      "difficulty": "advanced",
-      "path": "economics/orchestrated-bank-run.json",
-      "tags": [
-        "economics",
-        "bank-run"
-      ],
-      "elements": {
-        "stocks": 5,
-        "flows": 8,
-        "variables": 15,
-        "parameters": 17
-      }
-    },
-    {
-      "id": "pneumonic-plague",
-      "name": "0608PneumonicPlagueChinaA",
-      "displayName": "Pneumonic Plague",
-      "description": "Four-stock SIR-based model of pneumonic plague transmission in China",
-      "category": "epidemiology",
-      "difficulty": "intermediate",
-      "path": "epidemiology/pneumonic-plague.json",
-      "tags": [
-        "epidemiology",
-        "SIR"
-      ],
-      "elements": {
-        "stocks": 4,
-        "flows": 6,
-        "variables": 5,
-        "parameters": 8
-      }
-    },
-    {
-      "id": "pop",
-      "name": "POP",
-      "displayName": "Population",
-      "description": "Simple population model with birth and death flows driven by fractional rates.",
-      "category": "introductory",
-      "difficulty": "introductory",
-      "path": "introductory/pop.json",
-      "tags": [
-        "stock-and-flow",
-        "stock-and-flow"
-      ],
-      "elements": {
-        "stocks": 1,
-        "flows": 2,
-        "variables": 2,
-        "parameters": 5
-      }
-    },
-    {
-      "id": "pop-game",
-      "name": "POPGAME",
-      "displayName": "Population Game",
-      "description": "Interactive population growth game illustrating birth and death rate dynamics.",
-      "category": "introductory",
-      "difficulty": "introductory",
-      "path": "introductory/pop-game.json",
-      "tags": [
-        "stock-and-flow",
-        "stock-and-flow"
-      ],
-      "elements": {
-        "stocks": 1,
-        "flows": 2,
-        "variables": 2,
-        "parameters": 5
-      }
-    },
-    {
       "id": "predator-prey",
       "name": "Predator Prey",
       "displayName": "Predator Prey",
@@ -1489,350 +113,6 @@
         "flows": 4,
         "variables": 0,
         "parameters": 4
-      }
-    },
-    {
-      "id": "price1",
-      "name": "price1",
-      "displayName": "Price & Demand (CLD)",
-      "description": "Causal loop diagram of price and demand interactions in a simple market.",
-      "category": "causal-loop",
-      "difficulty": "introductory",
-      "path": "causal-loop/price1.json",
-      "tags": [
-        "causal-loop",
-        "pricing"
-      ],
-      "elements": {
-        "stocks": 0,
-        "flows": 0,
-        "variables": 0,
-        "parameters": 3
-      }
-    },
-    {
-      "id": "price3",
-      "name": "price3",
-      "displayName": "Market Pricing",
-      "description": "Stock-flow market pricing model with inventory adjustments driving price changes over time.",
-      "category": "economics",
-      "difficulty": "intermediate",
-      "path": "economics/price3.json",
-      "tags": [
-        "economics",
-        "pricing",
-        "stock-and-flow"
-      ],
-      "elements": {
-        "stocks": 1,
-        "flows": 1,
-        "variables": 6,
-        "parameters": 11
-      }
-    },
-    {
-      "id": "procrast",
-      "name": "PROCRAST",
-      "displayName": "Procrastination",
-      "description": "Procrastination dynamics model showing how delay, pressure, and deadlines interact in task completion.",
-      "category": "management",
-      "difficulty": "advanced",
-      "path": "management/procrast.json",
-      "tags": [
-        "management",
-        "procrastination"
-      ],
-      "elements": {
-        "stocks": 3,
-        "flows": 4,
-        "variables": 12,
-        "parameters": 11
-      }
-    },
-    {
-      "id": "production-management",
-      "name": "1413_ProductionManagement",
-      "displayName": "Production Management",
-      "description": "Six-stock production and inventory management model with workforce and backlog dynamics",
-      "category": "management",
-      "difficulty": "advanced",
-      "path": "management/production-management.json",
-      "tags": [
-        "management",
-        "stock-and-flow"
-      ],
-      "elements": {
-        "stocks": 6,
-        "flows": 8,
-        "variables": 13,
-        "parameters": 12
-      }
-    },
-    {
-      "id": "products",
-      "name": "Products",
-      "displayName": "Product Lifecycle",
-      "description": "Product lifecycle model tracking production, inventory, and market demand interactions.",
-      "category": "marketing",
-      "difficulty": "intermediate",
-      "path": "marketing/products.json",
-      "tags": [
-        "marketing",
-        "stock-and-flow"
-      ],
-      "elements": {
-        "stocks": 2,
-        "flows": 3,
-        "variables": 2,
-        "parameters": 8
-      }
-    },
-    {
-      "id": "proj",
-      "name": "PROJ",
-      "displayName": "Project (Advanced)",
-      "description": "Project management model with rework cycles, staffing dynamics, and schedule pressure feedbacks.",
-      "category": "management",
-      "difficulty": "advanced",
-      "path": "management/proj.json",
-      "tags": [
-        "management",
-        "stock-and-flow"
-      ],
-      "elements": {
-        "stocks": 7,
-        "flows": 8,
-        "variables": 33,
-        "parameters": 13
-      }
-    },
-    {
-      "id": "proj3",
-      "name": "PROJ3",
-      "displayName": "Project (Rework)",
-      "description": "Project management model with rework discovery, staffing adjustments, and schedule pressure feedbacks.",
-      "category": "management",
-      "difficulty": "advanced",
-      "path": "management/proj3.json",
-      "tags": [
-        "management",
-        "stock-and-flow"
-      ],
-      "elements": {
-        "stocks": 6,
-        "flows": 6,
-        "variables": 12,
-        "parameters": 18
-      }
-    },
-    {
-      "id": "project",
-      "name": "PROJECT",
-      "displayName": "Project Dynamics (CLD)",
-      "description": "Causal loop diagram of project dynamics showing feedback between schedule pressure, overtime, and errors.",
-      "category": "causal-loop",
-      "difficulty": "introductory",
-      "path": "causal-loop/project.json",
-      "tags": [
-        "causal-loop",
-        "project-management"
-      ],
-      "elements": {
-        "stocks": 0,
-        "flows": 0,
-        "variables": 0,
-        "parameters": 3
-      }
-    },
-    {
-      "id": "project-management",
-      "name": "1814_ProjectManagement_EN",
-      "displayName": "Project Management",
-      "description": "Five-stock model of project schedule and effort dynamics with rework and Brooks's Law effects",
-      "category": "management",
-      "difficulty": "advanced",
-      "path": "management/project-management.json",
-      "tags": [
-        "management",
-        "project-management"
-      ],
-      "elements": {
-        "stocks": 5,
-        "flows": 8,
-        "variables": 20,
-        "parameters": 9
-      }
-    },
-    {
-      "id": "prostitution-trafficking",
-      "name": "1805_ProstitutionHumanTraffickingEN_withoutSolvingUnitErrors",
-      "displayName": "Human Trafficking",
-      "description": "Three-stock model of human trafficking supply chains and policy intervention effectiveness",
-      "category": "social",
-      "difficulty": "advanced",
-      "path": "social/prostitution-trafficking.json",
-      "tags": [
-        "social",
-        "human-trafficking"
-      ],
-      "elements": {
-        "stocks": 3,
-        "flows": 8,
-        "variables": 18,
-        "parameters": 13
-      }
-    },
-    {
-      "id": "pulse-and-pulse-train",
-      "name": "1008_PULSEandPULSETRAIN",
-      "displayName": "Pulse & Pulse Train",
-      "description": "Demonstrates PULSE and PULSE TRAIN built-in functions with a simple accumulator",
-      "category": "introductory",
-      "difficulty": "introductory",
-      "path": "introductory/pulse-and-pulse-train.json",
-      "tags": [
-        "pulse-function",
-        "stock-and-flow"
-      ],
-      "elements": {
-        "stocks": 1,
-        "flows": 2,
-        "variables": 2,
-        "parameters": 3
-      }
-    },
-    {
-      "id": "rab-fox",
-      "name": "RABFOX",
-      "displayName": "Rabbit & Fox",
-      "description": "Classic Lotka-Volterra predator-prey model of rabbit and fox population dynamics.",
-      "category": "ecology",
-      "difficulty": "intermediate",
-      "path": "ecology/rab-fox.json",
-      "tags": [
-        "ecology",
-        "predator-prey"
-      ],
-      "elements": {
-        "stocks": 2,
-        "flows": 4,
-        "variables": 7,
-        "parameters": 11
-      }
-    },
-    {
-      "id": "rabbit",
-      "name": "RABBIT",
-      "displayName": "Rabbit Population",
-      "description": "Rabbit population model demonstrating exponential growth with birth and death rates.",
-      "category": "introductory",
-      "difficulty": "introductory",
-      "path": "introductory/rabbit.json",
-      "tags": [
-        "predator-prey",
-        "stock-and-flow"
-      ],
-      "elements": {
-        "stocks": 1,
-        "flows": 2,
-        "variables": 3,
-        "parameters": 7
-      }
-    },
-    {
-      "id": "random-vs-randomized",
-      "name": "1009_RANDOMvsRANDOMIZED",
-      "displayName": "Random vs. Randomized",
-      "description": "Demonstrates the difference between RANDOM and RANDOMIZED functions in Vensim",
-      "category": "causal-loop",
-      "difficulty": "introductory",
-      "path": "causal-loop/random-vs-randomized.json",
-      "tags": [
-        "causal-loop",
-        "stochastic"
-      ],
-      "elements": {
-        "stocks": 0,
-        "flows": 0,
-        "variables": 0,
-        "parameters": 3
-      }
-    },
-    {
-      "id": "real-estate-boom",
-      "name": "1807_RealEstateBoomAndBust_EN",
-      "displayName": "Real Estate Boom & Bust",
-      "description": "Four-stock model of speculative real estate boom-bust cycles with credit feedback",
-      "category": "economics",
-      "difficulty": "advanced",
-      "path": "economics/real-estate-boom.json",
-      "tags": [
-        "economics",
-        "boom-bust"
-      ],
-      "elements": {
-        "stocks": 4,
-        "flows": 8,
-        "variables": 18,
-        "parameters": 14
-      }
-    },
-    {
-      "id": "rem-aggregated-cld",
-      "name": "0203REMaggregatedCLDen1",
-      "displayName": "Real Estate Market (CLD)",
-      "description": "Aggregated causal loop diagram of real estate market feedback structure",
-      "category": "causal-loop",
-      "difficulty": "introductory",
-      "path": "causal-loop/rem-aggregated-cld.json",
-      "tags": [
-        "causal-loop",
-        "system-dynamics"
-      ],
-      "elements": {
-        "stocks": 0,
-        "flows": 0,
-        "variables": 0,
-        "parameters": 3
-      }
-    },
-    {
-      "id": "repair01",
-      "name": "repair01",
-      "displayName": "Equipment Repair (CLD)",
-      "description": "Causal loop diagram of equipment repair feedback showing failure rates and maintenance capacity.",
-      "category": "causal-loop",
-      "difficulty": "introductory",
-      "path": "causal-loop/repair01.json",
-      "tags": [
-        "causal-loop",
-        "maintenance"
-      ],
-      "elements": {
-        "stocks": 0,
-        "flows": 0,
-        "variables": 0,
-        "parameters": 3
-      }
-    },
-    {
-      "id": "repair02",
-      "name": "repair02",
-      "displayName": "Equipment Repair",
-      "description": "Stock-flow equipment repair model with maintenance workforce, failure rates, and repair throughput.",
-      "category": "control",
-      "difficulty": "intermediate",
-      "path": "control/repair02.json",
-      "tags": [
-        "control",
-        "maintenance",
-        "stock-and-flow"
-      ],
-      "elements": {
-        "stocks": 1,
-        "flows": 2,
-        "variables": 8,
-        "parameters": 9
       }
     },
     {
@@ -1855,102 +135,6 @@
       }
     },
     {
-      "id": "sales",
-      "name": "SALES",
-      "displayName": "Sales Forecasting",
-      "description": "Sales forecasting model using exponential smoothing to track and predict demand trends.",
-      "category": "marketing",
-      "difficulty": "intermediate",
-      "path": "marketing/sales.json",
-      "tags": [
-        "marketing",
-        "sales",
-        "stock-and-flow"
-      ],
-      "elements": {
-        "stocks": 1,
-        "flows": 1,
-        "variables": 5,
-        "parameters": 8
-      }
-    },
-    {
-      "id": "sd-education",
-      "name": "0609SDEducationVersion1",
-      "displayName": "SD Education",
-      "description": "Models student flow through a system dynamics education program with enrollment and graduation",
-      "category": "education",
-      "difficulty": "introductory",
-      "path": "education/sd-education.json",
-      "tags": [
-        "education",
-        "stock-and-flow"
-      ],
-      "elements": {
-        "stocks": 3,
-        "flows": 4,
-        "variables": 2,
-        "parameters": 9
-      }
-    },
-    {
-      "id": "sfd-diagram",
-      "name": "0205sfd",
-      "displayName": "Stock-Flow Diagram (CLD)",
-      "description": "Introductory stock-and-flow diagram illustrating the relationship between CLDs and SFDs",
-      "category": "causal-loop",
-      "difficulty": "introductory",
-      "path": "causal-loop/sfd-diagram.json",
-      "tags": [
-        "causal-loop",
-        "system-dynamics"
-      ],
-      "elements": {
-        "stocks": 0,
-        "flows": 0,
-        "variables": 0,
-        "parameters": 3
-      }
-    },
-    {
-      "id": "shale-gas",
-      "name": "1012_ShaleGASwoUnits",
-      "displayName": "Shale Gas",
-      "description": "Models shale gas extraction dynamics including well depletion and drilling rates",
-      "category": "technology",
-      "difficulty": "intermediate",
-      "path": "technology/shale-gas.json",
-      "tags": [
-        "technology",
-        "resource-extraction"
-      ],
-      "elements": {
-        "stocks": 3,
-        "flows": 4,
-        "variables": 3,
-        "parameters": 7
-      }
-    },
-    {
-      "id": "signalled-bank-run",
-      "name": "1410_SignalledBankRun",
-      "displayName": "Signalled Bank Run",
-      "description": "Two-stock model of bank runs triggered by signals of institutional weakness and depositor panic",
-      "category": "economics",
-      "difficulty": "advanced",
-      "path": "economics/signalled-bank-run.json",
-      "tags": [
-        "economics",
-        "bank-run"
-      ],
-      "elements": {
-        "stocks": 2,
-        "flows": 4,
-        "variables": 12,
-        "parameters": 18
-      }
-    },
-    {
       "id": "sir-epidemic",
       "name": "SIR Epidemic",
       "displayName": "SIR Epidemic",
@@ -1970,327 +154,211 @@
       }
     },
     {
-      "id": "snowball",
-      "name": "SNOWBALL",
-      "displayName": "Snowball",
-      "description": "Exponential growth analogy: a rolling snowball that accumulates mass as it grows.",
-      "category": "introductory",
+      "id": "cld-bankrun",
+      "name": "0211CLDbankrun",
+      "displayName": "Cld Bankrun",
+      "description": "Causal loop diagram of positive feedback loops driving bank run dynamics",
+      "category": "causal-loop",
       "difficulty": "introductory",
-      "path": "introductory/snowball.json",
-      "tags": [
-        "exponential",
-        "elastic-collision",
-        "stock-and-flow"
-      ],
+      "path": "causal-loop/cld-bankrun.json",
+      "tags": [],
       "elements": {
-        "stocks": 1,
-        "flows": 1,
-        "variables": 1,
-        "parameters": 5
-      }
-    },
-    {
-      "id": "speed",
-      "name": "SPEED",
-      "displayName": "Speed Adjustment",
-      "description": "Simple vehicle speed adjustment model demonstrating goal-seeking behavior.",
-      "category": "introductory",
-      "difficulty": "introductory",
-      "path": "introductory/speed.json",
-      "tags": [
-        "goal-seeking",
-        "stock-and-flow"
-      ],
-      "elements": {
-        "stocks": 1,
-        "flows": 1,
-        "variables": 1,
-        "parameters": 6
-      }
-    },
-    {
-      "id": "stock",
-      "name": "STOCK",
-      "displayName": "Stock Management",
-      "description": "Stock management policy model with complex ordering rules, pipeline delays, and optimization analysis.",
-      "category": "technology",
-      "difficulty": "advanced",
-      "path": "technology/stock.json",
-      "tags": [
-        "technology",
-        "stock-and-flow"
-      ],
-      "elements": {
-        "stocks": 4,
-        "flows": 6,
-        "variables": 14,
-        "parameters": 17
-      }
-    },
-    {
-      "id": "supply-chain-bullwhip",
-      "name": "SupplyChain",
-      "displayName": "Supply Chain Bullwhip",
-      "description": "System dynamics model: SupplyChain",
-      "category": "supply-chain",
-      "difficulty": "intermediate",
-      "path": "supply-chain/supply-chain-bullwhip.json",
-      "tags": [
-        "supply-chain",
-        "bullwhip"
-      ],
-      "elements": {
-        "stocks": 2,
-        "flows": 2,
-        "variables": 7,
-        "parameters": 4
-      }
-    },
-    {
-      "id": "supply-chain-management",
-      "name": "1402_SCM",
-      "displayName": "Supply Chain Management",
-      "description": "Six-stock supply chain model demonstrating the bullwhip effect across multiple echelons",
-      "category": "supply-chain",
-      "difficulty": "intermediate",
-      "path": "supply-chain/supply-chain-management.json",
-      "tags": [
-        "supply-chain",
-        "stock-and-flow"
-      ],
-      "elements": {
-        "stocks": 6,
-        "flows": 9,
-        "variables": 21,
-        "parameters": 16
-      }
-    },
-    {
-      "id": "tolerance-hate-aggression",
-      "name": "1407_ToleranceHateAggressionEZ509versionEP",
-      "displayName": "Tolerance, Hate & Aggression",
-      "description": "Four-stock model of tolerance erosion, hate accumulation, and aggression feedback dynamics",
-      "category": "social",
-      "difficulty": "advanced",
-      "path": "social/tolerance-hate-aggression.json",
-      "tags": [
-        "social",
-        "social-dynamics"
-      ],
-      "elements": {
-        "stocks": 4,
-        "flows": 8,
-        "variables": 16,
-        "parameters": 16
-      }
-    },
-    {
-      "id": "tubs",
-      "name": "TUBS",
-      "displayName": "Connected Bathtubs",
-      "description": "Bathtub analogy demonstrating stock-flow relationships with multiple connected reservoirs.",
-      "category": "social",
-      "difficulty": "intermediate",
-      "path": "social/tubs.json",
-      "tags": [
-        "social",
-        "stock-and-flow"
-      ],
-      "elements": {
-        "stocks": 5,
-        "flows": 5,
-        "variables": 10,
+        "stocks": 0,
+        "flows": 0,
+        "variables": 3,
         "parameters": 3
       }
     },
     {
-      "id": "unemployment",
-      "name": "1802_UnemploymentBasedOnEZ511",
-      "displayName": "Unemployment",
-      "description": "Five-stock model of unemployment dynamics with labor market feedback and skill deterioration",
-      "category": "social",
-      "difficulty": "advanced",
-      "path": "social/unemployment.json",
-      "tags": [
-        "social",
-        "labor-market"
-      ],
+      "id": "cocaine-cld",
+      "name": "0601Cocaine_CLD",
+      "displayName": "Cocaine Cld",
+      "description": "Causal loop diagram of feedback loops in cocaine use and addiction dynamics",
+      "category": "causal-loop",
+      "difficulty": "introductory",
+      "path": "causal-loop/cocaine-cld.json",
+      "tags": [],
       "elements": {
-        "stocks": 5,
-        "flows": 6,
-        "variables": 15,
-        "parameters": 11
+        "stocks": 0,
+        "flows": 0,
+        "variables": 3,
+        "parameters": 3
       }
     },
     {
-      "id": "urban",
-      "name": "URBAN",
-      "displayName": "Urban Dynamics",
-      "description": "Forrester's urban dynamics model of city lifecycle with industry, housing, and population sectors.",
-      "category": "urban",
-      "difficulty": "advanced",
-      "path": "urban/urban.json",
-      "tags": [
-        "urban",
-        "urban-dynamics"
-      ],
+      "id": "competition-faculty",
+      "name": "0201CompetitionFaculty",
+      "displayName": "Competition Faculty",
+      "description": "Causal loop diagram of competitive dynamics among faculty members",
+      "category": "causal-loop",
+      "difficulty": "introductory",
+      "path": "causal-loop/competition-faculty.json",
+      "tags": [],
       "elements": {
-        "stocks": 20,
-        "flows": 20,
-        "variables": 134,
-        "parameters": 100
+        "stocks": 0,
+        "flows": 0,
+        "variables": 3,
+        "parameters": 3
       }
     },
     {
-      "id": "wf-inv",
-      "name": "WFINV",
-      "displayName": "Workforce & Inventory",
-      "description": "Workforce and inventory management model balancing production, hiring, and stock levels.",
-      "category": "economics",
-      "difficulty": "intermediate",
-      "path": "economics/wf-inv.json",
-      "tags": [
-        "economics",
-        "stock-and-flow"
-      ],
+      "id": "conflict-middle-east",
+      "name": "0210ConflictInMiddleEast",
+      "displayName": "Conflict Middle East",
+      "description": "Causal loop diagram of escalation and de-escalation dynamics in Middle East conflicts",
+      "category": "causal-loop",
+      "difficulty": "introductory",
+      "path": "causal-loop/conflict-middle-east.json",
+      "tags": [],
       "elements": {
-        "stocks": 2,
-        "flows": 3,
-        "variables": 7,
-        "parameters": 7
+        "stocks": 0,
+        "flows": 0,
+        "variables": 3,
+        "parameters": 3
       }
     },
     {
-      "id": "wf-kal",
-      "name": "WFKAL",
-      "displayName": "Workforce Kalman Filter",
-      "description": "Kalman filter implementation for workforce estimation under noisy observations.",
+      "id": "flicker",
+      "name": "flicker",
+      "displayName": "Flicker",
+      "description": "Minimal causal loop diagram demonstrating oscillatory feedback without stocks or flows.",
+      "category": "causal-loop",
+      "difficulty": "introductory",
+      "path": "causal-loop/flicker.json",
+      "tags": [],
+      "elements": {
+        "stocks": 0,
+        "flows": 0,
+        "variables": 3,
+        "parameters": 3
+      }
+    },
+    {
+      "id": "munro-lane",
+      "name": "0204MunroLane",
+      "displayName": "Munro Lane",
+      "description": "Causal loop diagram illustrating neighborhood dynamics and tipping points",
+      "category": "causal-loop",
+      "difficulty": "introductory",
+      "path": "causal-loop/munro-lane.json",
+      "tags": [],
+      "elements": {
+        "stocks": 0,
+        "flows": 0,
+        "variables": 3,
+        "parameters": 3
+      }
+    },
+    {
+      "id": "random-vs-randomized",
+      "name": "1009_RANDOMvsRANDOMIZED",
+      "displayName": "Random Vs Randomized",
+      "description": "Demonstrates the difference between RANDOM and RANDOMIZED functions in Vensim",
+      "category": "causal-loop",
+      "difficulty": "introductory",
+      "path": "causal-loop/random-vs-randomized.json",
+      "tags": [],
+      "elements": {
+        "stocks": 0,
+        "flows": 0,
+        "variables": 3,
+        "parameters": 3
+      }
+    },
+    {
+      "id": "rem-aggregated-cld",
+      "name": "0203REMaggregatedCLDen1",
+      "displayName": "Rem Aggregated Cld",
+      "description": "Aggregated causal loop diagram of real estate market feedback structure",
+      "category": "causal-loop",
+      "difficulty": "introductory",
+      "path": "causal-loop/rem-aggregated-cld.json",
+      "tags": [],
+      "elements": {
+        "stocks": 0,
+        "flows": 0,
+        "variables": 3,
+        "parameters": 3
+      }
+    },
+    {
+      "id": "repair01",
+      "name": "repair01",
+      "displayName": "Repair01",
+      "description": "Causal loop diagram of equipment repair feedback showing failure rates and maintenance capacity.",
+      "category": "causal-loop",
+      "difficulty": "introductory",
+      "path": "causal-loop/repair01.json",
+      "tags": [],
+      "elements": {
+        "stocks": 0,
+        "flows": 0,
+        "variables": 3,
+        "parameters": 3
+      }
+    },
+    {
+      "id": "repair02",
+      "name": "repair02",
+      "displayName": "Repair02",
+      "description": "Stock-flow equipment repair model with maintenance workforce, failure rates, and repair throughput.",
       "category": "control",
-      "difficulty": "advanced",
-      "path": "control/wf-kal.json",
-      "tags": [
-        "control",
-        "stock-and-flow"
-      ],
-      "elements": {
-        "stocks": 3,
-        "flows": 4,
-        "variables": 10,
-        "parameters": 17
-      }
-    },
-    {
-      "id": "white-pink-noise",
-      "name": "1010_whitepinknoise",
-      "displayName": "White & Pink Noise",
-      "description": "Seven-stock reference model comparing white noise and pink noise generation techniques",
-      "category": "introductory",
       "difficulty": "intermediate",
-      "path": "introductory/white-pink-noise.json",
-      "tags": [
-        "stochastic",
-        "stock-and-flow"
-      ],
+      "path": "control/repair02.json",
+      "tags": [],
       "elements": {
-        "stocks": 7,
-        "flows": 13,
-        "variables": 44,
-        "parameters": 41
+        "stocks": 1,
+        "flows": 2,
+        "variables": 17,
+        "parameters": 9
       }
     },
     {
-      "id": "wom4",
-      "name": "WOM4",
-      "displayName": "Word of Mouth",
-      "description": "Word-of-mouth diffusion model capturing adoption spread through social contact and communication.",
+      "id": "market",
+      "name": "MARKET",
+      "displayName": "Market",
+      "description": "Market dynamics model with product adoption, competitive pricing, and capacity expansion feedbacks.",
+      "category": "economics",
+      "difficulty": "advanced",
+      "path": "economics/market.json",
+      "tags": [],
+      "elements": {
+        "stocks": 8,
+        "flows": 17,
+        "variables": 45,
+        "parameters": 22
+      }
+    },
+    {
+      "id": "advertising",
+      "name": "advertising",
+      "displayName": "Advertising",
+      "description": "Advertising effectiveness model showing how ad spending drives customer awareness and sales.",
       "category": "marketing",
       "difficulty": "intermediate",
-      "path": "marketing/wom4.json",
-      "tags": [
-        "marketing",
-        "word-of-mouth"
-      ],
+      "path": "marketing/advertising.json",
+      "tags": [],
       "elements": {
-        "stocks": 2,
-        "flows": 4,
-        "variables": 7,
-        "parameters": 11
+        "stocks": 1,
+        "flows": 1,
+        "variables": 11,
+        "parameters": 8
       }
     },
     {
-      "id": "world",
-      "name": "WORLD",
-      "displayName": "World2",
-      "description": "Forrester's World2 model of global population, pollution, resources, and capital interactions.",
-      "category": "urban",
-      "difficulty": "advanced",
-      "path": "urban/world.json",
-      "tags": [
-        "urban",
-        "world-dynamics"
-      ],
+      "id": "bpr0",
+      "name": "BPR0",
+      "displayName": "Bpr0",
+      "description": "Causal loop diagram of a business process reengineering problem with no stock-flow structure.",
+      "category": "policy",
+      "difficulty": "introductory",
+      "path": "policy/bpr0.json",
+      "tags": [],
       "elements": {
-        "stocks": 5,
-        "flows": 8,
-        "variables": 41,
-        "parameters": 38
-      }
-    },
-    {
-      "id": "world-app",
-      "name": "WORLDAPP",
-      "displayName": "World2 (Application)",
-      "description": "Vensim application version of the World2 model with interactive controls and scenario settings.",
-      "category": "urban",
-      "difficulty": "advanced",
-      "path": "urban/world-app.json",
-      "tags": [
-        "urban",
-        "world-dynamics"
-      ],
-      "elements": {
-        "stocks": 5,
-        "flows": 8,
-        "variables": 40,
-        "parameters": 23
-      }
-    },
-    {
-      "id": "wrld3-03",
-      "name": "wrld3-03",
-      "displayName": "World3",
-      "description": "World3 model (2003 revision) from Limits to Growth exploring long-term global sustainability scenarios.",
-      "category": "urban",
-      "difficulty": "advanced",
-      "path": "urban/wrld3-03.json",
-      "tags": [
-        "urban",
-        "stock-and-flow"
-      ],
-      "elements": {
-        "stocks": 15,
-        "flows": 17,
-        "variables": 163,
-        "parameters": 81
-      }
-    },
-    {
-      "id": "yeast4",
-      "name": "YEAST4",
-      "displayName": "Yeast Population",
-      "description": "Yeast population model with nutrient depletion, toxin accumulation, and carrying capacity limits.",
-      "category": "ecology",
-      "difficulty": "advanced",
-      "path": "ecology/yeast4.json",
-      "tags": [
-        "ecology",
-        "microbiology"
-      ],
-      "elements": {
-        "stocks": 3,
-        "flows": 4,
-        "variables": 8,
-        "parameters": 12
+        "stocks": 0,
+        "flows": 0,
+        "variables": 3,
+        "parameters": 3
       }
     }
   ]

@@ -1,18 +1,5 @@
 {
   "name" : "0201CompetitionFaculty",
-  "variables" : [ {
-    "name" : "TIME_STEP",
-    "equation" : "1",
-    "unit" : "Month"
-  }, {
-    "name" : "INITIAL_TIME",
-    "equation" : "0",
-    "unit" : "Month"
-  }, {
-    "name" : "FINAL_TIME",
-    "equation" : "100",
-    "unit" : "Month"
-  } ],
   "causalLinks" : [ {
     "from" : "scientific papers section A",
     "to" : "fraction of total budget to section A",

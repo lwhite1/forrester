@@ -1,20 +1,29 @@
 {
   "name" : "flicker",
-  "variables" : [ {
-    "name" : "TIME_STEP",
-    "equation" : "0.0078125",
-    "unit" : "Month"
+  "comments" : [ {
+    "name" : "Comment 1",
+    "text" : "This is actually an empty model just with a short time step so you can see changes."
   }, {
-    "name" : "INITIAL_TIME",
-    "equation" : "0",
-    "unit" : "Month"
-  }, {
-    "name" : "FINAL_TIME",
-    "equation" : "1000",
-    "unit" : "Month"
+    "name" : "Comment 2",
+    "text" : "///---\\\\\\"
   } ],
   "views" : [ {
-    "name" : "View 1"
+    "name" : "View 1",
+    "elements" : [ {
+      "name" : "Comment 1",
+      "type" : "comment",
+      "x" : 404.0,
+      "y" : 274.0,
+      "width" : 694.0,
+      "height" : 24.0
+    }, {
+      "name" : "Comment 2",
+      "type" : "comment",
+      "x" : 472.0,
+      "y" : 383.0,
+      "width" : 106.0,
+      "height" : 54.0
+    } ]
   } ],
   "defaultSimulation" : {
     "timeStep" : "Month",

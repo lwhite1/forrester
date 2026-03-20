@@ -1,18 +1,5 @@
 {
   "name" : "BPR0",
-  "variables" : [ {
-    "name" : "TIME_STEP",
-    "equation" : "1",
-    "unit" : "Month"
-  }, {
-    "name" : "INITIAL_TIME",
-    "equation" : "0",
-    "unit" : "Month"
-  }, {
-    "name" : "FINAL_TIME",
-    "equation" : "100",
-    "unit" : "Month"
-  } ],
   "causalLinks" : [ {
     "from" : "Set Program Switch",
     "to" : "Test",
@@ -45,6 +32,10 @@
     "from" : "Test",
     "to" : "Activate Service",
     "polarity" : "UNKNOWN"
+  } ],
+  "comments" : [ {
+    "name" : "Comment 1",
+    "text" : "Business Process ReEngineering Model 0"
   } ],
   "views" : [ {
     "name" : "1",
@@ -83,6 +74,13 @@
       "type" : "aux",
       "x" : 508.0,
       "y" : 342.0
+    }, {
+      "name" : "Comment 1",
+      "type" : "comment",
+      "x" : 504.0,
+      "y" : 46.0,
+      "width" : 224.0,
+      "height" : 74.0
     } ],
     "connectors" : [ {
       "from" : "Set Program Switch",

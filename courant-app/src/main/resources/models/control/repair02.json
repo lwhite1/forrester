@@ -19,18 +19,6 @@
     "source" : "total time since service"
   } ],
   "variables" : [ {
-    "name" : "TIME_STEP",
-    "equation" : "1",
-    "unit" : "Month"
-  }, {
-    "name" : "INITIAL_TIME",
-    "equation" : "0",
-    "unit" : "Month"
-  }, {
-    "name" : "FINAL_TIME",
-    "equation" : "24",
-    "unit" : "Month"
-  }, {
     "name" : "routine maintenance work done",
     "comment" : "routine maintenance work done",
     "equation" : "MIN(total_machines/machine_wear_time,workers_available_for_routine_maintenance * maintenance_productivity )",
@@ -106,6 +94,10 @@
     "xValues" : [ 0.0, 1.0, 1.5, 2.0, 3.0, 4.0 ],
     "yValues" : [ 0.9, 1.0, 1.1, 1.5, 3.0, 6.0 ],
     "interpolation" : "LINEAR"
+  } ],
+  "comments" : [ {
+    "name" : "Comment 1",
+    "text" : "Toggle 'h' to show/hide detail"
   } ],
   "views" : [ {
     "name" : "View 1",
@@ -184,6 +176,13 @@
       "type" : "aux",
       "x" : 625.0,
       "y" : 21.0
+    }, {
+      "name" : "Comment 1",
+      "type" : "comment",
+      "x" : 567.0,
+      "y" : 675.0,
+      "width" : 242.0,
+      "height" : 24.0
     } ],
     "connectors" : [ {
       "from" : "workers available for routine maintenance",

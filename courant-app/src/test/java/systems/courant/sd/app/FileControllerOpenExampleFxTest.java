@@ -77,7 +77,7 @@ class FileControllerOpenExampleFxTest {
 
         // Attempt to open another example — dialog should appear
         Platform.runLater(() ->
-                window.getFileController().openExample("Aging Chain", "demographics/aging-chain.json"));
+                window.getFileController().openExample("SIR Epidemic", "epidemiology/sir-epidemic.json"));
         WaitForAsyncUtils.waitForFxEvents();
 
         // Click Cancel on the confirmation dialog
@@ -105,7 +105,7 @@ class FileControllerOpenExampleFxTest {
 
         // Attempt to open another example — dialog should appear
         Platform.runLater(() ->
-                window.getFileController().openExample("Aging Chain", "demographics/aging-chain.json"));
+                window.getFileController().openExample("SIR Epidemic", "epidemiology/sir-epidemic.json"));
         WaitForAsyncUtils.waitForFxEvents();
 
         // Click OK to discard changes
@@ -114,7 +114,7 @@ class FileControllerOpenExampleFxTest {
         awaitLayout();
 
         // Model should now show the new example (title may truncate long names)
-        assertThat(stage.getTitle()).contains("Aging");
+        assertThat(stage.getTitle()).contains("SIR");
         assertThat(window.isDirty()).isFalse();
         assertThat(window.getCurrentFile()).isNull();
     }

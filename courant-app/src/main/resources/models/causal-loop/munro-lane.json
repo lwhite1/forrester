@@ -1,18 +1,5 @@
 {
   "name" : "0204MunroLane",
-  "variables" : [ {
-    "name" : "TIME_STEP",
-    "equation" : "1",
-    "unit" : "Month"
-  }, {
-    "name" : "INITIAL_TIME",
-    "equation" : "0",
-    "unit" : "Month"
-  }, {
-    "name" : "FINAL_TIME",
-    "equation" : "100",
-    "unit" : "Month"
-  } ],
   "causalLinks" : [ {
     "from" : "variety of needs of CYPs",
     "to" : "quality of outcomes for CYPs",
@@ -24,18 +11,6 @@
   }, {
     "from" : "scope for dealing with variety of CYP needs with professional expertise",
     "to" : "quality of outcomes for CYPs",
-    "polarity" : "UNKNOWN"
-  }, {
-    "from" : "scope for dealing with variety of CYP needs with professional expertise",
-    "to" : "4",
-    "polarity" : "UNKNOWN"
-  }, {
-    "from" : "quality of outcomes for CYPs",
-    "to" : "4",
-    "polarity" : "UNKNOWN"
-  }, {
-    "from" : "4",
-    "to" : "staff absence or sickness rate",
     "polarity" : "UNKNOWN"
   }, {
     "from" : "staff absence or sickness rate",
@@ -54,10 +29,6 @@
     "to" : "quality of outcomes for CYPs",
     "polarity" : "UNKNOWN"
   }, {
-    "from" : "4",
-    "to" : "staff turnover rate",
-    "polarity" : "UNKNOWN"
-  }, {
     "from" : "staff turnover rate",
     "to" : "average caseload",
     "polarity" : "UNKNOWN"
@@ -65,6 +36,13 @@
     "from" : "prescription of practice",
     "to" : "time spent working with CYPs and families",
     "polarity" : "UNKNOWN"
+  } ],
+  "comments" : [ {
+    "name" : "Comment 1",
+    "text" : "1"
+  }, {
+    "name" : "Comment 2",
+    "text" : "2"
   } ],
   "views" : [ {
     "name" : "View 1",
@@ -113,6 +91,20 @@
       "type" : "aux",
       "x" : 436.0,
       "y" : 328.0
+    }, {
+      "name" : "Comment 1",
+      "type" : "comment",
+      "x" : 618.0,
+      "y" : 433.0,
+      "width" : 10.0,
+      "height" : 14.0
+    }, {
+      "name" : "Comment 2",
+      "type" : "comment",
+      "x" : 659.0,
+      "y" : 600.0,
+      "width" : 10.0,
+      "height" : 14.0
     } ],
     "connectors" : [ {
       "from" : "variety of needs of CYPs",
@@ -123,15 +115,6 @@
     }, {
       "from" : "scope for dealing with variety of CYP needs with professional expertise",
       "to" : "quality of outcomes for CYPs"
-    }, {
-      "from" : "scope for dealing with variety of CYP needs with professional expertise",
-      "to" : "4"
-    }, {
-      "from" : "quality of outcomes for CYPs",
-      "to" : "4"
-    }, {
-      "from" : "4",
-      "to" : "staff absence or sickness rate"
     }, {
       "from" : "staff absence or sickness rate",
       "to" : "average caseload"
@@ -144,9 +127,6 @@
     }, {
       "from" : "quality of social worker relationship with CYP and family",
       "to" : "quality of outcomes for CYPs"
-    }, {
-      "from" : "4",
-      "to" : "staff turnover rate"
     }, {
       "from" : "staff turnover rate",
       "to" : "average caseload"
