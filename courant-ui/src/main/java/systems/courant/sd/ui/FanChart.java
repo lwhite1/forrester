@@ -70,6 +70,14 @@ public class FanChart extends Application {
         this.variableName = null;
     }
 
+    MonteCarloResult getResult() {
+        return result;
+    }
+
+    String getVariableName() {
+        return variableName;
+    }
+
     /**
      * Launches the fan chart viewer for the given Monte Carlo result and variable name.
      *
