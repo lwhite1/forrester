@@ -55,17 +55,24 @@ public class ImportPipeline {
             validationErrors.forEach(e -> log.warn("  - {}", e));
         }
 
-        // Stage 3: Trial compile
-        log.info("Trial-compiling model");
-        List<String> trialCompileErrors = trialCompile(definition);
-        if (!trialCompileErrors.isEmpty()) {
-            log.warn("{} trial-compile error(s):", trialCompileErrors.size());
-            trialCompileErrors.forEach(e -> log.warn("  - {}", e));
+        // Stage 3: Trial compile (skip for CLD models — they have no executable logic)
+        boolean isCld = !definition.cldVariables().isEmpty() && definition.stocks().isEmpty();
+        List<String> trialCompileErrors;
+        if (isCld) {
+            log.info("CLD model detected — skipping trial compile and code generation");
+            trialCompileErrors = List.of();
+        } else {
+            log.info("Trial-compiling model");
+            trialCompileErrors = trialCompile(definition);
+            if (!trialCompileErrors.isEmpty()) {
+                log.warn("{} trial-compile error(s):", trialCompileErrors.size());
+                trialCompileErrors.forEach(e -> log.warn("  - {}", e));
+            }
         }
 
         // Stage 4: Generate output (Java source or JSON)
         String source;
-        if (config.generateCode()) {
+        if (config.generateCode() && !isCld) {
             log.info("Generating Java class: {}", config.className());
             String packageName = resolvePackageName(config.category());
             Path srcFileName = config.sourceFile().getFileName();
@@ -87,7 +94,7 @@ public class ImportPipeline {
         if (config.dryRun()) {
             log.info("Dry run — skipping file write");
         } else {
-            if (config.generateCode()) {
+            if (config.generateCode() && !isCld) {
                 String packageName = resolvePackageName(config.category());
                 outputFile = resolveOutputPath(config.outputDir(), packageName, config.className());
             } else {

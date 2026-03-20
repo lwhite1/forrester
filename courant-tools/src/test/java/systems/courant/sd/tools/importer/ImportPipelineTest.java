@@ -207,6 +207,32 @@ class ImportPipelineTest {
         assertThat(result.outputFile()).isNull();
     }
 
+    @Test
+    void shouldSkipCodeGenerationForCldModel() throws IOException {
+        Path cldFile = Path.of("../courant-engine/src/test/resources/vensim/simple-cld.mdl")
+                .toAbsolutePath().normalize();
+
+        assumeTrue(Files.exists(cldFile), "CLD test fixture not available");
+
+        ModelMetadata metadata = ModelMetadata.builder()
+                .source("Test CLD")
+                .license("CC-BY-SA-4.0")
+                .build();
+
+        PipelineConfig config = new PipelineConfig(
+                cldFile, metadata, "causalloop", "SimpleCld",
+                tempDir, false, false);
+
+        ImportPipeline pipeline = new ImportPipeline();
+        PipelineResult result = pipeline.execute(config);
+
+        assertThat(result.definition().cldVariables()).isNotEmpty();
+        // Should produce JSON, not Java code
+        assertThat(result.generatedSource()).doesNotContain("public class");
+        assertThat(result.generatedSource()).contains("\"cldVariables\"");
+        assertThat(result.outputFile().toString()).endsWith(".json");
+    }
+
     @Nested
     @DisplayName("Package and path resolution")
     class PackageAndPathResolution {
