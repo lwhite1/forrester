@@ -62,6 +62,32 @@ class TrendTest {
     }
 
     @Test
+    void shouldSmoothAtCorrectRateWithSubUnitDt() {
+        // With DT=0.25, four integration steps should produce the same result
+        // as one DT=1.0 step. Use initialTrend=0.1 so the averaging actually does work
+        // (with zero initial trend and constant input, both sides are trivially 0).
+        int[] step1 = {0};
+        Trend trendDt1 = Trend.of(() -> 100, 5, 0.1, () -> step1[0]);
+        trendDt1.getCurrentValue(); // initialize
+
+        int[] step025 = {0};
+        double[] dt = {0.25};
+        Trend trendDt025 = Trend.of(() -> 100, 5, 0.1, dt, () -> step025[0]);
+        trendDt025.getCurrentValue(); // initialize
+
+        // Advance DT=1 by 1 step, DT=0.25 by 4 steps — should approximately match
+        step1[0] = 1;
+        double val1 = trendDt1.getCurrentValue();
+        for (int i = 1; i <= 4; i++) {
+            step025[0] = i;
+            trendDt025.getCurrentValue();
+        }
+        double val025 = trendDt025.getCurrentValue();
+        assertEquals(val1, val025, 0.005,
+                "Trend with DT=0.25 over 4 steps should approximate DT=1.0 over 1 step");
+    }
+
+    @Test
     void shouldNotProduceExtremeValuesWhenAverageInputNearZero() {
         int[] step = {0};
         // Input that oscillates around zero: starts at a small positive value

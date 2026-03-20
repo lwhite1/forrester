@@ -27,11 +27,14 @@ import java.util.function.LongSupplier;
  */
 public class Forecast implements Formula, Resettable {
 
+    private static final double[] UNIT_DT = {1.0};
+
     private final DoubleSupplier input;
     private final double averagingTime;
     private final double horizon;
     private final double initialTrend;
     private final LongSupplier currentStep;
+    private final double[] dtHolder;
 
     private double averageInput;
     private double trend;
@@ -40,7 +43,7 @@ public class Forecast implements Formula, Resettable {
     private long lastStep = -1;
 
     private Forecast(DoubleSupplier input, double averagingTime, double horizon,
-                     double initialTrend, LongSupplier currentStep) {
+                     double initialTrend, LongSupplier currentStep, double[] dtHolder) {
         Preconditions.checkNotNull(input, "input supplier must not be null");
         Preconditions.checkNotNull(currentStep, "currentStep supplier must not be null");
         Preconditions.checkArgument(averagingTime > 0,
@@ -50,10 +53,11 @@ public class Forecast implements Formula, Resettable {
         this.horizon = horizon;
         this.initialTrend = initialTrend;
         this.currentStep = currentStep;
+        this.dtHolder = dtHolder;
     }
 
     /**
-     * Creates a FORECAST formula.
+     * Creates a FORECAST formula with unit DT (dt=1.0).
      *
      * @param input         supplies the current input value
      * @param averagingTime the smoothing time for trend estimation
@@ -64,7 +68,23 @@ public class Forecast implements Formula, Resettable {
      */
     public static Forecast of(DoubleSupplier input, double averagingTime, double horizon,
                               double initialTrend, LongSupplier currentStep) {
-        return new Forecast(input, averagingTime, horizon, initialTrend, currentStep);
+        return new Forecast(input, averagingTime, horizon, initialTrend, currentStep, UNIT_DT);
+    }
+
+    /**
+     * Creates a FORECAST formula with runtime DT support.
+     *
+     * @param input         supplies the current input value
+     * @param averagingTime the smoothing time for trend estimation
+     * @param horizon       number of timesteps to forecast ahead
+     * @param initialTrend  the initial fractional growth rate
+     * @param dtHolder      mutable single-element array holding the integration time step
+     * @param currentStep   supplies the current simulation timestep
+     * @return a new Forecast formula
+     */
+    public static Forecast of(DoubleSupplier input, double averagingTime, double horizon,
+                              double initialTrend, double[] dtHolder, LongSupplier currentStep) {
+        return new Forecast(input, averagingTime, horizon, initialTrend, currentStep, dtHolder);
     }
 
     /**
@@ -100,7 +120,7 @@ public class Forecast implements Formula, Resettable {
             double currentInput = input.getAsDouble();
             for (long d = 0; d < delta; d++) {
                 double inputVal = (d < delta - 1) ? lastInputVal : currentInput;
-                averageInput += (inputVal - averageInput) / averagingTime;
+                averageInput += (inputVal - averageInput) * dtHolder[0] / averagingTime;
                 double denom = averageInput * averagingTime;
                 if (Math.abs(denom) > 1e-15) {
                     trend = (inputVal - averageInput) / denom;
