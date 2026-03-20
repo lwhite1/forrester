@@ -729,11 +729,17 @@ public class SimulationResultPane extends BorderPane {
     private static void applyDashedStyle(XYChart.Series<Number, Number> series) {
         series.nodeProperty().addListener((obs, oldNode, newNode) -> {
             if (newNode != null) {
-                newNode.setStyle(DASHED_STROKE);
+                String style = newNode.getStyle();
+                if (!style.contains("-fx-stroke-dash-array")) {
+                    newNode.setStyle(style + " " + DASHED_STROKE);
+                }
             }
         });
         if (series.getNode() != null) {
-            series.getNode().setStyle(DASHED_STROKE);
+            String style = series.getNode().getStyle();
+            if (!style.contains("-fx-stroke-dash-array")) {
+                series.getNode().setStyle(style + " " + DASHED_STROKE);
+            }
         }
     }
 
