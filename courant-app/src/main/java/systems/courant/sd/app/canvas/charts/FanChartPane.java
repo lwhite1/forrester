@@ -97,8 +97,20 @@ public class FanChartPane extends Pane {
         double minVal = Double.MAX_VALUE;
         double maxVal = -Double.MAX_VALUE;
         for (int i = 0; i < stepCount; i++) {
-            minVal = Math.min(minVal, lowerSeries[0][i]);
-            maxVal = Math.max(maxVal, upperSeries[0][i]);
+            double lo = lowerSeries[0][i];
+            double hi = upperSeries[0][i];
+            if (Double.isFinite(lo)) {
+                minVal = Math.min(minVal, lo);
+            }
+            if (Double.isFinite(hi)) {
+                maxVal = Math.max(maxVal, hi);
+            }
+        }
+        if (!Double.isFinite(minVal) || !Double.isFinite(maxVal)) {
+            gc.setFill(Color.BLACK);
+            gc.setFont(Font.font(14));
+            gc.fillText("Chart data contains non-finite values (NaN/Infinity)", MARGIN_LEFT, h / 2);
+            return;
         }
         double range = maxVal - minVal;
         if (range == 0) {
