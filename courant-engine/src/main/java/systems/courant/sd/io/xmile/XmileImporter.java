@@ -306,7 +306,7 @@ public class XmileImporter implements ModelImporter {
 
         if (eqnText == null || eqnText.isBlank()) {
             // Variable with no equation — treat as constant 0
-            builder.constant(name, 0, unit);
+            builder.variable(new VariableDef(name, comment, "0", unit));
             warnings.add("Variable '" + name + "' has no equation, treated as constant 0");
             return;
         }

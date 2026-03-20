@@ -851,6 +851,36 @@ class XmileImporterTest {
     }
 
     @Nested
+    @DisplayName("No-equation variables")
+    class NoEquationVariables {
+
+        @Test
+        void shouldTreatNoEquationAuxAsConstantZeroViaStandardPath() {
+            String xmile = """
+                    <?xml version="1.0" encoding="UTF-8"?>
+                    <xmile xmlns="http://docs.oasis-open.org/xmile/ns/XMILE/v1.0" version="1.0">
+                      <header><name>Test</name></header>
+                      <sim_specs time_units="day"><start>0</start><stop>10</stop><dt>1</dt></sim_specs>
+                      <model><variables>
+                        <aux name="placeholder">
+                          <doc>Awaiting calibration</doc>
+                        </aux>
+                      </variables></model>
+                    </xmile>
+                    """;
+
+            ImportResult result = importer.importModel(xmile, "Test");
+            // Should be created via builder.variable(), preserving comment
+            assertThat(result.definition().variables()).hasSize(1);
+            VariableDef v = result.definition().variables().get(0);
+            assertThat(v.name()).isEqualTo("placeholder");
+            assertThat(v.equation()).isEqualTo("0");
+            assertThat(v.comment()).isEqualTo("Awaiting calibration");
+            assertThat(result.warnings()).anyMatch(w -> w.contains("placeholder") && w.contains("constant 0"));
+        }
+    }
+
+    @Nested
     @DisplayName("Import → compile → simulate round-trip")
     class ImportCompileSimulate {
 
