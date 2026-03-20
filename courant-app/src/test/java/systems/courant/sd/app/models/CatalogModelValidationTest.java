@@ -133,7 +133,7 @@ class CatalogModelValidationTest {
         if (REPORT.isEmpty()) {
             return;
         }
-        Path reportDir = Path.of("target");
+        Path reportDir = Path.of("../devdocs/quality/demos");
         Files.createDirectories(reportDir);
         Path reportFile = reportDir.resolve("catalog-validation-report.txt");
 
