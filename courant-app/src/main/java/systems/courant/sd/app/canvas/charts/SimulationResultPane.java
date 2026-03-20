@@ -28,6 +28,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
@@ -673,7 +674,8 @@ public class SimulationResultPane extends BorderPane {
      * with other charts. Value is {@code Double.NaN} when no cursor is active.
      */
     public DoubleProperty cursorTimeStepProperty() {
-        return timeCursor != null ? timeCursor.cursorTimeStepProperty() : null;
+        return timeCursor != null ? timeCursor.cursorTimeStepProperty()
+                : new SimpleDoubleProperty(Double.NaN);
     }
 
     private void addSectionHeader(VBox sidebar, String title) {

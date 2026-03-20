@@ -14,6 +14,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TitledPane;
 import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.Priority;
@@ -111,7 +112,8 @@ public final class LoopDominancePane extends VBox {
      * with other charts. Value is {@code Double.NaN} when no cursor is active.
      */
     public DoubleProperty cursorTimeStepProperty() {
-        return timeCursor != null ? timeCursor.cursorTimeStepProperty() : null;
+        return timeCursor != null ? timeCursor.cursorTimeStepProperty()
+                : new SimpleDoubleProperty(Double.NaN);
     }
 
     private void saveChartAsPng() {
