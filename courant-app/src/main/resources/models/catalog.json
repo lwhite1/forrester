@@ -77,6 +77,25 @@
       }
     },
     {
+      "id": "cocaine-flow",
+      "name": "Cocaine Flow",
+      "displayName": "Cocaine Flow",
+      "description": "Simple drug flow model with import, use, and confiscation rates demonstrating balancing feedback",
+      "category": "introductory",
+      "difficulty": "introductory",
+      "path": "introductory/cocaine-flow.json",
+      "tags": [
+        "stock-and-flow",
+        "balancing-feedback"
+      ],
+      "elements": {
+        "stocks": 1,
+        "flows": 3,
+        "variables": 1,
+        "parameters": 3
+      }
+    },
+    {
       "id": "inventory-oscillation",
       "name": "Inventory Oscillation",
       "displayName": "Inventory Oscillation",
@@ -113,6 +132,84 @@
         "flows": 4,
         "variables": 0,
         "parameters": 4
+      }
+    },
+    {
+      "id": "muskrat-plague",
+      "name": "Muskrat Plague",
+      "displayName": "Muskrat Plague",
+      "description": "Muskrat population dynamics with trapping and licensing, illustrating negative feedback through harvest pressure",
+      "category": "ecology",
+      "difficulty": "intermediate",
+      "path": "ecology/muskrat-plague.json",
+      "tags": [
+        "population-dynamics",
+        "negative-feedback"
+      ],
+      "elements": {
+        "stocks": 1,
+        "flows": 2,
+        "variables": 3,
+        "parameters": 5
+      }
+    },
+    {
+      "id": "kaibab-deer",
+      "name": "Kaibab Deer",
+      "displayName": "Kaibab Deer",
+      "description": "Deer population on the Kaibab Plateau (1900-1950) limited by predation, using a lookup table for kill rate",
+      "category": "ecology",
+      "difficulty": "intermediate",
+      "path": "ecology/kaibab-deer.json",
+      "tags": [
+        "population-dynamics",
+        "lookup-table"
+      ],
+      "elements": {
+        "stocks": 1,
+        "flows": 2,
+        "variables": 4,
+        "parameters": 4
+      }
+    },
+    {
+      "id": "bluefin-tuna-overfishing",
+      "name": "Bluefin Tuna Overfishing",
+      "displayName": "Bluefin Tuna Overfishing",
+      "description": "Two-stock model of Northern Bluefin Tuna overfishing with fleet adjustment creating overshoot-and-collapse",
+      "category": "ecology",
+      "difficulty": "advanced",
+      "path": "ecology/bluefin-tuna-overfishing.json",
+      "tags": [
+        "overshoot",
+        "collapse",
+        "delay"
+      ],
+      "elements": {
+        "stocks": 2,
+        "flows": 5,
+        "variables": 12,
+        "parameters": 8
+      }
+    },
+    {
+      "id": "ecological-overshoot",
+      "name": "Ecological Overshoot",
+      "displayName": "Ecological Overshoot",
+      "description": "Consumer population depletes renewable resource, creating classic overshoot-and-collapse dynamics",
+      "category": "ecology",
+      "difficulty": "intermediate",
+      "path": "ecology/ecological-overshoot.json",
+      "tags": [
+        "overshoot",
+        "collapse",
+        "renewable-resource"
+      ],
+      "elements": {
+        "stocks": 2,
+        "flows": 4,
+        "variables": 6,
+        "parameters": 9
       }
     },
     {

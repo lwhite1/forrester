@@ -2,7 +2,8 @@
   {
     "url": "https://simulation.tudelft.nl/SD/model_files_nested/06_01/0601Cocaine_model.mdl",
     "className": "CocaineFlowDemo",
-    "category": null,
+    "id": "cocaine-flow",
+    "category": "introductory",
     "comment": "Simple drug flow model: a single cocaine stock with constant import and use rates, and a confiscation rate proportional to the stock. Demonstrates basic stock-and-flow structure with a balancing feedback loop.",
     "metadata": {
       "author": "Dr. Erik Pruyt",
@@ -14,7 +15,8 @@
   {
     "url": "https://simulation.tudelft.nl/SD/model_files_nested/06_02/0602Muskrats1.mdl",
     "className": "MuskratPlagueDemo",
-    "category": null,
+    "id": "muskrat-plague",
+    "category": "ecology",
     "comment": "Muskrat population dynamics with trapping. A single population stock grows at a fixed per-capita rate and is reduced by trapping, where catch depends on population size, trap count, and licensing. Illustrates negative feedback through harvest pressure.",
     "metadata": {
       "author": "Dr. Erik Pruyt",
@@ -26,7 +28,8 @@
   {
     "url": "https://simulation.tudelft.nl/SD/model_files_nested/18_04/1804_Kaibab1.mdl",
     "className": "KaibabDeerDemo",
-    "category": null,
+    "id": "kaibab-deer",
+    "category": "ecology",
     "comment": "Deer population on the Kaibab Plateau (1900-1950). Models deer population growth limited by predation from a fixed predator population, using a lookup table to relate deer density to predator kill rate. Classic ecology case study.",
     "metadata": {
       "author": "Dr. Erik Pruyt",
@@ -38,7 +41,8 @@
   {
     "url": "https://simulation.tudelft.nl/SD/model_files_nested/14_12/1412_OverfishingOfNBFTunaEN.mdl",
     "className": "BluefinTunaOverfishingDemo",
-    "category": null,
+    "id": "bluefin-tuna-overfishing",
+    "category": "ecology",
     "comment": "Two-stock model of Northern Bluefin Tuna overfishing. Tuna biomass grows via recruitment and natural growth, depleted by catch. Fishing fleet size adjusts based on perceived tuna availability, creating a reinforcing overshoot-and-collapse dynamic.",
     "metadata": {
       "author": "Dr. Erik Pruyt",
@@ -50,7 +54,8 @@
   {
     "url": "https://simulation.tudelft.nl/SD/model_files_nested/06_03/0603EcOvershootCollapseBasedOnEZ416Bossel.mdl",
     "className": "EcologicalOvershootDemo",
-    "category": null,
+    "id": "ecological-overshoot",
+    "category": "ecology",
     "comment": "Ecological overshoot and collapse model based on Bossel. A consumer population grows by consuming a renewable resource; resource depletion reduces population lifetime, creating classic overshoot-and-collapse dynamics.",
     "metadata": {
       "author": "Dr. Erik Pruyt",
