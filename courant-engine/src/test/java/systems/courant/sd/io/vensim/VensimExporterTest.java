@@ -462,7 +462,8 @@ class VensimExporterTest {
                                             "Birth_Rate", systems.courant.sd.model.def.ElementType.CLD_VARIABLE, 100, 100),
                                     new systems.courant.sd.model.def.ElementPlacement(
                                             "Death_Rate", systems.courant.sd.model.def.ElementType.CLD_VARIABLE, 300, 100)),
-                            List.of(new systems.courant.sd.model.def.ConnectorRoute("Birth_Rate", "Population")),
+                            List.of(new systems.courant.sd.model.def.ConnectorRoute(
+                                    "Birth_Rate", "Population", CausalLinkDef.Polarity.POSITIVE)),
                             List.of()))
                     .build();
 
@@ -481,6 +482,64 @@ class VensimExporterTest {
             assertThat(result.definition().cldVariables()).hasSize(3);
             assertThat(result.definition().causalLinks()).hasSize(1);
             assertThat(result.definition().parameters()).isEmpty();
+        }
+
+        @Test
+        void shouldRoundTripCldPolarities() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Polarity CLD")
+                    .defaultSimulation("Year", 100, "Year")
+                    .cldVariable("A", "Variable A")
+                    .cldVariable("B", "Variable B")
+                    .cldVariable("C", "Variable C")
+                    .causalLink("A", "B", CausalLinkDef.Polarity.POSITIVE)
+                    .causalLink("B", "C", CausalLinkDef.Polarity.NEGATIVE)
+                    .causalLink("C", "A", CausalLinkDef.Polarity.UNKNOWN)
+                    .view(new systems.courant.sd.model.def.ViewDef("CLD",
+                            List.of(
+                                    new systems.courant.sd.model.def.ElementPlacement(
+                                            "A", systems.courant.sd.model.def.ElementType.CLD_VARIABLE, 100, 100),
+                                    new systems.courant.sd.model.def.ElementPlacement(
+                                            "B", systems.courant.sd.model.def.ElementType.CLD_VARIABLE, 200, 100),
+                                    new systems.courant.sd.model.def.ElementPlacement(
+                                            "C", systems.courant.sd.model.def.ElementType.CLD_VARIABLE, 300, 100)),
+                            List.of(
+                                    new systems.courant.sd.model.def.ConnectorRoute(
+                                            "A", "B", CausalLinkDef.Polarity.POSITIVE),
+                                    new systems.courant.sd.model.def.ConnectorRoute(
+                                            "B", "C", CausalLinkDef.Polarity.NEGATIVE),
+                                    new systems.courant.sd.model.def.ConnectorRoute(
+                                            "C", "A", CausalLinkDef.Polarity.UNKNOWN)),
+                            List.of()))
+                    .build();
+
+            String mdl = VensimExporter.toVensim(def);
+
+            // Verify polarity codes appear in the connector lines
+            assertThat(mdl).contains(",1,0,43");  // POSITIVE → ASCII 43
+            assertThat(mdl).contains(",1,0,45");  // NEGATIVE → ASCII 45
+
+            // Re-import and verify polarities are preserved
+            VensimImporter importer = new VensimImporter();
+            ImportResult result = importer.importModel(mdl, "Polarity CLD");
+            ModelDefinition roundTripped = result.definition();
+
+            assertThat(roundTripped.causalLinks()).hasSize(3);
+
+            CausalLinkDef link1 = roundTripped.causalLinks().stream()
+                    .filter(l -> l.from().equals("A") && l.to().equals("B"))
+                    .findFirst().orElseThrow();
+            assertThat(link1.polarity()).isEqualTo(CausalLinkDef.Polarity.POSITIVE);
+
+            CausalLinkDef link2 = roundTripped.causalLinks().stream()
+                    .filter(l -> l.from().equals("B") && l.to().equals("C"))
+                    .findFirst().orElseThrow();
+            assertThat(link2.polarity()).isEqualTo(CausalLinkDef.Polarity.NEGATIVE);
+
+            CausalLinkDef link3 = roundTripped.causalLinks().stream()
+                    .filter(l -> l.from().equals("C") && l.to().equals("A"))
+                    .findFirst().orElseThrow();
+            assertThat(link3.polarity()).isEqualTo(CausalLinkDef.Polarity.UNKNOWN);
         }
     }
 

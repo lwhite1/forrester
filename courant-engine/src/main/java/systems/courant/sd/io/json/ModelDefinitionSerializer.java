@@ -353,6 +353,9 @@ public class ModelDefinitionSerializer {
                     if (!cr.controlPoints().isEmpty()) {
                         crNode.set("controlPoints", serializePointList(cr.controlPoints()));
                     }
+                    if (cr.polarity() != CausalLinkDef.Polarity.UNKNOWN) {
+                        crNode.put("polarity", cr.polarity().symbol());
+                    }
                     connectors.add(crNode);
                 }
                 node.set("connectors", connectors);
@@ -819,10 +822,15 @@ public class ModelDefinitionSerializer {
                 if (cr.has("controlPoints")) {
                     controlPoints = deserializePointList(cr.get("controlPoints"));
                 }
+                CausalLinkDef.Polarity polarity = CausalLinkDef.Polarity.UNKNOWN;
+                if (cr.has("polarity")) {
+                    polarity = CausalLinkDef.Polarity.fromSymbol(cr.get("polarity").asText());
+                }
                 connectors.add(new ConnectorRoute(
                         requiredText(cr, "from"),
                         requiredText(cr, "to"),
-                        controlPoints));
+                        controlPoints,
+                        polarity));
             }
         }
         List<FlowRoute> flowRoutes = new ArrayList<>();

@@ -3,6 +3,7 @@ package systems.courant.sd.io.vensim;
 import systems.courant.sd.io.ExportUtils;
 import systems.courant.sd.io.FormatUtils;
 import systems.courant.sd.model.def.VariableDef;
+import systems.courant.sd.model.def.CausalLinkDef;
 import systems.courant.sd.model.def.CldVariableDef;
 import systems.courant.sd.model.def.ConnectorRoute;
 import systems.courant.sd.model.def.ElementPlacement;
@@ -410,7 +411,12 @@ public final class VensimExporter {
             int id = nextId++;
             sb.append("1,").append(id).append(",")
                     .append(fromId).append(",")
-                    .append(toId).append("\n");
+                    .append(toId);
+            if (cr.polarity() != CausalLinkDef.Polarity.UNKNOWN) {
+                int polarityCode = cr.polarity() == CausalLinkDef.Polarity.POSITIVE ? 43 : 45;
+                sb.append(",1,0,").append(polarityCode);
+            }
+            sb.append("\n");
         }
 
         return sb.toString();

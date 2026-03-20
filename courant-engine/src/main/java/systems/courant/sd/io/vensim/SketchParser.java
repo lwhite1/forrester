@@ -3,6 +3,7 @@ package systems.courant.sd.io.vensim;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import systems.courant.sd.model.def.CausalLinkDef;
 import systems.courant.sd.model.def.CommentDef;
 import systems.courant.sd.model.def.ConnectorRoute;
 import systems.courant.sd.model.def.ElementPlacement;
@@ -280,7 +281,8 @@ public final class SketchParser {
 
     private static void parseConnectorLine(String[] parts, List<ConnectorRoute> connectors,
                                             Map<String, String> idToName) {
-        // Format: 1,id,fromId,toId,...
+        // Format: 1,id,fromId,toId[,shape,hidden,polarity,...]
+        // Polarity is at field [6] as an ASCII code: 43 = '+', 45 = '-', 0 = none
         if (parts.length < 4) {
             return;
         }
@@ -304,7 +306,21 @@ public final class SketchParser {
             return;
         }
 
-        connectors.add(new ConnectorRoute(from, to));
+        CausalLinkDef.Polarity polarity = CausalLinkDef.Polarity.UNKNOWN;
+        if (parts.length >= 7) {
+            try {
+                int code = Integer.parseInt(parts[6].strip());
+                polarity = switch (code) {
+                    case 43 -> CausalLinkDef.Polarity.POSITIVE;  // ASCII '+'
+                    case 45 -> CausalLinkDef.Polarity.NEGATIVE;  // ASCII '-'
+                    default -> CausalLinkDef.Polarity.UNKNOWN;
+                };
+            } catch (NumberFormatException e) {
+                // Non-numeric polarity field — default to UNKNOWN
+            }
+        }
+
+        connectors.add(new ConnectorRoute(from, to, polarity));
     }
 
     private static ElementType classifyElementType(String name, Set<String> stockNames,

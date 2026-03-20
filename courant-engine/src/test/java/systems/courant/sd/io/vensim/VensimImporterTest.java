@@ -916,6 +916,70 @@ class VensimImporterTest {
         }
 
         @Test
+        void shouldExtractPolarityFromConnectorLines() {
+            String mdl = """
+                    A= 0
+                    \t~\t
+                    \t~\t
+                    \t|
+
+                    B= 0
+                    \t~\t
+                    \t~\t
+                    \t|
+
+                    C= 0
+                    \t~\t
+                    \t~\t
+                    \t|
+
+                    INITIAL TIME = 0
+                    \t~\tYear
+                    \t~\t
+                    \t|
+
+                    FINAL TIME = 100
+                    \t~\tYear
+                    \t~\t
+                    \t|
+
+                    TIME STEP = 1
+                    \t~\tYear
+                    \t~\t
+                    \t|
+
+                    \\\\\\---///
+                    *View
+                    10,1,A,100,100
+                    10,2,B,200,100
+                    10,3,C,300,100
+                    1,4,1,2,1,0,43,0,2,64,0,-1--1--1,|12||0-0-0,1|(150,100)|
+                    1,5,2,3,1,0,45,0,2,64,0,-1--1--1,|12||0-0-0,1|(250,100)|
+                    1,6,3,1,1,0,0
+                    """;
+
+            ImportResult result = importer.importModel(mdl, "Test");
+            ModelDefinition def = result.definition();
+
+            assertThat(def.causalLinks()).hasSize(3);
+
+            CausalLinkDef link1 = def.causalLinks().get(0);
+            assertThat(link1.from()).isEqualTo("A");
+            assertThat(link1.to()).isEqualTo("B");
+            assertThat(link1.polarity()).isEqualTo(CausalLinkDef.Polarity.POSITIVE);
+
+            CausalLinkDef link2 = def.causalLinks().get(1);
+            assertThat(link2.from()).isEqualTo("B");
+            assertThat(link2.to()).isEqualTo("C");
+            assertThat(link2.polarity()).isEqualTo(CausalLinkDef.Polarity.NEGATIVE);
+
+            CausalLinkDef link3 = def.causalLinks().get(2);
+            assertThat(link3.from()).isEqualTo("C");
+            assertThat(link3.to()).isEqualTo("A");
+            assertThat(link3.polarity()).isEqualTo(CausalLinkDef.Polarity.UNKNOWN);
+        }
+
+        @Test
         void shouldClassifySketchElementsAsCldVariable() {
             String mdl = """
                     X= 0

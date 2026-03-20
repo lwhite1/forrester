@@ -11,11 +11,13 @@ import java.util.Objects;
  * @param from the source element name
  * @param to the target element name
  * @param controlPoints optional intermediate control points for curved connectors
+ * @param polarity the polarity of the causal link (positive, negative, or unknown)
  */
 public record ConnectorRoute(
         String from,
         String to,
-        List<double[]> controlPoints
+        List<double[]> controlPoints,
+        CausalLinkDef.Polarity polarity
 ) {
 
     public ConnectorRoute {
@@ -34,6 +36,9 @@ public record ConnectorRoute(
             }
             controlPoints = List.copyOf(cloned);
         }
+        if (polarity == null) {
+            polarity = CausalLinkDef.Polarity.UNKNOWN;
+        }
     }
 
     /**
@@ -49,13 +54,35 @@ public record ConnectorRoute(
     }
 
     /**
-     * Creates a straight connector with no intermediate control points.
+     * Creates a straight connector with no intermediate control points and unknown polarity.
      *
      * @param from the source element name
      * @param to   the target element name
      */
     public ConnectorRoute(String from, String to) {
-        this(from, to, List.of());
+        this(from, to, List.of(), CausalLinkDef.Polarity.UNKNOWN);
+    }
+
+    /**
+     * Creates a straight connector with the given polarity and no control points.
+     *
+     * @param from     the source element name
+     * @param to       the target element name
+     * @param polarity the polarity of the causal link
+     */
+    public ConnectorRoute(String from, String to, CausalLinkDef.Polarity polarity) {
+        this(from, to, List.of(), polarity);
+    }
+
+    /**
+     * Creates a connector with control points and unknown polarity.
+     *
+     * @param from          the source element name
+     * @param to            the target element name
+     * @param controlPoints intermediate control points for curved connectors
+     */
+    public ConnectorRoute(String from, String to, List<double[]> controlPoints) {
+        this(from, to, controlPoints, CausalLinkDef.Polarity.UNKNOWN);
     }
 
     @Override
@@ -68,12 +95,13 @@ public record ConnectorRoute(
         }
         return Objects.equals(from, that.from)
                 && Objects.equals(to, that.to)
+                && polarity == that.polarity
                 && PointListUtil.pointListEquals(controlPoints, that.controlPoints);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(from, to);
+        int result = Objects.hash(from, to, polarity);
         for (double[] point : controlPoints) {
             result = 31 * result + Arrays.hashCode(point);
         }

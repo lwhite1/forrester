@@ -50,7 +50,7 @@ class ConnectorRouteTest {
         @Test
         @DisplayName("should treat null control points as empty list")
         void shouldTreatNullControlPointsAsEmpty() {
-            ConnectorRoute route = new ConnectorRoute("A", "B", null);
+            ConnectorRoute route = new ConnectorRoute("A", "B", (List<double[]>) null);
             assertThat(route.controlPoints()).isEmpty();
         }
     }
