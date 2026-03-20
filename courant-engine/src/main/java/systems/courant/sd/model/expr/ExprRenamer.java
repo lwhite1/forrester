@@ -14,22 +14,7 @@ import java.util.Set;
  */
 public final class ExprRenamer {
 
-    /** Built-in function names that should never be renamed. */
-    private static final Set<String> BUILTIN_FUNCTIONS = Set.of(
-            "ABS", "SQRT", "LN", "EXP", "LOG", "SIN", "COS", "TAN",
-            "ARCSIN", "ARCCOS", "ARCTAN", "SIGN", "PI",
-            "INT", "ROUND", "MODULO", "QUANTUM", "POWER", "MIN", "MAX",
-            "SUM", "MEAN", "VMIN", "VMAX", "PROD",
-            "XIDZ", "ZIDZ",
-            "SMOOTH", "SMOOTHI", "SMOOTH3", "SMOOTH3I",
-            "DELAY1", "DELAY1I", "DELAY3", "DELAY3I", "DELAY_FIXED",
-            "STEP", "RAMP", "PULSE", "PULSE_TRAIN",
-            "TREND", "FORECAST", "NPV",
-            "RANDOM_NORMAL", "RANDOM_UNIFORM",
-            "SAMPLE_IF_TRUE", "FIND_ZERO", "LOOKUP_AREA",
-            "LOOKUP", "IF", "TIME", "DT", "INITIAL",
-            "TRUE", "FALSE", "NOT", "OR", "AND"
-    );
+    private static final Set<String> BUILTIN_FUNCTIONS = BuiltinFunctions.NAMES;
 
     private ExprRenamer() {
     }
