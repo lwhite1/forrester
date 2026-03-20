@@ -31,6 +31,10 @@ final class CausalLinkPass implements RenderPass {
         String hoveredElement = ctx.hoveredElement();
         CausalTraceAnalysis traceAnalysis = ctx.traceAnalysis();
         List<CausalLinkDef> allLinks = editor.getCausalLinks();
+        double[] centroid = CausalLinkGeometry.graphCentroid(
+                canvasState, editor.getCldVariables());
+        double gx = centroid != null ? centroid[0] : Double.NaN;
+        double gy = centroid != null ? centroid[1] : Double.NaN;
 
         for (CausalLinkDef link : allLinks) {
             String fromName = link.from();
@@ -58,7 +62,7 @@ final class CausalLinkPass implements RenderPass {
             if (fromName.equals(toName)) {
                 double halfW = LayoutMetrics.effectiveWidth(canvasState, fromName) / 2;
                 double halfH = LayoutMetrics.effectiveHeight(canvasState, fromName) / 2;
-                double[] loopPts = CausalLinkGeometry.selfLoopPoints(fromX, fromY, halfW, halfH);
+                double[] loopPts = CausalLinkGeometry.selfLoopPoints(fromX, fromY, halfW, halfH, gx, gy);
                 ConnectionRenderer.drawCausalLinkSelfLoop(gc, loopPts, link.polarity());
                 if (dim) {
                     gc.restore();
@@ -71,7 +75,7 @@ final class CausalLinkPass implements RenderPass {
 
             // Compute control point for the curve
             CausalLinkGeometry.ControlPoint cp = CausalLinkGeometry.controlPoint(
-                    fromX, fromY, toX, toY, fromName, toName, allLinks);
+                    fromX, fromY, toX, toY, fromName, toName, allLinks, gx, gy);
 
             // Clip endpoints to element borders, aiming at the control point
             // for a more natural exit angle from the element

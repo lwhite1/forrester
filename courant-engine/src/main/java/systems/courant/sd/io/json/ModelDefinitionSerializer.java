@@ -530,9 +530,6 @@ public class ModelDefinitionSerializer {
         List<SubscriptDef> subscripts = deserializeSubscripts(root);
         List<CldVariableDef> cldVariables = deserializeCldVariables(root);
         List<CausalLinkDef> causalLinks = deserializeCausalLinks(root);
-        if (cldVariables.isEmpty() && !causalLinks.isEmpty()) {
-            cldVariables = synthesizeCldVariables(causalLinks);
-        }
         List<CommentDef> comments = deserializeComments(root);
 
         List<ViewDef> views = new ArrayList<>();
@@ -690,24 +687,6 @@ public class ModelDefinitionSerializer {
             }
         }
         return cldVariables;
-    }
-
-    /**
-     * Synthesizes CLD variable definitions from causal link endpoints when no
-     * explicit cldVariables array is present. This handles legacy model files
-     * that were imported before CLD variable tracking was added.
-     */
-    private List<CldVariableDef> synthesizeCldVariables(List<CausalLinkDef> causalLinks) {
-        Set<String> seen = new LinkedHashSet<>();
-        for (CausalLinkDef link : causalLinks) {
-            seen.add(link.from());
-            seen.add(link.to());
-        }
-        List<CldVariableDef> result = new ArrayList<>();
-        for (String name : seen) {
-            result.add(new CldVariableDef(name, null));
-        }
-        return result;
     }
 
     private List<CausalLinkDef> deserializeCausalLinks(JsonNode root) {
