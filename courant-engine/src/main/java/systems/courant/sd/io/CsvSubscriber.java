@@ -33,6 +33,7 @@ public class CsvSubscriber implements EventHandler, Closeable {
     private static final Logger logger = LoggerFactory.getLogger(CsvSubscriber.class);
 
     private final String filePath;
+    private final Object lock = new Object();
     private CSVWriter csvWriter;
     private boolean closed;
 
@@ -70,30 +71,32 @@ public class CsvSubscriber implements EventHandler, Closeable {
      */
     @Override
     public void handleTimeStepEvent(TimeStepEvent event) {
-        ensureWriter();
-        if (csvWriter == null) {
-            return;
-        }
-        Model model = event.getModel();
+        synchronized (lock) {
+            ensureWriter();
+            if (csvWriter == null) {
+                return;
+            }
+            Model model = event.getModel();
 
-        List<Double> stockValues = model.getStockValues();
-        List<Double> variableValues = model.getVariableValues();
+            List<Double> stockValues = model.getStockValues();
+            List<Double> variableValues = model.getVariableValues();
 
-        List<String> values = new ArrayList<>(2 + stockValues.size() + variableValues.size());
-        values.add(String.valueOf(event.getStep()));
-        values.add(event.getCurrentTime().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+            List<String> values = new ArrayList<>(2 + stockValues.size() + variableValues.size());
+            values.add(String.valueOf(event.getStep()));
+            values.add(event.getCurrentTime().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
 
-        for (Double stockValue : stockValues) {
-            values.add(String.valueOf(stockValue));
-        }
-        for (Double variableValue : variableValues) {
-            values.add(String.valueOf(variableValue));
-        }
-        csvWriter.writeNext(values.toArray(new String[0]));
-        if (csvWriter.checkError()) {
-            throw new CsvOutputException(
-                    "Failed to write CSV data row at step " + event.getStep(),
-                    csvWriter.getException());
+            for (Double stockValue : stockValues) {
+                values.add(String.valueOf(stockValue));
+            }
+            for (Double variableValue : variableValues) {
+                values.add(String.valueOf(variableValue));
+            }
+            csvWriter.writeNext(values.toArray(new String[0]));
+            if (csvWriter.checkError()) {
+                throw new CsvOutputException(
+                        "Failed to write CSV data row at step " + event.getStep(),
+                        csvWriter.getException());
+            }
         }
     }
 
@@ -102,25 +105,27 @@ public class CsvSubscriber implements EventHandler, Closeable {
      */
     @Override
     public void handleSimulationStartEvent(SimulationStartEvent event) {
-        ensureWriter();
-        if (csvWriter == null) {
-            return;
-        }
-        logger.info("Starting simulation: {}", event.getModel().getName());
+        synchronized (lock) {
+            ensureWriter();
+            if (csvWriter == null) {
+                return;
+            }
+            logger.info("Starting simulation: {}", event.getModel().getName());
 
-        Model model = event.getModel();
-        List<String> stockNames = model.getStockNames();
-        List<String> variableNames = model.getVariableNames();
+            Model model = event.getModel();
+            List<String> stockNames = model.getStockNames();
+            List<String> variableNames = model.getVariableNames();
 
-        List<String> values = new ArrayList<>(2 + stockNames.size() + variableNames.size());
-        values.add("Step");
-        values.add("Date time");
-        values.addAll(stockNames);
-        values.addAll(variableNames);
-        csvWriter.writeNext(values.toArray(new String[0]));
-        if (csvWriter.checkError()) {
-            throw new CsvOutputException(
-                    "Failed to write CSV header", csvWriter.getException());
+            List<String> values = new ArrayList<>(2 + stockNames.size() + variableNames.size());
+            values.add("Step");
+            values.add("Date time");
+            values.addAll(stockNames);
+            values.addAll(variableNames);
+            csvWriter.writeNext(values.toArray(new String[0]));
+            if (csvWriter.checkError()) {
+                throw new CsvOutputException(
+                        "Failed to write CSV header", csvWriter.getException());
+            }
         }
     }
 
@@ -138,15 +143,17 @@ public class CsvSubscriber implements EventHandler, Closeable {
      */
     @Override
     public void close() {
-        closed = true;
-        if (csvWriter != null) {
-            try {
-                csvWriter.flush();
-                csvWriter.close();
-            } catch (IOException e) {
-                logger.error("Failed to close CSV writer", e);
+        synchronized (lock) {
+            closed = true;
+            if (csvWriter != null) {
+                try {
+                    csvWriter.flush();
+                    csvWriter.close();
+                } catch (IOException e) {
+                    logger.error("Failed to close CSV writer", e);
+                }
+                csvWriter = null;
             }
-            csvWriter = null;
         }
     }
 }
