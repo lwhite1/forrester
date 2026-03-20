@@ -1,179 +1,234 @@
 {
   "name" : "0211CLDbankrun",
+  "cldVariables" : [ {
+    "name" : "depositors and lenders fear of bank failure",
+    "comment" : "depositors' and lenders' fear of bank failure"
+  }, {
+    "name" : "exogenous net worth loss",
+    "comment" : "exogenous net worth loss"
+  }, {
+    "name" : "fixed asset loss",
+    "comment" : "fixed asset loss"
+  }, {
+    "name" : "liquid asset loss",
+    "comment" : "liquid asset loss"
+  }, {
+    "name" : "liquid deposito and loan loss",
+    "comment" : "liquid deposito and loan loss"
+  }, {
+    "name" : "net worth loss",
+    "comment" : "net worth loss"
+  }, {
+    "name" : "relative share price loss",
+    "comment" : "relative share price loss"
+  }, {
+    "name" : "fear of bank failure",
+    "comment" : "fear of bank failure"
+  }, {
+    "name" : "liquid bank reserves",
+    "comment" : "liquid bank reserves"
+  }, {
+    "name" : "perceived solvency of the bank",
+    "comment" : "perceived solvency of the bank"
+  }, {
+    "name" : "solvency of the bank",
+    "comment" : "solvency of the bank"
+  }, {
+    "name" : "tendency to withdraw personal savings",
+    "comment" : "tendency to withdraw personal savings"
+  }, {
+    "name" : "weak or uncertain economic conditions",
+    "comment" : "weak or uncertain economic conditions"
+  } ],
   "causalLinks" : [ {
     "from" : "fear of bank failure",
     "to" : "tendency to withdraw personal savings",
-    "polarity" : "UNKNOWN"
+    "polarity" : "POSITIVE"
   }, {
     "from" : "tendency to withdraw personal savings",
     "to" : "perceived solvency of the bank",
-    "polarity" : "UNKNOWN"
+    "polarity" : "NEGATIVE"
   }, {
     "from" : "perceived solvency of the bank",
     "to" : "fear of bank failure",
-    "polarity" : "UNKNOWN"
+    "polarity" : "NEGATIVE"
   }, {
     "from" : "tendency to withdraw personal savings",
     "to" : "liquid bank reserves",
-    "polarity" : "UNKNOWN"
+    "polarity" : "NEGATIVE"
   }, {
     "from" : "liquid bank reserves",
     "to" : "solvency of the bank",
-    "polarity" : "UNKNOWN"
+    "polarity" : "POSITIVE"
   }, {
     "from" : "solvency of the bank",
     "to" : "perceived solvency of the bank",
-    "polarity" : "UNKNOWN"
+    "polarity" : "POSITIVE"
   }, {
     "from" : "weak or uncertain economic conditions",
     "to" : "perceived solvency of the bank",
-    "polarity" : "UNKNOWN"
+    "polarity" : "NEGATIVE"
   }, {
     "from" : "weak or uncertain economic conditions",
     "to" : "fear of bank failure",
-    "polarity" : "UNKNOWN"
+    "polarity" : "POSITIVE"
   }, {
     "from" : "exogenous net worth loss",
     "to" : "net worth loss",
-    "polarity" : "UNKNOWN"
+    "polarity" : "POSITIVE"
   }, {
     "from" : "net worth loss",
     "to" : "relative share price loss",
-    "polarity" : "UNKNOWN"
+    "polarity" : "POSITIVE"
   }, {
     "from" : "relative share price loss",
     "to" : "depositors and lenders fear of bank failure",
-    "polarity" : "UNKNOWN"
+    "polarity" : "POSITIVE"
   }, {
     "from" : "depositors and lenders fear of bank failure",
     "to" : "liquid deposito and loan loss",
-    "polarity" : "UNKNOWN"
+    "polarity" : "POSITIVE"
   }, {
     "from" : "liquid deposito and loan loss",
     "to" : "fixed asset loss",
-    "polarity" : "UNKNOWN"
+    "polarity" : "POSITIVE"
   }, {
     "from" : "fixed asset loss",
     "to" : "net worth loss",
-    "polarity" : "UNKNOWN"
+    "polarity" : "POSITIVE"
   }, {
     "from" : "liquid deposito and loan loss",
     "to" : "liquid asset loss",
-    "polarity" : "UNKNOWN"
+    "polarity" : "POSITIVE"
   } ],
   "views" : [ {
     "name" : "View 1",
     "elements" : [ {
       "name" : "perceived solvency of the bank",
-      "type" : "aux",
+      "type" : "cld_variable",
       "x" : 239.0,
       "y" : 119.0
     }, {
       "name" : "fear of bank failure",
-      "type" : "aux",
+      "type" : "cld_variable",
       "x" : 354.0,
       "y" : 209.0
     }, {
       "name" : "tendency to withdraw personal savings",
-      "type" : "aux",
+      "type" : "cld_variable",
       "x" : 220.0,
       "y" : 293.0
     }, {
       "name" : "liquid bank reserves",
-      "type" : "aux",
+      "type" : "cld_variable",
       "x" : 76.0,
       "y" : 252.0
     }, {
       "name" : "solvency of the bank",
-      "type" : "aux",
+      "type" : "cld_variable",
       "x" : 73.0,
       "y" : 163.0
     }, {
       "name" : "weak or uncertain economic conditions",
-      "type" : "aux",
+      "type" : "cld_variable",
       "x" : 391.0,
       "y" : 113.0
     }, {
       "name" : "relative share price loss",
-      "type" : "aux",
+      "type" : "cld_variable",
       "x" : 723.0,
       "y" : 97.0
     }, {
       "name" : "net worth loss",
-      "type" : "aux",
+      "type" : "cld_variable",
       "x" : 631.0,
       "y" : 138.0
     }, {
       "name" : "depositors and lenders fear of bank failure",
-      "type" : "aux",
+      "type" : "cld_variable",
       "x" : 816.0,
       "y" : 183.0
     }, {
       "name" : "liquid deposito and loan loss",
-      "type" : "aux",
+      "type" : "cld_variable",
       "x" : 719.0,
       "y" : 273.0
     }, {
       "name" : "liquid asset loss",
-      "type" : "aux",
+      "type" : "cld_variable",
       "x" : 555.0,
       "y" : 253.0
     }, {
       "name" : "fixed asset loss",
-      "type" : "aux",
+      "type" : "cld_variable",
       "x" : 627.0,
       "y" : 220.0
     }, {
       "name" : "exogenous net worth loss",
-      "type" : "aux",
+      "type" : "cld_variable",
       "x" : 540.0,
       "y" : 192.0
     } ],
     "connectors" : [ {
       "from" : "fear of bank failure",
-      "to" : "tendency to withdraw personal savings"
+      "to" : "tendency to withdraw personal savings",
+      "polarity" : "+"
     }, {
       "from" : "tendency to withdraw personal savings",
-      "to" : "perceived solvency of the bank"
+      "to" : "perceived solvency of the bank",
+      "polarity" : "-"
     }, {
       "from" : "perceived solvency of the bank",
-      "to" : "fear of bank failure"
+      "to" : "fear of bank failure",
+      "polarity" : "-"
     }, {
       "from" : "tendency to withdraw personal savings",
-      "to" : "liquid bank reserves"
+      "to" : "liquid bank reserves",
+      "polarity" : "-"
     }, {
       "from" : "liquid bank reserves",
-      "to" : "solvency of the bank"
+      "to" : "solvency of the bank",
+      "polarity" : "+"
     }, {
       "from" : "solvency of the bank",
-      "to" : "perceived solvency of the bank"
+      "to" : "perceived solvency of the bank",
+      "polarity" : "+"
     }, {
       "from" : "weak or uncertain economic conditions",
-      "to" : "perceived solvency of the bank"
+      "to" : "perceived solvency of the bank",
+      "polarity" : "-"
     }, {
       "from" : "weak or uncertain economic conditions",
-      "to" : "fear of bank failure"
+      "to" : "fear of bank failure",
+      "polarity" : "+"
     }, {
       "from" : "exogenous net worth loss",
-      "to" : "net worth loss"
+      "to" : "net worth loss",
+      "polarity" : "+"
     }, {
       "from" : "net worth loss",
-      "to" : "relative share price loss"
+      "to" : "relative share price loss",
+      "polarity" : "+"
     }, {
       "from" : "relative share price loss",
-      "to" : "depositors and lenders fear of bank failure"
+      "to" : "depositors and lenders fear of bank failure",
+      "polarity" : "+"
     }, {
       "from" : "depositors and lenders fear of bank failure",
-      "to" : "liquid deposito and loan loss"
+      "to" : "liquid deposito and loan loss",
+      "polarity" : "+"
     }, {
       "from" : "liquid deposito and loan loss",
-      "to" : "fixed asset loss"
+      "to" : "fixed asset loss",
+      "polarity" : "+"
     }, {
       "from" : "fixed asset loss",
-      "to" : "net worth loss"
+      "to" : "net worth loss",
+      "polarity" : "+"
     }, {
       "from" : "liquid deposito and loan loss",
-      "to" : "liquid asset loss"
+      "to" : "liquid asset loss",
+      "polarity" : "+"
     } ]
   }, {
     "name" : "View 2"
@@ -182,11 +237,5 @@
     "timeStep" : "Month",
     "duration" : 100.0,
     "durationUnit" : "Month"
-  },
-  "metadata" : {
-    "author" : "Dr. Erik Pruyt",
-    "source" : "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
-    "license" : "CC-BY-NC-SA-4.0",
-    "url" : "https://simulation.tudelft.nl/SD/"
   }
 }

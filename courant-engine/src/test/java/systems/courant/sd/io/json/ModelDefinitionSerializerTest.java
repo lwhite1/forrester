@@ -273,7 +273,10 @@ class ModelDefinitionSerializerTest {
     }
 
     @Test
-    void shouldSynthesizeCldVariablesFromCausalLinksWhenMissing() {
+    void shouldNotSynthesizeCldVariablesWhenMissing() {
+        // After removing the synthesizeCldVariables fallback, JSON without
+        // explicit cldVariables should deserialize with empty cldVariables.
+        // Models should be re-imported to include cldVariables in the JSON.
         String json = """
                 {
                   "name": "Legacy CLD",
@@ -285,9 +288,7 @@ class ModelDefinitionSerializerTest {
                 }
                 """;
         ModelDefinition def = serializer.fromJson(json);
-        assertThat(def.cldVariables()).hasSize(3);
-        assertThat(def.cldVariables().stream().map(CldVariableDef::name))
-                .containsExactlyInAnyOrder("A", "B", "C");
+        assertThat(def.cldVariables()).isEmpty();
         assertThat(def.causalLinks()).hasSize(3);
     }
 

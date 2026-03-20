@@ -204,7 +204,8 @@ public final class HitTester {
     public static ConnectionId hitTestCausalLink(CanvasState state,
                                                   List<CausalLinkDef> causalLinks,
                                                   double worldX, double worldY) {
-        return hitTestCausalLink(state, causalLinks, worldX, worldY, false);
+        return hitTestCausalLink(state, causalLinks, worldX, worldY, false,
+                Double.NaN, Double.NaN);
     }
 
     /**
@@ -216,6 +217,20 @@ public final class HitTester {
                                                   List<CausalLinkDef> causalLinks,
                                                   double worldX, double worldY,
                                                   boolean hideVariables) {
+        return hitTestCausalLink(state, causalLinks, worldX, worldY, hideVariables,
+                Double.NaN, Double.NaN);
+    }
+
+    /**
+     * Returns the ConnectionId of the causal link at the given world coordinates,
+     * or null if no causal link is hit. Uses centroid-aware curve geometry when
+     * centroid coordinates are provided (non-NaN).
+     */
+    public static ConnectionId hitTestCausalLink(CanvasState state,
+                                                  List<CausalLinkDef> causalLinks,
+                                                  double worldX, double worldY,
+                                                  boolean hideVariables,
+                                                  double centroidX, double centroidY) {
         for (int i = causalLinks.size() - 1; i >= 0; i--) {
             CausalLinkDef link = causalLinks.get(i);
             String fromName = link.from();
@@ -239,7 +254,8 @@ public final class HitTester {
                 // Self-loop: hit-test against cubic Bézier
                 double halfW = LayoutMetrics.effectiveWidth(state, fromName) / 2;
                 double halfH = LayoutMetrics.effectiveHeight(state, fromName) / 2;
-                double[] lp = CausalLinkGeometry.selfLoopPoints(fromX, fromY, halfW, halfH);
+                double[] lp = CausalLinkGeometry.selfLoopPoints(
+                        fromX, fromY, halfW, halfH, centroidX, centroidY);
                 dist = CausalLinkGeometry.pointToCubicDistance(worldX, worldY,
                         lp[0], lp[1], lp[2], lp[3], lp[4], lp[5], lp[6], lp[7]);
             } else {
@@ -247,7 +263,8 @@ public final class HitTester {
                 double toY = state.getY(toName);
 
                 CausalLinkGeometry.ControlPoint cp = CausalLinkGeometry.controlPoint(
-                        fromX, fromY, toX, toY, fromName, toName, causalLinks);
+                        fromX, fromY, toX, toY, fromName, toName, causalLinks,
+                        centroidX, centroidY);
 
                 FlowGeometry.Point2D clippedFrom = FlowGeometry.clipToElement(
                         state, fromName, cp.x(), cp.y());

@@ -494,7 +494,7 @@ public class VensimImporter implements ModelImporter {
             if (name.isEmpty() || isSystemVar(name)) {
                 continue;
             }
-            if (isDocumentationBlock(eq.expression())) {
+            if (!isCld && isDocumentationBlock(eq.expression())) {
                 continue;
             }
             String eqName = VensimExprTranslator.normalizeName(name);

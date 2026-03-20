@@ -104,6 +104,10 @@ final class LoopHighlightPass implements RenderPass {
 
         // Highlight causal link edges (curved)
         List<CausalLinkDef> allLinks = editor.getCausalLinks();
+        double[] centroid = CausalLinkGeometry.graphCentroid(
+                canvasState, editor.getCldVariables());
+        double gx = centroid != null ? centroid[0] : Double.NaN;
+        double gy = centroid != null ? centroid[1] : Double.NaN;
         for (CausalLinkDef link : allLinks) {
             String fromName = link.from();
             String toName = link.to();
@@ -125,7 +129,8 @@ final class LoopHighlightPass implements RenderPass {
             if (fromName.equals(toName)) {
                 double halfW = LayoutMetrics.effectiveWidth(canvasState, fromName) / 2;
                 double halfH = LayoutMetrics.effectiveHeight(canvasState, fromName) / 2;
-                double[] loopPts = CausalLinkGeometry.selfLoopPoints(fromX, fromY, halfW, halfH);
+                double[] loopPts = CausalLinkGeometry.selfLoopPoints(
+                        fromX, fromY, halfW, halfH, gx, gy);
                 FeedbackLoopRenderer.drawLoopEdgeCubic(gc, loopPts);
                 continue;
             }
@@ -134,7 +139,7 @@ final class LoopHighlightPass implements RenderPass {
             double toY = canvasState.getY(toName);
 
             CausalLinkGeometry.ControlPoint cp = CausalLinkGeometry.controlPoint(
-                    fromX, fromY, toX, toY, fromName, toName, allLinks);
+                    fromX, fromY, toX, toY, fromName, toName, allLinks, gx, gy);
 
             FlowGeometry.Point2D clippedFrom = FlowGeometry.clipToElement(
                     canvasState, fromName, cp.x(), cp.y());
@@ -233,6 +238,10 @@ final class LoopHighlightPass implements RenderPass {
 
         // Highlight causal link edges in the trace (curved)
         List<CausalLinkDef> allLinks = editor.getCausalLinks();
+        double[] centroid = CausalLinkGeometry.graphCentroid(
+                canvasState, editor.getCldVariables());
+        double gx = centroid != null ? centroid[0] : Double.NaN;
+        double gy = centroid != null ? centroid[1] : Double.NaN;
         for (CausalLinkDef link : allLinks) {
             String fromName = link.from();
             String toName = link.to();
@@ -266,7 +275,7 @@ final class LoopHighlightPass implements RenderPass {
             double toY = canvasState.getY(toName);
 
             CausalLinkGeometry.ControlPoint cp = CausalLinkGeometry.controlPoint(
-                    fromX, fromY, toX, toY, fromName, toName, allLinks);
+                    fromX, fromY, toX, toY, fromName, toName, allLinks, gx, gy);
 
             FlowGeometry.Point2D clippedFrom = FlowGeometry.clipToElement(
                     canvasState, fromName, cp.x(), cp.y());

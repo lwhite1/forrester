@@ -542,6 +542,10 @@ public final class SvgExporter {
 
     private static void writeCausalLinks(PrintWriter w, CanvasState state, ModelEditor editor) {
         List<CausalLinkDef> allLinks = editor.getCausalLinks();
+        double[] centroid = CausalLinkGeometry.graphCentroid(
+                state, editor.getCldVariables());
+        double gx = centroid != null ? centroid[0] : Double.NaN;
+        double gy = centroid != null ? centroid[1] : Double.NaN;
 
         for (CausalLinkDef link : allLinks) {
             if (!state.hasElement(link.from()) || !state.hasElement(link.to())) {
@@ -555,7 +559,7 @@ public final class SvgExporter {
             if (link.from().equals(link.to())) {
                 double halfW = LayoutMetrics.effectiveWidth(state, link.from()) / 2;
                 double halfH = LayoutMetrics.effectiveHeight(state, link.from()) / 2;
-                double[] lp = CausalLinkGeometry.selfLoopPoints(fromX, fromY, halfW, halfH);
+                double[] lp = CausalLinkGeometry.selfLoopPoints(fromX, fromY, halfW, halfH, gx, gy);
 
                 boolean isUnknown = link.polarity() == CausalLinkDef.Polarity.UNKNOWN;
                 Color selfLinkColor = isUnknown ? ColorPalette.CAUSAL_UNKNOWN : ColorPalette.CAUSAL_LINK;
@@ -585,7 +589,7 @@ public final class SvgExporter {
             double toY = state.getY(link.to());
 
             CausalLinkGeometry.ControlPoint cp = CausalLinkGeometry.controlPoint(
-                    fromX, fromY, toX, toY, link.from(), link.to(), allLinks);
+                    fromX, fromY, toX, toY, link.from(), link.to(), allLinks, gx, gy);
 
             FlowGeometry.Point2D cf = FlowGeometry.clipToElement(state, link.from(), cp.x(), cp.y());
             FlowGeometry.Point2D ct = FlowGeometry.clipToElement(state, link.to(), cp.x(), cp.y());

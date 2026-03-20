@@ -83,6 +83,10 @@ final class ExportBounds {
 
         // Include causal link polarity label positions
         List<CausalLinkDef> allLinks = editor.getCausalLinks();
+        double[] centroid = CausalLinkGeometry.graphCentroid(
+                canvasState, editor.getCldVariables());
+        double gx = centroid != null ? centroid[0] : Double.NaN;
+        double gy = centroid != null ? centroid[1] : Double.NaN;
         for (CausalLinkDef link : allLinks) {
             String fromName = link.from();
             String toName = link.to();
@@ -97,7 +101,7 @@ final class ExportBounds {
                 // Self-loop: label at cubic midpoint with y offset
                 double halfW = LayoutMetrics.effectiveWidth(canvasState, fromName) / 2;
                 double halfH = LayoutMetrics.effectiveHeight(canvasState, fromName) / 2;
-                double[] loopPts = CausalLinkGeometry.selfLoopPoints(fromX, fromY, halfW, halfH);
+                double[] loopPts = CausalLinkGeometry.selfLoopPoints(fromX, fromY, halfW, halfH, gx, gy);
                 double[] midPt = CausalLinkGeometry.evaluateCubic(
                         loopPts[0], loopPts[1], loopPts[2], loopPts[3],
                         loopPts[4], loopPts[5], loopPts[6], loopPts[7], 0.5);
@@ -121,7 +125,7 @@ final class ExportBounds {
             }
 
             CausalLinkGeometry.ControlPoint cp = CausalLinkGeometry.controlPoint(
-                    fromX, fromY, toX, toY, fromName, toName, allLinks);
+                    fromX, fromY, toX, toY, fromName, toName, allLinks, gx, gy);
             double[] labelPt = CausalLinkGeometry.evaluate(
                     fromX, fromY, cp.x(), cp.y(), toX, toY, POLARITY_LABEL_T);
             double[] labelTan = CausalLinkGeometry.tangent(

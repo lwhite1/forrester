@@ -1,6 +1,7 @@
 package systems.courant.sd.app.canvas;
 
 import systems.courant.sd.model.def.CausalLinkDef;
+import systems.courant.sd.model.def.CldVariableDef;
 
 import javafx.scene.canvas.GraphicsContext;
 
@@ -106,6 +107,169 @@ public final class CausalLinkGeometry {
 
         // Consistent direction: lexicographic comparison decides which side
         return fromName.compareTo(toName) < 0 ? 1 : -1;
+    }
+
+    /**
+     * Centroid-aware control point. Blends the perpendicular offset direction
+     * with an outward direction from the graph centroid, producing curves that
+     * bow away from the center of the diagram.
+     *
+     * @param centroidX X-coordinate of the graph centroid (or NaN to fall back)
+     * @param centroidY Y-coordinate of the graph centroid (or NaN to fall back)
+     */
+    public static ControlPoint controlPoint(double fromX, double fromY,
+                                             double toX, double toY,
+                                             String fromName, String toName,
+                                             List<CausalLinkDef> allLinks,
+                                             double centroidX, double centroidY) {
+        if (Double.isNaN(centroidX) || Double.isNaN(centroidY)) {
+            return controlPoint(fromX, fromY, toX, toY, fromName, toName, allLinks);
+        }
+
+        // Self-loop: delegate to centroid-aware self-loop
+        if (fromName.equals(toName)) {
+            return new ControlPoint(fromX, fromY - SELF_LOOP_RADIUS * 2);
+        }
+
+        double midX = (fromX + toX) / 2;
+        double midY = (fromY + toY) / 2;
+
+        double dx = toX - fromX;
+        double dy = toY - fromY;
+        double chordLen = Math.sqrt(dx * dx + dy * dy);
+
+        if (chordLen < 1) {
+            return new ControlPoint(midX, midY);
+        }
+
+        // d_perp: perpendicular to chord (canonical direction)
+        boolean canonical = fromName.compareTo(toName) < 0;
+        double cdx = canonical ? dx : -dx;
+        double cdy = canonical ? dy : -dy;
+        double perpX = -cdy / chordLen;
+        double perpY = cdx / chordLen;
+
+        // d_out: direction from centroid through midpoint
+        double outDx = midX - centroidX;
+        double outDy = midY - centroidY;
+        double outDist = Math.sqrt(outDx * outDx + outDy * outDy);
+
+        double finalDirX;
+        double finalDirY;
+
+        if (outDist < 1) {
+            // M ≈ G — fall back to pure perpendicular
+            finalDirX = perpX;
+            finalDirY = perpY;
+        } else {
+            double outNx = outDx / outDist;
+            double outNy = outDy / outDist;
+
+            // Flip perpendicular if it points toward the centroid so the
+            // curve always tends to bow outward
+            double dot = outNx * perpX + outNy * perpY;
+            if (dot < 0) {
+                perpX = -perpX;
+                perpY = -perpY;
+                dot = -dot;
+            }
+
+            // w = clamp(dot, 0, 1)
+            double w = Math.min(1, dot);
+
+            // d_final = normalize(lerp(d_perp, d_out, w))
+            finalDirX = perpX * (1 - w) + outNx * w;
+            finalDirY = perpY * (1 - w) + outNy * w;
+            double finalLen = Math.sqrt(finalDirX * finalDirX + finalDirY * finalDirY);
+            if (finalLen > 0.001) {
+                finalDirX /= finalLen;
+                finalDirY /= finalLen;
+            }
+        }
+
+        double bulge = 0.35 * chordLen;
+        // Cap the bulge to avoid excessively wide curves
+        bulge = Math.min(bulge, 120);
+
+        int direction = curveDirection(fromName, toName, allLinks);
+
+        return new ControlPoint(
+                midX + finalDirX * bulge * direction,
+                midY + finalDirY * bulge * direction
+        );
+    }
+
+    /**
+     * Centroid-aware self-loop geometry. The loop bulges radially outward
+     * from the centroid.
+     *
+     * @return {startX, startY, cp1X, cp1Y, cp2X, cp2Y, endX, endY}
+     */
+    public static double[] selfLoopPoints(double cx, double cy,
+                                           double halfW, double halfH,
+                                           double centroidX, double centroidY) {
+        if (Double.isNaN(centroidX) || Double.isNaN(centroidY)) {
+            return selfLoopPoints(cx, cy, halfW, halfH);
+        }
+
+        // Direction from centroid to node center
+        double dx = cx - centroidX;
+        double dy = cy - centroidY;
+        double dist = Math.sqrt(dx * dx + dy * dy);
+
+        if (dist < 1) {
+            // Node is at centroid — default to upward
+            return selfLoopPoints(cx, cy, halfW, halfH);
+        }
+
+        double nx = dx / dist;
+        double ny = dy / dist;
+
+        // Perpendicular for start/end spread
+        double px = -ny;
+        double py = nx;
+
+        double r = SELF_LOOP_RADIUS * 1.5;
+        double spread = Math.max(halfW, halfH) * 0.5;
+
+        double startX = cx + px * spread;
+        double startY = cy + py * spread;
+        double endX = cx - px * spread;
+        double endY = cy - py * spread;
+
+        double cp1X = startX + nx * r + px * r * 0.4;
+        double cp1Y = startY + ny * r + py * r * 0.4;
+        double cp2X = endX + nx * r - px * r * 0.4;
+        double cp2Y = endY + ny * r - py * r * 0.4;
+
+        return new double[]{startX, startY, cp1X, cp1Y, cp2X, cp2Y, endX, endY};
+    }
+
+    /**
+     * Computes the centroid (mean position) of all CLD variable nodes.
+     *
+     * @return {centroidX, centroidY}, or null if there are no CLD nodes
+     */
+    public static double[] graphCentroid(CanvasState canvasState,
+                                          List<CldVariableDef> cldVariables) {
+        if (cldVariables == null || cldVariables.isEmpty()) {
+            return null;
+        }
+        double sumX = 0, sumY = 0;
+        int count = 0;
+        for (CldVariableDef v : cldVariables) {
+            double x = canvasState.getX(v.name());
+            double y = canvasState.getY(v.name());
+            if (!Double.isNaN(x) && !Double.isNaN(y)) {
+                sumX += x;
+                sumY += y;
+                count++;
+            }
+        }
+        if (count == 0) {
+            return null;
+        }
+        return new double[]{sumX / count, sumY / count};
     }
 
     /**

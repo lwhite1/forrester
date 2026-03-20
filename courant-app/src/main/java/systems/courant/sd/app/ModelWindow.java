@@ -34,6 +34,7 @@ import systems.courant.sd.model.def.ModelDefinition;
 import systems.courant.sd.model.def.ValidationResult;
 import systems.courant.sd.model.def.ViewDef;
 import systems.courant.sd.model.graph.AutoLayout;
+import systems.courant.sd.model.graph.CldLayout;
 import systems.courant.sd.model.graph.FeedbackAnalysis;
 
 import javafx.application.Platform;
@@ -648,10 +649,13 @@ public class ModelWindow {
 
         if (def.stocks().isEmpty() && def.flows().isEmpty()
                 && def.variables().isEmpty()) {
-            // CLD or empty model — use embedded view if available
+            // CLD or empty model — use embedded view if available, otherwise compute layout
             ViewDef view;
-            if (!def.views().isEmpty() && !def.cldVariables().isEmpty()) {
+            if (!def.views().isEmpty() && !def.cldVariables().isEmpty()
+                    && !def.views().getFirst().elements().isEmpty()) {
                 view = def.views().getFirst();
+            } else if (!def.cldVariables().isEmpty()) {
+                view = CldLayout.layout(def);
             } else {
                 view = new ViewDef("Main", List.of(), List.of(), List.of());
             }
