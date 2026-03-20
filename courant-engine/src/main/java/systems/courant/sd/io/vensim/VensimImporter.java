@@ -8,6 +8,7 @@ import systems.courant.sd.model.def.ReferenceDataset;
 import systems.courant.sd.model.def.VariableDef;
 import systems.courant.sd.model.def.CausalLinkDef;
 import systems.courant.sd.model.def.CldVariableDef;
+import systems.courant.sd.model.def.CommentDef;
 import systems.courant.sd.model.def.ConnectorRoute;
 import systems.courant.sd.model.def.FlowDef;
 import systems.courant.sd.model.def.LookupTableDef;
@@ -532,10 +533,10 @@ public class VensimImporter implements ModelImporter {
         if (sketchLines.isEmpty()) {
             return;
         }
-        List<ViewDef> views = SketchParser.parse(
+        SketchParser.ParseResult result = SketchParser.parseWithComments(
                 sketchLines, stockNames, sketchFlowNames, lookupNames,
                 cldVariableNames);
-        for (ViewDef view : views) {
+        for (ViewDef view : result.views()) {
             builder.view(view);
             if (isCld) {
                 for (ConnectorRoute connector : view.connectors()) {
@@ -544,6 +545,9 @@ public class VensimImporter implements ModelImporter {
                             CausalLinkDef.Polarity.UNKNOWN));
                 }
             }
+        }
+        for (CommentDef comment : result.comments()) {
+            builder.comment(comment);
         }
     }
 

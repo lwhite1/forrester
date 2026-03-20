@@ -3,6 +3,7 @@ package systems.courant.sd.io.vensim;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import systems.courant.sd.model.def.CommentDef;
 import systems.courant.sd.model.def.ConnectorRoute;
 import systems.courant.sd.model.def.ElementPlacement;
 import systems.courant.sd.model.def.ElementType;
@@ -23,13 +24,27 @@ import java.util.Set;
  *   <li>{@code *View Name} — new view declaration</li>
  *   <li>{@code 10,id,name,x,y,...} — variable/stock placement</li>
  *   <li>{@code 11,id,...,x,y,...} — flow valve placement</li>
- *   <li>{@code 12,id,...} — cloud (source/sink, skipped)</li>
+ *   <li>{@code 12,id,0,x,y,...} — text annotation (text on next line)</li>
+ *   <li>{@code 12,id,48|2,...} — cloud (source/sink, skipped)</li>
  *   <li>{@code 1,id,from,to,...} — connector arrow</li>
  * </ul>
  */
 public final class SketchParser {
 
     private static final Logger logger = LoggerFactory.getLogger(SketchParser.class);
+
+    /**
+     * Result of parsing sketch lines, containing view definitions and comment definitions.
+     *
+     * @param views the parsed view definitions (element placements, connectors, flow routes)
+     * @param comments the comment definitions extracted from sketch text annotations
+     */
+    public record ParseResult(List<ViewDef> views, List<CommentDef> comments) {
+        public ParseResult {
+            views = List.copyOf(views);
+            comments = List.copyOf(comments);
+        }
+    }
 
     private SketchParser() {
     }
@@ -61,7 +76,28 @@ public final class SketchParser {
     public static List<ViewDef> parse(List<String> sketchLines, Set<String> stockNames,
                                        Set<String> flowNames, Set<String> lookupNames,
                                        Set<String> cldVariableNames) {
+        return parseWithComments(sketchLines, stockNames, flowNames, lookupNames,
+                cldVariableNames).views();
+    }
+
+    /**
+     * Parses sketch lines into view definitions and comment definitions.
+     *
+     * <p>Text annotations (type 12, subtype 0) are converted to {@link CommentDef} elements
+     * with their original canvas positions preserved as {@link ElementPlacement} entries.
+     *
+     * @param sketchLines the raw sketch lines from the .mdl file
+     * @param stockNames the set of known stock names (normalized) for type classification
+     * @param flowNames the set of known flow names (normalized) for type classification
+     * @param lookupNames the set of known lookup table names (normalized) for type classification
+     * @param cldVariableNames the set of CLD variable names (normalized) for type classification
+     * @return a parse result containing view definitions and comment definitions
+     */
+    public static ParseResult parseWithComments(List<String> sketchLines, Set<String> stockNames,
+                                                 Set<String> flowNames, Set<String> lookupNames,
+                                                 Set<String> cldVariableNames) {
         List<ViewDef> views = new ArrayList<>();
+        List<CommentDef> comments = new ArrayList<>();
 
         String currentViewName = null;
         List<ElementPlacement> elements = new ArrayList<>();
@@ -69,8 +105,8 @@ public final class SketchParser {
         List<FlowRoute> flowRoutes = new ArrayList<>();
         Map<String, String> idToName = new HashMap<>();
 
-        for (String line : sketchLines) {
-            String trimmed = line.strip();
+        for (int i = 0; i < sketchLines.size(); i++) {
+            String trimmed = sketchLines.get(i).strip();
             if (trimmed.isEmpty()) {
                 continue;
             }
@@ -108,12 +144,10 @@ public final class SketchParser {
                 case 10 -> parseElementLine(parts, elements, idToName,
                         stockNames, flowNames, lookupNames, cldVariableNames);
                 case 11 -> parseFlowValveLine(parts, elements, flowRoutes, idToName);
-                case 12 -> {
-                    // Cloud (source/sink boundary) — skip
-                }
+                case 12 -> i = parseType12Line(parts, i, sketchLines, elements, comments);
                 case 1 -> parseConnectorLine(parts, connectors, idToName);
                 default -> {
-                    // Other line types (annotations, etc.) — skip
+                    // Other line types — skip
                 }
             }
         }
@@ -123,7 +157,65 @@ public final class SketchParser {
             views.add(new ViewDef(currentViewName, elements, connectors, flowRoutes));
         }
 
-        return views;
+        return new ParseResult(views, comments);
+    }
+
+    /**
+     * Parses a type 12 line. Subtype 0 lines are text annotations with the text on the
+     * following line. Other subtypes (48, 2, etc.) are clouds and are skipped.
+     *
+     * @return the updated line index (advanced past the text line for subtype 0)
+     */
+    private static int parseType12Line(String[] parts, int currentIndex,
+                                        List<String> sketchLines,
+                                        List<ElementPlacement> elements,
+                                        List<CommentDef> comments) {
+        // Format: 12,id,subtype,x,y,width,height,...
+        if (parts.length < 7) {
+            return currentIndex;
+        }
+
+        int subtype;
+        try {
+            subtype = Integer.parseInt(parts[2].strip());
+        } catch (NumberFormatException e) {
+            return currentIndex;
+        }
+
+        if (subtype != 0) {
+            // Cloud (source/sink boundary) — skip
+            return currentIndex;
+        }
+
+        // Subtype 0 = text annotation; text is on the next line
+        double x;
+        double y;
+        double width;
+        double height;
+        try {
+            x = Double.parseDouble(parts[3].strip());
+            y = Double.parseDouble(parts[4].strip());
+            width = Double.parseDouble(parts[5].strip()) * 2;
+            height = Double.parseDouble(parts[6].strip()) * 2;
+        } catch (NumberFormatException e) {
+            return currentIndex;
+        }
+
+        // Read annotation text from next line
+        int nextIndex = currentIndex + 1;
+        if (nextIndex >= sketchLines.size()) {
+            return currentIndex;
+        }
+        String text = sketchLines.get(nextIndex).strip();
+        if (text.isEmpty()) {
+            return currentIndex;
+        }
+
+        String name = "Comment " + (comments.size() + 1);
+        comments.add(new CommentDef(name, text));
+        elements.add(new ElementPlacement(name, ElementType.COMMENT, x, y, width, height));
+
+        return nextIndex;
     }
 
     private static void parseElementLine(String[] parts, List<ElementPlacement> elements,
