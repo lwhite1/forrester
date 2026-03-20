@@ -244,10 +244,14 @@ public final class IndexedValue {
     /**
      * Divides this value by {@code other} with automatic broadcasting.
      * Result dimensions: left dimensions first, then right-only dimensions.
-     * Division by zero returns {@code Double.NaN}, consistent with ExprCompiler.
+     *
+     * <p>Division by zero follows IEEE 754 semantics: {@code 0/0 → NaN},
+     * {@code x/0 → ±Infinity}. This is intentional for simulation correctness
+     * and matches ExprCompiler behavior. Note that factory methods ({@link #scalar},
+     * {@link #of}) reject NaN/Infinity — arithmetic operations do not.
      */
     public IndexedValue divide(IndexedValue other) {
-        return binaryOp(other, (a, b) -> b == 0 ? Double.NaN : a / b);
+        return binaryOp(other, (a, b) -> a / b);
     }
 
     // --- Scalar convenience overloads ---

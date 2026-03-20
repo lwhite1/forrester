@@ -164,8 +164,14 @@ class IndexedValueTest {
         }
 
         @Test
-        void shouldReturnNaNForDivisionByZero() {
+        void shouldReturnInfinityForDivisionByZero() {
             IndexedValue result = IndexedValue.scalar(1).divide(IndexedValue.scalar(0));
+            assertTrue(Double.isInfinite(result.scalarValue()));
+        }
+
+        @Test
+        void shouldReturnNaNForZeroDividedByZero() {
+            IndexedValue result = IndexedValue.scalar(0).divide(IndexedValue.scalar(0));
             assertTrue(Double.isNaN(result.scalarValue()));
         }
     }
@@ -374,12 +380,12 @@ class IndexedValueTest {
         }
 
         @Test
-        void shouldReturnNaNForDivisionByZeroInBroadcast() {
+        void shouldReturnInfinityForDivisionByZeroInBroadcast() {
             IndexedValue a = IndexedValue.of(region, 10, 20, 30);
             IndexedValue b = IndexedValue.of(region, 1, 0, 3);
             IndexedValue result = a.divide(b);
             assertEquals(10.0, result.get(0));
-            assertTrue(Double.isNaN(result.get(1)));
+            assertTrue(Double.isInfinite(result.get(1)));
             assertEquals(10.0, result.get(2));
         }
     }
@@ -708,11 +714,11 @@ class IndexedValueTest {
         }
 
         @Test
-        void shouldReturnNaNForDivideByZeroDouble() {
+        void shouldReturnInfinityForDivideByZeroDouble() {
             IndexedValue v = IndexedValue.of(region, 10, 20, 30);
             IndexedValue result = v.divide(0);
             for (int i = 0; i < result.size(); i++) {
-                assertTrue(Double.isNaN(result.get(i)));
+                assertTrue(Double.isInfinite(result.get(i)));
             }
         }
     }
