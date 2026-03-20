@@ -157,12 +157,12 @@ public final class XmileExporter {
 
         Element start = doc.createElementNS(
                 XmileConstants.NAMESPACE_URI, XmileConstants.START);
-        start.setTextContent("0");
+        start.setTextContent(formatDouble(sim.initialTime()));
         simSpecs.appendChild(start);
 
         Element stop = doc.createElementNS(
                 XmileConstants.NAMESPACE_URI, XmileConstants.STOP);
-        stop.setTextContent(formatDouble(sim.duration()));
+        stop.setTextContent(formatDouble(sim.initialTime() + sim.duration()));
         simSpecs.appendChild(stop);
 
         Element dt = doc.createElementNS(

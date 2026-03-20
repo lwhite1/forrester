@@ -8,6 +8,7 @@ import systems.courant.sd.model.def.FlowDef;
 import systems.courant.sd.model.def.LookupTableDef;
 import systems.courant.sd.model.def.ModelDefinition;
 import systems.courant.sd.model.def.ModelDefinitionBuilder;
+import systems.courant.sd.model.def.SimulationSettings;
 import systems.courant.sd.model.def.StockDef;
 import systems.courant.sd.model.def.SubscriptDef;
 
@@ -405,6 +406,20 @@ class VensimExporterTest {
             assertThat(mdl).contains("INITIAL TIME  = 0");
             assertThat(mdl).contains("FINAL TIME  = 200");
             assertThat(mdl).contains("TIME STEP  = 1");
+        }
+
+        @Test
+        void shouldExportNonZeroInitialTime() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .defaultSimulation(new SimulationSettings(
+                            "Year", 50, "Year", 1.0, false, 1, 2000.0))
+                    .build();
+
+            String mdl = VensimExporter.toVensim(def);
+
+            assertThat(mdl).contains("INITIAL TIME  = 2000");
+            assertThat(mdl).contains("FINAL TIME  = 2050");
         }
 
         @Test
