@@ -62,6 +62,63 @@ class TrendTest {
     }
 
     @Test
+    void shouldSmoothAtCorrectRateWithSubUnitDt() {
+        // With DT=0.25, four integration steps should equal one DT=1.0 step.
+        // Run constant input=100, initialTrend=0 — trend should remain 0 regardless of DT.
+        int[] step1 = {0};
+        Trend trendDt1 = Trend.of(() -> 100, 5, 0, () -> step1[0]);
+        trendDt1.getCurrentValue(); // initialize
+
+        int[] step025 = {0};
+        double[] dt = {0.25};
+        Trend trendDt025 = Trend.of(() -> 100, 5, 0, dt, () -> step025[0]);
+        trendDt025.getCurrentValue(); // initialize
+
+        // Advance DT=1 by 1 step, DT=0.25 by 4 steps — should match
+        step1[0] = 1;
+        double val1 = trendDt1.getCurrentValue();
+        for (int i = 1; i <= 4; i++) {
+            step025[0] = i;
+            trendDt025.getCurrentValue();
+        }
+        double val025 = trendDt025.getCurrentValue();
+        assertEquals(val1, val025, 1e-12,
+                "Trend with DT=0.25 over 4 steps should match DT=1.0 over 1 step");
+    }
+
+    @Test
+    void shouldSmoothCorrectlyWithSubUnitDtAndChangingInput() {
+        // With DT=1.0: averageInput += (input - averageInput) * 1.0 / avgTime
+        // With DT=0.25 × 4 steps: should produce equivalent smoothing per time unit
+        double[] input1 = {100};
+        int[] step1 = {0};
+        Trend trendDt1 = Trend.of(() -> input1[0], 5, 0, () -> step1[0]);
+        trendDt1.getCurrentValue();
+
+        double[] input025 = {100};
+        int[] step025 = {0};
+        double[] dt = {0.25};
+        Trend trendDt025 = Trend.of(() -> input025[0], 5, 0, dt, () -> step025[0]);
+        trendDt025.getCurrentValue();
+
+        // Step both to see input change to 120
+        input1[0] = 120;
+        step1[0] = 1;
+        double val1 = trendDt1.getCurrentValue();
+
+        input025[0] = 120;
+        for (int i = 1; i <= 4; i++) {
+            step025[0] = i;
+            trendDt025.getCurrentValue();
+        }
+        double val025 = trendDt025.getCurrentValue();
+
+        // They won't be exactly equal (Euler vs 4 sub-steps) but should be close
+        assertEquals(val1, val025, 0.01,
+                "Trend with DT=0.25 should approximate DT=1.0 result");
+    }
+
+    @Test
     void shouldNotProduceExtremeValuesWhenAverageInputNearZero() {
         int[] step = {0};
         // Input that oscillates around zero: starts at a small positive value

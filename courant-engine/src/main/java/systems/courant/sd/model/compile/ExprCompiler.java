@@ -937,7 +937,8 @@ public class ExprCompiler {
         DoubleSupplier input = compileExpr(args.get(0));
         double averagingTime = evaluateConstant(args.get(1), "TREND averagingTime");
         double initialTrend = evaluateConstant(args.get(2), "TREND initialTrend");
-        Trend trend = Trend.of(input, averagingTime, initialTrend, context.getCurrentStep());
+        double[] dtH = context.getDtHolder();
+        Trend trend = Trend.of(input, averagingTime, initialTrend, dtH, context.getCurrentStep());
         resettables.add(trend);
         return trend::getCurrentValue;
     }
@@ -948,8 +949,9 @@ public class ExprCompiler {
         double averagingTime = evaluateConstant(args.get(1), "FORECAST averagingTime");
         double horizon = evaluateConstant(args.get(2), "FORECAST horizon");
         double initialTrend = evaluateConstant(args.get(3), "FORECAST initialTrend");
+        double[] dtH = context.getDtHolder();
         Forecast forecast = Forecast.of(input, averagingTime, horizon, initialTrend,
-                context.getCurrentStep());
+                dtH, context.getCurrentStep());
         resettables.add(forecast);
         return forecast::getCurrentValue;
     }

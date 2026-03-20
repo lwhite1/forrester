@@ -28,10 +28,13 @@ import java.util.function.LongSupplier;
  */
 public class Trend implements Formula, Resettable {
 
+    private static final double[] UNIT_DT = {1.0};
+
     private final DoubleSupplier input;
     private final double averagingTime;
     private final double initialTrend;
     private final LongSupplier currentStep;
+    private final double[] dtHolder;
 
     private double averageInput;
     private double trend;
@@ -40,7 +43,7 @@ public class Trend implements Formula, Resettable {
     private long lastStep = -1;
 
     private Trend(DoubleSupplier input, double averagingTime, double initialTrend,
-                  LongSupplier currentStep) {
+                  LongSupplier currentStep, double[] dtHolder) {
         Preconditions.checkNotNull(input, "input supplier must not be null");
         Preconditions.checkNotNull(currentStep, "currentStep supplier must not be null");
         Preconditions.checkArgument(averagingTime > 0,
@@ -49,10 +52,11 @@ public class Trend implements Formula, Resettable {
         this.averagingTime = averagingTime;
         this.initialTrend = initialTrend;
         this.currentStep = currentStep;
+        this.dtHolder = dtHolder;
     }
 
     /**
-     * Creates a TREND formula.
+     * Creates a TREND formula with unit DT (dt=1.0).
      *
      * @param input         supplies the current input value
      * @param averagingTime the smoothing time for trend estimation
@@ -62,7 +66,22 @@ public class Trend implements Formula, Resettable {
      */
     public static Trend of(DoubleSupplier input, double averagingTime, double initialTrend,
                            LongSupplier currentStep) {
-        return new Trend(input, averagingTime, initialTrend, currentStep);
+        return new Trend(input, averagingTime, initialTrend, currentStep, UNIT_DT);
+    }
+
+    /**
+     * Creates a TREND formula with runtime DT support.
+     *
+     * @param input         supplies the current input value
+     * @param averagingTime the smoothing time for trend estimation
+     * @param initialTrend  the initial fractional growth rate
+     * @param dtHolder      mutable single-element array holding the integration time step
+     * @param currentStep   supplies the current simulation timestep
+     * @return a new Trend formula
+     */
+    public static Trend of(DoubleSupplier input, double averagingTime, double initialTrend,
+                           double[] dtHolder, LongSupplier currentStep) {
+        return new Trend(input, averagingTime, initialTrend, currentStep, dtHolder);
     }
 
     /**
@@ -102,7 +121,7 @@ public class Trend implements Formula, Resettable {
             double currentInput = input.getAsDouble();
             for (long d = 0; d < delta; d++) {
                 double inputVal = (d < delta - 1) ? lastInputVal : currentInput;
-                averageInput += (inputVal - averageInput) / averagingTime;
+                averageInput += (inputVal - averageInput) * dtHolder[0] / averagingTime;
                 double denom = averageInput * averagingTime;
                 if (Math.abs(denom) > 1e-15) {
                     trend = (inputVal - averageInput) / denom;

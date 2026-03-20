@@ -79,6 +79,30 @@ class ForecastTest {
     }
 
     @Test
+    void shouldSmoothAtCorrectRateWithSubUnitDt() {
+        // With DT=0.25, four integration steps should equal one DT=1.0 step
+        // for constant input — forecast should be the same regardless of DT.
+        int[] step1 = {0};
+        Forecast fcDt1 = Forecast.of(() -> 100, 5, 3, 0, () -> step1[0]);
+        fcDt1.getCurrentValue();
+
+        int[] step025 = {0};
+        double[] dt = {0.25};
+        Forecast fcDt025 = Forecast.of(() -> 100, 5, 3, 0, dt, () -> step025[0]);
+        fcDt025.getCurrentValue();
+
+        step1[0] = 1;
+        double val1 = fcDt1.getCurrentValue();
+        for (int i = 1; i <= 4; i++) {
+            step025[0] = i;
+            fcDt025.getCurrentValue();
+        }
+        double val025 = fcDt025.getCurrentValue();
+        assertEquals(val1, val025, 1e-12,
+                "Forecast with DT=0.25 over 4 steps should match DT=1.0 over 1 step");
+    }
+
+    @Test
     void shouldNotProduceExtremeValuesWhenAverageInputNearZero() {
         int[] step = {0};
         double[] inputVal = {0.01};
