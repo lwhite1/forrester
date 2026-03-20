@@ -133,7 +133,7 @@ class CatalogModelValidationTest {
         if (REPORT.isEmpty()) {
             return;
         }
-        Path reportDir = Path.of("../devdocs/quality/demos");
+        Path reportDir = resolveReportDir();
         Files.createDirectories(reportDir);
         Path reportFile = reportDir.resolve("catalog-validation-report.txt");
 
@@ -164,6 +164,25 @@ class CatalogModelValidationTest {
             String json = new String(in.readAllBytes());
             return SERIALIZER.fromJson(json);
         }
+    }
+
+    /**
+     * Resolves the report output directory. Uses {@code git rev-parse --git-common-dir}
+     * to find the main repo root (works in both worktrees and the main checkout).
+     */
+    private static Path resolveReportDir() {
+        try {
+            Process p = new ProcessBuilder("git", "rev-parse", "--git-common-dir")
+                    .redirectErrorStream(true).start();
+            String output = new String(p.getInputStream().readAllBytes()).strip();
+            p.waitFor();
+            if (!output.isBlank()) {
+                // --git-common-dir returns path to .git; parent is repo root
+                return Path.of(output).getParent().resolve("devdocs/quality/demos");
+            }
+        } catch (Exception ignored) {
+        }
+        return Path.of("../devdocs/quality/demos");
     }
 
     private static String formatIssues(List<ValidationIssue> issues) {
