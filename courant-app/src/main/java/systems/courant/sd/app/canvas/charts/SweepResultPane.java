@@ -91,10 +91,13 @@ public class SweepResultPane extends BorderPane {
             series.setName(paramName + " = " + ChartUtils.formatNumber(paramValue));
 
             for (int s = 0; s < run.getStepCount(); s++) {
-                double value = isStock
-                        ? run.getStockValuesAtStep(s)[colIndex]
-                        : run.getVariableValuesAtStep(s)[colIndex];
-                series.getData().add(new XYChart.Data<>(run.getStep(s), value));
+                double[] values = isStock
+                        ? run.getStockValuesAtStep(s)
+                        : run.getVariableValuesAtStep(s);
+                if (colIndex >= values.length) {
+                    break;
+                }
+                series.getData().add(new XYChart.Data<>(run.getStep(s), values[colIndex]));
             }
             allSeries.add(series);
         }
