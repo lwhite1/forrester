@@ -87,6 +87,19 @@ public class Model extends Element {
             for (Flow flow : stock.getOutflows()) {
                 flow.setSource(null);
             }
+            // Remove flows that are fully orphaned (both endpoints null)
+            List<Flow> orphaned = new ArrayList<>();
+            for (Flow flow : flows) {
+                if (flow.getSource() == null && flow.getSink() == null) {
+                    orphaned.add(flow);
+                }
+            }
+            for (Flow flow : orphaned) {
+                flows.remove(flow);
+                flowIdentity.remove(flow);
+                flowNames.remove(flow.getName());
+                topLevelFlowNames.remove(flow.getName());
+            }
         }
     }
 
