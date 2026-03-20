@@ -38,7 +38,8 @@ public class CanvasState {
     private final Map<String, ElementType> types = new LinkedHashMap<>();
     private final Set<String> selection = new LinkedHashSet<>();
     private final SequencedSet<String> drawOrder = new LinkedHashSet<>();
-    private volatile List<String> drawOrderCache;
+    private final Object drawOrderLock = new Object();
+    private List<String> drawOrderCache;
     private String viewName = DEFAULT_VIEW_NAME;
 
     /**
@@ -49,26 +50,28 @@ public class CanvasState {
         types.clear();
         sizes.clear();
         selection.clear();
-        drawOrder.clear();
-        drawOrderCache = null;
         viewName = view.name();
 
-        for (ElementPlacement ep : view.elements()) {
-            positions.put(ep.name(), new Position(ep.x(), ep.y()));
-            types.put(ep.name(), ep.type());
-            if (ep.hasCustomSize()) {
-                sizes.put(ep.name(), new Size(ep.width(), ep.height()));
-            } else if (ep.type() == ElementType.CLD_VARIABLE) {
-                double w = LayoutMetrics.cldVarWidthForName(ep.name());
-                sizes.put(ep.name(), new Size(w, LayoutMetrics.CLD_VAR_HEIGHT));
-            } else if (ep.type() == ElementType.AUX) {
-                double w = LayoutMetrics.auxWidthForName(ep.name());
-                sizes.put(ep.name(), new Size(w, LayoutMetrics.AUX_HEIGHT));
-            } else if (ep.type() == ElementType.LOOKUP) {
-                double w = LayoutMetrics.lookupWidthForName(ep.name());
-                sizes.put(ep.name(), new Size(w, LayoutMetrics.LOOKUP_HEIGHT));
+        synchronized (drawOrderLock) {
+            drawOrder.clear();
+            drawOrderCache = null;
+            for (ElementPlacement ep : view.elements()) {
+                positions.put(ep.name(), new Position(ep.x(), ep.y()));
+                types.put(ep.name(), ep.type());
+                if (ep.hasCustomSize()) {
+                    sizes.put(ep.name(), new Size(ep.width(), ep.height()));
+                } else if (ep.type() == ElementType.CLD_VARIABLE) {
+                    double w = LayoutMetrics.cldVarWidthForName(ep.name());
+                    sizes.put(ep.name(), new Size(w, LayoutMetrics.CLD_VAR_HEIGHT));
+                } else if (ep.type() == ElementType.AUX) {
+                    double w = LayoutMetrics.auxWidthForName(ep.name());
+                    sizes.put(ep.name(), new Size(w, LayoutMetrics.AUX_HEIGHT));
+                } else if (ep.type() == ElementType.LOOKUP) {
+                    double w = LayoutMetrics.lookupWidthForName(ep.name());
+                    sizes.put(ep.name(), new Size(w, LayoutMetrics.LOOKUP_HEIGHT));
+                }
+                drawOrder.add(ep.name());
             }
-            drawOrder.add(ep.name());
         }
     }
 
@@ -158,12 +161,14 @@ public class CanvasState {
      * Returns all element names in draw order.
      */
     public List<String> getDrawOrder() {
-        List<String> cached = drawOrderCache;
-        if (cached == null) {
-            cached = List.copyOf(drawOrder);
-            drawOrderCache = cached;
+        synchronized (drawOrderLock) {
+            List<String> cached = drawOrderCache;
+            if (cached == null) {
+                cached = List.copyOf(drawOrder);
+                drawOrderCache = cached;
+            }
+            return cached;
         }
-        return cached;
     }
 
     /**
@@ -242,8 +247,10 @@ public class CanvasState {
     public void addElement(String name, ElementType type, double x, double y) {
         positions.put(name, new Position(x, y));
         types.put(name, type);
-        drawOrder.add(name);
-        drawOrderCache = null;
+        synchronized (drawOrderLock) {
+            drawOrder.add(name);
+            drawOrderCache = null;
+        }
     }
 
     /**
@@ -267,13 +274,15 @@ public class CanvasState {
             sizes.put(newName, size);
         }
 
-        LinkedHashSet<String> reordered = new LinkedHashSet<>(drawOrder.size());
-        for (String name : drawOrder) {
-            reordered.add(name.equals(oldName) ? newName : name);
+        synchronized (drawOrderLock) {
+            LinkedHashSet<String> reordered = new LinkedHashSet<>(drawOrder.size());
+            for (String name : drawOrder) {
+                reordered.add(name.equals(oldName) ? newName : name);
+            }
+            drawOrder.clear();
+            drawOrder.addAll(reordered);
+            drawOrderCache = null;
         }
-        drawOrder.clear();
-        drawOrder.addAll(reordered);
-        drawOrderCache = null;
 
         if (selection.remove(oldName)) {
             selection.add(newName);
@@ -288,7 +297,11 @@ public class CanvasState {
      */
     public ViewDef toViewDef() {
         List<ElementPlacement> placements = new ArrayList<>();
-        for (String name : drawOrder) {
+        List<String> order;
+        synchronized (drawOrderLock) {
+            order = List.copyOf(drawOrder);
+        }
+        for (String name : order) {
             ElementType type = types.get(name);
             if (type == null) {
                 continue;
@@ -312,8 +325,10 @@ public class CanvasState {
         positions.remove(name);
         types.remove(name);
         sizes.remove(name);
-        drawOrder.remove(name);
-        drawOrderCache = null;
+        synchronized (drawOrderLock) {
+            drawOrder.remove(name);
+            drawOrderCache = null;
+        }
         selection.remove(name);
     }
 }
