@@ -8,6 +8,7 @@ import systems.courant.sd.model.def.LookupTableDef;
 import systems.courant.sd.model.def.ModelDefinition;
 import systems.courant.sd.model.def.ModelDefinitionBuilder;
 import systems.courant.sd.model.def.ModuleInstanceDef;
+import systems.courant.sd.model.def.SimulationSettings;
 import systems.courant.sd.model.def.StockDef;
 
 import org.junit.jupiter.api.DisplayName;
@@ -41,6 +42,19 @@ class XmileExporterTest {
             assertThat(xml).contains("<name>Test</name>");
             assertThat(xml).contains("time_units=\"day\"");
             assertThat(xml).contains("<stop>100</stop>");
+        }
+
+        @Test
+        void shouldExportNonZeroInitialTime() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .defaultSimulation(new SimulationSettings(
+                            "Year", 50, "Year", 1.0, false, 1, 2000.0))
+                    .build();
+
+            String xml = XmileExporter.toXmile(def);
+            assertThat(xml).contains("<start>2000</start>");
+            assertThat(xml).contains("<stop>2050</stop>");
         }
 
         @Test

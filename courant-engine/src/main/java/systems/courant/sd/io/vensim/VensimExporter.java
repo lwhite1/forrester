@@ -358,11 +358,12 @@ public final class VensimExporter {
         String durationUnit = sim != null ? sim.durationUnit() : "Day";
 
         // INITIAL TIME
-        sb.append(buildControlBlock("INITIAL TIME", "0", durationUnit,
+        double initialTime = sim != null ? sim.initialTime() : 0;
+        sb.append(buildControlBlock("INITIAL TIME", formatDouble(initialTime), durationUnit,
                 "The initial time for the simulation."));
 
         // FINAL TIME
-        sb.append(buildControlBlock("FINAL TIME", formatDouble(duration), durationUnit,
+        sb.append(buildControlBlock("FINAL TIME", formatDouble(initialTime + duration), durationUnit,
                 "The final time for the simulation."));
 
         // TIME STEP
