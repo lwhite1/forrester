@@ -234,7 +234,7 @@ public final class CausalLinkGeometry {
         double px = -ny;
         double py = nx;
 
-        double r = 1.5 * Math.max(halfW, halfH);
+        double r = SELF_LOOP_RADIUS * 1.5;
         double spread = Math.max(halfW, halfH) * 0.5;
 
         double startX = cx + px * spread;
@@ -290,27 +290,16 @@ public final class CausalLinkGeometry {
     ) {
         /**
          * Returns the centroid to use for an edge between the two named nodes.
-         * Same-loop edges use the loop centroid; cross-loop, shared-node, or
-         * non-loop edges use the global centroid.
+         * Always uses the global centroid for consistency — using per-loop
+         * centroids causes visual instability when only some nodes are in loops.
          */
         public double[] centroidFor(String fromName, String toName) {
-            if (loopInfo != null && !loopInfo.isEmpty()) {
-                if (!loopInfo.isSharedNode(fromName) && !loopInfo.isSharedNode(toName)) {
-                    int common = loopInfo.commonLoopIndex(fromName, toName);
-                    if (common >= 0) {
-                        double[] lc = loopCentroids.get(common);
-                        if (lc != null) {
-                            return lc;
-                        }
-                    }
-                }
-            }
             return new double[]{globalCentroidX, globalCentroidY};
         }
 
         /**
          * Returns the bulge factor (k) for an edge between the two named nodes.
-         * Same-loop: 0.6, cross-loop: 0.25, default: 0.35.
+         * Same-loop: 0.45, cross-loop: 0.25, default: 0.35.
          */
         public double bulgeFactorFor(String fromName, String toName) {
             if (loopInfo == null || loopInfo.isEmpty()) {
@@ -320,7 +309,7 @@ public final class CausalLinkGeometry {
                 return 0.25;
             }
             if (loopInfo.commonLoopIndex(fromName, toName) >= 0) {
-                return 0.6;
+                return 0.45;
             }
             if (!loopInfo.loopsOf(fromName).isEmpty()
                     && !loopInfo.loopsOf(toName).isEmpty()) {
@@ -331,18 +320,9 @@ public final class CausalLinkGeometry {
 
         /**
          * Returns the centroid to use for a self-loop on the named node.
+         * Uses global centroid for consistency with regular edges.
          */
         public double[] selfLoopCentroid(String name) {
-            if (loopInfo != null && !loopInfo.isEmpty()) {
-                Set<Integer> loops = loopInfo.loopsOf(name);
-                if (!loops.isEmpty()) {
-                    int idx = loops.iterator().next();
-                    double[] lc = loopCentroids.get(idx);
-                    if (lc != null) {
-                        return lc;
-                    }
-                }
-            }
             return new double[]{globalCentroidX, globalCentroidY};
         }
     }

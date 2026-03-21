@@ -178,9 +178,9 @@ class CausalLinkGeometryTest {
             CausalLinkGeometry.LoopContext loopCtx = new CausalLinkGeometry.LoopContext(
                     loopInfo, loopCentroids, 100, 100);
 
-            // All in same SCC → k=0.6
-            assertThat(loopCtx.bulgeFactorFor("A", "B")).isEqualTo(0.6);
-            assertThat(loopCtx.bulgeFactorFor("B", "C")).isEqualTo(0.6);
+            // All in same SCC → k=0.45
+            assertThat(loopCtx.bulgeFactorFor("A", "B")).isEqualTo(0.45);
+            assertThat(loopCtx.bulgeFactorFor("B", "C")).isEqualTo(0.45);
         }
 
         @Test

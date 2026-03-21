@@ -1,101 +1,96 @@
 {
-  "name" : "0601Cocaine_CLD",
-  "cldVariables" : [ {
-    "name" : "Cocaine",
-    "comment" : "Cocaine"
-  }, {
-    "name" : "confiscation",
-    "comment" : "confiscation"
-  }, {
-    "name" : "confiscation rate",
-    "comment" : "confiscation rate"
-  }, {
-    "name" : "imports",
-    "comment" : "imports"
-  }, {
-    "name" : "use",
-    "comment" : "use"
-  } ],
-  "causalLinks" : [ {
-    "from" : "imports",
-    "to" : "Cocaine",
-    "polarity" : "POSITIVE"
-  }, {
-    "from" : "use",
-    "to" : "Cocaine",
-    "polarity" : "NEGATIVE"
-  }, {
-    "from" : "Cocaine",
-    "to" : "confiscation",
-    "polarity" : "POSITIVE"
-  }, {
-    "from" : "confiscation",
-    "to" : "Cocaine",
-    "polarity" : "NEGATIVE"
-  }, {
-    "from" : "confiscation rate",
-    "to" : "confiscation",
-    "polarity" : "POSITIVE"
-  } ],
-  "views" : [ {
-    "name" : "View 1",
-    "elements" : [ {
-      "name" : "Cocaine",
-      "type" : "cld_variable",
-      "x" : 307.0,
-      "y" : 204.0
-    }, {
-      "name" : "imports",
-      "type" : "cld_variable",
-      "x" : 147.0,
-      "y" : 204.0
-    }, {
-      "name" : "confiscation",
-      "type" : "cld_variable",
-      "x" : 512.0,
-      "y" : 202.0
-    }, {
-      "name" : "use",
-      "type" : "cld_variable",
-      "x" : 306.0,
-      "y" : 311.0
-    }, {
-      "name" : "confiscation rate",
-      "type" : "cld_variable",
-      "x" : 570.0,
-      "y" : 298.0
-    } ],
-    "connectors" : [ {
-      "from" : "imports",
-      "to" : "Cocaine",
-      "polarity" : "+"
-    }, {
-      "from" : "use",
-      "to" : "Cocaine",
-      "polarity" : "-"
-    }, {
-      "from" : "Cocaine",
-      "to" : "confiscation",
-      "polarity" : "+"
-    }, {
-      "from" : "confiscation",
-      "to" : "Cocaine",
-      "polarity" : "-"
-    }, {
-      "from" : "confiscation rate",
-      "to" : "confiscation",
-      "polarity" : "+"
-    } ]
-  } ],
-  "defaultSimulation" : {
-    "timeStep" : "Month",
-    "duration" : 100.0,
-    "durationUnit" : "Month"
+  "name": "0601Cocaine_CLD",
+  "cldVariables": [
+    {
+      "name": "Cocaine",
+      "comment": "Cocaine"
+    },
+    {
+      "name": "confiscation",
+      "comment": "confiscation"
+    },
+    {
+      "name": "confiscation rate",
+      "comment": "confiscation rate"
+    },
+    {
+      "name": "imports",
+      "comment": "imports"
+    },
+    {
+      "name": "use",
+      "comment": "use"
+    }
+  ],
+  "causalLinks": [
+    {
+      "from": "imports",
+      "to": "Cocaine",
+      "polarity": "POSITIVE"
+    },
+    {
+      "from": "use",
+      "to": "Cocaine",
+      "polarity": "NEGATIVE"
+    },
+    {
+      "from": "Cocaine",
+      "to": "confiscation",
+      "polarity": "POSITIVE"
+    },
+    {
+      "from": "confiscation",
+      "to": "Cocaine",
+      "polarity": "NEGATIVE"
+    },
+    {
+      "from": "confiscation rate",
+      "to": "confiscation",
+      "polarity": "POSITIVE"
+    }
+  ],
+  "views": [
+    {
+      "name": "View 1",
+      "elements": [],
+      "connectors": [
+        {
+          "from": "imports",
+          "to": "Cocaine",
+          "polarity": "+"
+        },
+        {
+          "from": "use",
+          "to": "Cocaine",
+          "polarity": "-"
+        },
+        {
+          "from": "Cocaine",
+          "to": "confiscation",
+          "polarity": "+"
+        },
+        {
+          "from": "confiscation",
+          "to": "Cocaine",
+          "polarity": "-"
+        },
+        {
+          "from": "confiscation rate",
+          "to": "confiscation",
+          "polarity": "+"
+        }
+      ]
+    }
+  ],
+  "defaultSimulation": {
+    "timeStep": "Month",
+    "duration": 100.0,
+    "durationUnit": "Month"
   },
-  "metadata" : {
-    "author" : "Dr. Erik Pruyt",
-    "source" : "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
-    "license" : "CC-BY-NC-SA-4.0",
-    "url" : "https://simulation.tudelft.nl/SD/model_files_nested/06_01"
+  "metadata": {
+    "author": "Dr. Erik Pruyt",
+    "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
+    "license": "CC-BY-NC-SA-4.0",
+    "url": "https://simulation.tudelft.nl/SD/model_files_nested/06_01"
   }
 }
