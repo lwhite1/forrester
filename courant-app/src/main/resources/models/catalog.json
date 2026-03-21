@@ -459,54 +459,6 @@
       }
     },
     {
-      "id": "vensim-bpr0",
-      "name": "BPR0",
-      "displayName": "BPR0",
-      "description": "Model 'BPR0' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-      "category": "sample/bpr",
-      "difficulty": "intermediate",
-      "path": "sample/bpr/VensimBpr0.json",
-      "tags": [],
-      "elements": {
-        "stocks": 0,
-        "flows": 0,
-        "cldVariables": 0,
-        "causalLinks": 8
-      }
-    },
-    {
-      "id": "vensim-bpr1",
-      "name": "BPR1",
-      "displayName": "BPR1",
-      "description": "Model 'BPR1' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-      "category": "sample/bpr",
-      "difficulty": "intermediate",
-      "path": "sample/bpr/VensimBpr1.json",
-      "tags": [],
-      "elements": {
-        "stocks": 0,
-        "flows": 0,
-        "cldVariables": 0,
-        "causalLinks": 9
-      }
-    },
-    {
-      "id": "vensim-bpr2",
-      "name": "BPR2",
-      "displayName": "BPR2",
-      "description": "Model 'BPR2' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-      "category": "sample/bpr",
-      "difficulty": "intermediate",
-      "path": "sample/bpr/VensimBpr2.json",
-      "tags": [],
-      "elements": {
-        "stocks": 0,
-        "flows": 0,
-        "variables": 0,
-        "parameters": 0
-      }
-    },
-    {
       "id": "vensim-bpr3",
       "name": "BPR3",
       "displayName": "BPR3",
@@ -987,22 +939,6 @@
       }
     },
     {
-      "id": "vensim-market",
-      "name": "MARKET",
-      "displayName": "MARKET",
-      "description": "Model 'MARKET' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-      "category": "sample/market",
-      "difficulty": "intermediate",
-      "path": "sample/market/VensimMarket.json",
-      "tags": [],
-      "elements": {
-        "stocks": 0,
-        "flows": 0,
-        "variables": 0,
-        "parameters": 0
-      }
-    },
-    {
       "id": "vensim-market2",
       "name": "MARKET2",
       "displayName": "MARKET2",
@@ -1099,22 +1035,6 @@
       }
     },
     {
-      "id": "vensim-worldappedited",
-      "name": "WORLDAPPEDITED",
-      "displayName": "WORLDAPPEDITED",
-      "description": "Model 'WORLDAPPEDITED' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-      "category": "sample/venapp",
-      "difficulty": "intermediate",
-      "path": "sample/venapp/VensimWorldappedited.json",
-      "tags": [],
-      "elements": {
-        "stocks": 0,
-        "flows": 0,
-        "variables": 0,
-        "parameters": 0
-      }
-    },
-    {
       "id": "vensim-change",
       "name": "change",
       "displayName": "change",
@@ -1131,22 +1051,6 @@
       }
     },
     {
-      "id": "vensim-flicker",
-      "name": "flicker",
-      "displayName": "flicker",
-      "description": "Model 'flicker' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-      "category": "sample/venapp",
-      "difficulty": "intermediate",
-      "path": "sample/venapp/VensimFlicker.json",
-      "tags": [],
-      "elements": {
-        "stocks": 0,
-        "flows": 0,
-        "variables": 0,
-        "parameters": 0
-      }
-    },
-    {
       "id": "vensim-mplayer",
       "name": "mplayer",
       "displayName": "mplayer",
@@ -1154,22 +1058,6 @@
       "category": "sample/venapp",
       "difficulty": "intermediate",
       "path": "sample/venapp/VensimMplayer.json",
-      "tags": [],
-      "elements": {
-        "stocks": 0,
-        "flows": 0,
-        "variables": 0,
-        "parameters": 0
-      }
-    },
-    {
-      "id": "vensim-world303scenarios",
-      "name": "World3_03_Scenarios",
-      "displayName": "World3_03_Scenarios",
-      "description": "Model 'World3_03_Scenarios' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-      "category": "sample/wrld3-03",
-      "difficulty": "intermediate",
-      "path": "sample/wrld3-03/VensimWorld303Scenarios.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -1211,38 +1099,6 @@
       }
     },
     {
-      "id": "vensim-project",
-      "name": "PROJECT",
-      "displayName": "PROJECT",
-      "description": "Model 'PROJECT' from Vensim User Guide, Chapter 04. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-      "category": "userguide/chap04/complete",
-      "difficulty": "intermediate",
-      "path": "userguide/chap04/complete/VensimProject.json",
-      "tags": [],
-      "elements": {
-        "stocks": 0,
-        "flows": 0,
-        "cldVariables": 0,
-        "causalLinks": 10
-      }
-    },
-    {
-      "id": "vensim-customer",
-      "name": "CUSTOMER",
-      "displayName": "CUSTOMER",
-      "description": "Model 'CUSTOMER' from Vensim User Guide, Chapter 05. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-      "category": "userguide/chap05/complete",
-      "difficulty": "intermediate",
-      "path": "userguide/chap05/complete/VensimCustomer.json",
-      "tags": [],
-      "elements": {
-        "stocks": 0,
-        "flows": 0,
-        "variables": 0,
-        "parameters": 0
-      }
-    },
-    {
       "id": "vensim-pop",
       "name": "POP",
       "displayName": "POP",
@@ -1259,38 +1115,6 @@
       }
     },
     {
-      "id": "vensim-price1",
-      "name": "price1",
-      "displayName": "price1",
-      "description": "Model 'price1' from Vensim User Guide, Chapter 07. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-      "category": "userguide/chap07/complete",
-      "difficulty": "intermediate",
-      "path": "userguide/chap07/complete/VensimPrice1.json",
-      "tags": [],
-      "elements": {
-        "stocks": 0,
-        "flows": 0,
-        "variables": 0,
-        "parameters": 0
-      }
-    },
-    {
-      "id": "vensim-price2",
-      "name": "price2",
-      "displayName": "price2",
-      "description": "Model 'price2' from Vensim User Guide, Chapter 07. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-      "category": "userguide/chap07/complete",
-      "difficulty": "intermediate",
-      "path": "userguide/chap07/complete/VensimPrice2.json",
-      "tags": [],
-      "elements": {
-        "stocks": 0,
-        "flows": 0,
-        "variables": 0,
-        "parameters": 0
-      }
-    },
-    {
       "id": "vensim-price3",
       "name": "price3",
       "displayName": "price3",
@@ -1298,38 +1122,6 @@
       "category": "userguide/chap07/complete",
       "difficulty": "intermediate",
       "path": "userguide/chap07/complete/VensimPrice3.json",
-      "tags": [],
-      "elements": {
-        "stocks": 0,
-        "flows": 0,
-        "variables": 0,
-        "parameters": 0
-      }
-    },
-    {
-      "id": "vensim-rabbit",
-      "name": "RABBIT",
-      "displayName": "RABBIT",
-      "description": "Model 'RABBIT' from Vensim User Guide, Chapter 08. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-      "category": "userguide/chap08/complete",
-      "difficulty": "intermediate",
-      "path": "userguide/chap08/complete/VensimRabbit.json",
-      "tags": [],
-      "elements": {
-        "stocks": 0,
-        "flows": 0,
-        "variables": 0,
-        "parameters": 0
-      }
-    },
-    {
-      "id": "vensim-rabbit2",
-      "name": "RABBIT2",
-      "displayName": "RABBIT2",
-      "description": "Model 'RABBIT2' from Vensim User Guide, Chapter 08. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-      "category": "userguide/chap08/complete",
-      "difficulty": "intermediate",
-      "path": "userguide/chap08/complete/VensimRabbit2.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -1371,38 +1163,6 @@
       }
     },
     {
-      "id": "vensim-cust1",
-      "name": "CUST1",
-      "displayName": "CUST1",
-      "description": "Model 'CUST1' from Vensim User Guide, Chapter 09. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-      "category": "userguide/chap09/complete",
-      "difficulty": "intermediate",
-      "path": "userguide/chap09/complete/VensimCust1.json",
-      "tags": [],
-      "elements": {
-        "stocks": 0,
-        "flows": 0,
-        "variables": 0,
-        "parameters": 0
-      }
-    },
-    {
-      "id": "vensim-cust2",
-      "name": "CUST2",
-      "displayName": "CUST2",
-      "description": "Model 'CUST2' from Vensim User Guide, Chapter 09. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-      "category": "userguide/chap09/complete",
-      "difficulty": "intermediate",
-      "path": "userguide/chap09/complete/VensimCust2.json",
-      "tags": [],
-      "elements": {
-        "stocks": 0,
-        "flows": 0,
-        "variables": 0,
-        "parameters": 0
-      }
-    },
-    {
       "id": "vensim-cust3",
       "name": "CUST3",
       "displayName": "CUST3",
@@ -1410,54 +1170,6 @@
       "category": "userguide/chap09/complete",
       "difficulty": "intermediate",
       "path": "userguide/chap09/complete/VensimCust3.json",
-      "tags": [],
-      "elements": {
-        "stocks": 0,
-        "flows": 0,
-        "variables": 0,
-        "parameters": 0
-      }
-    },
-    {
-      "id": "vensim-wom1",
-      "name": "WOM1",
-      "displayName": "WOM1",
-      "description": "Model 'WOM1' from Vensim User Guide, Chapter 12. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-      "category": "userguide/chap12",
-      "difficulty": "intermediate",
-      "path": "userguide/chap12/VensimWom1.json",
-      "tags": [],
-      "elements": {
-        "stocks": 0,
-        "flows": 0,
-        "variables": 0,
-        "parameters": 0
-      }
-    },
-    {
-      "id": "vensim-wom2",
-      "name": "WOM2",
-      "displayName": "WOM2",
-      "description": "Model 'WOM2' from Vensim User Guide, Chapter 12. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-      "category": "userguide/chap12/complete",
-      "difficulty": "intermediate",
-      "path": "userguide/chap12/complete/VensimWom2.json",
-      "tags": [],
-      "elements": {
-        "stocks": 0,
-        "flows": 0,
-        "variables": 0,
-        "parameters": 0
-      }
-    },
-    {
-      "id": "vensim-wom3",
-      "name": "WOM3",
-      "displayName": "WOM3",
-      "description": "Model 'WOM3' from Vensim User Guide, Chapter 12. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-      "category": "userguide/chap12/complete",
-      "difficulty": "intermediate",
-      "path": "userguide/chap12/complete/VensimWom3.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -1483,38 +1195,6 @@
       }
     },
     {
-      "id": "vensim-arms1",
-      "name": "arms1",
-      "displayName": "arms1",
-      "description": "Model 'arms1' from Vensim User Guide, Chapter 13. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-      "category": "userguide/chap13",
-      "difficulty": "intermediate",
-      "path": "userguide/chap13/VensimArms1.json",
-      "tags": [],
-      "elements": {
-        "stocks": 0,
-        "flows": 0,
-        "variables": 0,
-        "parameters": 0
-      }
-    },
-    {
-      "id": "vensim-arms2",
-      "name": "arms2",
-      "displayName": "arms2",
-      "description": "Model 'arms2' from Vensim User Guide, Chapter 13. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-      "category": "userguide/chap13/complete",
-      "difficulty": "intermediate",
-      "path": "userguide/chap13/complete/VensimArms2.json",
-      "tags": [],
-      "elements": {
-        "stocks": 0,
-        "flows": 0,
-        "variables": 0,
-        "parameters": 0
-      }
-    },
-    {
       "id": "vensim-arms3",
       "name": "arms3",
       "displayName": "arms3",
@@ -1522,54 +1202,6 @@
       "category": "userguide/chap13/complete",
       "difficulty": "intermediate",
       "path": "userguide/chap13/complete/VensimArms3.json",
-      "tags": [],
-      "elements": {
-        "stocks": 0,
-        "flows": 0,
-        "variables": 0,
-        "parameters": 0
-      }
-    },
-    {
-      "id": "vensim-yeast1",
-      "name": "YEAST1",
-      "displayName": "YEAST1",
-      "description": "Model 'YEAST1' from Vensim User Guide, Chapter 14. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-      "category": "userguide/chap14",
-      "difficulty": "intermediate",
-      "path": "userguide/chap14/VensimYeast1.json",
-      "tags": [],
-      "elements": {
-        "stocks": 0,
-        "flows": 0,
-        "variables": 0,
-        "parameters": 0
-      }
-    },
-    {
-      "id": "vensim-yeast2",
-      "name": "YEAST2",
-      "displayName": "YEAST2",
-      "description": "Model 'YEAST2' from Vensim User Guide, Chapter 14. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-      "category": "userguide/chap14",
-      "difficulty": "intermediate",
-      "path": "userguide/chap14/VensimYeast2.json",
-      "tags": [],
-      "elements": {
-        "stocks": 0,
-        "flows": 0,
-        "variables": 0,
-        "parameters": 0
-      }
-    },
-    {
-      "id": "vensim-yeast3",
-      "name": "YEAST3",
-      "displayName": "YEAST3",
-      "description": "Model 'YEAST3' from Vensim User Guide, Chapter 14. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-      "category": "userguide/chap14",
-      "difficulty": "intermediate",
-      "path": "userguide/chap14/VensimYeast3.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -1627,38 +1259,6 @@
       }
     },
     {
-      "id": "vensim-proj1",
-      "name": "PROJ1",
-      "displayName": "PROJ1",
-      "description": "Model 'PROJ1' from Vensim User Guide, Chapter 17. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-      "category": "userguide/chap17",
-      "difficulty": "intermediate",
-      "path": "userguide/chap17/VensimProj1.json",
-      "tags": [],
-      "elements": {
-        "stocks": 0,
-        "flows": 0,
-        "variables": 0,
-        "parameters": 0
-      }
-    },
-    {
-      "id": "vensim-proj2",
-      "name": "PROJ2",
-      "displayName": "PROJ2",
-      "description": "Model 'PROJ2' from Vensim User Guide, Chapter 17. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-      "category": "userguide/chap17/complete",
-      "difficulty": "intermediate",
-      "path": "userguide/chap17/complete/VensimProj2.json",
-      "tags": [],
-      "elements": {
-        "stocks": 0,
-        "flows": 0,
-        "variables": 0,
-        "parameters": 0
-      }
-    },
-    {
       "id": "vensim-proj3",
       "name": "PROJ3",
       "displayName": "PROJ3",
@@ -1704,38 +1304,6 @@
         "flows": 0,
         "variables": 0,
         "parameters": 0
-      }
-    },
-    {
-      "id": "vensim-mentalsimulation01",
-      "name": "MentalSimulation01",
-      "displayName": "MentalSimulation01",
-      "description": "Model 'MentalSimulation01' from Vensim User Guide, Chapter 20. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-      "category": "userguide/chap20/complete",
-      "difficulty": "intermediate",
-      "path": "userguide/chap20/complete/VensimMentalsimulation01.json",
-      "tags": [],
-      "elements": {
-        "stocks": 0,
-        "flows": 0,
-        "variables": 0,
-        "parameters": 0
-      }
-    },
-    {
-      "id": "vensim-repair01",
-      "name": "repair01",
-      "displayName": "repair01",
-      "description": "Model 'repair01' from Vensim User Guide, Chapter 20. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-      "category": "userguide/chap20/complete",
-      "difficulty": "intermediate",
-      "path": "userguide/chap20/complete/VensimRepair01.json",
-      "tags": [],
-      "elements": {
-        "stocks": 0,
-        "flows": 0,
-        "cldVariables": 0,
-        "causalLinks": 6
       }
     },
     {
