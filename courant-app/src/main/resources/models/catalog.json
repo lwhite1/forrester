@@ -80,7 +80,7 @@
       "id": "cocaine-flow",
       "name": "Cocaine Flow",
       "displayName": "Cocaine Flow",
-      "description": "Simple drug flow model with import, use, and confiscation rates demonstrating balancing feedback",
+      "description": "Simple stock-flow model of cocaine usage dynamics with one stock representing users",
       "category": "introductory",
       "difficulty": "introductory",
       "path": "introductory/cocaine-flow.json",
@@ -89,10 +89,10 @@
         "balancing-feedback"
       ],
       "elements": {
-        "stocks": 1,
-        "flows": 3,
-        "variables": 1,
-        "parameters": 3
+        "stocks": 0,
+        "flows": 0,
+        "variables": 0,
+        "parameters": 0
       }
     },
     {
@@ -138,19 +138,19 @@
       "id": "muskrat-plague",
       "name": "Muskrat Plague",
       "displayName": "Muskrat Plague",
-      "description": "Muskrat population dynamics with trapping and licensing, illustrating negative feedback through harvest pressure",
+      "description": "Models muskrat population growth and plague-driven collapse in the Netherlands",
       "category": "ecology",
-      "difficulty": "intermediate",
+      "difficulty": "introductory",
       "path": "ecology/muskrat-plague.json",
       "tags": [
         "population-dynamics",
         "negative-feedback"
       ],
       "elements": {
-        "stocks": 1,
-        "flows": 2,
-        "variables": 3,
-        "parameters": 5
+        "stocks": 0,
+        "flows": 0,
+        "variables": 0,
+        "parameters": 0
       }
     },
     {
@@ -176,7 +176,7 @@
       "id": "bluefin-tuna-overfishing",
       "name": "Bluefin Tuna Overfishing",
       "displayName": "Bluefin Tuna Overfishing",
-      "description": "Two-stock model of Northern Bluefin Tuna overfishing with fleet adjustment creating overshoot-and-collapse",
+      "description": "Two-stock model of North Atlantic bluefin tuna population collapse from commercial overfishing",
       "category": "ecology",
       "difficulty": "advanced",
       "path": "ecology/bluefin-tuna-overfishing.json",
@@ -186,17 +186,17 @@
         "delay"
       ],
       "elements": {
-        "stocks": 2,
-        "flows": 5,
-        "variables": 12,
-        "parameters": 8
+        "stocks": 0,
+        "flows": 0,
+        "variables": 0,
+        "parameters": 0
       }
     },
     {
       "id": "ecological-overshoot",
       "name": "Ecological Overshoot",
       "displayName": "Ecological Overshoot",
-      "description": "Consumer population depletes renewable resource, creating classic overshoot-and-collapse dynamics",
+      "description": "Two-stock ecological overshoot and collapse model based on Bossel's formulation",
       "category": "ecology",
       "difficulty": "intermediate",
       "path": "ecology/ecological-overshoot.json",
@@ -206,10 +206,10 @@
         "renewable-resource"
       ],
       "elements": {
-        "stocks": 2,
-        "flows": 4,
-        "variables": 6,
-        "parameters": 9
+        "stocks": 0,
+        "flows": 0,
+        "variables": 0,
+        "parameters": 0
       }
     },
     {
@@ -262,7 +262,7 @@
       "elements": {
         "stocks": 0,
         "flows": 0,
-        "cldVariables": 13,
+        "cldVariables": 0,
         "causalLinks": 15
       }
     },
@@ -278,7 +278,7 @@
       "elements": {
         "stocks": 0,
         "flows": 0,
-        "cldVariables": 5,
+        "cldVariables": 0,
         "causalLinks": 5
       }
     },
@@ -294,7 +294,7 @@
       "elements": {
         "stocks": 0,
         "flows": 0,
-        "cldVariables": 8,
+        "cldVariables": 0,
         "causalLinks": 10
       }
     },
@@ -310,7 +310,7 @@
       "elements": {
         "stocks": 0,
         "flows": 0,
-        "cldVariables": 14,
+        "cldVariables": 0,
         "causalLinks": 23
       }
     },
@@ -326,7 +326,7 @@
       "elements": {
         "stocks": 0,
         "flows": 0,
-        "cldVariables": 10,
+        "cldVariables": 0,
         "causalLinks": 9
       }
     },
@@ -342,7 +342,7 @@
       "elements": {
         "stocks": 0,
         "flows": 0,
-        "cldVariables": 7,
+        "cldVariables": 0,
         "causalLinks": 5
       }
     },
@@ -358,7 +358,7 @@
       "elements": {
         "stocks": 0,
         "flows": 0,
-        "cldVariables": 5,
+        "cldVariables": 0,
         "causalLinks": 4
       }
     },

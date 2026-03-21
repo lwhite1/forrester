@@ -6,7 +6,6 @@ package systems.courant.sd.demo.ecology;
 
 import systems.courant.sd.Simulation;
 import systems.courant.sd.model.ModelMetadata;
-import systems.courant.sd.model.compile.CompiledModel;
 import systems.courant.sd.model.compile.ModelCompiler;
 import systems.courant.sd.model.def.ModelDefinitionBuilder;
 import systems.courant.sd.model.def.VariableDef;
@@ -27,20 +26,6 @@ import systems.courant.sd.model.def.StockDef;
  *   <li>View 'View 1' places non-existent element: _48</li>
  *   <li>View 'View 1' places non-existent element: _48</li>
  *   <li>View 'View 1' places non-existent element: _48</li>
- *   <li>View 'View 1' connector references non-existent element: 6</li>
- *   <li>View 'View 1' connector references non-existent element: 6</li>
- *   <li>View 'View 1' connector references non-existent element: 3</li>
- *   <li>View 'View 1' connector references non-existent element: 19</li>
- *   <li>View 'View 1' connector references non-existent element: 16</li>
- *   <li>View 'View 1' connector references non-existent element: 19</li>
- *   <li>View 'View 1' connector references non-existent element: 30</li>
- *   <li>View 'View 1' connector references non-existent element: 30</li>
- *   <li>View 'View 1' connector references non-existent element: 27</li>
- *   <li>View 'View 1' connector references non-existent element: 35</li>
- *   <li>View 'View 1' connector references non-existent element: 32</li>
- *   <li>View 'View 1' connector references non-existent element: 35</li>
- *   <li>View 'View 1' connector references non-existent element: 51</li>
- *   <li>View 'View 1' connector references non-existent element: 51</li>
  *   <li>View 'View 1' flow route references non-existent flow: _48</li>
  *   <li>View 'View 1' flow route references non-existent flow: _48</li>
  *   <li>View 'View 1' flow route references non-existent flow: _48</li>
@@ -63,9 +48,6 @@ public class EcologicalOvershoot {
         builder.stock(new StockDef("population", "population", 100000.0, "consumer", null));
 
         // Constants
-        builder.constant("TIME_STEP", 0.02, "Year");
-        builder.constant("INITIAL_TIME", 0.0, "Year");
-        builder.constant("FINAL_TIME", 500.0, "Year");
         builder.constant("rapid resource depletion time", 1.0, "Year");
         builder.constant("INITIAL RESOURCES", 7000000.0, "resource");
         builder.constant("INITIAL CONSUMERS", 100000.0, "consumer");

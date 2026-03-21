@@ -6,7 +6,6 @@ package systems.courant.sd.demo.ecology;
 
 import systems.courant.sd.Simulation;
 import systems.courant.sd.model.ModelMetadata;
-import systems.courant.sd.model.compile.CompiledModel;
 import systems.courant.sd.model.compile.ModelCompiler;
 import systems.courant.sd.model.def.ModelDefinitionBuilder;
 import systems.courant.sd.model.def.VariableDef;
@@ -29,24 +28,9 @@ import systems.courant.sd.model.def.StockDef;
  *   <li>View 'View 1' places non-existent element: _48</li>
  *   <li>View 'View 1' places non-existent element: _48</li>
  *   <li>View 'View 1' places non-existent element: _48</li>
- *   <li>View 'View 1' connector references non-existent element: 5</li>
- *   <li>View 'View 1' connector references non-existent element: 5</li>
- *   <li>View 'View 1' connector references non-existent element: 2</li>
- *   <li>View 'View 1' connector references non-existent element: 10</li>
- *   <li>View 'View 1' connector references non-existent element: 10</li>
- *   <li>View 'View 1' connector references non-existent element: 7</li>
- *   <li>View 'View 1' connector references non-existent element: 15</li>
- *   <li>View 'View 1' connector references non-existent element: 12</li>
- *   <li>View 'View 1' connector references non-existent element: 15</li>
- *   <li>View 'View 1' connector references non-existent element: 20</li>
- *   <li>View 'View 1' connector references non-existent element: 17</li>
- *   <li>View 'View 1' connector references non-existent element: 20</li>
  *   <li>View 'View 1' connector references non-existent element: _48</li>
  *   <li>View 'View 1' connector references non-existent element: _48</li>
  *   <li>View 'View 1' connector references non-existent element: _48</li>
- *   <li>View 'View 1' connector references non-existent element: 61</li>
- *   <li>View 'View 1' connector references non-existent element: 61</li>
- *   <li>View 'View 1' connector references non-existent element: 58</li>
  *   <li>View 'View 1' flow route references non-existent flow: _48</li>
  *   <li>View 'View 1' flow route references non-existent flow: _48</li>
  *   <li>View 'View 1' flow route references non-existent flow: _48</li>
@@ -70,9 +54,6 @@ public class BluefinTunaOverfishing {
         builder.stock(new StockDef("Official Number of Tuna Ships", "Official Number of Tuna Ships", 15000.0, "Ship", null));
 
         // Constants
-        builder.constant("TIME_STEP", 0.125, "Year");
-        builder.constant("INITIAL_TIME", 1990.0, "Year");
-        builder.constant("FINAL_TIME", 2290.0, "Year");
         builder.constant("average efficiency tuna ships", 4.0E-6, "1/Ship/Year");
         builder.constant("implementation time delay", 2.0, "Year");
         builder.constant("initial state tuna fishery", 10.0, "Dmnl");
@@ -84,7 +65,7 @@ public class BluefinTunaOverfishing {
 
         // Lookup tables
         builder.lookupTable(new LookupTableDef("effect_lookup", null, new double[]{-10.0, -7.5, -5.0, -2.5, 0.0, 2.5, 5.0, 7.5, 10.0, 100.0}, new double[]{-0.9, -0.5, -0.25, -0.1, 0.0, 0.075, 0.15, 0.21, 0.25, 0.25}, "LINEAR"));
-        builder.lookupTable(new LookupTableDef("change in tuna perception lookup", "change in tuna perception lookup", new double[]{0.0, 0.25, 0.5, 0.75, 1.0}, new double[]{-10.0, -2.0, 0.0, 1.5, 10.0}, "LINEAR"));
+        builder.lookupTable(new LookupTableDef("change in tuna perception lookup", "change in tuna perception lookup", new double[]{0.0, 0.25, 0.5, 0.75, 1.0}, new double[]{-10.0, -2.0, 0.0, 1.5, 10.0}, "LINEAR", "Dmnl"));
 
         // Variables
         builder.variable(new VariableDef("effect", "effect", "LOOKUP(effect_lookup, perceived_state_of_tuna_fishery)", "Dmnl"));

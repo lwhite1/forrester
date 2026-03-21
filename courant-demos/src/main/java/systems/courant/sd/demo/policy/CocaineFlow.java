@@ -6,7 +6,6 @@ package systems.courant.sd.demo.policy;
 
 import systems.courant.sd.Simulation;
 import systems.courant.sd.model.ModelMetadata;
-import systems.courant.sd.model.compile.CompiledModel;
 import systems.courant.sd.model.compile.ModelCompiler;
 import systems.courant.sd.model.def.ModelDefinitionBuilder;
 import systems.courant.sd.model.def.VariableDef;
@@ -31,15 +30,6 @@ import systems.courant.sd.model.def.StockDef;
  *   <li>View 'View 1' places non-existent element: _48</li>
  *   <li>View 'View 1' places non-existent element: _48</li>
  *   <li>View 'View 1' places non-existent element: _48</li>
- *   <li>View 'View 1' connector references non-existent element: 5</li>
- *   <li>View 'View 1' connector references non-existent element: 5</li>
- *   <li>View 'View 1' connector references non-existent element: 2</li>
- *   <li>View 'View 1' connector references non-existent element: 10</li>
- *   <li>View 'View 1' connector references non-existent element: 7</li>
- *   <li>View 'View 1' connector references non-existent element: 10</li>
- *   <li>View 'View 1' connector references non-existent element: 15</li>
- *   <li>View 'View 1' connector references non-existent element: 12</li>
- *   <li>View 'View 1' connector references non-existent element: 15</li>
  *   <li>View 'View 1' connector references non-existent element: _48</li>
  *   <li>View 'View 1' flow route references non-existent flow: _48</li>
  *   <li>View 'View 1' flow route references non-existent flow: _48</li>
@@ -61,9 +51,6 @@ public class CocaineFlow {
         builder.stock(new StockDef("Cocaine", "Cocaine", 20000.0, "kg", null));
 
         // Constants
-        builder.constant("TIME_STEP", 0.0625, "Month");
-        builder.constant("INITIAL_TIME", 0.0, "Month");
-        builder.constant("FINAL_TIME", 24.0, "Month");
         builder.constant("confiscation rate", 0.1, "1/Month");
         builder.constant("imports", 4000.0, "kg/Month");
         builder.constant("use", 3000.0, "kg/Month");

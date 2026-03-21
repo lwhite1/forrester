@@ -6,7 +6,6 @@ package systems.courant.sd.demo.ecology;
 
 import systems.courant.sd.Simulation;
 import systems.courant.sd.model.ModelMetadata;
-import systems.courant.sd.model.compile.CompiledModel;
 import systems.courant.sd.model.compile.ModelCompiler;
 import systems.courant.sd.model.def.ModelDefinitionBuilder;
 import systems.courant.sd.model.def.VariableDef;
@@ -25,12 +24,6 @@ import systems.courant.sd.model.def.StockDef;
  * <ul>
  *   <li>View 'View 1' places non-existent element: _48</li>
  *   <li>View 'View 1' places non-existent element: _48</li>
- *   <li>View 'View 1' connector references non-existent element: 5</li>
- *   <li>View 'View 1' connector references non-existent element: 5</li>
- *   <li>View 'View 1' connector references non-existent element: 2</li>
- *   <li>View 'View 1' connector references non-existent element: 10</li>
- *   <li>View 'View 1' connector references non-existent element: 7</li>
- *   <li>View 'View 1' connector references non-existent element: 10</li>
  *   <li>View 'View 1' connector references non-existent element: _48</li>
  *   <li>View 'View 1' connector references non-existent element: _48</li>
  *   <li>View 'View 1' flow route references non-existent flow: _48</li>
@@ -52,9 +45,6 @@ public class MuskratPlague {
         builder.stock(new StockDef("Muskrat population", "Muskrat population", 100.0, "Muskrats", null));
 
         // Constants
-        builder.constant("TIME_STEP", 0.0625, "Year");
-        builder.constant("INITIAL_TIME", 0.0, "Year");
-        builder.constant("FINAL_TIME", 10.0, "Year");
         builder.constant("Initial number of muskrats", 100.0, "Muskrats");
         builder.constant("Number of licenses", 10.0, "licenses/Year");
         builder.constant("New muskrats rate", 20.0, "1/Year");

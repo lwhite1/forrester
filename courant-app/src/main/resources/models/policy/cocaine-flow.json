@@ -1,0 +1,119 @@
+{
+  "name" : "0601Cocaine_model",
+  "stocks" : [ {
+    "name" : "Cocaine",
+    "comment" : "Cocaine",
+    "initialValue" : 20000.0,
+    "unit" : "kg"
+  } ],
+  "flows" : [ {
+    "name" : "Cocaine inflow 1",
+    "equation" : "imports",
+    "timeUnit" : "Month",
+    "sink" : "Cocaine"
+  }, {
+    "name" : "Cocaine outflow 2",
+    "equation" : "confiscation",
+    "timeUnit" : "Month",
+    "source" : "Cocaine"
+  }, {
+    "name" : "Cocaine outflow 3",
+    "equation" : "use",
+    "timeUnit" : "Month",
+    "source" : "Cocaine"
+  } ],
+  "variables" : [ {
+    "name" : "confiscation",
+    "comment" : "confiscation",
+    "equation" : "Cocaine*confiscation_rate",
+    "unit" : "kg/Month"
+  }, {
+    "name" : "confiscation rate",
+    "comment" : "confiscation rate",
+    "equation" : "0.1",
+    "unit" : "1/Month"
+  }, {
+    "name" : "imports",
+    "comment" : "imports",
+    "equation" : "4000",
+    "unit" : "kg/Month"
+  }, {
+    "name" : "use",
+    "comment" : "use",
+    "equation" : "3000",
+    "unit" : "kg/Month"
+  } ],
+  "views" : [ {
+    "name" : "View 1",
+    "elements" : [ {
+      "name" : "Cocaine",
+      "type" : "stock",
+      "x" : 302.0,
+      "y" : 171.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 199.0,
+      "y" : 171.0
+    }, {
+      "name" : "imports",
+      "type" : "aux",
+      "x" : 199.0,
+      "y" : 190.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 303.0,
+      "y" : 246.0
+    }, {
+      "name" : "use",
+      "type" : "aux",
+      "x" : 323.0,
+      "y" : 246.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 423.0,
+      "y" : 173.0
+    }, {
+      "name" : "confiscation",
+      "type" : "aux",
+      "x" : 423.0,
+      "y" : 192.0
+    }, {
+      "name" : "confiscation rate",
+      "type" : "aux",
+      "x" : 478.0,
+      "y" : 255.0
+    } ],
+    "connectors" : [ {
+      "from" : "confiscation rate",
+      "to" : "confiscation"
+    }, {
+      "from" : "Cocaine",
+      "to" : "_48"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_48",
+      "points" : [ [ 199.0, 171.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 303.0, 246.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 423.0, 173.0 ] ]
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Month",
+    "duration" : 24.0,
+    "durationUnit" : "Month",
+    "dt" : 0.0625
+  },
+  "metadata" : {
+    "author" : "Dr. Erik Pruyt",
+    "source" : "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
+    "license" : "CC-BY-NC-SA-4.0",
+    "url" : "https://simulation.tudelft.nl/SD/"
+  }
+}
