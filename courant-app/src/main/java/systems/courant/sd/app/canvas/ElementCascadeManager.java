@@ -100,7 +100,8 @@ final class ElementCascadeManager {
                         fromMatch ? newName : link.from(),
                         toMatch ? newName : link.to(),
                         link.polarity(),
-                        link.comment()));
+                        link.comment(),
+                        link.strength()));
             }
         }
 

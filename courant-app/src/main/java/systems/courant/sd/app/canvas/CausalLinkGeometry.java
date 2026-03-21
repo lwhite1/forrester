@@ -81,6 +81,12 @@ public final class CausalLinkGeometry {
         // Scale bulge with distance — enough curve to be visible but not excessive
         double bulge = Math.min(DEFAULT_BULGE, dist * 0.25);
 
+        // Apply user-defined strength override if present
+        double strength = findStrength(fromName, toName, allLinks);
+        if (!Double.isNaN(strength)) {
+            bulge = strength;
+        }
+
         // Check for reciprocal link (to→from). If it exists, this link curves one way
         // and the reciprocal curves the other way.
         int direction = curveDirection(fromName, toName, allLinks);
@@ -89,6 +95,19 @@ public final class CausalLinkGeometry {
                 midX + perpX * bulge * direction,
                 midY + perpY * bulge * direction
         );
+    }
+
+    /**
+     * Finds the strength override for a specific causal link, or NaN if none.
+     */
+    static double findStrength(String fromName, String toName,
+                                       List<CausalLinkDef> allLinks) {
+        for (CausalLinkDef link : allLinks) {
+            if (link.from().equals(fromName) && link.to().equals(toName)) {
+                return link.strength();
+            }
+        }
+        return Double.NaN;
     }
 
     /**
@@ -195,6 +214,12 @@ public final class CausalLinkGeometry {
         double bulge = 0.35 * chordLen;
         // Cap the bulge to avoid excessively wide curves
         bulge = Math.min(bulge, 120);
+
+        // Apply user-defined strength override if present
+        double strength = findStrength(fromName, toName, allLinks);
+        if (!Double.isNaN(strength)) {
+            bulge = strength;
+        }
 
         int direction = curveDirection(fromName, toName, allLinks);
 
@@ -460,6 +485,12 @@ public final class CausalLinkGeometry {
 
         double bulge = k * chordLen;
         bulge = Math.min(bulge, 120);
+
+        // Apply user-defined strength override if present
+        double strength = findStrength(fromName, toName, allLinks);
+        if (!Double.isNaN(strength)) {
+            bulge = strength;
+        }
 
         int direction = curveDirection(fromName, toName, allLinks);
 

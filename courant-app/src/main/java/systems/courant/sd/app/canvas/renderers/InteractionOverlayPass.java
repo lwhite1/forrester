@@ -13,6 +13,7 @@ import systems.courant.sd.app.canvas.MaturityAnalysis;
 import systems.courant.sd.app.canvas.MaturityIndicatorRenderer;
 import systems.courant.sd.app.canvas.ModelEditor;
 import systems.courant.sd.app.canvas.controllers.CausalLinkCreationController;
+import systems.courant.sd.app.canvas.controllers.CausalLinkDragController;
 import systems.courant.sd.app.canvas.controllers.FlowCreationController;
 import systems.courant.sd.app.canvas.controllers.InfoLinkCreationController;
 import systems.courant.sd.model.def.CausalLinkDef;
@@ -129,6 +130,8 @@ final class InteractionOverlayPass implements RenderPass {
         ConnectionId hoveredConnection = ctx.hoveredConnection();
         if (selectedConnection != null) {
             drawConnectionHighlight(gc, connectors, allCausalLinks, selectedConnection, false, loopCtx);
+            // Draw curvature drag handle for selected causal link
+            drawCausalLinkHandle(gc, selectedConnection, allCausalLinks, loopCtx);
         }
         if (hoveredConnection != null
                 && !hoveredConnection.equals(selectedConnection)) {
@@ -408,6 +411,17 @@ final class InteractionOverlayPass implements RenderPass {
                         clippedFrom.x(), clippedFrom.y(),
                         clippedTo.x(), clippedTo.y());
             }
+        }
+    }
+
+    private void drawCausalLinkHandle(GraphicsContext gc, ConnectionId connection,
+                                       List<CausalLinkDef> allLinks,
+                                       CausalLinkGeometry.LoopContext loopCtx) {
+        double[] pos = CausalLinkDragController.handlePosition(
+                connection, canvasState, allLinks, loopCtx);
+        if (pos != null) {
+            SelectionRenderer.drawCurveHandle(gc, pos[0], pos[1],
+                    CausalLinkDragController.HANDLE_RADIUS);
         }
     }
 

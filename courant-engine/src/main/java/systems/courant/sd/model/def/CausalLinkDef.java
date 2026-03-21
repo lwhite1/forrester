@@ -9,12 +9,14 @@ package systems.courant.sd.model.def;
  * @param to target variable name
  * @param polarity the direction of influence (positive, negative, or unknown)
  * @param comment optional annotation (e.g., "after a delay")
+ * @param strength curve strength override ({@code NaN} = auto-computed curvature)
  */
 public record CausalLinkDef(
         String from,
         String to,
         Polarity polarity,
-        String comment
+        String comment,
+        double strength
 ) {
 
     public enum Polarity {
@@ -69,6 +71,25 @@ public record CausalLinkDef(
     }
 
     /**
+     * Returns true if this link has a user-defined curve strength override.
+     */
+    public boolean hasStrength() {
+        return !Double.isNaN(strength);
+    }
+
+    /**
+     * Creates a causal link with default (auto) curve strength.
+     *
+     * @param from     the source variable name
+     * @param to       the target variable name
+     * @param polarity the direction of influence
+     * @param comment  optional annotation
+     */
+    public CausalLinkDef(String from, String to, Polarity polarity, String comment) {
+        this(from, to, polarity, comment, Double.NaN);
+    }
+
+    /**
      * Creates a causal link without a comment.
      *
      * @param from     the source variable name
@@ -76,7 +97,7 @@ public record CausalLinkDef(
      * @param polarity the direction of influence
      */
     public CausalLinkDef(String from, String to, Polarity polarity) {
-        this(from, to, polarity, null);
+        this(from, to, polarity, null, Double.NaN);
     }
 
     /**
@@ -86,6 +107,13 @@ public record CausalLinkDef(
      * @param to   the target variable name
      */
     public CausalLinkDef(String from, String to) {
-        this(from, to, Polarity.UNKNOWN, null);
+        this(from, to, Polarity.UNKNOWN, null, Double.NaN);
+    }
+
+    /**
+     * Returns a copy of this link with a different strength value.
+     */
+    public CausalLinkDef withStrength(double newStrength) {
+        return new CausalLinkDef(from, to, polarity, comment, newStrength);
     }
 }

@@ -15,6 +15,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 import systems.courant.sd.app.canvas.controllers.CausalLinkCreationController;
+import systems.courant.sd.app.canvas.controllers.CausalLinkDragController;
 import systems.courant.sd.app.canvas.controllers.ConnectionRerouteController;
 import systems.courant.sd.app.canvas.controllers.DragController;
 import systems.courant.sd.app.canvas.controllers.FlowCreationController;
@@ -67,6 +68,7 @@ final class InputDispatcher {
     private final ConnectionRerouteController rerouteController;
     private final InlineEditController inlineEdit;
 
+    private final CausalLinkDragController causalLinkDrag = new CausalLinkDragController();
     private final PanController panController = new PanController();
     private double dragStartX;
     private double dragStartY;
@@ -338,6 +340,21 @@ final class InputDispatcher {
                 event.consume();
                 return true;
             }
+
+            // Causal link curvature handle drag
+            if (canvas.isSelectedConnectionCausalLink()) {
+                CausalLinkGeometry.LoopContext loopCtx = CausalLinkGeometry.loopContext(
+                        canvasState, editor.getCldVariables());
+                if (CausalLinkDragController.hitTestHandle(
+                        worldX, worldY, selectedConnection, canvasState,
+                        editor.getCausalLinks(), loopCtx)) {
+                    causalLinkDrag.start(selectedConnection, canvasState,
+                            editor.getCausalLinks());
+                    updateCursor(canvas);
+                    event.consume();
+                    return true;
+                }
+            }
         }
 
         return false;
@@ -460,6 +477,23 @@ final class InputDispatcher {
             return;
         }
 
+        if (causalLinkDrag.isActive()) {
+            double strength = causalLinkDrag.drag(
+                    viewport.toWorldX(event.getX()),
+                    viewport.toWorldY(event.getY()));
+            ModelEditor editor = canvas.getEditor();
+            if (editor != null) {
+                canvas.saveUndoStateTentative("Adjust curve");
+                editor.setCausalLinkStrength(
+                        causalLinkDrag.getFromName(),
+                        causalLinkDrag.getToName(),
+                        strength);
+            }
+            canvas.requestRedraw();
+            event.consume();
+            return;
+        }
+
         if (rerouteController.isActive()) {
             rerouteController.drag(
                     viewport.toWorldX(event.getX()),
@@ -504,6 +538,15 @@ final class InputDispatcher {
         Viewport viewport = canvas.viewport();
         CanvasState canvasState = canvas.canvasState();
         ModelEditor editor = canvas.getEditor();
+
+        if (causalLinkDrag.isActive()) {
+            causalLinkDrag.cancel();
+            canvas.requestRedraw();
+            canvas.fireStatusChanged();
+            updateCursor(canvas);
+            event.consume();
+            return;
+        }
 
         if (marqueeController.isActive()) {
             marqueeController.end();

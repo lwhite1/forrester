@@ -468,6 +468,9 @@ public class ModelDefinitionSerializer {
             if (link.comment() != null) {
                 node.put("comment", link.comment());
             }
+            if (link.hasStrength()) {
+                node.put("strength", link.strength());
+            }
             arr.add(node);
         }
         return arr;
@@ -705,11 +708,14 @@ public class ModelDefinitionSerializer {
                         polarity = CausalLinkDef.Polarity.UNKNOWN;
                     }
                 }
+                double strength = n.has("strength")
+                        ? n.get("strength").asDouble() : Double.NaN;
                 causalLinks.add(new CausalLinkDef(
                         requiredText(n, "from"),
                         requiredText(n, "to"),
                         polarity,
-                        textOrNull(n, "comment")));
+                        textOrNull(n, "comment"),
+                        strength));
             }
         }
         return causalLinks;

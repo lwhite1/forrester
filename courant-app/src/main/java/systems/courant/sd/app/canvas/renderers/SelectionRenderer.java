@@ -128,6 +128,18 @@ public final class SelectionRenderer {
         drawHandle(gc, d.cx() - d.half(), d.cy());
     }
 
+    /**
+     * Draws a circular drag handle for adjusting causal link curvature.
+     */
+    public static void drawCurveHandle(GraphicsContext gc, double x, double y, double radius) {
+        gc.setFill(Color.WHITE);
+        gc.fillOval(x - radius, y - radius, radius * 2, radius * 2);
+        gc.setStroke(SELECTION_COLOR);
+        gc.setLineWidth(1.5);
+        gc.setLineDashes();
+        gc.strokeOval(x - radius, y - radius, radius * 2, radius * 2);
+    }
+
     private static void drawHandle(GraphicsContext gc, double x, double y) {
         gc.fillRect(x - HANDLE_SIZE / 2, y - HANDLE_SIZE / 2, HANDLE_SIZE, HANDLE_SIZE);
     }
