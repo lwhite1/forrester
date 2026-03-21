@@ -1,0 +1,457 @@
+{
+  "name" : "WOM4",
+  "stocks" : [ {
+    "name" : "Customers",
+    "comment" : "Customers",
+    "initialValue" : 10000.0,
+    "unit" : "person"
+  }, {
+    "name" : "Potential Customers",
+    "comment" : "Potential Customers",
+    "initialValue" : 0.0,
+    "initialExpression" : "market_size - seed_customers",
+    "unit" : "person"
+  } ],
+  "flows" : [ {
+    "name" : "Customers inflow 1",
+    "equation" : "new_customers",
+    "timeUnit" : "Year",
+    "sink" : "Customers"
+  }, {
+    "name" : "Customers outflow 2",
+    "equation" : "leaving_customers",
+    "timeUnit" : "Year",
+    "source" : "Customers"
+  }, {
+    "name" : "Potential Customers inflow 1",
+    "equation" : "leaving_customers",
+    "timeUnit" : "Year",
+    "sink" : "Potential Customers"
+  }, {
+    "name" : "Potential Customers outflow 2",
+    "equation" : "new_customers",
+    "timeUnit" : "Year",
+    "source" : "Potential Customers"
+  } ],
+  "variables" : [ {
+    "name" : "GAME INTERVAL",
+    "comment" : "GAME INTERVAL",
+    "equation" : "0.25",
+    "unit" : "Year"
+  }, {
+    "name" : "new customers",
+    "comment" : "new customers",
+    "equation" : "sales / sales_size",
+    "unit" : "person/Year"
+  }, {
+    "name" : "advertising spending",
+    "comment" : "advertising spending",
+    "equation" : "c_advertising_spending",
+    "unit" : "$/Year"
+  }, {
+    "name" : "c advertising spending",
+    "comment" : "c advertising spending",
+    "equation" : "20000000",
+    "unit" : "$/Year"
+  }, {
+    "name" : "customer sales effectiveness",
+    "comment" : "customer sales effectiveness",
+    "equation" : "3",
+    "unit" : "widget/person/Year"
+  }, {
+    "name" : "fraction would be with real prospects",
+    "comment" : "fraction would be with real prospects",
+    "equation" : "Potential_Customers / market_size",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "leaving customers",
+    "comment" : "leaving customers",
+    "equation" : "Customers / obsolescence_time",
+    "unit" : "person/Year"
+  }, {
+    "name" : "market size",
+    "comment" : "market size",
+    "equation" : "100000000",
+    "unit" : "person"
+  }, {
+    "name" : "sales size",
+    "comment" : "sales size",
+    "equation" : "1",
+    "unit" : "widget/person"
+  }, {
+    "name" : "obsolescence time",
+    "comment" : "obsolescence time",
+    "equation" : "2",
+    "unit" : "Year"
+  }, {
+    "name" : "sales",
+    "comment" : "sales",
+    "equation" : "(would_be_word_of_mouth_sales + would_be_advertising_sales ) * fraction_would_be_with_real_prospects",
+    "unit" : "widget/Year"
+  }, {
+    "name" : "would be advertising sales",
+    "comment" : "would be advertising sales",
+    "equation" : "advertising_spending * advertising_effectiveness",
+    "unit" : "widget/Year"
+  }, {
+    "name" : "seed customers",
+    "comment" : "seed customers",
+    "equation" : "10000",
+    "unit" : "person"
+  }, {
+    "name" : "would be word of mouth sales",
+    "comment" : "would be word of mouth sales",
+    "equation" : "Customers * customer_sales_effectiveness",
+    "unit" : "widget/Year"
+  }, {
+    "name" : "advertising effectiveness",
+    "comment" : "advertising effectiveness",
+    "equation" : "0.1",
+    "unit" : "widget/$"
+  } ],
+  "comments" : [ {
+    "name" : "Comment 1",
+    "text" : "Main Menu"
+  }, {
+    "name" : "Comment 2",
+    "text" : "Welcome to the Word of Mouth Market Simulator"
+  }, {
+    "name" : "Comment 3",
+    "text" : "This model will help you understand the dynamics of growth in an emerging market.  Click on one of the links below to go to that page."
+  }, {
+    "name" : "Comment 4",
+    "text" : "Model Structure"
+  }, {
+    "name" : "Comment 5",
+    "text" : "Simulation Setup"
+  }, {
+    "name" : "Comment 6",
+    "text" : "Gaming Control"
+  }, {
+    "name" : "Comment 7",
+    "text" : "Review the structure of the model.  Position the mouse over a variable to get more information about its meaning."
+  }, {
+    "name" : "Comment 8",
+    "text" : "Setup and run a simulation.  Type Ctrl+E, move the sliders and/or click on the constants and go to Gaming, or press Ctrl+R to see simulation results."
+  }, {
+    "name" : "Comment 9",
+    "text" : "Run a game with this model.  You can first use simulation setup and then go to gaming if you want."
+  }, {
+    "name" : "Comment 10",
+    "text" : "Overview"
+  }, {
+    "name" : "Comment 11",
+    "text" : "advertising spending ($/Year)"
+  }, {
+    "name" : "Comment 12",
+    "text" : "Product Lifetime (years)"
+  }, {
+    "name" : "Comment 13",
+    "text" : "Gaming Control"
+  }, {
+    "name" : "Comment 14",
+    "text" : "Overview"
+  }, {
+    "name" : "Comment 15",
+    "text" : "advertising spending ($/Year)"
+  }, {
+    "name" : "Comment 16",
+    "text" : "Overview"
+  } ],
+  "views" : [ {
+    "name" : "Overview",
+    "elements" : [ {
+      "name" : "Comment 1",
+      "type" : "comment",
+      "x" : 413.0,
+      "y" : 67.0,
+      "width" : 170.0,
+      "height" : 40.0
+    }, {
+      "name" : "Comment 2",
+      "type" : "comment",
+      "x" : 403.0,
+      "y" : 103.0,
+      "width" : 408.0,
+      "height" : 24.0
+    }, {
+      "name" : "Comment 3",
+      "type" : "comment",
+      "x" : 412.0,
+      "y" : 165.0,
+      "width" : 598.0,
+      "height" : 58.0
+    }, {
+      "name" : "Comment 4",
+      "type" : "comment",
+      "x" : 139.0,
+      "y" : 251.0,
+      "width" : 110.0,
+      "height" : 72.0
+    }, {
+      "name" : "Comment 5",
+      "type" : "comment",
+      "x" : 139.0,
+      "y" : 349.0,
+      "width" : 110.0,
+      "height" : 64.0
+    }, {
+      "name" : "Comment 6",
+      "type" : "comment",
+      "x" : 139.0,
+      "y" : 444.0,
+      "width" : 112.0,
+      "height" : 64.0
+    }, {
+      "name" : "Comment 7",
+      "type" : "comment",
+      "x" : 520.0,
+      "y" : 259.0,
+      "width" : 522.0,
+      "height" : 54.0
+    }, {
+      "name" : "Comment 8",
+      "type" : "comment",
+      "x" : 531.0,
+      "y" : 343.0,
+      "width" : 646.0,
+      "height" : 54.0
+    }, {
+      "name" : "Comment 9",
+      "type" : "comment",
+      "x" : 495.0,
+      "y" : 439.0,
+      "width" : 474.0,
+      "height" : 42.0
+    } ]
+  }, {
+    "name" : "Structure",
+    "elements" : [ {
+      "name" : "Potential Customers",
+      "type" : "stock",
+      "x" : 317.0,
+      "y" : 157.0
+    }, {
+      "name" : "Customers",
+      "type" : "stock",
+      "x" : 603.0,
+      "y" : 159.0
+    }, {
+      "name" : "_316",
+      "type" : "flow",
+      "x" : 460.0,
+      "y" : 161.0
+    }, {
+      "name" : "new customers",
+      "type" : "aux",
+      "x" : 460.0,
+      "y" : 181.0
+    }, {
+      "name" : "_172",
+      "type" : "flow",
+      "x" : 460.0,
+      "y" : 43.0
+    }, {
+      "name" : "leaving customers",
+      "type" : "aux",
+      "x" : 460.0,
+      "y" : 61.0
+    }, {
+      "name" : "obsolescence time",
+      "type" : "aux",
+      "x" : 605.0,
+      "y" : 101.0
+    }, {
+      "name" : "seed customers",
+      "type" : "aux",
+      "x" : 440.0,
+      "y" : 112.0
+    }, {
+      "name" : "market size",
+      "type" : "aux",
+      "x" : 153.0,
+      "y" : 240.0
+    }, {
+      "name" : "sales size",
+      "type" : "aux",
+      "x" : 348.0,
+      "y" : 240.0
+    }, {
+      "name" : "fraction would be with real prospects",
+      "type" : "aux",
+      "x" : 316.0,
+      "y" : 313.0
+    }, {
+      "name" : "would be advertising sales",
+      "type" : "aux",
+      "x" : 515.0,
+      "y" : 332.0
+    }, {
+      "name" : "sales",
+      "type" : "aux",
+      "x" : 460.0,
+      "y" : 261.0
+    }, {
+      "name" : "advertising spending",
+      "type" : "aux",
+      "x" : 681.0,
+      "y" : 287.0
+    }, {
+      "name" : "advertising effectiveness",
+      "type" : "aux",
+      "x" : 691.0,
+      "y" : 375.0
+    }, {
+      "name" : "c advertising spending",
+      "type" : "aux",
+      "x" : 844.0,
+      "y" : 296.0
+    }, {
+      "name" : "customer sales effectiveness",
+      "type" : "aux",
+      "x" : 768.0,
+      "y" : 231.0
+    }, {
+      "name" : "would be word of mouth sales",
+      "type" : "aux",
+      "x" : 555.0,
+      "y" : 232.0
+    }, {
+      "name" : "Comment 10",
+      "type" : "comment",
+      "x" : 300.0,
+      "y" : 459.0,
+      "width" : 90.0,
+      "height" : 50.0
+    } ],
+    "connectors" : [ {
+      "from" : "obsolescence time",
+      "to" : "leaving customers"
+    }, {
+      "from" : "Customers",
+      "to" : "leaving customers"
+    }, {
+      "from" : "seed customers",
+      "to" : "Potential Customers"
+    }, {
+      "from" : "seed customers",
+      "to" : "Customers"
+    }, {
+      "from" : "market size",
+      "to" : "Potential Customers"
+    }, {
+      "from" : "sales size",
+      "to" : "new customers"
+    }, {
+      "from" : "sales",
+      "to" : "new customers"
+    }, {
+      "from" : "would be word of mouth sales",
+      "to" : "sales"
+    }, {
+      "from" : "Customers",
+      "to" : "would be word of mouth sales"
+    }, {
+      "from" : "would be advertising sales",
+      "to" : "sales"
+    }, {
+      "from" : "advertising spending",
+      "to" : "would be advertising sales"
+    }, {
+      "from" : "advertising effectiveness",
+      "to" : "would be advertising sales"
+    }, {
+      "from" : "c advertising spending",
+      "to" : "advertising spending"
+    }, {
+      "from" : "customer sales effectiveness",
+      "to" : "would be word of mouth sales"
+    }, {
+      "from" : "Potential Customers",
+      "to" : "fraction would be with real prospects"
+    }, {
+      "from" : "fraction would be with real prospects",
+      "to" : "sales"
+    }, {
+      "from" : "market size",
+      "to" : "fraction would be with real prospects"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_316",
+      "points" : [ [ 460.0, 161.0 ] ]
+    }, {
+      "flowName" : "_172",
+      "points" : [ [ 460.0, 43.0 ] ]
+    } ]
+  }, {
+    "name" : "Simulate",
+    "elements" : [ {
+      "name" : "Comment 11",
+      "type" : "comment",
+      "x" : 160.0,
+      "y" : 51.0,
+      "width" : 248.0,
+      "height" : 24.0
+    }, {
+      "name" : "Comment 12",
+      "type" : "comment",
+      "x" : 160.0,
+      "y" : 191.0,
+      "width" : 206.0,
+      "height" : 24.0
+    }, {
+      "name" : "customer sales effectiveness",
+      "type" : "aux",
+      "x" : 160.0,
+      "y" : 341.0
+    }, {
+      "name" : "market size",
+      "type" : "aux",
+      "x" : 141.0,
+      "y" : 395.0
+    }, {
+      "name" : "Comment 13",
+      "type" : "comment",
+      "x" : 135.0,
+      "y" : 489.0,
+      "width" : 90.0,
+      "height" : 50.0
+    }, {
+      "name" : "Comment 14",
+      "type" : "comment",
+      "x" : 133.0,
+      "y" : 560.0,
+      "width" : 90.0,
+      "height" : 50.0
+    } ]
+  }, {
+    "name" : "Game",
+    "elements" : [ {
+      "name" : "Comment 15",
+      "type" : "comment",
+      "x" : 160.0,
+      "y" : 51.0,
+      "width" : 194.0,
+      "height" : 22.0
+    }, {
+      "name" : "Comment 16",
+      "type" : "comment",
+      "x" : 133.0,
+      "y" : 560.0,
+      "width" : 90.0,
+      "height" : 50.0
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Year",
+    "duration" : 5.0,
+    "durationUnit" : "Year",
+    "dt" : 0.0625
+  },
+  "metadata" : {
+    "author" : "Ventana Systems, Inc.",
+    "source" : "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+    "license" : "MIT",
+    "url" : "https://www.vensim.com/documentation/models.html"
+  }
+}

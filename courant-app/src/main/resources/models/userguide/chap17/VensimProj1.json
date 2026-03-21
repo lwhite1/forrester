@@ -1,0 +1,125 @@
+{
+  "name" : "PROJ1",
+  "stocks" : [ {
+    "name" : "Work Done",
+    "comment" : "Work Done",
+    "initialValue" : 0.0,
+    "unit" : "Drawing"
+  }, {
+    "name" : "Work To Do",
+    "comment" : "Work To Do",
+    "initialValue" : 180.0,
+    "unit" : "Drawing"
+  } ],
+  "flows" : [ {
+    "name" : "Work Done net flow",
+    "comment" : "Net flow for Work Done",
+    "equation" : "work_accomplishment",
+    "timeUnit" : "Month",
+    "sink" : "Work Done"
+  }, {
+    "name" : "Work To Do net flow",
+    "comment" : "Net flow for Work To Do",
+    "equation" : "- work_accomplishment",
+    "timeUnit" : "Month",
+    "sink" : "Work To Do"
+  } ],
+  "variables" : [ {
+    "name" : "work accomplishment",
+    "comment" : "work accomplishment",
+    "equation" : "max_work_accomplishment * task_is_active",
+    "unit" : "Drawing/Month"
+  }, {
+    "name" : "max work accomplishment",
+    "comment" : "max work accomplishment",
+    "equation" : "8",
+    "unit" : "Drawing/Month"
+  }, {
+    "name" : "task is active",
+    "comment" : "task is active",
+    "equation" : "IF( Work_Done < task_size, 1, 0)",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "task size",
+    "comment" : "task size",
+    "equation" : "180",
+    "unit" : "Drawing"
+  } ],
+  "views" : [ {
+    "name" : "View 1",
+    "elements" : [ {
+      "name" : "Work To Do",
+      "type" : "stock",
+      "x" : 113.0,
+      "y" : 124.0
+    }, {
+      "name" : "task size",
+      "type" : "aux",
+      "x" : 139.0,
+      "y" : 55.0
+    }, {
+      "name" : "task is active",
+      "type" : "aux",
+      "x" : 281.0,
+      "y" : 56.0
+    }, {
+      "name" : "Work Done",
+      "type" : "stock",
+      "x" : 421.0,
+      "y" : 125.0
+    }, {
+      "name" : "_236",
+      "type" : "flow",
+      "x" : 260.0,
+      "y" : 125.0
+    }, {
+      "name" : "work accomplishment",
+      "type" : "aux",
+      "x" : 260.0,
+      "y" : 145.0
+    }, {
+      "name" : "max work accomplishment",
+      "type" : "aux",
+      "x" : 184.0,
+      "y" : 197.0
+    } ],
+    "connectors" : [ {
+      "from" : "_236",
+      "to" : "Work Done"
+    }, {
+      "from" : "_236",
+      "to" : "Work To Do"
+    }, {
+      "from" : "max work accomplishment",
+      "to" : "work accomplishment"
+    }, {
+      "from" : "Work Done",
+      "to" : "task is active"
+    }, {
+      "from" : "task size",
+      "to" : "Work To Do"
+    }, {
+      "from" : "task is active",
+      "to" : "_236"
+    }, {
+      "from" : "task size",
+      "to" : "task is active"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_236",
+      "points" : [ [ 260.0, 125.0 ] ]
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Month",
+    "duration" : 100.0,
+    "durationUnit" : "Month",
+    "dt" : 0.125
+  },
+  "metadata" : {
+    "author" : "Ventana Systems, Inc.",
+    "source" : "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+    "license" : "MIT",
+    "url" : "https://www.vensim.com/documentation/models.html"
+  }
+}

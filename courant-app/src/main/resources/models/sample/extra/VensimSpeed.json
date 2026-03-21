@@ -1,0 +1,124 @@
+{
+  "name" : "SPEED",
+  "stocks" : [ {
+    "name" : "Speed",
+    "comment" : "Speed",
+    "initialValue" : 0.0,
+    "unit" : "Miles/Hour"
+  } ],
+  "flows" : [ {
+    "name" : "Speed net flow",
+    "comment" : "Net flow for Speed",
+    "equation" : "acceleration",
+    "timeUnit" : "Second",
+    "sink" : "Speed"
+  } ],
+  "variables" : [ {
+    "name" : "acceleration",
+    "comment" : "acceleration",
+    "equation" : "(target_speed-Speed)/time_to_adjust_speed",
+    "unit" : "Miles/Hour/Second"
+  }, {
+    "name" : "initial speed",
+    "comment" : "initial speed",
+    "equation" : "0",
+    "unit" : "Miles/Hour"
+  }, {
+    "name" : "target speed",
+    "comment" : "target speed",
+    "equation" : "55",
+    "unit" : "Miles/Hour"
+  }, {
+    "name" : "time to adjust speed",
+    "comment" : "time to adjust speed",
+    "equation" : "10",
+    "unit" : "Second"
+  } ],
+  "comments" : [ {
+    "name" : "Comment 1",
+    "text" : "speed_accel"
+  }, {
+    "name" : "Comment 2",
+    "text" : "SPEED MODEL"
+  } ],
+  "views" : [ {
+    "name" : "1",
+    "elements" : [ {
+      "name" : "Speed",
+      "type" : "stock",
+      "x" : 521.0,
+      "y" : 191.0
+    }, {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : 427.0,
+      "y" : 187.0
+    }, {
+      "name" : "acceleration",
+      "type" : "aux",
+      "x" : 427.0,
+      "y" : 225.0
+    }, {
+      "name" : "target speed",
+      "type" : "aux",
+      "x" : 552.0,
+      "y" : 251.0
+    }, {
+      "name" : "time to adjust speed",
+      "type" : "aux",
+      "x" : 352.0,
+      "y" : 252.0
+    }, {
+      "name" : "initial speed",
+      "type" : "aux",
+      "x" : 656.0,
+      "y" : 212.0
+    }, {
+      "name" : "Comment 1",
+      "type" : "comment",
+      "x" : 457.0,
+      "y" : 515.0,
+      "width" : 802.0,
+      "height" : 450.0
+    }, {
+      "name" : "Comment 2",
+      "type" : "comment",
+      "x" : 444.0,
+      "y" : 39.0,
+      "width" : 160.0,
+      "height" : 80.0
+    } ],
+    "connectors" : [ {
+      "from" : "_0",
+      "to" : "Speed"
+    }, {
+      "from" : "target speed",
+      "to" : "acceleration"
+    }, {
+      "from" : "Speed",
+      "to" : "_0"
+    }, {
+      "from" : "time to adjust speed",
+      "to" : "acceleration"
+    }, {
+      "from" : "initial speed",
+      "to" : "Speed"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_0",
+      "points" : [ [ 427.0, 187.0 ] ]
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Second",
+    "duration" : 60.0,
+    "durationUnit" : "Second",
+    "dt" : 0.5
+  },
+  "metadata" : {
+    "author" : "Ventana Systems, Inc.",
+    "source" : "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+    "license" : "MIT",
+    "url" : "https://www.vensim.com/documentation/sample_models.html"
+  }
+}

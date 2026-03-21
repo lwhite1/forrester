@@ -1,0 +1,124 @@
+{
+  "name" : "COOL",
+  "stocks" : [ {
+    "name" : "Coffee Temperature",
+    "comment" : "Coffee Temperature",
+    "initialValue" : 140.0,
+    "unit" : "Farenheit"
+  } ],
+  "flows" : [ {
+    "name" : "Coffee Temperature net flow",
+    "comment" : "Net flow for Coffee Temperature",
+    "equation" : "-cooling",
+    "timeUnit" : "Minute",
+    "sink" : "Coffee Temperature"
+  } ],
+  "variables" : [ {
+    "name" : "cooling",
+    "comment" : "cooling",
+    "equation" : "(Coffee_Temperature - room_temperature) / time_to_cool",
+    "unit" : "Farenheit/minute"
+  }, {
+    "name" : "initial temperature",
+    "comment" : "initial temperature",
+    "equation" : "140",
+    "unit" : "Farenheit"
+  }, {
+    "name" : "room temperature",
+    "comment" : "room temperature",
+    "equation" : "68",
+    "unit" : "Farenheit"
+  }, {
+    "name" : "time to cool",
+    "comment" : "time to cool",
+    "equation" : "20",
+    "unit" : "minute"
+  } ],
+  "comments" : [ {
+    "name" : "Comment 1",
+    "text" : "Coffee Temperature,graph"
+  }, {
+    "name" : "Comment 2",
+    "text" : "COOL MODEL"
+  } ],
+  "views" : [ {
+    "name" : "View 1",
+    "elements" : [ {
+      "name" : "Coffee Temperature",
+      "type" : "stock",
+      "x" : 136.0,
+      "y" : 232.0
+    }, {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : 239.0,
+      "y" : 233.0
+    }, {
+      "name" : "cooling",
+      "type" : "aux",
+      "x" : 239.0,
+      "y" : 271.0
+    }, {
+      "name" : "time to cool",
+      "type" : "aux",
+      "x" : 309.0,
+      "y" : 297.0
+    }, {
+      "name" : "initial temperature",
+      "type" : "aux",
+      "x" : 105.0,
+      "y" : 153.0
+    }, {
+      "name" : "room temperature",
+      "type" : "aux",
+      "x" : 267.0,
+      "y" : 173.0
+    }, {
+      "name" : "Comment 1",
+      "type" : "comment",
+      "x" : 221.0,
+      "y" : 539.0,
+      "width" : 400.0,
+      "height" : 400.0
+    }, {
+      "name" : "Comment 2",
+      "type" : "comment",
+      "x" : 199.0,
+      "y" : 85.0,
+      "width" : 160.0,
+      "height" : 80.0
+    } ],
+    "connectors" : [ {
+      "from" : "_0",
+      "to" : "Coffee Temperature"
+    }, {
+      "from" : "time to cool",
+      "to" : "cooling"
+    }, {
+      "from" : "room temperature",
+      "to" : "_0"
+    }, {
+      "from" : "Coffee Temperature",
+      "to" : "cooling"
+    }, {
+      "from" : "initial temperature",
+      "to" : "Coffee Temperature"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_0",
+      "points" : [ [ 239.0, 233.0 ] ]
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Minute",
+    "duration" : 100.0,
+    "durationUnit" : "Minute",
+    "dt" : 0.25
+  },
+  "metadata" : {
+    "author" : "Ventana Systems, Inc.",
+    "source" : "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+    "license" : "MIT",
+    "url" : "https://www.vensim.com/documentation/sample_models.html"
+  }
+}

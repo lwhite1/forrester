@@ -1,0 +1,240 @@
+{
+  "name" : "CAFFEINE",
+  "stocks" : [ {
+    "name" : "Bodys Expected Caffeine",
+    "comment" : "Body's Expected Caffeine",
+    "initialValue" : 0.0,
+    "initialExpression" : "Caffeine_in_Body",
+    "unit" : "Mg"
+  }, {
+    "name" : "Caffeine in Body",
+    "comment" : "Caffeine in Body",
+    "initialValue" : 0.0,
+    "initialExpression" : "normal_caffeine_consumption*caffeine_disposal_time",
+    "unit" : "Mg"
+  } ],
+  "flows" : [ {
+    "name" : "Bodys Expected Caffeine net flow",
+    "comment" : "Net flow for Body's Expected Caffeine",
+    "equation" : "(Caffeine_in_Body - Bodys_Expected_Caffeine) / caffeine_tolerance_time",
+    "timeUnit" : "Day",
+    "sink" : "Bodys Expected Caffeine"
+  }, {
+    "name" : "Caffeine in Body inflow 1",
+    "equation" : "caffeine_consumption",
+    "timeUnit" : "Day",
+    "sink" : "Caffeine in Body"
+  }, {
+    "name" : "Caffeine in Body outflow 2",
+    "equation" : "caffeine_disposal",
+    "timeUnit" : "Day",
+    "source" : "Caffeine in Body"
+  } ],
+  "variables" : [ {
+    "name" : "caffeine consumption",
+    "comment" : "caffeine consumption",
+    "equation" : "normal_caffeine_consumption * LOOKUP(effect_of_drowsiness_on_caffeine_consumption_lookup, drowsiness/ normal_amount_of_drowsiness)",
+    "unit" : "Mg/Day"
+  }, {
+    "name" : "caffeine disposal",
+    "comment" : "caffeine disposal",
+    "equation" : "Caffeine_in_Body/caffeine_disposal_time",
+    "unit" : "Mg/Day"
+  }, {
+    "name" : "caffeine disposal time",
+    "comment" : "caffeine disposal time",
+    "equation" : "0.25",
+    "unit" : "Day"
+  }, {
+    "name" : "caffeine tolerance time",
+    "comment" : "caffeine tolerance time",
+    "equation" : "5",
+    "unit" : "Day"
+  }, {
+    "name" : "drowsiness",
+    "comment" : "drowsiness",
+    "equation" : "normal_amount_of_drowsiness* IF((Caffeine_in_Body) == 0, 10, (Bodys_Expected_Caffeine) / (Caffeine_in_Body)) * effect_of_stress_on_drowsiness",
+    "unit" : "Yawn/Hour"
+  }, {
+    "name" : "effect of stress on drowsiness",
+    "comment" : "effect of stress on drowsiness",
+    "equation" : "1 + STEP(0.2,10)",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "normal caffeine consumption",
+    "comment" : "normal caffeine consumption",
+    "equation" : "100",
+    "unit" : "Mg/Day"
+  }, {
+    "name" : "normal amount of drowsiness",
+    "comment" : "normal amount of drowsiness",
+    "equation" : "1",
+    "unit" : "Yawn/Hour"
+  } ],
+  "lookupTables" : [ {
+    "name" : "effect of drowsiness on caffeine consumption lookup",
+    "comment" : "effect of drowsiness on caffeine consumption lookup",
+    "xValues" : [ 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 10.0 ],
+    "yValues" : [ 0.01, 1.0, 7.0, 9.2, 9.9, 10.0, 10.0033 ],
+    "interpolation" : "LINEAR",
+    "unit" : "Dmnl"
+  } ],
+  "comments" : [ {
+    "name" : "Comment 1",
+    "text" : "caffeine"
+  }, {
+    "name" : "Comment 2",
+    "text" : "CAFFEINE MODEL"
+  } ],
+  "views" : [ {
+    "name" : "View 1",
+    "elements" : [ {
+      "name" : "Caffeine in Body",
+      "type" : "stock",
+      "x" : 468.0,
+      "y" : 263.0
+    }, {
+      "name" : "Bodys Expected Caffeine",
+      "type" : "stock",
+      "x" : 592.0,
+      "y" : 403.0
+    }, {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : 603.0,
+      "y" : 264.0
+    }, {
+      "name" : "caffeine disposal",
+      "type" : "aux",
+      "x" : 603.0,
+      "y" : 302.0
+    }, {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : 321.0,
+      "y" : 264.0
+    }, {
+      "name" : "caffeine consumption",
+      "type" : "aux",
+      "x" : 321.0,
+      "y" : 302.0
+    }, {
+      "name" : "drowsiness",
+      "type" : "aux",
+      "x" : 365.0,
+      "y" : 388.0
+    }, {
+      "name" : "normal amount of drowsiness",
+      "type" : "aux",
+      "x" : 224.0,
+      "y" : 424.0
+    }, {
+      "name" : "normal caffeine consumption",
+      "type" : "aux",
+      "x" : 396.0,
+      "y" : 192.0
+    }, {
+      "name" : "caffeine disposal time",
+      "type" : "aux",
+      "x" : 623.0,
+      "y" : 189.0
+    }, {
+      "name" : "caffeine tolerance time",
+      "type" : "aux",
+      "x" : 697.0,
+      "y" : 335.0
+    }, {
+      "name" : "effect of stress on drowsiness",
+      "type" : "aux",
+      "x" : 403.0,
+      "y" : 475.0
+    }, {
+      "name" : "effect of drowsiness on caffeine consumption lookup",
+      "type" : "lookup",
+      "x" : 271.0,
+      "y" : 153.0
+    }, {
+      "name" : "Comment 1",
+      "type" : "comment",
+      "x" : 1015.0,
+      "y" : 335.0,
+      "width" : 400.0,
+      "height" : 400.0
+    }, {
+      "name" : "Comment 2",
+      "type" : "comment",
+      "x" : 708.0,
+      "y" : 46.0,
+      "width" : 160.0,
+      "height" : 80.0
+    } ],
+    "connectors" : [ {
+      "from" : "_0",
+      "to" : "Caffeine in Body"
+    }, {
+      "from" : "_0",
+      "to" : "Caffeine in Body"
+    }, {
+      "from" : "Caffeine in Body",
+      "to" : "Bodys Expected Caffeine"
+    }, {
+      "from" : "normal caffeine consumption",
+      "to" : "_0"
+    }, {
+      "from" : "drowsiness",
+      "to" : "caffeine consumption"
+    }, {
+      "from" : "normal amount of drowsiness",
+      "to" : "drowsiness"
+    }, {
+      "from" : "Bodys Expected Caffeine",
+      "to" : "drowsiness"
+    }, {
+      "from" : "Caffeine in Body",
+      "to" : "drowsiness"
+    }, {
+      "from" : "Caffeine in Body",
+      "to" : "_0"
+    }, {
+      "from" : "caffeine tolerance time",
+      "to" : "Bodys Expected Caffeine"
+    }, {
+      "from" : "effect of stress on drowsiness",
+      "to" : "drowsiness"
+    }, {
+      "from" : "effect of drowsiness on caffeine consumption lookup",
+      "to" : "_0"
+    }, {
+      "from" : "caffeine disposal time",
+      "to" : "_0"
+    }, {
+      "from" : "normal amount of drowsiness",
+      "to" : "caffeine consumption"
+    }, {
+      "from" : "caffeine disposal time",
+      "to" : "Caffeine in Body"
+    }, {
+      "from" : "normal caffeine consumption",
+      "to" : "Caffeine in Body"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_0",
+      "points" : [ [ 603.0, 264.0 ] ]
+    }, {
+      "flowName" : "_0",
+      "points" : [ [ 321.0, 264.0 ] ]
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Day",
+    "duration" : 50.0,
+    "durationUnit" : "Day",
+    "dt" : 0.0625
+  },
+  "metadata" : {
+    "author" : "Ventana Systems, Inc.",
+    "source" : "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+    "license" : "MIT",
+    "url" : "https://www.vensim.com/documentation/sample_models.html"
+  }
+}

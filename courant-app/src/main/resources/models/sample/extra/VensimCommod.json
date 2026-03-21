@@ -1,0 +1,880 @@
+{
+  "name" : "COMMOD",
+  "stocks" : [ {
+    "name" : "Breeding Stock",
+    "comment" : "Sows and gilts held for breeding.",
+    "initialValue" : 0.0,
+    "initialExpression" : "desired_breeding_stock",
+    "unit" : "hogs"
+  }, {
+    "name" : "Inventory",
+    "comment" : "Inventory of frozen and cured pork.",
+    "initialValue" : 0.0,
+    "initialExpression" : "normal_consumption * population * desired_coverage",
+    "unit" : "hogs"
+  }, {
+    "name" : "Mature Stock",
+    "comment" : "\"Hogs in the terminal stage of feeding and preparation either for slaughter or for \t\t\t\t addition\n\t\t         to the breeding stock.\" (Meadows, p.54).",
+    "initialValue" : 0.0,
+    "initialExpression" : "mature_stock_feeding_period * maturing",
+    "unit" : "hogs"
+  }, {
+    "name" : "Piglets",
+    "comment" : "Immature hogs.",
+    "initialValue" : 0.0,
+    "initialExpression" : "time_to_mature * farrowing",
+    "unit" : "hogs"
+  }, {
+    "name" : "Piglets In Utero",
+    "comment" : "Pig fetuses that will survive birth and weening.",
+    "initialValue" : 0.0,
+    "initialExpression" : "breeding * gestation_time",
+    "unit" : "hogs"
+  } ],
+  "flows" : [ {
+    "name" : "Breeding Stock net flow",
+    "comment" : "Net flow for Breeding Stock",
+    "equation" : "acquiring_breeding_stock",
+    "timeUnit" : "Month",
+    "sink" : "Breeding Stock"
+  }, {
+    "name" : "Inventory outflow 1",
+    "equation" : "consuming",
+    "timeUnit" : "Month",
+    "source" : "Inventory"
+  }, {
+    "name" : "Inventory inflow 2",
+    "equation" : "slaughtering",
+    "timeUnit" : "Month",
+    "sink" : "Inventory"
+  }, {
+    "name" : "Mature Stock outflow 1",
+    "equation" : "acquiring_breeding_stock",
+    "timeUnit" : "Month",
+    "source" : "Mature Stock"
+  }, {
+    "name" : "Mature Stock outflow 2",
+    "equation" : "slaughtering",
+    "timeUnit" : "Month",
+    "source" : "Mature Stock"
+  }, {
+    "name" : "Mature Stock inflow 3",
+    "equation" : "maturing",
+    "timeUnit" : "Month",
+    "sink" : "Mature Stock"
+  }, {
+    "name" : "Piglets inflow 1",
+    "equation" : "farrowing",
+    "timeUnit" : "Month",
+    "sink" : "Piglets"
+  }, {
+    "name" : "Piglets outflow 2",
+    "equation" : "maturing",
+    "timeUnit" : "Month",
+    "source" : "Piglets"
+  }, {
+    "name" : "Piglets In Utero inflow 1",
+    "equation" : "breeding",
+    "timeUnit" : "Month",
+    "sink" : "Piglets In Utero"
+  }, {
+    "name" : "Piglets In Utero outflow 2",
+    "equation" : "farrowing",
+    "timeUnit" : "Month",
+    "source" : "Piglets In Utero"
+  } ],
+  "variables" : [ {
+    "name" : "normal consumption",
+    "comment" : "normal consumption",
+    "equation" : "INITIAL( slaughtering / population)",
+    "unit" : "hogs/(Month*person)"
+  }, {
+    "name" : "acquiring breeding stock",
+    "comment" : "Net rate at which sows and gilts are either acquired for breeding or returned to \t\t\t\t mature\n\t\t        stock for slaughtering. A positive rate indicates more sows and gilts are \t\t\t\t being acquired\n\t\t        for breeding than are being returned to feeding pens for slaughter. A \t\t\t\t negative number\n\t\t        indicates more are being returned for slaughter than are being added to the \t\t\t\t breeding\n\t\t        stock. Note: The basic policy is (Desired Breeding Stock-Breeding \t\t\t\t Stock)/Breeding Stock\n\t\t         Acquisition Delay. The complication keeps the level of mature \t\t\t\t hogs from going negative.",
+    "equation" : "IF( desired_breeding_stock > Breeding_Stock , IF( Mature_Stock > TIME_STEP * ( desired_breeding_stock - Breeding_Stock ) / breeding_stock_acquisition_delay , ( desired_breeding_stock - Breeding_Stock ) / breeding_stock_acquisition_delay , Mature_Stock / TIME_STEP ) , ( desired_breeding_stock - Breeding_Stock ) / breeding_stock_acquisition_delay )",
+    "unit" : "hogs/Month"
+  }, {
+    "name" : "breeding",
+    "comment" : "Rate at which pigs are created in utero. This rate is net of any pigs that do not \t\t\t\t survive to\n\t\t         maturity.",
+    "equation" : "Breeding_Stock * fertility",
+    "unit" : "hogs/Month"
+  }, {
+    "name" : "breeding stock acquisition delay",
+    "comment" : "Dealy for farmers to adjust their breeding stocks to desired levels. Source: \t\t\t\t Meadows' Hog\n\t\t         Cycle model (BSAD)",
+    "equation" : "5",
+    "unit" : "months"
+  }, {
+    "name" : "consuming",
+    "comment" : "National consumption of pork",
+    "equation" : "IF( Inventory + slaughtering * TIME_STEP > Per_Capita_Consumption * population * TIME_STEP , Per_Capita_Consumption * population , Inventory / TIME_STEP )",
+    "unit" : "hog/Month"
+  }, {
+    "name" : "coverage effect on price",
+    "comment" : "Effect that surplus or deficient pork inventories have on the price of \t\t\t\t live hogs.",
+    "equation" : "LOOKUP(coverage_effect_on_price_func, relative_coverage)",
+    "unit" : "dmnl"
+  }, {
+    "name" : "desired breeding stock",
+    "comment" : "Number of sows and gilts farmers would like to have for breeding.",
+    "equation" : "normal_breeding_stock * price_effect_on_breeding_stock",
+    "unit" : "hogs"
+  }, {
+    "name" : "desired coverage",
+    "comment" : "Desired months of pork inventory. Source: Meadows (DCOV)",
+    "equation" : "0.36",
+    "unit" : "months"
+  }, {
+    "name" : "effect of price on consumption",
+    "comment" : "Impact of retail price on national consumption of pork.",
+    "equation" : "LOOKUP(effect_of_price_on_consumption_func, relative_hog_price)",
+    "unit" : "dmnl"
+  }, {
+    "name" : "expected corn price",
+    "comment" : "Farmers' expected price of corn. Source: Meadows (FECCP)",
+    "equation" : "1.14",
+    "unit" : "$/bushel"
+  }, {
+    "name" : "Expected Hog Price",
+    "comment" : "The price farmers expect to receive for live hogs.",
+    "equation" : "SMOOTHI( hog_price , time_to_form_price_expectations , normal_hog_price )",
+    "unit" : "$/hog"
+  }, {
+    "name" : "farrowing",
+    "comment" : "Hog birth rate.",
+    "equation" : "Piglets_In_Utero / gestation_time",
+    "unit" : "hogs/Month"
+  }, {
+    "name" : "fertility",
+    "comment" : "The fertility of hogs after accounting for hogs lost at birth, weaning or \t\t\t\t elswewhere before\n\t\t        slaughter or breeding. Source: Meadows: Litters per hog * pigs saved per \t\t\t\t litter * weaning\n\t\t         survival factor =LPHM*PSPL*WSF = .17*7 *.7=0.83",
+    "equation" : "0.83",
+    "unit" : "hogs/(Month*hog)"
+  }, {
+    "name" : "gestation time",
+    "comment" : "Average pregnancy period for hogs. Source: Meadows, figure 5-14",
+    "equation" : "3.7",
+    "unit" : "months"
+  }, {
+    "name" : "hog corn price ratio",
+    "comment" : "The ratio of the price of a hog to the price of a bushel of corn. The \"exchange \t\t\t\t rate\" of a\n\t\t         hog in terms of bushels of corn.",
+    "equation" : "Expected_Hog_Price / expected_corn_price",
+    "unit" : "bushel/hog"
+  }, {
+    "name" : "hog dressing yield",
+    "comment" : "Fraction of each hog that is not discarded as waste during dressing. \t\t\t\t Source: Meadows (DY)",
+    "equation" : "0.58",
+    "unit" : "fraction"
+  }, {
+    "name" : "hog price",
+    "comment" : "The price farmers receive for live hogs.",
+    "equation" : "normal_hog_price * coverage_effect_on_price",
+    "unit" : "$/hog"
+  }, {
+    "name" : "indicated per capita consumption",
+    "comment" : "Per capita consumption that would hold if the retail price had worked its way \t\t\t\t through the\n\t\t         system, and if people had had time to completely react to it.",
+    "equation" : "( normal_consumption * effect_of_price_on_consumption ) * input",
+    "unit" : "hogs/(Month*person)"
+  }, {
+    "name" : "input",
+    "comment" : "Test input that disturbs the system from an initial equilibrium. The test input is \t\t\t\t designed\n\t\t        to elicit the inherent dynamics of the system. The test input does not \t\t\t\t represent an\n\t\t         historical event.",
+    "equation" : "( 1 + STEP ( 0.1, 0) )",
+    "unit" : "dmnl"
+  }, {
+    "name" : "inventory coverage",
+    "comment" : "Months of inventory at the current consumption rate",
+    "equation" : "Inventory / consuming",
+    "unit" : "Month"
+  }, {
+    "name" : "live weight of slaughtered hogs",
+    "comment" : "Weight of fully mature hogs, ready for slaughter. Source: Meadows (LWSH)",
+    "equation" : "240",
+    "unit" : "lbs/hog"
+  }, {
+    "name" : "marketing margin",
+    "comment" : "Marketing Margin in Meadows is $28/100 lbs. A hog is 240 lbs, and the dressing \t\t\t\t yield in .58.\n\t\t        So the margin is $39/hog. However, this leads to unstable (or undamped) \t\t\t\t oscillations,\n\t\t        because of the delay in consumption (which is not in the original model) so \t\t\t\t we go with\n\t\t         $30/hog.",
+    "equation" : "30",
+    "unit" : "$/hog"
+  }, {
+    "name" : "mature stock feeding period",
+    "comment" : "Average time hogs are held (and fed) after becoming mature. Source: \t\t\t\t Meadows, figure 5-14.",
+    "equation" : "2",
+    "unit" : "months"
+  }, {
+    "name" : "maturing",
+    "comment" : "Rate at which piglets becoming mature hogs.",
+    "equation" : "Piglets / time_to_mature",
+    "unit" : "hogs/Month"
+  }, {
+    "name" : "normal breeding stock",
+    "comment" : "The normal number of sows and gilts held for breeding. This is the equilibrium \t\t\t\t quantity,\n\t\t        given the normal hog/corn price ratio. Source: Meadows (BSTAB). Note: the \t\t\t\t normal hog\n\t\t         dcorn price ratio is about 20 bushels per hog.",
+    "equation" : "9000000",
+    "unit" : "hogs"
+  }, {
+    "name" : "normal hog corn price ratio",
+    "comment" : "The equilibrium hog corn price ratio.",
+    "equation" : "normal_hog_price / expected_corn_price",
+    "unit" : "bushel/hog"
+  }, {
+    "name" : "normal hog price",
+    "comment" : "The initial normal hog price.",
+    "equation" : "normal_price_per_pounds * live_weight_of_slaughtered_hogs * hog_dressing_yield",
+    "unit" : "$/hog"
+  }, {
+    "name" : "normal price per pounds",
+    "comment" : "The initial normal price per pound of live hogs. Source: From meadows HPTAB, this \t\t\t\t is the\n\t\t         price per lbs when RCOV = 1. (In Meadows, the price is 16.5 per \t\t\t\t hundred pound.",
+    "equation" : "0.165",
+    "unit" : "$/lbs"
+  }, {
+    "name" : "normal retail price",
+    "comment" : "The initial normal retail price of pork.",
+    "equation" : "normal_hog_price + marketing_margin",
+    "unit" : "$/hog"
+  }, {
+    "name" : "Per Capita Consumption",
+    "comment" : "Pork consumption per person per month in the U.S.",
+    "equation" : "SMOOTHI( indicated_per_capita_consumption , time_to_change_consumption , normal_consumption )",
+    "unit" : "hogs/(Month*person)"
+  }, {
+    "name" : "population",
+    "comment" : "U.S. population. Source: Meadows (POP)",
+    "equation" : "200000000",
+    "unit" : "people"
+  }, {
+    "name" : "price effect on breeding stock",
+    "comment" : "Impact of relative hog/corn price ratio on desired breeding stock. As the relative \t\t\t\t hog/corn\n\t\t        price ratio increases, farmers desire to increase their production, and \t\t\t\t hence to increase\n\t\t         breeding stock.",
+    "equation" : "LOOKUP(price_effect_on_breeding_stock_function, Relative_Hog_Corn_Ratio)",
+    "unit" : "dmnl"
+  }, {
+    "name" : "relative coverage",
+    "comment" : "Months of pork inventory, relative to desired.",
+    "equation" : "inventory_coverage / desired_coverage",
+    "unit" : "fraction"
+  }, {
+    "name" : "Relative Hog Corn Ratio",
+    "comment" : "The hog corn price ratio relative to normal",
+    "equation" : "hog_corn_price_ratio / normal_hog_corn_price_ratio",
+    "unit" : "dimensionless"
+  }, {
+    "name" : "relative hog price",
+    "comment" : "Retail price of pork, relative to normal retail price",
+    "equation" : "retail_price / normal_retail_price",
+    "unit" : "fraction"
+  }, {
+    "name" : "retail price",
+    "comment" : "Retail price of pork.",
+    "equation" : "hog_price + marketing_margin",
+    "unit" : "$/hog"
+  }, {
+    "name" : "slaughtering",
+    "comment" : "Hog slaughter rate.",
+    "equation" : "Mature_Stock / mature_stock_feeding_period",
+    "unit" : "hogs/Month"
+  }, {
+    "name" : "time to change consumption",
+    "comment" : "Average for pork consumption to react to a change in price. Represents perception \t\t\t\t and\n\t\t        reaction delays, as well as the time it takes for a wholesale price increase \t\t\t\t to work its\n\t\t        way through the system. This constant does not appear in Meadows. Source: \t\t\t\t LeapTec\n\t\t         estimate.",
+    "equation" : "0.5",
+    "unit" : "months"
+  }, {
+    "name" : "time to form price expectations",
+    "comment" : "Average time for farmers to adjust their expectations to a change in the level of \t\t\t\t live-hog\n\t\t         prices. Source: Meadows (FEHPAD)",
+    "equation" : "6",
+    "unit" : "months"
+  }, {
+    "name" : "time to mature",
+    "comment" : "Average time for a pig to reach maturity. The average period from Farrowing to \t\t\t\t Maturity.\n\t\t        Includes time from Farrowing to Weaning (2 months), Weaning to First Heat (1 \t\t\t\t month), and\n\t\t         from First Heat to Maturity (2 months). Source: Meadows, figure \t\t\t\t 5-14.",
+    "equation" : "5",
+    "unit" : "months"
+  } ],
+  "lookupTables" : [ {
+    "name" : "coverage effect on price func",
+    "comment" : "Functional relationship between pork relative pork inventory coverage and its \t\t\t\t effect on the\n\t\t        price of live-hogs. Source: Meadows (HPTAB). Normalized around 16.5, the \t\t\t\t coverage effect\n\t\t        for a relative coverage of 1. Meadow's table goes to 0 at rcov=2; the above \t\t\t\t table does\n\t\t         not.",
+    "xValues" : [ 0.0, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0 ],
+    "yValues" : [ 2.12, 1.61, 1.32, 1.13, 1.0, 0.79, 0.58, 0.33, 0.100421 ],
+    "interpolation" : "LINEAR",
+    "unit" : "dmnl"
+  }, {
+    "name" : "effect of price on consumption func",
+    "comment" : "Functional relationship between relative price of pork and its impact on per capita\n\t\t        consumption. Source: Meadows PCCP. We have assumed the \"Normal\" retail price \t\t\t\t is 60, and\n\t\t         so the normal consumption per capita is 5/person/month",
+    "xValues" : [ 0.67, 1.0, 1.33 ],
+    "yValues" : [ 1.28, 1.0, 0.74 ],
+    "interpolation" : "LINEAR",
+    "unit" : "dmnl"
+  }, {
+    "name" : "price effect on breeding stock function",
+    "comment" : "Functional relationship between relative Hog/Corn price ratio and its impact on \t\t\t\t desired\n\t\t        breeding stock. Source: Meadows(BSTAB). We have normalized in the following \t\t\t\t way. The\n\t\t        normal expected hog corn ratio is about 20 bushels/hog. The normal breeding \t\t\t\t stock (from\n\t\t         the table, then, is about 9 million hogs.",
+    "xValues" : [ 0.5, 0.75, 1.0, 1.25 ],
+    "yValues" : [ 0.55, 0.78, 1.0, 1.18 ],
+    "interpolation" : "LINEAR",
+    "unit" : "dmnl"
+  } ],
+  "comments" : [ {
+    "name" : "Comment 1",
+    "text" : "Copyright (c) 1994 LeapTec and Ventana.  After Meadows. 1970. Dynamics of Commodity Production Cycles."
+  }, {
+    "name" : "Comment 2",
+    "text" : "hog price,graph"
+  }, {
+    "name" : "Comment 3",
+    "text" : "COMMOD MODEL"
+  } ],
+  "views" : [ {
+    "name" : "1",
+    "elements" : [ {
+      "name" : "Piglets In Utero",
+      "type" : "stock",
+      "x" : 135.0,
+      "y" : 239.0
+    }, {
+      "name" : "Piglets",
+      "type" : "stock",
+      "x" : 314.0,
+      "y" : 239.0
+    }, {
+      "name" : "Mature Stock",
+      "type" : "stock",
+      "x" : 490.0,
+      "y" : 240.0
+    }, {
+      "name" : "Inventory",
+      "type" : "stock",
+      "x" : 691.0,
+      "y" : 239.0
+    }, {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : 402.0,
+      "y" : 240.0
+    }, {
+      "name" : "maturing",
+      "type" : "aux",
+      "x" : 402.0,
+      "y" : 278.0
+    }, {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : 795.0,
+      "y" : 237.0
+    }, {
+      "name" : "consuming",
+      "type" : "aux",
+      "x" : 795.0,
+      "y" : 275.0
+    }, {
+      "name" : "Breeding Stock",
+      "type" : "stock",
+      "x" : 188.0,
+      "y" : 357.0
+    }, {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : 55.0,
+      "y" : 240.0
+    }, {
+      "name" : "breeding",
+      "type" : "aux",
+      "x" : 55.0,
+      "y" : 278.0
+    }, {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : 230.0,
+      "y" : 240.0
+    }, {
+      "name" : "farrowing",
+      "type" : "aux",
+      "x" : 230.0,
+      "y" : 278.0
+    }, {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : 588.0,
+      "y" : 240.0
+    }, {
+      "name" : "slaughtering",
+      "type" : "aux",
+      "x" : 588.0,
+      "y" : 278.0
+    }, {
+      "name" : "desired breeding stock",
+      "type" : "aux",
+      "x" : 223.0,
+      "y" : 451.0
+    }, {
+      "name" : "gestation time",
+      "type" : "aux",
+      "x" : 204.0,
+      "y" : 168.0
+    }, {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : 350.0,
+      "y" : 361.0
+    }, {
+      "name" : "acquiring breeding stock",
+      "type" : "aux",
+      "x" : 350.0,
+      "y" : 399.0
+    }, {
+      "name" : "time to mature",
+      "type" : "aux",
+      "x" : 344.0,
+      "y" : 167.0
+    }, {
+      "name" : "mature stock feeding period",
+      "type" : "aux",
+      "x" : 542.0,
+      "y" : 168.0
+    }, {
+      "name" : "fertility",
+      "type" : "aux",
+      "x" : 163.0,
+      "y" : 305.0
+    }, {
+      "name" : "breeding stock acquisition delay",
+      "type" : "aux",
+      "x" : 479.0,
+      "y" : 453.0
+    }, {
+      "name" : "inventory coverage",
+      "type" : "aux",
+      "x" : 727.0,
+      "y" : 352.0
+    }, {
+      "name" : "population",
+      "type" : "aux",
+      "x" : 866.0,
+      "y" : 201.0
+    }, {
+      "name" : "indicated per capita consumption",
+      "type" : "aux",
+      "x" : 991.0,
+      "y" : 428.0
+    }, {
+      "name" : "relative coverage",
+      "type" : "aux",
+      "x" : 691.0,
+      "y" : 421.0
+    }, {
+      "name" : "hog price",
+      "type" : "aux",
+      "x" : 599.0,
+      "y" : 576.0
+    }, {
+      "name" : "relative hog price",
+      "type" : "aux",
+      "x" : 914.0,
+      "y" : 585.0
+    }, {
+      "name" : "Expected Hog Price",
+      "type" : "aux",
+      "x" : 452.0,
+      "y" : 679.0
+    }, {
+      "name" : "hog corn price ratio",
+      "type" : "aux",
+      "x" : 258.0,
+      "y" : 671.0
+    }, {
+      "name" : "expected corn price",
+      "type" : "aux",
+      "x" : 475.0,
+      "y" : 753.0
+    }, {
+      "name" : "desired coverage",
+      "type" : "aux",
+      "x" : 571.0,
+      "y" : 324.0
+    }, {
+      "name" : "coverage effect on price",
+      "type" : "aux",
+      "x" : 650.0,
+      "y" : 508.0
+    }, {
+      "name" : "normal hog price",
+      "type" : "aux",
+      "x" : 663.0,
+      "y" : 781.0
+    }, {
+      "name" : "normal breeding stock",
+      "type" : "aux",
+      "x" : 284.0,
+      "y" : 503.0
+    }, {
+      "name" : "effect of price on consumption",
+      "type" : "aux",
+      "x" : 990.0,
+      "y" : 517.0
+    }, {
+      "name" : "normal consumption",
+      "type" : "aux",
+      "x" : 1018.0,
+      "y" : 180.0
+    }, {
+      "name" : "normal retail price",
+      "type" : "aux",
+      "x" : 919.0,
+      "y" : 652.0
+    }, {
+      "name" : "marketing margin",
+      "type" : "aux",
+      "x" : 722.0,
+      "y" : 676.0
+    }, {
+      "name" : "TIME STEP",
+      "type" : "aux",
+      "x" : 824.0,
+      "y" : 324.0
+    }, {
+      "name" : "normal hog corn price ratio",
+      "type" : "aux",
+      "x" : 174.0,
+      "y" : 712.0
+    }, {
+      "name" : "Relative Hog Corn Ratio",
+      "type" : "aux",
+      "x" : 171.0,
+      "y" : 616.0
+    }, {
+      "name" : "live weight of slaughtered hogs",
+      "type" : "aux",
+      "x" : 959.0,
+      "y" : 735.0
+    }, {
+      "name" : "hog dressing yield",
+      "type" : "aux",
+      "x" : 919.0,
+      "y" : 776.0
+    }, {
+      "name" : "normal price per pounds",
+      "type" : "aux",
+      "x" : 960.0,
+      "y" : 807.0
+    }, {
+      "name" : "time to form price expectations",
+      "type" : "aux",
+      "x" : 418.0,
+      "y" : 619.0
+    }, {
+      "name" : "TIME STEP",
+      "type" : "aux",
+      "x" : 502.0,
+      "y" : 415.0
+    }, {
+      "name" : "input",
+      "type" : "aux",
+      "x" : 1043.0,
+      "y" : 480.0
+    }, {
+      "name" : "Per Capita Consumption",
+      "type" : "aux",
+      "x" : 966.0,
+      "y" : 304.0
+    }, {
+      "name" : "time to change consumption",
+      "type" : "aux",
+      "x" : 846.0,
+      "y" : 391.0
+    }, {
+      "name" : "price effect on breeding stock",
+      "type" : "aux",
+      "x" : 150.0,
+      "y" : 545.0
+    }, {
+      "name" : "retail price",
+      "type" : "aux",
+      "x" : 743.0,
+      "y" : 625.0
+    }, {
+      "name" : "Comment 1",
+      "type" : "comment",
+      "x" : 634.0,
+      "y" : 848.0,
+      "width" : 912.0,
+      "height" : 24.0
+    }, {
+      "name" : "coverage effect on price func",
+      "type" : "lookup",
+      "x" : 838.0,
+      "y" : 456.0
+    }, {
+      "name" : "effect of price on consumption func",
+      "type" : "lookup",
+      "x" : 1104.0,
+      "y" : 615.0
+    }, {
+      "name" : "price effect on breeding stock function",
+      "type" : "lookup",
+      "x" : 388.0,
+      "y" : 580.0
+    }, {
+      "name" : "Comment 2",
+      "type" : "comment",
+      "x" : 1258.0,
+      "y" : 285.0,
+      "width" : 296.0,
+      "height" : 242.0
+    }, {
+      "name" : "Comment 3",
+      "type" : "comment",
+      "x" : 733.0,
+      "y" : 71.0,
+      "width" : 160.0,
+      "height" : 80.0
+    } ],
+    "connectors" : [ {
+      "from" : "_0",
+      "to" : "Piglets In Utero"
+    }, {
+      "from" : "_0",
+      "to" : "Piglets"
+    }, {
+      "from" : "_0",
+      "to" : "Piglets In Utero"
+    }, {
+      "from" : "_0",
+      "to" : "Mature Stock"
+    }, {
+      "from" : "_0",
+      "to" : "Piglets"
+    }, {
+      "from" : "_0",
+      "to" : "Inventory"
+    }, {
+      "from" : "_0",
+      "to" : "Mature Stock"
+    }, {
+      "from" : "_0",
+      "to" : "Inventory"
+    }, {
+      "from" : "_0",
+      "to" : "Breeding Stock"
+    }, {
+      "from" : "_0",
+      "to" : "Mature Stock"
+    }, {
+      "from" : "Piglets In Utero",
+      "to" : "farrowing"
+    }, {
+      "from" : "Piglets",
+      "to" : "maturing"
+    }, {
+      "from" : "Mature Stock",
+      "to" : "slaughtering"
+    }, {
+      "from" : "Inventory",
+      "to" : "consuming"
+    }, {
+      "from" : "Breeding Stock",
+      "to" : "breeding"
+    }, {
+      "from" : "gestation time",
+      "to" : "_0"
+    }, {
+      "from" : "time to mature",
+      "to" : "_0"
+    }, {
+      "from" : "mature stock feeding period",
+      "to" : "_0"
+    }, {
+      "from" : "Breeding Stock",
+      "to" : "acquiring breeding stock"
+    }, {
+      "from" : "fertility",
+      "to" : "breeding"
+    }, {
+      "from" : "Inventory",
+      "to" : "inventory coverage"
+    }, {
+      "from" : "population",
+      "to" : "_0"
+    }, {
+      "from" : "desired breeding stock",
+      "to" : "acquiring breeding stock"
+    }, {
+      "from" : "inventory coverage",
+      "to" : "relative coverage"
+    }, {
+      "from" : "hog price",
+      "to" : "Expected Hog Price"
+    }, {
+      "from" : "expected corn price",
+      "to" : "hog corn price ratio"
+    }, {
+      "from" : "Expected Hog Price",
+      "to" : "hog corn price ratio"
+    }, {
+      "from" : "desired coverage",
+      "to" : "relative coverage"
+    }, {
+      "from" : "breeding stock acquisition delay",
+      "to" : "acquiring breeding stock"
+    }, {
+      "from" : "relative coverage",
+      "to" : "coverage effect on price"
+    }, {
+      "from" : "coverage effect on price",
+      "to" : "hog price"
+    }, {
+      "from" : "normal hog price",
+      "to" : "hog price"
+    }, {
+      "from" : "price effect on breeding stock",
+      "to" : "desired breeding stock"
+    }, {
+      "from" : "relative hog price",
+      "to" : "effect of price on consumption"
+    }, {
+      "from" : "effect of price on consumption",
+      "to" : "indicated per capita consumption"
+    }, {
+      "from" : "normal consumption",
+      "to" : "indicated per capita consumption"
+    }, {
+      "from" : "desired coverage",
+      "to" : "Inventory"
+    }, {
+      "from" : "mature stock feeding period",
+      "to" : "Mature Stock"
+    }, {
+      "from" : "gestation time",
+      "to" : "Piglets In Utero"
+    }, {
+      "from" : "time to mature",
+      "to" : "Piglets"
+    }, {
+      "from" : "desired breeding stock",
+      "to" : "Breeding Stock"
+    }, {
+      "from" : "TIME STEP",
+      "to" : "consuming"
+    }, {
+      "from" : "hog corn price ratio",
+      "to" : "Relative Hog Corn Ratio"
+    }, {
+      "from" : "Relative Hog Corn Ratio",
+      "to" : "price effect on breeding stock"
+    }, {
+      "from" : "normal hog corn price ratio",
+      "to" : "Relative Hog Corn Ratio"
+    }, {
+      "from" : "normal breeding stock",
+      "to" : "desired breeding stock"
+    }, {
+      "from" : "normal price per pounds",
+      "to" : "normal hog price"
+    }, {
+      "from" : "live weight of slaughtered hogs",
+      "to" : "normal hog price"
+    }, {
+      "from" : "time to form price expectations",
+      "to" : "Expected Hog Price"
+    }, {
+      "from" : "normal hog price",
+      "to" : "Expected Hog Price"
+    }, {
+      "from" : "expected corn price",
+      "to" : "normal hog corn price ratio"
+    }, {
+      "from" : "normal hog price",
+      "to" : "normal hog corn price ratio"
+    }, {
+      "from" : "hog dressing yield",
+      "to" : "normal hog price"
+    }, {
+      "from" : "Mature Stock",
+      "to" : "_0"
+    }, {
+      "from" : "TIME STEP",
+      "to" : "acquiring breeding stock"
+    }, {
+      "from" : "population",
+      "to" : "normal consumption"
+    }, {
+      "from" : "slaughtering",
+      "to" : "consuming"
+    }, {
+      "from" : "indicated per capita consumption",
+      "to" : "Per Capita Consumption"
+    }, {
+      "from" : "Per Capita Consumption",
+      "to" : "consuming"
+    }, {
+      "from" : "time to change consumption",
+      "to" : "Per Capita Consumption"
+    }, {
+      "from" : "normal consumption",
+      "to" : "Per Capita Consumption"
+    }, {
+      "from" : "consuming",
+      "to" : "inventory coverage"
+    }, {
+      "from" : "normal consumption",
+      "to" : "Inventory"
+    }, {
+      "from" : "population",
+      "to" : "Inventory"
+    }, {
+      "from" : "normal hog price",
+      "to" : "normal retail price"
+    }, {
+      "from" : "marketing margin",
+      "to" : "normal retail price"
+    }, {
+      "from" : "hog price",
+      "to" : "retail price"
+    }, {
+      "from" : "marketing margin",
+      "to" : "retail price"
+    }, {
+      "from" : "retail price",
+      "to" : "relative hog price"
+    }, {
+      "from" : "normal retail price",
+      "to" : "relative hog price"
+    }, {
+      "from" : "coverage effect on price func",
+      "to" : "coverage effect on price"
+    }, {
+      "from" : "effect of price on consumption func",
+      "to" : "effect of price on consumption"
+    }, {
+      "from" : "price effect on breeding stock function",
+      "to" : "price effect on breeding stock"
+    }, {
+      "from" : "input",
+      "to" : "indicated per capita consumption"
+    }, {
+      "from" : "_0",
+      "to" : "normal consumption"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_0",
+      "points" : [ [ 402.0, 240.0 ] ]
+    }, {
+      "flowName" : "_0",
+      "points" : [ [ 795.0, 237.0 ] ]
+    }, {
+      "flowName" : "_0",
+      "points" : [ [ 55.0, 240.0 ] ]
+    }, {
+      "flowName" : "_0",
+      "points" : [ [ 230.0, 240.0 ] ]
+    }, {
+      "flowName" : "_0",
+      "points" : [ [ 588.0, 240.0 ] ]
+    }, {
+      "flowName" : "_0",
+      "points" : [ [ 350.0, 361.0 ] ]
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Month",
+    "duration" : 100.0,
+    "durationUnit" : "Month"
+  },
+  "metadata" : {
+    "author" : "Ventana Systems, Inc.",
+    "source" : "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+    "license" : "MIT",
+    "url" : "https://www.vensim.com/documentation/sample_models.html"
+  }
+}

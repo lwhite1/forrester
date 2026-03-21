@@ -1,0 +1,1699 @@
+{
+  "name" : "MARKET2",
+  "stocks" : [ {
+    "name" : "Adv Budget Effective",
+    "comment" : "Adv Budget Effective",
+    "initialValue" : 0.0,
+    "initialExpression" : "adv_budget",
+    "unit" : "$/ Month"
+  }, {
+    "name" : "Cum Retained Cash",
+    "comment" : "Cum Retained Cash",
+    "initialValue" : 0.0,
+    "unit" : "$"
+  }, {
+    "name" : "Int Dir Salespeople",
+    "comment" : "Int Dir Salespeople",
+    "initialValue" : 0.0,
+    "initialExpression" : "target_int_dir_sales",
+    "unit" : "People"
+  }, {
+    "name" : "Pot Orders In Negotiation",
+    "comment" : "Pot Orders In Negotiation",
+    "initialValue" : 23.0,
+    "unit" : "Orders"
+  }, {
+    "name" : "Potential Orders",
+    "comment" : "Potential Orders",
+    "initialValue" : 2400.0,
+    "unit" : "Orders"
+  }, {
+    "name" : "prod gen rate",
+    "comment" : "prod gen rate",
+    "initialValue" : 0.0,
+    "initialExpression" : "prod_dev_efficiency * prod_dev_budget",
+    "unit" : "Product / Month"
+  }, {
+    "name" : "Products",
+    "comment" : "Products",
+    "initialValue" : 10.0,
+    "unit" : "Product"
+  }, {
+    "name" : "Receivables",
+    "comment" : "Receivables",
+    "initialValue" : 0.0,
+    "initialExpression" : "accrued_revenue * time_to_clear_receivables",
+    "unit" : "$"
+  } ],
+  "flows" : [ {
+    "name" : "Adv Budget Effective net flow",
+    "comment" : "Net flow for Adv Budget Effective",
+    "equation" : "( adv_budget - Adv_Budget_Effective ) / adv_impact_delay",
+    "timeUnit" : "Month",
+    "sink" : "Adv Budget Effective"
+  }, {
+    "name" : "Cum Retained Cash net flow",
+    "comment" : "Net flow for Cum Retained Cash",
+    "equation" : "retained_cash_flow",
+    "timeUnit" : "Month",
+    "sink" : "Cum Retained Cash"
+  }, {
+    "name" : "Int Dir Salespeople net flow",
+    "comment" : "Net flow for Int Dir Salespeople",
+    "equation" : "( target_int_dir_sales - Int_Dir_Salespeople ) / time_to_hire_int_dir_salespeople",
+    "timeUnit" : "Month",
+    "sink" : "Int Dir Salespeople"
+  }, {
+    "name" : "Pot Orders In Negotiation inflow 1",
+    "equation" : "pot_orders_moving_to_negot",
+    "timeUnit" : "Month",
+    "sink" : "Pot Orders In Negotiation"
+  }, {
+    "name" : "Pot Orders In Negotiation outflow 2",
+    "equation" : "unit_sales",
+    "timeUnit" : "Month",
+    "source" : "Pot Orders In Negotiation"
+  }, {
+    "name" : "Pot Orders In Negotiation outflow 3",
+    "equation" : "pot_orders_lost_to_comp",
+    "timeUnit" : "Month",
+    "source" : "Pot Orders In Negotiation"
+  }, {
+    "name" : "Pot Orders In Negotiation outflow 4",
+    "equation" : "pot_orders_not_buying",
+    "timeUnit" : "Month",
+    "source" : "Pot Orders In Negotiation"
+  }, {
+    "name" : "Potential Orders inflow 1",
+    "equation" : "pot_order_creation",
+    "timeUnit" : "Month",
+    "sink" : "Potential Orders"
+  }, {
+    "name" : "Potential Orders outflow 2",
+    "equation" : "pot_ords_obs_rate",
+    "timeUnit" : "Month",
+    "source" : "Potential Orders"
+  }, {
+    "name" : "Potential Orders outflow 3",
+    "equation" : "pot_orders_moving_to_negot",
+    "timeUnit" : "Month",
+    "source" : "Potential Orders"
+  }, {
+    "name" : "Potential Orders inflow 4",
+    "equation" : "pot_orders_not_buying",
+    "timeUnit" : "Month",
+    "sink" : "Potential Orders"
+  }, {
+    "name" : "prod gen rate net flow",
+    "comment" : "Net flow for prod gen rate",
+    "equation" : "( prod_dev_efficiency * prod_dev_budget - prod_gen_rate ) / prod_dev_time",
+    "timeUnit" : "Month",
+    "sink" : "prod gen rate"
+  }, {
+    "name" : "Products inflow 1",
+    "equation" : "prod_gen_rate",
+    "timeUnit" : "Month",
+    "sink" : "Products"
+  }, {
+    "name" : "Products outflow 2",
+    "equation" : "prod_obsolescence_rate",
+    "timeUnit" : "Month",
+    "source" : "Products"
+  }, {
+    "name" : "Receivables inflow 1",
+    "equation" : "accrued_revenue",
+    "timeUnit" : "Month",
+    "sink" : "Receivables"
+  }, {
+    "name" : "Receivables outflow 2",
+    "equation" : "cash_revenue",
+    "timeUnit" : "Month",
+    "source" : "Receivables"
+  } ],
+  "variables" : [ {
+    "name" : "accrued revenue",
+    "comment" : "accrued revenue",
+    "equation" : "unit_sales * price",
+    "unit" : "$/ Month"
+  }, {
+    "name" : "adv budget",
+    "comment" : "adv budget",
+    "equation" : "percent_budget_adv/100 * cash_revenue",
+    "unit" : "$/ Month"
+  }, {
+    "name" : "adv impact delay",
+    "comment" : "adv impact delay",
+    "equation" : "12",
+    "unit" : "Months"
+  }, {
+    "name" : "cash revenue",
+    "comment" : "cash revenue",
+    "equation" : "Receivables / time_to_clear_receivables",
+    "unit" : "$/ Month"
+  }, {
+    "name" : "demos per person month",
+    "comment" : "demos per person month",
+    "equation" : "12",
+    "unit" : "Orders / Month / Person"
+  }, {
+    "name" : "eff of lead avail on demos",
+    "comment" : "eff of lead avail on demos",
+    "equation" : "LOOKUP(table_for_eff_of_leads, Potential_Orders / Int_Dir_Salespeople)",
+    "unit" : "Dimensionless"
+  }, {
+    "name" : "effect of advertising",
+    "comment" : "effect of advertising",
+    "equation" : "LOOKUP(table_for_effect_of_adv, Adv_Budget_Effective / Products)",
+    "unit" : "Dimensionless"
+  }, {
+    "name" : "duration of negotiation",
+    "comment" : "duration of negotiation",
+    "equation" : "1",
+    "unit" : "Month"
+  }, {
+    "name" : "ext sales rep fee",
+    "comment" : "ext sales rep fee",
+    "equation" : "400",
+    "unit" : "$/ Person / Month"
+  }, {
+    "name" : "external sales reps",
+    "comment" : "external sales reps",
+    "equation" : "cash_revenue * percent_budget_ext_sales_reps/100 / ext_sales_rep_fee",
+    "unit" : "People"
+  }, {
+    "name" : "frac budget mfg",
+    "comment" : "frac budget mfg",
+    "equation" : "0.47",
+    "unit" : "Dimensionless"
+  }, {
+    "name" : "frac budget r and d",
+    "comment" : "frac budget r and d",
+    "equation" : "0.15",
+    "unit" : "Dimensionless"
+  }, {
+    "name" : "frac cash retained",
+    "comment" : "frac cash retained",
+    "equation" : "( 1 - frac_budget_mfg - frac_budget_r_and_d - percent_budget_adv/100 - percent_budget_ext_sales_reps/100 - percent_budget_int_dir_sales /100)",
+    "unit" : "Fraction"
+  }, {
+    "name" : "fraction custs buying",
+    "comment" : "fraction custs buying",
+    "equation" : "LOOKUP(table_for_frac_buying, Pot_Orders_In_Negotiation / Potential_Orders)",
+    "unit" : "Dimensionless"
+  }, {
+    "name" : "int dir sales cost",
+    "comment" : "int dir sales cost",
+    "equation" : "2400",
+    "unit" : "$/ Person / Month"
+  }, {
+    "name" : "lifetime of mailing list",
+    "comment" : "lifetime of mailing list",
+    "equation" : "60",
+    "unit" : "Months"
+  }, {
+    "name" : "normal lead gen effic",
+    "comment" : "normal lead gen effic",
+    "equation" : "7",
+    "unit" : "Orders / Products / Month"
+  }, {
+    "name" : "normal share of sales",
+    "comment" : "normal share of sales",
+    "equation" : "0.8",
+    "unit" : "Dimensionless"
+  }, {
+    "name" : "percent budget adv",
+    "comment" : "percent budget adv",
+    "equation" : "4",
+    "unit" : "Dimensionless"
+  }, {
+    "name" : "percent budget ext sales reps",
+    "comment" : "percent budget ext sales reps",
+    "equation" : "8",
+    "unit" : "Dimensionless"
+  }, {
+    "name" : "percent budget int dir sales",
+    "comment" : "percent budget int dir sales",
+    "equation" : "6",
+    "unit" : "Dimensionless"
+  }, {
+    "name" : "pot order creation",
+    "comment" : "pot order creation",
+    "equation" : "normal_lead_gen_effic * Products * effect_of_advertising",
+    "unit" : "Orders / Month"
+  }, {
+    "name" : "pot orders lost to comp",
+    "comment" : "pot orders lost to comp",
+    "equation" : "Pot_Orders_In_Negotiation * fraction_custs_buying * ( 1 - normal_share_of_sales ) / duration_of_negotiation",
+    "unit" : "Orders / Month"
+  }, {
+    "name" : "pot orders not buying",
+    "comment" : "pot orders not buying",
+    "equation" : "Pot_Orders_In_Negotiation * ( 1 - fraction_custs_buying ) / duration_of_negotiation",
+    "unit" : "Orders / Month"
+  }, {
+    "name" : "pot orders moving to negot",
+    "comment" : "pot orders moving to negot",
+    "equation" : "Int_Dir_Salespeople * demos_per_person_month * eff_of_lead_avail_on_demos * sales_rep_effect_mult",
+    "unit" : "Orders / Month"
+  }, {
+    "name" : "pot ords obs rate",
+    "comment" : "pot ords obs rate",
+    "equation" : "Potential_Orders / lifetime_of_mailing_list",
+    "unit" : "Orders / Month"
+  }, {
+    "name" : "potential orders initial",
+    "comment" : "potential orders initial",
+    "equation" : "2400",
+    "unit" : "Orders"
+  }, {
+    "name" : "price",
+    "comment" : "price",
+    "equation" : "7000",
+    "unit" : "$/ Orders"
+  }, {
+    "name" : "prod dev budget",
+    "comment" : "prod dev budget",
+    "equation" : "cash_revenue * frac_budget_r_and_d",
+    "unit" : "$/ Month"
+  }, {
+    "name" : "prod dev efficiency",
+    "comment" : "prod dev efficiency",
+    "equation" : "3.0E-5",
+    "unit" : "Product / $"
+  }, {
+    "name" : "prod dev time",
+    "comment" : "prod dev time",
+    "equation" : "12",
+    "unit" : "Month"
+  }, {
+    "name" : "prod obs time",
+    "comment" : "prod obs time",
+    "equation" : "60",
+    "unit" : "Months"
+  }, {
+    "name" : "prod obsolescence rate",
+    "comment" : "prod obsolescence rate",
+    "equation" : "Products / prod_obs_time",
+    "unit" : "Product / Month"
+  }, {
+    "name" : "retained cash flow",
+    "comment" : "retained cash flow",
+    "equation" : "cash_revenue * frac_cash_retained",
+    "unit" : "$/ Month"
+  }, {
+    "name" : "sales rep effect mult",
+    "comment" : "sales rep effect mult",
+    "equation" : "LOOKUP(table_for_sales_rep_effect, external_sales_reps / Potential_Orders)",
+    "unit" : "Dimensionless"
+  }, {
+    "name" : "target int dir sales",
+    "comment" : "target int dir sales",
+    "equation" : "cash_revenue * percent_budget_int_dir_sales/100 / int_dir_sales_cost",
+    "unit" : "People"
+  }, {
+    "name" : "time to hire int dir salespeople",
+    "comment" : "time to hire int dir salespeople",
+    "equation" : "10",
+    "unit" : "Months"
+  }, {
+    "name" : "time to clear receivables",
+    "comment" : "time to clear receivables",
+    "equation" : "6",
+    "unit" : "Months"
+  }, {
+    "name" : "unit sales",
+    "comment" : "unit sales",
+    "equation" : "Pot_Orders_In_Negotiation * normal_share_of_sales * fraction_custs_buying / duration_of_negotiation",
+    "unit" : "Orders / Month"
+  } ],
+  "lookupTables" : [ {
+    "name" : "table for eff of leads",
+    "comment" : "table for eff of leads",
+    "xValues" : [ 0.0, 100.0, 200.0, 300.0, 400.0, 500.0 ],
+    "yValues" : [ 0.0, 0.32, 0.6, 0.8, 0.9, 1.0 ],
+    "interpolation" : "LINEAR",
+    "unit" : "Dimensionless"
+  }, {
+    "name" : "table for effect of adv",
+    "comment" : "table for effect of adv",
+    "xValues" : [ 0.0, 40.0, 80.0, 120.0, 160.0, 200.0, 240.0, 280.0, 320.0, 360.0, 400.0 ],
+    "yValues" : [ 0.01, 0.2, 0.5, 0.7, 0.8, 1.0, 1.03, 1.06, 1.08, 1.09, 1.1 ],
+    "interpolation" : "LINEAR",
+    "unit" : "Dimensionless"
+  }, {
+    "name" : "table for frac buying",
+    "comment" : "table for frac buying",
+    "xValues" : [ 0.0, 0.005, 0.01, 0.015, 0.02, 0.025, 0.03 ],
+    "yValues" : [ 1.0, 0.75, 0.55, 0.43, 0.38, 0.35, 0.34 ],
+    "interpolation" : "LINEAR",
+    "unit" : "Dimensionless"
+  }, {
+    "name" : "table for sales rep effect",
+    "comment" : "table for sales rep effect",
+    "xValues" : [ 0.0017, 0.0027, 0.0037, 0.0047, 0.0057, 0.0067, 0.0077, 0.0087, 0.0097, 0.0107 ],
+    "yValues" : [ 0.4, 0.55, 0.7, 0.85, 1.0, 1.1, 1.2, 1.3, 1.4, 1.4 ],
+    "interpolation" : "LINEAR",
+    "unit" : "Dimensionless"
+  } ],
+  "comments" : [ {
+    "name" : "Comment 1",
+    "text" : "MARKET 2 MODEL"
+  }, {
+    "name" : "Comment 2",
+    "text" : "MARKET_2_MODEL"
+  }, {
+    "name" : "Comment 3",
+    "text" : "Sales Process"
+  }, {
+    "name" : "Comment 4",
+    "text" : "Sales_Process"
+  }, {
+    "name" : "Comment 5",
+    "text" : "Cash Revenue"
+  }, {
+    "name" : "Comment 6",
+    "text" : "Cash_Revenue"
+  }, {
+    "name" : "Comment 7",
+    "text" : "Sales People"
+  }, {
+    "name" : "Comment 8",
+    "text" : "Sales_People"
+  }, {
+    "name" : "Comment 9",
+    "text" : "Advertising"
+  }, {
+    "name" : "Comment 10",
+    "text" : "Advertising"
+  }, {
+    "name" : "Comment 11",
+    "text" : "Products"
+  }, {
+    "name" : "Comment 12",
+    "text" : "Products"
+  } ],
+  "views" : [ {
+    "name" : "Overview",
+    "elements" : [ {
+      "name" : "Cum Retained Cash",
+      "type" : "stock",
+      "x" : 395.0,
+      "y" : 162.0
+    }, {
+      "name" : "retained cash flow",
+      "type" : "aux",
+      "x" : 176.0,
+      "y" : 207.0
+    }, {
+      "name" : "cash revenue",
+      "type" : "aux",
+      "x" : 839.0,
+      "y" : 198.0
+    }, {
+      "name" : "frac cash retained",
+      "type" : "aux",
+      "x" : 132.0,
+      "y" : 312.0
+    }, {
+      "name" : "Receivables",
+      "type" : "stock",
+      "x" : 632.0,
+      "y" : 156.0
+    }, {
+      "name" : "time to clear receivables",
+      "type" : "aux",
+      "x" : 341.0,
+      "y" : 297.0
+    }, {
+      "name" : "accrued revenue",
+      "type" : "aux",
+      "x" : 359.0,
+      "y" : 130.0
+    }, {
+      "name" : "price",
+      "type" : "aux",
+      "x" : 719.0,
+      "y" : 207.0
+    }, {
+      "name" : "unit sales",
+      "type" : "aux",
+      "x" : 176.0,
+      "y" : 199.0
+    }, {
+      "name" : "duration of negotiation",
+      "type" : "aux",
+      "x" : 788.0,
+      "y" : 258.0
+    }, {
+      "name" : "fraction custs buying",
+      "type" : "aux",
+      "x" : 572.0,
+      "y" : 216.0
+    }, {
+      "name" : "normal share of sales",
+      "type" : "aux",
+      "x" : 755.0,
+      "y" : 294.0
+    }, {
+      "name" : "Pot Orders In Negotiation",
+      "type" : "stock",
+      "x" : 146.0,
+      "y" : 319.0
+    }, {
+      "name" : "pot orders lost to comp",
+      "type" : "aux",
+      "x" : 488.0,
+      "y" : 366.0
+    }, {
+      "name" : "Adv Budget Effective",
+      "type" : "stock",
+      "x" : 737.0,
+      "y" : 711.0
+    }, {
+      "name" : "table for frac buying",
+      "type" : "lookup",
+      "x" : 713.0,
+      "y" : 399.0
+    }, {
+      "name" : "pot orders not buying",
+      "type" : "aux",
+      "x" : 398.0,
+      "y" : 292.0
+    }, {
+      "name" : "pot orders moving to negot",
+      "type" : "aux",
+      "x" : 149.0,
+      "y" : 446.0
+    }, {
+      "name" : "demos per person month",
+      "type" : "aux",
+      "x" : 176.0,
+      "y" : 441.0
+    }, {
+      "name" : "eff of lead avail on demos",
+      "type" : "aux",
+      "x" : 407.0,
+      "y" : 477.0
+    }, {
+      "name" : "Int Dir Salespeople",
+      "type" : "stock",
+      "x" : 623.0,
+      "y" : 429.0
+    }, {
+      "name" : "sales rep effect mult",
+      "type" : "aux",
+      "x" : 473.0,
+      "y" : 537.0
+    }, {
+      "name" : "target int dir sales",
+      "type" : "aux",
+      "x" : 673.0,
+      "y" : 349.0
+    }, {
+      "name" : "Potential Orders",
+      "type" : "stock",
+      "x" : 143.0,
+      "y" : 580.0
+    }, {
+      "name" : "table for eff of leads",
+      "type" : "lookup",
+      "x" : 330.0,
+      "y" : 561.0
+    }, {
+      "name" : "pot order creation",
+      "type" : "aux",
+      "x" : 275.0,
+      "y" : 660.0
+    }, {
+      "name" : "pot ords obs rate",
+      "type" : "aux",
+      "x" : 137.0,
+      "y" : 714.0
+    }, {
+      "name" : "potential orders initial",
+      "type" : "aux",
+      "x" : 288.0,
+      "y" : 600.0
+    }, {
+      "name" : "time to hire int dir salespeople",
+      "type" : "aux",
+      "x" : 767.0,
+      "y" : 537.0
+    }, {
+      "name" : "external sales reps",
+      "type" : "aux",
+      "x" : 680.0,
+      "y" : 508.0
+    }, {
+      "name" : "table for sales rep effect",
+      "type" : "lookup",
+      "x" : 482.0,
+      "y" : 604.0
+    }, {
+      "name" : "int dir sales cost",
+      "type" : "aux",
+      "x" : 662.0,
+      "y" : 640.0
+    }, {
+      "name" : "percent budget int dir sales",
+      "type" : "aux",
+      "x" : 599.0,
+      "y" : 663.0
+    }, {
+      "name" : "lifetime of mailing list",
+      "type" : "aux",
+      "x" : 144.0,
+      "y" : 658.0
+    }, {
+      "name" : "effect of advertising",
+      "type" : "aux",
+      "x" : 425.0,
+      "y" : 726.0
+    }, {
+      "name" : "normal lead gen effic",
+      "type" : "aux",
+      "x" : 119.0,
+      "y" : 477.0
+    }, {
+      "name" : "percent budget adv",
+      "type" : "aux",
+      "x" : 131.0,
+      "y" : 159.0
+    }, {
+      "name" : "frac budget mfg",
+      "type" : "aux",
+      "x" : 95.0,
+      "y" : 364.0
+    }, {
+      "name" : "frac budget r and d",
+      "type" : "aux",
+      "x" : 168.0,
+      "y" : 382.0
+    }, {
+      "name" : "percent budget adv",
+      "type" : "aux",
+      "x" : 120.0,
+      "y" : 315.0
+    }, {
+      "name" : "percent budget ext sales reps",
+      "type" : "aux",
+      "x" : 456.0,
+      "y" : 207.0
+    }, {
+      "name" : "Products",
+      "type" : "stock",
+      "x" : 683.0,
+      "y" : 652.0
+    }, {
+      "name" : "table for effect of adv",
+      "type" : "lookup",
+      "x" : 203.0,
+      "y" : 706.0
+    }, {
+      "name" : "adv budget",
+      "type" : "aux",
+      "x" : 854.0,
+      "y" : 636.0
+    }, {
+      "name" : "adv impact delay",
+      "type" : "aux",
+      "x" : 392.0,
+      "y" : 717.0
+    }, {
+      "name" : "prod gen rate",
+      "type" : "stock",
+      "x" : 792.0,
+      "y" : 570.0
+    }, {
+      "name" : "prod obsolescence rate",
+      "type" : "aux",
+      "x" : 485.0,
+      "y" : 592.0
+    }, {
+      "name" : "prod obs time",
+      "type" : "aux",
+      "x" : 816.0,
+      "y" : 507.0
+    }, {
+      "name" : "prod dev budget",
+      "type" : "aux",
+      "x" : 845.0,
+      "y" : 468.0
+    }, {
+      "name" : "prod dev efficiency",
+      "type" : "aux",
+      "x" : 846.0,
+      "y" : 669.0
+    }, {
+      "name" : "prod dev time",
+      "type" : "aux",
+      "x" : 779.0,
+      "y" : 723.0
+    }, {
+      "name" : "ext sales rep fee",
+      "type" : "aux",
+      "x" : 636.0,
+      "y" : 420.0
+    }, {
+      "name" : "Comment 1",
+      "type" : "comment",
+      "x" : 629.0,
+      "y" : 33.0,
+      "width" : 160.0,
+      "height" : 80.0
+    }, {
+      "name" : "Comment 2",
+      "type" : "comment",
+      "x" : 1306.0,
+      "y" : 375.0,
+      "width" : 600.0,
+      "height" : 400.0
+    } ],
+    "connectors" : [ {
+      "from" : "retained cash flow",
+      "to" : "Cum Retained Cash"
+    }, {
+      "from" : "cash revenue",
+      "to" : "retained cash flow"
+    }, {
+      "from" : "frac cash retained",
+      "to" : "retained cash flow"
+    }, {
+      "from" : "Receivables",
+      "to" : "cash revenue"
+    }, {
+      "from" : "time to clear receivables",
+      "to" : "cash revenue"
+    }, {
+      "from" : "accrued revenue",
+      "to" : "Receivables"
+    }, {
+      "from" : "cash revenue",
+      "to" : "Receivables"
+    }, {
+      "from" : "time to clear receivables",
+      "to" : "Receivables"
+    }, {
+      "from" : "price",
+      "to" : "accrued revenue"
+    }, {
+      "from" : "unit sales",
+      "to" : "accrued revenue"
+    }, {
+      "from" : "duration of negotiation",
+      "to" : "unit sales"
+    }, {
+      "from" : "fraction custs buying",
+      "to" : "unit sales"
+    }, {
+      "from" : "normal share of sales",
+      "to" : "unit sales"
+    }, {
+      "from" : "Pot Orders In Negotiation",
+      "to" : "unit sales"
+    }, {
+      "from" : "Pot Orders In Negotiation",
+      "to" : "fraction custs buying"
+    }, {
+      "from" : "table for frac buying",
+      "to" : "fraction custs buying"
+    }, {
+      "from" : "pot orders lost to comp",
+      "to" : "Pot Orders In Negotiation"
+    }, {
+      "from" : "pot orders not buying",
+      "to" : "Pot Orders In Negotiation"
+    }, {
+      "from" : "pot orders moving to negot",
+      "to" : "Pot Orders In Negotiation"
+    }, {
+      "from" : "unit sales",
+      "to" : "Pot Orders In Negotiation"
+    }, {
+      "from" : "duration of negotiation",
+      "to" : "pot orders lost to comp"
+    }, {
+      "from" : "fraction custs buying",
+      "to" : "pot orders lost to comp"
+    }, {
+      "from" : "normal share of sales",
+      "to" : "pot orders lost to comp"
+    }, {
+      "from" : "Pot Orders In Negotiation",
+      "to" : "pot orders lost to comp"
+    }, {
+      "from" : "duration of negotiation",
+      "to" : "pot orders not buying"
+    }, {
+      "from" : "fraction custs buying",
+      "to" : "pot orders not buying"
+    }, {
+      "from" : "Pot Orders In Negotiation",
+      "to" : "pot orders not buying"
+    }, {
+      "from" : "demos per person month",
+      "to" : "pot orders moving to negot"
+    }, {
+      "from" : "eff of lead avail on demos",
+      "to" : "pot orders moving to negot"
+    }, {
+      "from" : "Int Dir Salespeople",
+      "to" : "pot orders moving to negot"
+    }, {
+      "from" : "sales rep effect mult",
+      "to" : "pot orders moving to negot"
+    }, {
+      "from" : "Int Dir Salespeople",
+      "to" : "eff of lead avail on demos"
+    }, {
+      "from" : "Potential Orders",
+      "to" : "eff of lead avail on demos"
+    }, {
+      "from" : "table for eff of leads",
+      "to" : "eff of lead avail on demos"
+    }, {
+      "from" : "pot order creation",
+      "to" : "Potential Orders"
+    }, {
+      "from" : "pot orders not buying",
+      "to" : "Potential Orders"
+    }, {
+      "from" : "pot orders moving to negot",
+      "to" : "Potential Orders"
+    }, {
+      "from" : "pot ords obs rate",
+      "to" : "Potential Orders"
+    }, {
+      "from" : "potential orders initial",
+      "to" : "Potential Orders"
+    }, {
+      "from" : "target int dir sales",
+      "to" : "Int Dir Salespeople"
+    }, {
+      "from" : "time to hire int dir salespeople",
+      "to" : "Int Dir Salespeople"
+    }, {
+      "from" : "external sales reps",
+      "to" : "sales rep effect mult"
+    }, {
+      "from" : "Potential Orders",
+      "to" : "sales rep effect mult"
+    }, {
+      "from" : "table for sales rep effect",
+      "to" : "sales rep effect mult"
+    }, {
+      "from" : "cash revenue",
+      "to" : "target int dir sales"
+    }, {
+      "from" : "percent budget int dir sales",
+      "to" : "target int dir sales"
+    }, {
+      "from" : "int dir sales cost",
+      "to" : "target int dir sales"
+    }, {
+      "from" : "lifetime of mailing list",
+      "to" : "pot ords obs rate"
+    }, {
+      "from" : "Potential Orders",
+      "to" : "pot ords obs rate"
+    }, {
+      "from" : "effect of advertising",
+      "to" : "pot order creation"
+    }, {
+      "from" : "normal lead gen effic",
+      "to" : "pot order creation"
+    }, {
+      "from" : "Products",
+      "to" : "pot order creation"
+    }, {
+      "from" : "percent budget adv",
+      "to" : "frac cash retained"
+    }, {
+      "from" : "percent budget ext sales reps",
+      "to" : "frac cash retained"
+    }, {
+      "from" : "percent budget int dir sales",
+      "to" : "frac cash retained"
+    }, {
+      "from" : "frac budget mfg",
+      "to" : "frac cash retained"
+    }, {
+      "from" : "frac budget r and d",
+      "to" : "frac cash retained"
+    }, {
+      "from" : "Adv Budget Effective",
+      "to" : "effect of advertising"
+    }, {
+      "from" : "Products",
+      "to" : "effect of advertising"
+    }, {
+      "from" : "table for effect of adv",
+      "to" : "effect of advertising"
+    }, {
+      "from" : "adv budget",
+      "to" : "Adv Budget Effective"
+    }, {
+      "from" : "adv impact delay",
+      "to" : "Adv Budget Effective"
+    }, {
+      "from" : "prod gen rate",
+      "to" : "Products"
+    }, {
+      "from" : "prod obsolescence rate",
+      "to" : "Products"
+    }, {
+      "from" : "cash revenue",
+      "to" : "adv budget"
+    }, {
+      "from" : "percent budget adv",
+      "to" : "adv budget"
+    }, {
+      "from" : "prod obs time",
+      "to" : "prod obsolescence rate"
+    }, {
+      "from" : "Products",
+      "to" : "prod obsolescence rate"
+    }, {
+      "from" : "prod dev budget",
+      "to" : "prod gen rate"
+    }, {
+      "from" : "prod dev efficiency",
+      "to" : "prod gen rate"
+    }, {
+      "from" : "prod dev time",
+      "to" : "prod gen rate"
+    }, {
+      "from" : "cash revenue",
+      "to" : "prod dev budget"
+    }, {
+      "from" : "frac budget r and d",
+      "to" : "prod dev budget"
+    }, {
+      "from" : "cash revenue",
+      "to" : "external sales reps"
+    }, {
+      "from" : "ext sales rep fee",
+      "to" : "external sales reps"
+    }, {
+      "from" : "percent budget ext sales reps",
+      "to" : "external sales reps"
+    }, {
+      "from" : "Potential Orders",
+      "to" : "fraction custs buying"
+    } ]
+  }, {
+    "name" : "Sales Process",
+    "elements" : [ {
+      "name" : "Pot Orders In Negotiation",
+      "type" : "stock",
+      "x" : 367.0,
+      "y" : 315.0
+    }, {
+      "name" : "table for frac buying",
+      "type" : "lookup",
+      "x" : 624.0,
+      "y" : 162.0
+    }, {
+      "name" : "Potential Orders",
+      "type" : "stock",
+      "x" : 25.0,
+      "y" : 318.0
+    }, {
+      "name" : "demos per person month",
+      "type" : "aux",
+      "x" : 145.0,
+      "y" : 429.0
+    }, {
+      "name" : "eff of lead avail on demos",
+      "type" : "aux",
+      "x" : 195.0,
+      "y" : 654.0
+    }, {
+      "name" : "Int Dir Salespeople",
+      "type" : "stock",
+      "x" : 237.0,
+      "y" : 528.0
+    }, {
+      "name" : "sales rep effect mult",
+      "type" : "aux",
+      "x" : 145.0,
+      "y" : 463.0
+    }, {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : 198.0,
+      "y" : 321.0
+    }, {
+      "name" : "pot orders moving to negot",
+      "type" : "aux",
+      "x" : 198.0,
+      "y" : 359.0
+    }, {
+      "name" : "potential orders initial",
+      "type" : "aux",
+      "x" : -123.0,
+      "y" : 222.0
+    }, {
+      "name" : "lifetime of mailing list",
+      "type" : "aux",
+      "x" : -23.0,
+      "y" : 631.0
+    }, {
+      "name" : "table for eff of leads",
+      "type" : "lookup",
+      "x" : 423.0,
+      "y" : 595.0
+    }, {
+      "name" : "effect of advertising",
+      "type" : "aux",
+      "x" : -173.0,
+      "y" : 519.0
+    }, {
+      "name" : "normal lead gen effic",
+      "type" : "aux",
+      "x" : -159.0,
+      "y" : 594.0
+    }, {
+      "name" : "Products",
+      "type" : "stock",
+      "x" : -189.0,
+      "y" : 426.0
+    }, {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : -123.0,
+      "y" : 318.0
+    }, {
+      "name" : "pot order creation",
+      "type" : "aux",
+      "x" : -123.0,
+      "y" : 356.0
+    }, {
+      "name" : "duration of negotiation",
+      "type" : "aux",
+      "x" : 709.0,
+      "y" : 237.0
+    }, {
+      "name" : "fraction custs buying",
+      "type" : "aux",
+      "x" : 468.0,
+      "y" : 198.0
+    }, {
+      "name" : "normal share of sales",
+      "type" : "aux",
+      "x" : 627.0,
+      "y" : 378.0
+    }, {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : 522.0,
+      "y" : 319.0
+    }, {
+      "name" : "unit sales",
+      "type" : "aux",
+      "x" : 522.0,
+      "y" : 357.0
+    }, {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : 151.0,
+      "y" : 231.0
+    }, {
+      "name" : "pot orders not buying",
+      "type" : "aux",
+      "x" : 151.0,
+      "y" : 193.0
+    }, {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : 31.0,
+      "y" : 504.0
+    }, {
+      "name" : "pot ords obs rate",
+      "type" : "aux",
+      "x" : -52.0,
+      "y" : 504.0
+    }, {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : 390.0,
+      "y" : 415.0
+    }, {
+      "name" : "pot orders lost to comp",
+      "type" : "aux",
+      "x" : 473.0,
+      "y" : 415.0
+    }, {
+      "name" : "Comment 3",
+      "type" : "comment",
+      "x" : 243.0,
+      "y" : 32.0,
+      "width" : 160.0,
+      "height" : 80.0
+    }, {
+      "name" : "Comment 4",
+      "type" : "comment",
+      "x" : 1152.0,
+      "y" : 261.0,
+      "width" : 600.0,
+      "height" : 400.0
+    } ],
+    "connectors" : [ {
+      "from" : "_0",
+      "to" : "Pot Orders In Negotiation"
+    }, {
+      "from" : "_0",
+      "to" : "Potential Orders"
+    }, {
+      "from" : "demos per person month",
+      "to" : "pot orders moving to negot"
+    }, {
+      "from" : "eff of lead avail on demos",
+      "to" : "pot orders moving to negot"
+    }, {
+      "from" : "Int Dir Salespeople",
+      "to" : "pot orders moving to negot"
+    }, {
+      "from" : "sales rep effect mult",
+      "to" : "pot orders moving to negot"
+    }, {
+      "from" : "potential orders initial",
+      "to" : "Potential Orders"
+    }, {
+      "from" : "_0",
+      "to" : "Potential Orders"
+    }, {
+      "from" : "effect of advertising",
+      "to" : "pot order creation"
+    }, {
+      "from" : "normal lead gen effic",
+      "to" : "pot order creation"
+    }, {
+      "from" : "Products",
+      "to" : "pot order creation"
+    }, {
+      "from" : "_0",
+      "to" : "Pot Orders In Negotiation"
+    }, {
+      "from" : "duration of negotiation",
+      "to" : "_0"
+    }, {
+      "from" : "fraction custs buying",
+      "to" : "_0"
+    }, {
+      "from" : "normal share of sales",
+      "to" : "unit sales"
+    }, {
+      "from" : "Pot Orders In Negotiation",
+      "to" : "_0"
+    }, {
+      "from" : "Int Dir Salespeople",
+      "to" : "eff of lead avail on demos"
+    }, {
+      "from" : "Potential Orders",
+      "to" : "eff of lead avail on demos"
+    }, {
+      "from" : "table for eff of leads",
+      "to" : "eff of lead avail on demos"
+    }, {
+      "from" : "_0",
+      "to" : "Potential Orders"
+    }, {
+      "from" : "_0",
+      "to" : "Pot Orders In Negotiation"
+    }, {
+      "from" : "fraction custs buying",
+      "to" : "pot orders not buying"
+    }, {
+      "from" : "Pot Orders In Negotiation",
+      "to" : "_0"
+    }, {
+      "from" : "_0",
+      "to" : "Potential Orders"
+    }, {
+      "from" : "lifetime of mailing list",
+      "to" : "pot ords obs rate"
+    }, {
+      "from" : "Potential Orders",
+      "to" : "pot ords obs rate"
+    }, {
+      "from" : "_0",
+      "to" : "Pot Orders In Negotiation"
+    }, {
+      "from" : "fraction custs buying",
+      "to" : "pot orders lost to comp"
+    }, {
+      "from" : "normal share of sales",
+      "to" : "pot orders lost to comp"
+    }, {
+      "from" : "Pot Orders In Negotiation",
+      "to" : "pot orders lost to comp"
+    }, {
+      "from" : "Pot Orders In Negotiation",
+      "to" : "fraction custs buying"
+    }, {
+      "from" : "table for frac buying",
+      "to" : "fraction custs buying"
+    }, {
+      "from" : "Potential Orders",
+      "to" : "fraction custs buying"
+    }, {
+      "from" : "duration of negotiation",
+      "to" : "pot orders not buying"
+    }, {
+      "from" : "duration of negotiation",
+      "to" : "pot orders lost to comp"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_0",
+      "points" : [ [ 198.0, 321.0 ] ]
+    }, {
+      "flowName" : "_0",
+      "points" : [ [ -123.0, 318.0 ] ]
+    }, {
+      "flowName" : "_0",
+      "points" : [ [ 522.0, 319.0 ] ]
+    }, {
+      "flowName" : "_0",
+      "points" : [ [ 151.0, 231.0 ] ]
+    }, {
+      "flowName" : "_0",
+      "points" : [ [ 31.0, 504.0 ] ]
+    }, {
+      "flowName" : "_0",
+      "points" : [ [ 390.0, 415.0 ] ]
+    } ]
+  }, {
+    "name" : "Cash Revenue",
+    "elements" : [ {
+      "name" : "frac cash retained",
+      "type" : "aux",
+      "x" : 713.0,
+      "y" : 597.0
+    }, {
+      "name" : "frac budget mfg",
+      "type" : "aux",
+      "x" : 454.0,
+      "y" : 549.0
+    }, {
+      "name" : "frac budget r and d",
+      "type" : "aux",
+      "x" : 431.0,
+      "y" : 588.0
+    }, {
+      "name" : "percent budget adv",
+      "type" : "aux",
+      "x" : 431.0,
+      "y" : 630.0
+    }, {
+      "name" : "percent budget ext sales reps",
+      "type" : "aux",
+      "x" : 365.0,
+      "y" : 669.0
+    }, {
+      "name" : "Receivables",
+      "type" : "stock",
+      "x" : 775.0,
+      "y" : 352.0
+    }, {
+      "name" : "time to clear receivables",
+      "type" : "aux",
+      "x" : 629.0,
+      "y" : 438.0
+    }, {
+      "name" : "percent budget int dir sales",
+      "type" : "aux",
+      "x" : 389.0,
+      "y" : 717.0
+    }, {
+      "name" : "price",
+      "type" : "aux",
+      "x" : 388.0,
+      "y" : 456.0
+    }, {
+      "name" : "unit sales",
+      "type" : "aux",
+      "x" : 334.0,
+      "y" : 412.0
+    }, {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : 574.0,
+      "y" : 351.0
+    }, {
+      "name" : "accrued revenue",
+      "type" : "aux",
+      "x" : 574.0,
+      "y" : 389.0
+    }, {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : 946.0,
+      "y" : 358.0
+    }, {
+      "name" : "cash revenue",
+      "type" : "aux",
+      "x" : 946.0,
+      "y" : 396.0
+    }, {
+      "name" : "Cum Retained Cash",
+      "type" : "stock",
+      "x" : 1045.0,
+      "y" : 495.0
+    }, {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : 835.0,
+      "y" : 498.0
+    }, {
+      "name" : "retained cash flow",
+      "type" : "aux",
+      "x" : 835.0,
+      "y" : 536.0
+    }, {
+      "name" : "Comment 5",
+      "type" : "comment",
+      "x" : 737.0,
+      "y" : 211.0,
+      "width" : 160.0,
+      "height" : 80.0
+    }, {
+      "name" : "Comment 6",
+      "type" : "comment",
+      "x" : 1464.0,
+      "y" : 369.0,
+      "width" : 600.0,
+      "height" : 400.0
+    } ],
+    "connectors" : [ {
+      "from" : "Receivables",
+      "to" : "_0"
+    }, {
+      "from" : "time to clear receivables",
+      "to" : "cash revenue"
+    }, {
+      "from" : "time to clear receivables",
+      "to" : "Receivables"
+    }, {
+      "from" : "price",
+      "to" : "accrued revenue"
+    }, {
+      "from" : "unit sales",
+      "to" : "accrued revenue"
+    }, {
+      "from" : "_0",
+      "to" : "Receivables"
+    }, {
+      "from" : "_0",
+      "to" : "Receivables"
+    }, {
+      "from" : "cash revenue",
+      "to" : "_0"
+    }, {
+      "from" : "frac cash retained",
+      "to" : "retained cash flow"
+    }, {
+      "from" : "frac budget mfg",
+      "to" : "frac cash retained"
+    }, {
+      "from" : "frac budget r and d",
+      "to" : "frac cash retained"
+    }, {
+      "from" : "percent budget adv",
+      "to" : "frac cash retained"
+    }, {
+      "from" : "percent budget ext sales reps",
+      "to" : "frac cash retained"
+    }, {
+      "from" : "percent budget int dir sales",
+      "to" : "frac cash retained"
+    }, {
+      "from" : "_0",
+      "to" : "Cum Retained Cash"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_0",
+      "points" : [ [ 574.0, 351.0 ] ]
+    }, {
+      "flowName" : "_0",
+      "points" : [ [ 946.0, 358.0 ] ]
+    }, {
+      "flowName" : "_0",
+      "points" : [ [ 835.0, 498.0 ] ]
+    } ]
+  }, {
+    "name" : "Sales People",
+    "elements" : [ {
+      "name" : "Int Dir Salespeople",
+      "type" : "stock",
+      "x" : 761.0,
+      "y" : 378.0
+    }, {
+      "name" : "target int dir sales",
+      "type" : "aux",
+      "x" : 568.0,
+      "y" : 402.0
+    }, {
+      "name" : "time to hire int dir salespeople",
+      "type" : "aux",
+      "x" : 753.0,
+      "y" : 463.0
+    }, {
+      "name" : "external sales reps",
+      "type" : "aux",
+      "x" : 360.0,
+      "y" : 320.0
+    }, {
+      "name" : "int dir sales cost",
+      "type" : "aux",
+      "x" : 370.0,
+      "y" : 430.0
+    }, {
+      "name" : "percent budget int dir sales",
+      "type" : "aux",
+      "x" : 414.0,
+      "y" : 463.0
+    }, {
+      "name" : "ext sales rep fee",
+      "type" : "aux",
+      "x" : 138.0,
+      "y" : 324.0
+    }, {
+      "name" : "percent budget ext sales reps",
+      "type" : "aux",
+      "x" : 177.0,
+      "y" : 372.0
+    }, {
+      "name" : "pot orders moving to negot",
+      "type" : "aux",
+      "x" : 865.0,
+      "y" : 300.0
+    }, {
+      "name" : "cash revenue",
+      "type" : "aux",
+      "x" : 346.0,
+      "y" : 395.0
+    }, {
+      "name" : "demos per person month",
+      "type" : "aux",
+      "x" : 466.0,
+      "y" : 227.0
+    }, {
+      "name" : "eff of lead avail on demos",
+      "type" : "aux",
+      "x" : 708.0,
+      "y" : 224.0
+    }, {
+      "name" : "sales rep effect mult",
+      "type" : "aux",
+      "x" : 620.0,
+      "y" : 299.0
+    }, {
+      "name" : "Potential Orders",
+      "type" : "stock",
+      "x" : 266.0,
+      "y" : 227.0
+    }, {
+      "name" : "table for sales rep effect",
+      "type" : "lookup",
+      "x" : 280.0,
+      "y" : 280.0
+    }, {
+      "name" : "Comment 7",
+      "type" : "comment",
+      "x" : 504.0,
+      "y" : 117.0,
+      "width" : 160.0,
+      "height" : 80.0
+    }, {
+      "name" : "Comment 8",
+      "type" : "comment",
+      "x" : 1323.0,
+      "y" : 348.0,
+      "width" : 600.0,
+      "height" : 400.0
+    } ],
+    "connectors" : [ {
+      "from" : "percent budget ext sales reps",
+      "to" : "external sales reps"
+    }, {
+      "from" : "ext sales rep fee",
+      "to" : "external sales reps"
+    }, {
+      "from" : "int dir sales cost",
+      "to" : "target int dir sales"
+    }, {
+      "from" : "percent budget int dir sales",
+      "to" : "target int dir sales"
+    }, {
+      "from" : "time to hire int dir salespeople",
+      "to" : "Int Dir Salespeople"
+    }, {
+      "from" : "target int dir sales",
+      "to" : "Int Dir Salespeople"
+    }, {
+      "from" : "cash revenue",
+      "to" : "target int dir sales"
+    }, {
+      "from" : "cash revenue",
+      "to" : "external sales reps"
+    }, {
+      "from" : "demos per person month",
+      "to" : "pot orders moving to negot"
+    }, {
+      "from" : "eff of lead avail on demos",
+      "to" : "pot orders moving to negot"
+    }, {
+      "from" : "Int Dir Salespeople",
+      "to" : "pot orders moving to negot"
+    }, {
+      "from" : "sales rep effect mult",
+      "to" : "pot orders moving to negot"
+    }, {
+      "from" : "external sales reps",
+      "to" : "sales rep effect mult"
+    }, {
+      "from" : "Potential Orders",
+      "to" : "sales rep effect mult"
+    }, {
+      "from" : "table for sales rep effect",
+      "to" : "sales rep effect mult"
+    } ]
+  }, {
+    "name" : "Advertising",
+    "elements" : [ {
+      "name" : "Adv Budget Effective",
+      "type" : "stock",
+      "x" : 498.0,
+      "y" : 279.0
+    }, {
+      "name" : "adv budget",
+      "type" : "aux",
+      "x" : 356.0,
+      "y" : 299.0
+    }, {
+      "name" : "adv impact delay",
+      "type" : "aux",
+      "x" : 333.0,
+      "y" : 259.0
+    }, {
+      "name" : "cash revenue",
+      "type" : "aux",
+      "x" : 188.0,
+      "y" : 303.0
+    }, {
+      "name" : "effect of advertising",
+      "type" : "aux",
+      "x" : 668.0,
+      "y" : 279.0
+    }, {
+      "name" : "percent budget adv",
+      "type" : "aux",
+      "x" : 204.0,
+      "y" : 346.0
+    }, {
+      "name" : "Products",
+      "type" : "stock",
+      "x" : 616.0,
+      "y" : 230.0
+    }, {
+      "name" : "table for effect of adv",
+      "type" : "lookup",
+      "x" : 638.0,
+      "y" : 337.0
+    }, {
+      "name" : "pot order creation",
+      "type" : "aux",
+      "x" : 889.0,
+      "y" : 275.0
+    }, {
+      "name" : "normal lead gen effic",
+      "type" : "aux",
+      "x" : 837.0,
+      "y" : 334.0
+    }, {
+      "name" : "Comment 9",
+      "type" : "comment",
+      "x" : 501.0,
+      "y" : 140.0,
+      "width" : 160.0,
+      "height" : 80.0
+    }, {
+      "name" : "Comment 10",
+      "type" : "comment",
+      "x" : 1411.0,
+      "y" : 320.0,
+      "width" : 600.0,
+      "height" : 400.0
+    } ],
+    "connectors" : [ {
+      "from" : "adv budget",
+      "to" : "Adv Budget Effective"
+    }, {
+      "from" : "adv impact delay",
+      "to" : "Adv Budget Effective"
+    }, {
+      "from" : "cash revenue",
+      "to" : "adv budget"
+    }, {
+      "from" : "percent budget adv",
+      "to" : "adv budget"
+    }, {
+      "from" : "Adv Budget Effective",
+      "to" : "effect of advertising"
+    }, {
+      "from" : "Products",
+      "to" : "effect of advertising"
+    }, {
+      "from" : "table for effect of adv",
+      "to" : "effect of advertising"
+    }, {
+      "from" : "effect of advertising",
+      "to" : "pot order creation"
+    }, {
+      "from" : "normal lead gen effic",
+      "to" : "pot order creation"
+    }, {
+      "from" : "Products",
+      "to" : "pot order creation"
+    } ]
+  }, {
+    "name" : "Products",
+    "elements" : [ {
+      "name" : "Products",
+      "type" : "stock",
+      "x" : 407.0,
+      "y" : 258.0
+    }, {
+      "name" : "cash revenue",
+      "type" : "aux",
+      "x" : 76.0,
+      "y" : 390.0
+    }, {
+      "name" : "frac budget r and d",
+      "type" : "aux",
+      "x" : 99.0,
+      "y" : 433.0
+    }, {
+      "name" : "prod dev budget",
+      "type" : "aux",
+      "x" : 249.0,
+      "y" : 386.0
+    }, {
+      "name" : "prod dev efficiency",
+      "type" : "aux",
+      "x" : 408.0,
+      "y" : 330.0
+    }, {
+      "name" : "prod dev time",
+      "type" : "aux",
+      "x" : 165.0,
+      "y" : 339.0
+    }, {
+      "name" : "prod obs time",
+      "type" : "aux",
+      "x" : 592.0,
+      "y" : 334.0
+    }, {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : 559.0,
+      "y" : 257.0
+    }, {
+      "name" : "prod obsolescence rate",
+      "type" : "aux",
+      "x" : 559.0,
+      "y" : 295.0
+    }, {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : 281.0,
+      "y" : 257.0
+    }, {
+      "name" : "prod gen rate",
+      "type" : "stock",
+      "x" : 281.0,
+      "y" : 295.0
+    }, {
+      "name" : "Comment 11",
+      "type" : "comment",
+      "x" : 414.0,
+      "y" : 137.0,
+      "width" : 160.0,
+      "height" : 80.0
+    }, {
+      "name" : "Comment 12",
+      "type" : "comment",
+      "x" : 1106.0,
+      "y" : 279.0,
+      "width" : 600.0,
+      "height" : 400.0
+    } ],
+    "connectors" : [ {
+      "from" : "prod dev budget",
+      "to" : "prod gen rate"
+    }, {
+      "from" : "prod dev efficiency",
+      "to" : "prod gen rate"
+    }, {
+      "from" : "prod dev time",
+      "to" : "prod gen rate"
+    }, {
+      "from" : "prod obs time",
+      "to" : "prod obsolescence rate"
+    }, {
+      "from" : "Products",
+      "to" : "_0"
+    }, {
+      "from" : "_0",
+      "to" : "Products"
+    }, {
+      "from" : "_0",
+      "to" : "Products"
+    }, {
+      "from" : "cash revenue",
+      "to" : "prod dev budget"
+    }, {
+      "from" : "frac budget r and d",
+      "to" : "prod dev budget"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_0",
+      "points" : [ [ 559.0, 257.0 ] ]
+    }, {
+      "flowName" : "_0",
+      "points" : [ [ 281.0, 257.0 ] ]
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Month",
+    "duration" : 60.0,
+    "durationUnit" : "Month"
+  },
+  "metadata" : {
+    "author" : "Ventana Systems, Inc.",
+    "source" : "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+    "license" : "MIT",
+    "url" : "https://www.vensim.com/documentation/sample_models.html"
+  }
+}

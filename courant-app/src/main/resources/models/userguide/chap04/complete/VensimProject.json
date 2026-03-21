@@ -1,0 +1,185 @@
+{
+  "name" : "PROJECT",
+  "cldVariables" : [ {
+    "name" : "Work To Do",
+    "comment" : "Work To Do"
+  }, {
+    "name" : "actual workforce",
+    "comment" : "actual workforce"
+  }, {
+    "name" : "required workforce",
+    "comment" : "required workforce"
+  }, {
+    "name" : "work done",
+    "comment" : "work done"
+  }, {
+    "name" : "productivity",
+    "comment" : "productivity"
+  }, {
+    "name" : "fatigue",
+    "comment" : "fatigue"
+  }, {
+    "name" : "overtime hours required",
+    "comment" : "overtime hours required"
+  }, {
+    "name" : "quality of work",
+    "comment" : "quality of work"
+  } ],
+  "causalLinks" : [ {
+    "from" : "quality of work",
+    "to" : "Work To Do",
+    "polarity" : "POSITIVE"
+  }, {
+    "from" : "work done",
+    "to" : "Work To Do",
+    "polarity" : "NEGATIVE"
+  }, {
+    "from" : "Work To Do",
+    "to" : "overtime hours required",
+    "polarity" : "POSITIVE"
+  }, {
+    "from" : "overtime hours required",
+    "to" : "work done",
+    "polarity" : "POSITIVE"
+  }, {
+    "from" : "overtime hours required",
+    "to" : "fatigue",
+    "polarity" : "POSITIVE"
+  }, {
+    "from" : "fatigue",
+    "to" : "quality of work",
+    "polarity" : "NEGATIVE"
+  }, {
+    "from" : "productivity",
+    "to" : "work done",
+    "polarity" : "POSITIVE"
+  }, {
+    "from" : "actual workforce",
+    "to" : "work done",
+    "polarity" : "NEGATIVE"
+  }, {
+    "from" : "required workforce",
+    "to" : "actual workforce",
+    "polarity" : "POSITIVE"
+  }, {
+    "from" : "Work To Do",
+    "to" : "required workforce",
+    "polarity" : "UNKNOWN"
+  } ],
+  "comments" : [ {
+    "name" : "Comment 1",
+    "text" : "Work to do Project Model"
+  }, {
+    "name" : "Comment 2",
+    "text" : "hiring delay"
+  } ],
+  "views" : [ {
+    "name" : "View 1",
+    "elements" : [ {
+      "name" : "Work To Do",
+      "type" : "cld_variable",
+      "x" : 211.0,
+      "y" : 113.0
+    }, {
+      "name" : "work done",
+      "type" : "cld_variable",
+      "x" : 351.0,
+      "y" : 227.0
+    }, {
+      "name" : "overtime hours required",
+      "type" : "cld_variable",
+      "x" : 208.0,
+      "y" : 299.0
+    }, {
+      "name" : "quality of work",
+      "type" : "cld_variable",
+      "x" : 75.0,
+      "y" : 139.0
+    }, {
+      "name" : "fatigue",
+      "type" : "cld_variable",
+      "x" : 47.0,
+      "y" : 228.0
+    }, {
+      "name" : "Comment 1",
+      "type" : "comment",
+      "x" : 288.0,
+      "y" : 33.0,
+      "width" : 274.0,
+      "height" : 30.0
+    }, {
+      "name" : "required workforce",
+      "type" : "cld_variable",
+      "x" : 421.0,
+      "y" : 85.0
+    }, {
+      "name" : "actual workforce",
+      "type" : "cld_variable",
+      "x" : 480.0,
+      "y" : 188.0
+    }, {
+      "name" : "productivity",
+      "type" : "cld_variable",
+      "x" : 525.0,
+      "y" : 285.0
+    }, {
+      "name" : "Comment 2",
+      "type" : "comment",
+      "x" : 547.0,
+      "y" : 131.0,
+      "width" : 102.0,
+      "height" : 24.0
+    } ],
+    "connectors" : [ {
+      "from" : "quality of work",
+      "to" : "Work To Do",
+      "polarity" : "+"
+    }, {
+      "from" : "work done",
+      "to" : "Work To Do",
+      "polarity" : "-"
+    }, {
+      "from" : "Work To Do",
+      "to" : "overtime hours required",
+      "polarity" : "+"
+    }, {
+      "from" : "overtime hours required",
+      "to" : "work done",
+      "polarity" : "+"
+    }, {
+      "from" : "overtime hours required",
+      "to" : "fatigue",
+      "polarity" : "+"
+    }, {
+      "from" : "fatigue",
+      "to" : "quality of work",
+      "polarity" : "-"
+    }, {
+      "from" : "productivity",
+      "to" : "work done",
+      "polarity" : "+"
+    }, {
+      "from" : "actual workforce",
+      "to" : "work done",
+      "polarity" : "-"
+    }, {
+      "from" : "required workforce",
+      "to" : "actual workforce",
+      "polarity" : "+"
+    }, {
+      "from" : "Work To Do",
+      "to" : "required workforce"
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Month",
+    "duration" : 100.0,
+    "durationUnit" : "Month"
+  },
+  "metadata" : {
+    "author" : "Ventana Systems, Inc.",
+    "source" : "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+    "license" : "MIT",
+    "url" : "https://www.vensim.com/documentation/models.html"
+  }
+}

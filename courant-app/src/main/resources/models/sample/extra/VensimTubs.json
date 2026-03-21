@@ -1,0 +1,213 @@
+{
+  "name" : "TUBS",
+  "stocks" : [ {
+    "name" : "Water T1",
+    "comment" : "The amount of water in each tub.",
+    "initialValue" : 0.0,
+    "unit" : "Gallon"
+  }, {
+    "name" : "Water T2",
+    "comment" : "The amount of water in each tub.",
+    "initialValue" : 0.0,
+    "unit" : "Gallon"
+  }, {
+    "name" : "Water T3",
+    "comment" : "The amount of water in each tub.",
+    "initialValue" : 0.0,
+    "unit" : "Gallon"
+  }, {
+    "name" : "Water T4",
+    "comment" : "The amount of water in each tub.",
+    "initialValue" : 0.0,
+    "unit" : "Gallon"
+  }, {
+    "name" : "Water T5",
+    "comment" : "The amount of water in each tub.",
+    "initialValue" : 0.0,
+    "unit" : "Gallon"
+  } ],
+  "flows" : [ {
+    "name" : "Water T1 net flow",
+    "comment" : "Net flow for Water T1",
+    "equation" : "inflow_T1-outflow_T1",
+    "timeUnit" : "Minute",
+    "sink" : "Water T1"
+  }, {
+    "name" : "Water T2 net flow",
+    "comment" : "Net flow for Water T2",
+    "equation" : "inflow_T2-outflow_T2",
+    "timeUnit" : "Minute",
+    "sink" : "Water T2"
+  }, {
+    "name" : "Water T3 net flow",
+    "comment" : "Net flow for Water T3",
+    "equation" : "inflow_T3-outflow_T3",
+    "timeUnit" : "Minute",
+    "sink" : "Water T3"
+  }, {
+    "name" : "Water T4 net flow",
+    "comment" : "Net flow for Water T4",
+    "equation" : "inflow_T4-outflow_T4",
+    "timeUnit" : "Minute",
+    "sink" : "Water T4"
+  }, {
+    "name" : "Water T5 net flow",
+    "comment" : "Net flow for Water T5",
+    "equation" : "inflow_T5-outflow_T5",
+    "timeUnit" : "Minute",
+    "sink" : "Water T5"
+  } ],
+  "variables" : [ {
+    "name" : "inflow T1",
+    "comment" : "inflow[T1]",
+    "equation" : "IF(TIME > 10,1,0)",
+    "unit" : ""
+  }, {
+    "name" : "inflow T2",
+    "comment" : "The inflow into each tub.",
+    "equation" : "outflow_T1",
+    "unit" : "Gallon/Minute"
+  }, {
+    "name" : "inflow T3",
+    "comment" : "The inflow into each tub.",
+    "equation" : "outflow_T2",
+    "unit" : "Gallon/Minute"
+  }, {
+    "name" : "inflow T4",
+    "comment" : "The inflow into each tub.",
+    "equation" : "outflow_T3",
+    "unit" : "Gallon/Minute"
+  }, {
+    "name" : "inflow T5",
+    "comment" : "The inflow into each tub.",
+    "equation" : "outflow_T4",
+    "unit" : "Gallon/Minute"
+  }, {
+    "name" : "outflow T1",
+    "comment" : "The amount of water flowing out of the tub.",
+    "equation" : "IF(Water_T1 > 10,inflow_T1,0)",
+    "unit" : "Gallon/Minute"
+  }, {
+    "name" : "outflow T2",
+    "comment" : "The amount of water flowing out of the tub.",
+    "equation" : "IF(Water_T2 > 10,inflow_T2,0)",
+    "unit" : "Gallon/Minute"
+  }, {
+    "name" : "outflow T3",
+    "comment" : "The amount of water flowing out of the tub.",
+    "equation" : "IF(Water_T3 > 10,inflow_T3,0)",
+    "unit" : "Gallon/Minute"
+  }, {
+    "name" : "outflow T4",
+    "comment" : "The amount of water flowing out of the tub.",
+    "equation" : "IF(Water_T4 > 10,inflow_T4,0)",
+    "unit" : "Gallon/Minute"
+  }, {
+    "name" : "outflow T5",
+    "comment" : "The amount of water flowing out of the tub.",
+    "equation" : "IF(Water_T5 > 10,inflow_T5,0)",
+    "unit" : "Gallon/Minute"
+  } ],
+  "subscripts" : [ {
+    "name" : "hightub",
+    "labels" : [ "T1", "T2", "T3", "T4" ]
+  }, {
+    "name" : "lowtub",
+    "labels" : [ "T2", "T3", "T4", "T5" ]
+  }, {
+    "name" : "tub",
+    "labels" : [ "T1", "T2", "T3", "T4", "T5" ]
+  } ],
+  "comments" : [ {
+    "name" : "Comment 1",
+    "text" : "GRAPH"
+  }, {
+    "name" : "Comment 2",
+    "text" : "TUBS MODEL"
+  } ],
+  "views" : [ {
+    "name" : "1",
+    "elements" : [ {
+      "name" : "Water",
+      "type" : "aux",
+      "x" : 297.0,
+      "y" : 207.0
+    }, {
+      "name" : "Time",
+      "type" : "aux",
+      "x" : 93.0,
+      "y" : 271.0
+    }, {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : 179.0,
+      "y" : 204.0
+    }, {
+      "name" : "inflow",
+      "type" : "aux",
+      "x" : 179.0,
+      "y" : 242.0
+    }, {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : 419.0,
+      "y" : 205.0
+    }, {
+      "name" : "outflow",
+      "type" : "aux",
+      "x" : 419.0,
+      "y" : 243.0
+    }, {
+      "name" : "Comment 1",
+      "type" : "comment",
+      "x" : 281.0,
+      "y" : 560.0,
+      "width" : 442.0,
+      "height" : 410.0
+    }, {
+      "name" : "Comment 2",
+      "type" : "comment",
+      "x" : 288.0,
+      "y" : 53.0,
+      "width" : 160.0,
+      "height" : 80.0
+    } ],
+    "connectors" : [ {
+      "from" : "_0",
+      "to" : "Water"
+    }, {
+      "from" : "_0",
+      "to" : "Water"
+    }, {
+      "from" : "Water",
+      "to" : "outflow"
+    }, {
+      "from" : "_0",
+      "to" : "_0"
+    }, {
+      "from" : "Time",
+      "to" : "inflow"
+    }, {
+      "from" : "outflow",
+      "to" : "inflow"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_0",
+      "points" : [ [ 179.0, 204.0 ] ]
+    }, {
+      "flowName" : "_0",
+      "points" : [ [ 419.0, 205.0 ] ]
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Minute",
+    "duration" : 100.0,
+    "durationUnit" : "Minute"
+  },
+  "metadata" : {
+    "author" : "Ventana Systems, Inc.",
+    "source" : "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+    "license" : "MIT",
+    "url" : "https://www.vensim.com/documentation/sample_models.html"
+  }
+}

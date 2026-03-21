@@ -1,0 +1,56 @@
+{
+  "name" : "MentalSimulation01",
+  "stocks" : [ {
+    "name" : "Level",
+    "comment" : "Level",
+    "initialValue" : 0.0,
+    "unit" : ""
+  } ],
+  "flows" : [ {
+    "name" : "Level net flow",
+    "comment" : "Net flow for Level",
+    "equation" : "inflow",
+    "timeUnit" : "Month",
+    "sink" : "Level"
+  } ],
+  "variables" : [ {
+    "name" : "inflow",
+    "comment" : "inflow",
+    "equation" : "0",
+    "unit" : ""
+  } ],
+  "views" : [ {
+    "name" : "View 1",
+    "elements" : [ {
+      "name" : "Level",
+      "type" : "stock",
+      "x" : 355.0,
+      "y" : 151.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 239.0,
+      "y" : 155.0
+    }, {
+      "name" : "inflow",
+      "type" : "aux",
+      "x" : 239.0,
+      "y" : 175.0
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_48",
+      "points" : [ [ 239.0, 155.0 ] ]
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Month",
+    "duration" : 100.0,
+    "durationUnit" : "Month"
+  },
+  "metadata" : {
+    "author" : "Ventana Systems, Inc.",
+    "source" : "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+    "license" : "MIT",
+    "url" : "https://www.vensim.com/documentation/models.html"
+  }
+}

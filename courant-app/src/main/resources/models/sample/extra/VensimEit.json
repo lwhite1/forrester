@@ -1,0 +1,189 @@
+{
+  "name" : "EIT",
+  "stocks" : [ {
+    "name" : "Trees",
+    "comment" : "Trees",
+    "initialValue" : 30000.0,
+    "unit" : "trees"
+  }, {
+    "name" : "Population",
+    "comment" : "Population",
+    "initialValue" : 10.0,
+    "unit" : "people"
+  } ],
+  "flows" : [ {
+    "name" : "Trees net flow",
+    "comment" : "Net flow for Trees",
+    "equation" : "-tree_harvesting",
+    "timeUnit" : "Year",
+    "sink" : "Trees"
+  }, {
+    "name" : "Population net flow",
+    "comment" : "Net flow for Population",
+    "equation" : "net_births_per_year",
+    "timeUnit" : "Year",
+    "sink" : "Population"
+  } ],
+  "variables" : [ {
+    "name" : "tree harvesting",
+    "comment" : "tree harvesting",
+    "equation" : "MIN ( Population * per_capita_tree_consumption , Trees / TIME_STEP )",
+    "unit" : "trees / Year"
+  }, {
+    "name" : "initial trees",
+    "comment" : "initial trees",
+    "equation" : "30000",
+    "unit" : "trees"
+  }, {
+    "name" : "per capita tree consumption",
+    "comment" : "per capita tree consumption",
+    "equation" : "0.01",
+    "unit" : "trees / people / Year"
+  }, {
+    "name" : "net birth rate",
+    "comment" : "net birth rate",
+    "equation" : "0.0035",
+    "unit" : "fraction / Year"
+  }, {
+    "name" : "net births per year",
+    "comment" : "net births per year",
+    "equation" : "net_birth_rate * Population",
+    "unit" : "people / Year"
+  }, {
+    "name" : "initial population",
+    "comment" : "initial population",
+    "equation" : "10",
+    "unit" : "people"
+  } ],
+  "comments" : [ {
+    "name" : "Comment 1",
+    "text" : "Easter Island Trees"
+  }, {
+    "name" : "Comment 2",
+    "text" : "pop_trees"
+  } ],
+  "views" : [ {
+    "name" : "View 1",
+    "elements" : [ {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : 278.0,
+      "y" : 313.0
+    }, {
+      "name" : "net births per year",
+      "type" : "aux",
+      "x" : 278.0,
+      "y" : 351.0
+    }, {
+      "name" : "initial population",
+      "type" : "aux",
+      "x" : 333.0,
+      "y" : 265.0
+    }, {
+      "name" : "Population",
+      "type" : "stock",
+      "x" : 445.0,
+      "y" : 312.0
+    }, {
+      "name" : "Trees",
+      "type" : "stock",
+      "x" : 309.0,
+      "y" : 477.0
+    }, {
+      "name" : "Comment 1",
+      "type" : "comment",
+      "x" : 452.0,
+      "y" : 189.0,
+      "width" : 214.0,
+      "height" : 30.0
+    }, {
+      "name" : "net birth rate",
+      "type" : "aux",
+      "x" : 221.0,
+      "y" : 420.0
+    }, {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : 546.0,
+      "y" : 474.0
+    }, {
+      "name" : "tree harvesting",
+      "type" : "aux",
+      "x" : 546.0,
+      "y" : 512.0
+    }, {
+      "name" : "per capita tree consumption",
+      "type" : "aux",
+      "x" : 353.0,
+      "y" : 538.0
+    }, {
+      "name" : "initial trees",
+      "type" : "aux",
+      "x" : 173.0,
+      "y" : 456.0
+    }, {
+      "name" : "TIME STEP",
+      "type" : "aux",
+      "x" : 568.0,
+      "y" : 540.0
+    }, {
+      "name" : "Comment 2",
+      "type" : "comment",
+      "x" : 1018.0,
+      "y" : 365.0,
+      "width" : 594.0,
+      "height" : 402.0
+    } ],
+    "connectors" : [ {
+      "from" : "_0",
+      "to" : "Population"
+    }, {
+      "from" : "Population",
+      "to" : "net births per year"
+    }, {
+      "from" : "net birth rate",
+      "to" : "net births per year"
+    }, {
+      "from" : "_0",
+      "to" : "Trees"
+    }, {
+      "from" : "Population",
+      "to" : "_0"
+    }, {
+      "from" : "per capita tree consumption",
+      "to" : "tree harvesting"
+    }, {
+      "from" : "TIME STEP",
+      "to" : "tree harvesting"
+    }, {
+      "from" : "Trees",
+      "to" : "_0"
+    }, {
+      "from" : "initial population",
+      "to" : "Population"
+    }, {
+      "from" : "initial trees",
+      "to" : "Trees"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_0",
+      "points" : [ [ 278.0, 313.0 ] ]
+    }, {
+      "flowName" : "_0",
+      "points" : [ [ 546.0, 474.0 ] ]
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Year",
+    "duration" : 2000.0,
+    "durationUnit" : "Year",
+    "dt" : 10.0,
+    "initialTime" : -500.0
+  },
+  "metadata" : {
+    "author" : "Ventana Systems, Inc.",
+    "source" : "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+    "license" : "MIT",
+    "url" : "https://www.vensim.com/documentation/sample_models.html"
+  }
+}

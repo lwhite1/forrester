@@ -1,0 +1,282 @@
+{
+  "name" : "YEAST1",
+  "stocks" : [ {
+    "name" : "Yeast Count",
+    "comment" : "The number of yeast.",
+    "initialValue" : 100.0,
+    "unit" : "Cell"
+  } ],
+  "flows" : [ {
+    "name" : "Yeast Count inflow 1",
+    "equation" : "divisions",
+    "timeUnit" : "Minute",
+    "sink" : "Yeast Count"
+  }, {
+    "name" : "Yeast Count outflow 2",
+    "equation" : "terminations",
+    "timeUnit" : "Minute",
+    "source" : "Yeast Count"
+  } ],
+  "variables" : [ {
+    "name" : "Water",
+    "comment" : "The amount of water in the bowl.",
+    "equation" : "100",
+    "unit" : "ml"
+  }, {
+    "name" : "average lifetime",
+    "comment" : "The average length of time a yeast survives.",
+    "equation" : "250",
+    "unit" : "Minute"
+  }, {
+    "name" : "division rate",
+    "comment" : "The rate at which yeast divide.",
+    "equation" : "0.08",
+    "unit" : "1/Minute"
+  }, {
+    "name" : "divisions",
+    "comment" : "divisions",
+    "equation" : "Yeast_Count*division_rate",
+    "unit" : "Cell/Minute"
+  }, {
+    "name" : "Sugar",
+    "comment" : "The amount of sugar in the bowl.",
+    "equation" : "100",
+    "unit" : "g"
+  }, {
+    "name" : "temperature",
+    "comment" : "The temperature of the water in the bowl.",
+    "equation" : "85",
+    "unit" : "degrees farenheit"
+  }, {
+    "name" : "terminations",
+    "comment" : "The rate of termination of yeast.",
+    "equation" : "Yeast_Count/average_lifetime",
+    "unit" : "Cell/Minute"
+  }, {
+    "name" : "RC START TIME",
+    "comment" : "RC START TIME",
+    "equation" : "10",
+    "unit" : "Minute"
+  } ],
+  "subscripts" : [ {
+    "name" : "cold is dormant",
+    "labels" : [ "THE CONDITION temperature  50 IMPLIES divisions  0" ]
+  }, {
+    "name" : "hot is dead",
+    "labels" : [ "THE CONDITION temperature  RC STEP120", "_1IMPLIES Yeast Count  RC DECAY CHECK1", "Yeast Count", "_2" ]
+  }, {
+    "name" : "eat or die",
+    "labels" : [ "THE CONDITION Sugar  RC STEPSugar", "_0 AND temperature  65 IMPLIES Yeast Count  RC DECAY CHECK1", "Yeast Count", "_15" ]
+  }, {
+    "name" : "drink or die",
+    "labels" : [ "THE CONDITION Water  RC STEPWater", "_0 AND temperature  65 IMPLIES Yeast Count  RC DECAY CHECK1", "Yeast Count", "_1" ]
+  }, {
+    "name" : "big growth",
+    "labels" : [ "TEST INPUT divisions  1e022" ]
+  }, {
+    "name" : "hunger from growth",
+    "labels" : [ "THE CONDITION big growth IMPLIES Sugar  RC DECAY CHECK1", "Sugar", "_05", "INITIAL TIME" ]
+  }, {
+    "name" : "thirst from growth",
+    "labels" : [ "THE CONDITION big growth IMPLIES Water  RC DECAY CHECK1", "Water", "_05", "INITIAL TIME" ]
+  } ],
+  "views" : [ {
+    "name" : "1",
+    "elements" : [ {
+      "name" : "Yeast Count",
+      "type" : "stock",
+      "x" : 397.0,
+      "y" : 101.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 263.0,
+      "y" : 101.0
+    }, {
+      "name" : "divisions",
+      "type" : "aux",
+      "x" : 263.0,
+      "y" : 119.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 529.0,
+      "y" : 103.0
+    }, {
+      "name" : "terminations",
+      "type" : "aux",
+      "x" : 529.0,
+      "y" : 119.0
+    }, {
+      "name" : "division rate",
+      "type" : "aux",
+      "x" : 205.0,
+      "y" : 163.0
+    }, {
+      "name" : "average lifetime",
+      "type" : "aux",
+      "x" : 555.0,
+      "y" : 157.0
+    }, {
+      "name" : "temperature",
+      "type" : "aux",
+      "x" : 397.0,
+      "y" : 177.0
+    }, {
+      "name" : "Sugar",
+      "type" : "aux",
+      "x" : 71.0,
+      "y" : 55.0
+    }, {
+      "name" : "Water",
+      "type" : "aux",
+      "x" : 263.0,
+      "y" : 55.0
+    } ],
+    "connectors" : [ {
+      "from" : "_48",
+      "to" : "Yeast Count"
+    }, {
+      "from" : "_48",
+      "to" : "Yeast Count"
+    }, {
+      "from" : "Yeast Count",
+      "to" : "divisions"
+    }, {
+      "from" : "average lifetime",
+      "to" : "terminations"
+    }, {
+      "from" : "Yeast Count",
+      "to" : "terminations"
+    }, {
+      "from" : "division rate",
+      "to" : "divisions"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_48",
+      "points" : [ [ 263.0, 101.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 529.0, 103.0 ] ]
+    } ]
+  }, {
+    "name" : "View 2",
+    "elements" : [ {
+      "name" : "cold is dormant",
+      "type" : "aux",
+      "x" : 419.0,
+      "y" : 143.0
+    }, {
+      "name" : "divisions",
+      "type" : "aux",
+      "x" : 99.0,
+      "y" : 31.0
+    }, {
+      "name" : "temperature",
+      "type" : "aux",
+      "x" : 112.0,
+      "y" : 236.0
+    }, {
+      "name" : "drink or die",
+      "type" : "aux",
+      "x" : 401.0,
+      "y" : 241.0
+    }, {
+      "name" : "Yeast Count",
+      "type" : "stock",
+      "x" : 112.0,
+      "y" : 196.0
+    }, {
+      "name" : "eat or die",
+      "type" : "aux",
+      "x" : 393.0,
+      "y" : 100.0
+    }, {
+      "name" : "hot is dead",
+      "type" : "aux",
+      "x" : 400.0,
+      "y" : 183.0
+    }, {
+      "name" : "hunger from growth",
+      "type" : "aux",
+      "x" : 436.0,
+      "y" : 31.0
+    }, {
+      "name" : "Sugar",
+      "type" : "aux",
+      "x" : 84.0,
+      "y" : 72.0
+    }, {
+      "name" : "thirst from growth",
+      "type" : "aux",
+      "x" : 427.0,
+      "y" : 65.0
+    }, {
+      "name" : "Water",
+      "type" : "aux",
+      "x" : 84.0,
+      "y" : 155.0
+    }, {
+      "name" : "big growth",
+      "type" : "aux",
+      "x" : 237.0,
+      "y" : 31.0
+    }, {
+      "name" : "INITIAL TIME",
+      "type" : "aux",
+      "x" : 115.0,
+      "y" : 113.0
+    } ],
+    "connectors" : [ {
+      "from" : "divisions",
+      "to" : "cold is dormant"
+    }, {
+      "from" : "temperature",
+      "to" : "cold is dormant"
+    }, {
+      "from" : "Yeast Count",
+      "to" : "drink or die"
+    }, {
+      "from" : "temperature",
+      "to" : "eat or die"
+    }, {
+      "from" : "Yeast Count",
+      "to" : "eat or die"
+    }, {
+      "from" : "temperature",
+      "to" : "hot is dead"
+    }, {
+      "from" : "Yeast Count",
+      "to" : "hot is dead"
+    }, {
+      "from" : "Sugar",
+      "to" : "hunger from growth"
+    }, {
+      "from" : "Water",
+      "to" : "thirst from growth"
+    }, {
+      "from" : "divisions",
+      "to" : "big growth"
+    }, {
+      "from" : "temperature",
+      "to" : "drink or die"
+    }, {
+      "from" : "INITIAL TIME",
+      "to" : "hunger from growth"
+    }, {
+      "from" : "INITIAL TIME",
+      "to" : "thirst from growth"
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Minute",
+    "duration" : 300.0,
+    "durationUnit" : "Minute"
+  },
+  "metadata" : {
+    "author" : "Ventana Systems, Inc.",
+    "source" : "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+    "license" : "MIT",
+    "url" : "https://www.vensim.com/documentation/models.html"
+  }
+}

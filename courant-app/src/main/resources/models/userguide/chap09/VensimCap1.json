@@ -1,0 +1,189 @@
+{
+  "name" : "CAP1",
+  "stocks" : [ {
+    "name" : "Capacity",
+    "comment" : "Capacity",
+    "initialValue" : 0.0,
+    "initialExpression" : "target_capacity",
+    "unit" : "Gadget/Month"
+  } ],
+  "flows" : [ {
+    "name" : "Capacity inflow 1",
+    "equation" : "investment",
+    "timeUnit" : "Month",
+    "sink" : "Capacity"
+  }, {
+    "name" : "Capacity outflow 2",
+    "equation" : "reductions",
+    "timeUnit" : "Month",
+    "source" : "Capacity"
+  } ],
+  "variables" : [ {
+    "name" : "investment",
+    "comment" : "investment",
+    "equation" : "capacity_adjustment",
+    "unit" : "Gadget/Month/Month"
+  }, {
+    "name" : "capacity adjustment",
+    "comment" : "capacity adjustment",
+    "equation" : "(target_capacity - Capacity)/time_to_adjust_capacity",
+    "unit" : "Gadget/Month/Month"
+  }, {
+    "name" : "capacity life",
+    "comment" : "capacity life",
+    "equation" : "20",
+    "unit" : "Month"
+  }, {
+    "name" : "target capacity",
+    "comment" : "target capacity",
+    "equation" : "desired_production",
+    "unit" : "Gadget/Month"
+  }, {
+    "name" : "desired production",
+    "comment" : "desired production",
+    "equation" : "1000 + STEP(500,10) + STEP(-800, 50)",
+    "unit" : "Gadget/Month"
+  }, {
+    "name" : "potential production",
+    "comment" : "potential production",
+    "equation" : "Capacity",
+    "unit" : "Gadget/Month"
+  }, {
+    "name" : "production",
+    "comment" : "production",
+    "equation" : "MIN(desired_production,potential_production)",
+    "unit" : "Gadget/Month"
+  }, {
+    "name" : "reductions",
+    "comment" : "reductions",
+    "equation" : "Capacity/capacity_life",
+    "unit" : "Gadget/(Month*Month)"
+  }, {
+    "name" : "time to adjust capacity",
+    "comment" : "time to adjust capacity",
+    "equation" : "12",
+    "unit" : "Month"
+  } ],
+  "views" : [ {
+    "name" : "View 1",
+    "elements" : [ {
+      "name" : "Capacity",
+      "type" : "stock",
+      "x" : 523.0,
+      "y" : 129.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 416.0,
+      "y" : 125.0
+    }, {
+      "name" : "investment",
+      "type" : "aux",
+      "x" : 416.0,
+      "y" : 144.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 625.0,
+      "y" : 125.0
+    }, {
+      "name" : "reductions",
+      "type" : "aux",
+      "x" : 625.0,
+      "y" : 144.0
+    }, {
+      "name" : "capacity life",
+      "type" : "aux",
+      "x" : 543.0,
+      "y" : 60.0
+    }, {
+      "name" : "potential production",
+      "type" : "aux",
+      "x" : 617.0,
+      "y" : 217.0
+    }, {
+      "name" : "desired production",
+      "type" : "aux",
+      "x" : 257.0,
+      "y" : 311.0
+    }, {
+      "name" : "target capacity",
+      "type" : "aux",
+      "x" : 351.0,
+      "y" : 269.0
+    }, {
+      "name" : "time to adjust capacity",
+      "type" : "aux",
+      "x" : 277.0,
+      "y" : 169.0
+    }, {
+      "name" : "capacity adjustment",
+      "type" : "aux",
+      "x" : 396.0,
+      "y" : 219.0
+    }, {
+      "name" : "production",
+      "type" : "aux",
+      "x" : 717.0,
+      "y" : 299.0
+    } ],
+    "connectors" : [ {
+      "from" : "Capacity",
+      "to" : "capacity adjustment"
+    }, {
+      "from" : "time to adjust capacity",
+      "to" : "capacity adjustment"
+    }, {
+      "from" : "Capacity",
+      "to" : "_48"
+    }, {
+      "from" : "target capacity",
+      "to" : "Capacity"
+    }, {
+      "from" : "desired production",
+      "to" : "production"
+    }, {
+      "from" : "potential production",
+      "to" : "production"
+    }, {
+      "from" : "Capacity",
+      "to" : "potential production"
+    }, {
+      "from" : "capacity life",
+      "to" : "_48"
+    }, {
+      "from" : "_48",
+      "to" : "Capacity"
+    }, {
+      "from" : "_48",
+      "to" : "Capacity"
+    }, {
+      "from" : "capacity adjustment",
+      "to" : "investment"
+    }, {
+      "from" : "target capacity",
+      "to" : "capacity adjustment"
+    }, {
+      "from" : "desired production",
+      "to" : "target capacity"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_48",
+      "points" : [ [ 416.0, 125.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 625.0, 125.0 ] ]
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Month",
+    "duration" : 100.0,
+    "durationUnit" : "Month"
+  },
+  "metadata" : {
+    "author" : "Ventana Systems, Inc.",
+    "source" : "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+    "license" : "MIT",
+    "url" : "https://www.vensim.com/documentation/models.html"
+  }
+}

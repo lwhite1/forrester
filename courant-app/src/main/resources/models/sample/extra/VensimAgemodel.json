@@ -1,0 +1,265 @@
+{
+  "name" : "AGEMODEL",
+  "stocks" : [ {
+    "name" : "Population infant",
+    "comment" : "Population[infant]",
+    "initialValue" : 30.0,
+    "unit" : ""
+  }, {
+    "name" : "Population child",
+    "comment" : "Population[all but youngest]",
+    "initialValue" : 50.0,
+    "unit" : "person"
+  }, {
+    "name" : "Population teen",
+    "comment" : "Population[all but youngest]",
+    "initialValue" : 50.0,
+    "unit" : "person"
+  }, {
+    "name" : "Population middle",
+    "comment" : "Population[all but youngest]",
+    "initialValue" : 60.0,
+    "unit" : "person"
+  }, {
+    "name" : "Population old",
+    "comment" : "Population[all but youngest]",
+    "initialValue" : 50.0,
+    "unit" : "person"
+  } ],
+  "flows" : [ {
+    "name" : "Population infant inflow 1",
+    "equation" : "births",
+    "timeUnit" : "Year",
+    "sink" : "Population infant"
+  }, {
+    "name" : "Population infant outflow 2",
+    "equation" : "aging_infant",
+    "timeUnit" : "Year",
+    "source" : "Population infant"
+  }, {
+    "name" : "Population child net flow",
+    "comment" : "Net flow for Population child",
+    "equation" : "aging_infant - aging_child",
+    "timeUnit" : "Year",
+    "sink" : "Population child"
+  }, {
+    "name" : "Population teen net flow",
+    "comment" : "Net flow for Population teen",
+    "equation" : "aging_child - aging_teen",
+    "timeUnit" : "Year",
+    "sink" : "Population teen"
+  }, {
+    "name" : "Population middle net flow",
+    "comment" : "Net flow for Population middle",
+    "equation" : "aging_teen - aging_middle",
+    "timeUnit" : "Year",
+    "sink" : "Population middle"
+  }, {
+    "name" : "Population old net flow",
+    "comment" : "Net flow for Population old",
+    "equation" : "aging_middle - aging_old",
+    "timeUnit" : "Year",
+    "sink" : "Population old"
+  } ],
+  "variables" : [ {
+    "name" : "birth rate",
+    "comment" : "birth rate",
+    "equation" : "0.08",
+    "unit" : "fraction/Year"
+  }, {
+    "name" : "aging infant",
+    "comment" : "aging[age]",
+    "equation" : "Population_infant / average_time_in_cohort_infant",
+    "unit" : "person/Year"
+  }, {
+    "name" : "aging child",
+    "comment" : "aging[age]",
+    "equation" : "Population_child / average_time_in_cohort_child",
+    "unit" : "person/Year"
+  }, {
+    "name" : "aging teen",
+    "comment" : "aging[age]",
+    "equation" : "Population_teen / average_time_in_cohort_teen",
+    "unit" : "person/Year"
+  }, {
+    "name" : "aging middle",
+    "comment" : "aging[age]",
+    "equation" : "Population_middle / average_time_in_cohort_middle",
+    "unit" : "person/Year"
+  }, {
+    "name" : "aging old",
+    "comment" : "aging[age]",
+    "equation" : "Population_old / average_time_in_cohort_old",
+    "unit" : "person/Year"
+  }, {
+    "name" : "initial population infant",
+    "comment" : "initial population[age]",
+    "equation" : "30",
+    "unit" : "person"
+  }, {
+    "name" : "initial population child",
+    "comment" : "initial population[age]",
+    "equation" : "50",
+    "unit" : "person"
+  }, {
+    "name" : "initial population teen",
+    "comment" : "initial population[age]",
+    "equation" : "50",
+    "unit" : "person"
+  }, {
+    "name" : "initial population middle",
+    "comment" : "initial population[age]",
+    "equation" : "60",
+    "unit" : "person"
+  }, {
+    "name" : "initial population old",
+    "comment" : "initial population[age]",
+    "equation" : "50",
+    "unit" : "person"
+  }, {
+    "name" : "average time in cohort infant",
+    "comment" : "average time in cohort[age]",
+    "equation" : "2",
+    "unit" : "Year"
+  }, {
+    "name" : "average time in cohort child",
+    "comment" : "average time in cohort[age]",
+    "equation" : "10",
+    "unit" : "Year"
+  }, {
+    "name" : "average time in cohort teen",
+    "comment" : "average time in cohort[age]",
+    "equation" : "7",
+    "unit" : "Year"
+  }, {
+    "name" : "average time in cohort middle",
+    "comment" : "average time in cohort[age]",
+    "equation" : "40",
+    "unit" : "Year"
+  }, {
+    "name" : "average time in cohort old",
+    "comment" : "average time in cohort[age]",
+    "equation" : "20",
+    "unit" : "Year"
+  }, {
+    "name" : "births",
+    "comment" : "births",
+    "equation" : "Population_middle * birth_rate",
+    "unit" : "person/Year"
+  } ],
+  "subscripts" : [ {
+    "name" : "age",
+    "labels" : [ "infant", "child", "teen", "middle", "old" ]
+  }, {
+    "name" : "all but youngest",
+    "labels" : [ "child", "teen", "middle", "old" ]
+  }, {
+    "name" : "previous cohort",
+    "labels" : [ "infant", "child", "teen", "middle" ]
+  } ],
+  "comments" : [ {
+    "name" : "Comment 1",
+    "text" : "Population"
+  }, {
+    "name" : "Comment 2",
+    "text" : "AGE MODEL"
+  } ],
+  "views" : [ {
+    "name" : "View 1",
+    "elements" : [ {
+      "name" : "Population",
+      "type" : "aux",
+      "x" : 289.0,
+      "y" : 223.0
+    }, {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : 163.0,
+      "y" : 225.0
+    }, {
+      "name" : "births",
+      "type" : "aux",
+      "x" : 163.0,
+      "y" : 263.0
+    }, {
+      "name" : "initial population",
+      "type" : "aux",
+      "x" : 147.0,
+      "y" : 155.0
+    }, {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : 424.0,
+      "y" : 223.0
+    }, {
+      "name" : "aging",
+      "type" : "aux",
+      "x" : 424.0,
+      "y" : 261.0
+    }, {
+      "name" : "average time in cohort",
+      "type" : "aux",
+      "x" : 547.0,
+      "y" : 299.0
+    }, {
+      "name" : "birth rate",
+      "type" : "aux",
+      "x" : 81.0,
+      "y" : 306.0
+    }, {
+      "name" : "Comment 1",
+      "type" : "comment",
+      "x" : 340.0,
+      "y" : 553.0,
+      "width" : 600.0,
+      "height" : 448.0
+    }, {
+      "name" : "Comment 2",
+      "type" : "comment",
+      "x" : 355.0,
+      "y" : 55.0,
+      "width" : 160.0,
+      "height" : 80.0
+    } ],
+    "connectors" : [ {
+      "from" : "initial population",
+      "to" : "Population"
+    }, {
+      "from" : "Population",
+      "to" : "births"
+    }, {
+      "from" : "Population",
+      "to" : "aging"
+    }, {
+      "from" : "average time in cohort",
+      "to" : "aging"
+    }, {
+      "from" : "birth rate",
+      "to" : "births"
+    }, {
+      "from" : "_0",
+      "to" : "Population"
+    }, {
+      "from" : "_0",
+      "to" : "Population"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_0",
+      "points" : [ [ 163.0, 225.0 ] ]
+    }, {
+      "flowName" : "_0",
+      "points" : [ [ 424.0, 223.0 ] ]
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Year",
+    "duration" : 100.0,
+    "durationUnit" : "Year"
+  },
+  "metadata" : {
+    "author" : "Ventana Systems, Inc.",
+    "source" : "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+    "license" : "MIT",
+    "url" : "https://www.vensim.com/documentation/sample_models.html"
+  }
+}

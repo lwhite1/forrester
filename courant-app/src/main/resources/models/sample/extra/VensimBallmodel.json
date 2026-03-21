@@ -1,0 +1,219 @@
+{
+  "name" : "BALLMODEL",
+  "stocks" : [ {
+    "name" : "Position",
+    "comment" : "Position",
+    "initialValue" : 30.0,
+    "unit" : "Feet"
+  }, {
+    "name" : "Velocity",
+    "comment" : "Velocity",
+    "initialValue" : 0.0,
+    "unit" : "Feet/Second"
+  } ],
+  "flows" : [ {
+    "name" : "Position net flow",
+    "comment" : "Net flow for Position",
+    "equation" : "Velocity",
+    "timeUnit" : "Second",
+    "sink" : "Position"
+  }, {
+    "name" : "Velocity net flow",
+    "comment" : "Net flow for Velocity",
+    "equation" : "acceleration",
+    "timeUnit" : "Second",
+    "sink" : "Velocity"
+  } ],
+  "variables" : [ {
+    "name" : "acceleration",
+    "comment" : "acceleration",
+    "equation" : "g + compression_acceleration",
+    "unit" : "Feet/Second/Second"
+  }, {
+    "name" : "ball diameter",
+    "comment" : "ball diameter",
+    "equation" : "0.25",
+    "unit" : "Feet"
+  }, {
+    "name" : "big time step",
+    "comment" : "big time step",
+    "equation" : "0.0625",
+    "unit" : "Second"
+  }, {
+    "name" : "compression acceleration",
+    "comment" : "compression acceleration",
+    "equation" : "IF(Position <= ball_diameter, (ball_diameter-Position)*stiffness_constant,0)",
+    "unit" : "Feet/Second/Second"
+  }, {
+    "name" : "could be position",
+    "comment" : "could be position",
+    "equation" : "IF(Velocity>0,Position, Position+Velocity*big_time_step)",
+    "unit" : "Feet"
+  }, {
+    "name" : "g",
+    "comment" : "Negative because up is positive.",
+    "equation" : "-32",
+    "unit" : "Feet/(Second*Second)"
+  }, {
+    "name" : "little time step",
+    "comment" : "little time step",
+    "equation" : "4.88281E-4",
+    "unit" : "Second"
+  }, {
+    "name" : "stiffness constant",
+    "comment" : "stiffness constant",
+    "equation" : "200000",
+    "unit" : "1/Second/Second"
+  } ],
+  "comments" : [ {
+    "name" : "Comment 1",
+    "text" : "p_and_v"
+  }, {
+    "name" : "Comment 2",
+    "text" : "BALL MODEL"
+  } ],
+  "views" : [ {
+    "name" : "View 1",
+    "elements" : [ {
+      "name" : "Position",
+      "type" : "stock",
+      "x" : 366.0,
+      "y" : 480.0
+    }, {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : 240.0,
+      "y" : 480.0
+    }, {
+      "name" : "Velocity",
+      "type" : "stock",
+      "x" : 240.0,
+      "y" : 508.0
+    }, {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : 125.0,
+      "y" : 510.0
+    }, {
+      "name" : "acceleration",
+      "type" : "aux",
+      "x" : 125.0,
+      "y" : 548.0
+    }, {
+      "name" : "g",
+      "type" : "aux",
+      "x" : 144.0,
+      "y" : 640.0
+    }, {
+      "name" : "compression acceleration",
+      "type" : "aux",
+      "x" : 300.0,
+      "y" : 600.0
+    }, {
+      "name" : "stiffness constant",
+      "type" : "aux",
+      "x" : 312.0,
+      "y" : 649.0
+    }, {
+      "name" : "ball diameter",
+      "type" : "aux",
+      "x" : 509.0,
+      "y" : 588.0
+    }, {
+      "name" : "could be position",
+      "type" : "aux",
+      "x" : 297.0,
+      "y" : 396.0
+    }, {
+      "name" : "TIME STEP",
+      "type" : "aux",
+      "x" : 296.0,
+      "y" : 328.0
+    }, {
+      "name" : "big time step",
+      "type" : "aux",
+      "x" : 162.0,
+      "y" : 362.0
+    }, {
+      "name" : "little time step",
+      "type" : "aux",
+      "x" : 517.0,
+      "y" : 368.0
+    }, {
+      "name" : "Comment 1",
+      "type" : "comment",
+      "x" : 952.0,
+      "y" : 501.0,
+      "width" : 742.0,
+      "height" : 422.0
+    }, {
+      "name" : "Comment 2",
+      "type" : "comment",
+      "x" : 502.0,
+      "y" : 163.0,
+      "width" : 160.0,
+      "height" : 80.0
+    } ],
+    "connectors" : [ {
+      "from" : "_0",
+      "to" : "Position"
+    }, {
+      "from" : "_0",
+      "to" : "Velocity"
+    }, {
+      "from" : "g",
+      "to" : "acceleration"
+    }, {
+      "from" : "compression acceleration",
+      "to" : "acceleration"
+    }, {
+      "from" : "Position",
+      "to" : "compression acceleration"
+    }, {
+      "from" : "ball diameter",
+      "to" : "compression acceleration"
+    }, {
+      "from" : "stiffness constant",
+      "to" : "compression acceleration"
+    }, {
+      "from" : "_0",
+      "to" : "could be position"
+    }, {
+      "from" : "Position",
+      "to" : "could be position"
+    }, {
+      "from" : "could be position",
+      "to" : "TIME STEP"
+    }, {
+      "from" : "big time step",
+      "to" : "could be position"
+    }, {
+      "from" : "big time step",
+      "to" : "TIME STEP"
+    }, {
+      "from" : "ball diameter",
+      "to" : "TIME STEP"
+    }, {
+      "from" : "little time step",
+      "to" : "TIME STEP"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_0",
+      "points" : [ [ 240.0, 480.0 ] ]
+    }, {
+      "flowName" : "_0",
+      "points" : [ [ 125.0, 510.0 ] ]
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Second",
+    "duration" : 20.0,
+    "durationUnit" : "Second"
+  },
+  "metadata" : {
+    "author" : "Ventana Systems, Inc.",
+    "source" : "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+    "license" : "MIT",
+    "url" : "https://www.vensim.com/documentation/sample_models.html"
+  }
+}

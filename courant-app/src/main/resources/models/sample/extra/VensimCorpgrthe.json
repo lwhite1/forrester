@@ -1,0 +1,470 @@
+{
+  "name" : "CORPGRTHE",
+  "stocks" : [ {
+    "name" : "Delivery Delay Recognized",
+    "comment" : "Delivery Delay Recognized",
+    "initialValue" : 2.0,
+    "unit" : "Month"
+  }, {
+    "name" : "Backlog",
+    "comment" : "Backlog",
+    "initialValue" : 8000.0,
+    "unit" : "unit"
+  }, {
+    "name" : "Sales Force",
+    "comment" : "Sales Force",
+    "initialValue" : 10.0,
+    "unit" : "person"
+  } ],
+  "flows" : [ {
+    "name" : "Delivery Delay Recognized net flow",
+    "comment" : "Net flow for Delivery Delay Recognized",
+    "equation" : "(delivery_delay_impending - Delivery_Delay_Recognized) / time_for_delivery_delay_recognition",
+    "timeUnit" : "Month",
+    "sink" : "Delivery Delay Recognized"
+  }, {
+    "name" : "Backlog inflow 1",
+    "equation" : "orders_entered",
+    "timeUnit" : "Month",
+    "sink" : "Backlog"
+  }, {
+    "name" : "Backlog outflow 2",
+    "equation" : "orders_completed",
+    "timeUnit" : "Month",
+    "source" : "Backlog"
+  }, {
+    "name" : "Sales Force net flow",
+    "comment" : "Net flow for Sales Force",
+    "equation" : "net_hires",
+    "timeUnit" : "Month",
+    "sink" : "Sales Force"
+  } ],
+  "variables" : [ {
+    "name" : "normal backlog",
+    "comment" : "normal backlog",
+    "equation" : "8000",
+    "unit" : "unit"
+  }, {
+    "name" : "normal delivery delay recognized",
+    "comment" : "normal delivery delay recognized",
+    "equation" : "2",
+    "unit" : "Month"
+  }, {
+    "name" : "normal delivery rate",
+    "comment" : "normal delivery rate",
+    "equation" : "4000",
+    "unit" : "unit/Month"
+  }, {
+    "name" : "normal sales effectivness",
+    "comment" : "normal sales effectivness",
+    "equation" : "350",
+    "unit" : "unit/(Month*person)"
+  }, {
+    "name" : "delivery rate",
+    "comment" : "delivery rate",
+    "equation" : "normal_delivery_rate * effect_of_backlog_on_delivery_rate",
+    "unit" : "unit/Month"
+  }, {
+    "name" : "effect of backlog on delivery rate",
+    "comment" : "effect of backlog on delivery rate",
+    "equation" : "LOOKUP(effect_of_backlog_on_delivery_rate_lookup, Backlog/normal_backlog)",
+    "unit" : "dmnl"
+  }, {
+    "name" : "effect of delivery delay recognized",
+    "comment" : "effect of delivery delay recognized",
+    "equation" : "LOOKUP(effect_of_delivery_delay_recognized_lookup, Delivery_Delay_Recognized/normal_delivery_delay_recognized)",
+    "unit" : "dmnl"
+  }, {
+    "name" : "sales effectiveness",
+    "comment" : "sales effectiveness",
+    "equation" : "normal_sales_effectivness * effect_of_delivery_delay_recognized",
+    "unit" : "unit/(person*Month)"
+  }, {
+    "name" : "budget",
+    "comment" : "budget",
+    "equation" : "orders_booked * revenue_to_sales",
+    "unit" : "dollars/Month"
+  }, {
+    "name" : "delivery delay impending",
+    "comment" : "delivery delay impending",
+    "equation" : "Backlog / delivery_rate",
+    "unit" : "Month"
+  }, {
+    "name" : "indicated sales force",
+    "comment" : "indicated sales force",
+    "equation" : "budget / sales_person_salary",
+    "unit" : "person"
+  }, {
+    "name" : "net hires",
+    "comment" : "net hires",
+    "equation" : "(indicated_sales_force - Sales_Force) / sales_force_adjustment_time",
+    "unit" : "person/Month"
+  }, {
+    "name" : "orders booked",
+    "comment" : "orders booked",
+    "equation" : "Sales_Force * sales_effectiveness",
+    "unit" : "unit/Month"
+  }, {
+    "name" : "orders completed",
+    "comment" : "orders completed",
+    "equation" : "delivery_rate",
+    "unit" : "unit/Month"
+  }, {
+    "name" : "orders entered",
+    "comment" : "orders entered",
+    "equation" : "orders_booked",
+    "unit" : "unit/Month"
+  }, {
+    "name" : "revenue to sales",
+    "comment" : "revenue to sales",
+    "equation" : "10",
+    "unit" : "dollars/unit"
+  }, {
+    "name" : "sales force adjustment time",
+    "comment" : "sales force adjustment time",
+    "equation" : "20",
+    "unit" : "Month"
+  }, {
+    "name" : "sales person salary",
+    "comment" : "sales person salary",
+    "equation" : "2000",
+    "unit" : "dollars/(person*Month)"
+  }, {
+    "name" : "time for delivery delay recognition",
+    "comment" : "time for delivery delay recognition",
+    "equation" : "5",
+    "unit" : "Month"
+  } ],
+  "lookupTables" : [ {
+    "name" : "effect of backlog on delivery rate lookup",
+    "comment" : "effect of backlog on delivery rate lookup",
+    "xValues" : [ 0.9, 1.0, 1.7, 2.3, 3.5, 6.3, 10.0, 20.0 ],
+    "yValues" : [ 0.0, 1.0, 3.5, 4.3, 5.0, 5.6, 6.0, 6.5 ],
+    "interpolation" : "LINEAR",
+    "unit" : "dmnl"
+  }, {
+    "name" : "effect of delivery delay recognized lookup",
+    "comment" : "effect of delivery delay recognized lookup",
+    "xValues" : [ 0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0 ],
+    "yValues" : [ 1.15, 1.1, 1.0, 0.75, 0.5, 0.35, 0.3 ],
+    "interpolation" : "LINEAR",
+    "unit" : "dmnl"
+  } ],
+  "comments" : [ {
+    "name" : "Comment 1",
+    "text" : "( - )"
+  }, {
+    "name" : "Comment 2",
+    "text" : "( - )"
+  }, {
+    "name" : "Comment 3",
+    "text" : "by Jay W. Forrester"
+  }, {
+    "name" : "Comment 4",
+    "text" : "12,68,0,516,94,179,20,0,4,0,58,-1,0,0,0,0-0-0,0-0-0,Vensim Sans|24|IU|0-0-255,0,0,0,0,0,0"
+  }, {
+    "name" : "Comment 5",
+    "text" : "As described fully in \"Principles of Systems\" by Jay W. Forrester"
+  }, {
+    "name" : "Comment 6",
+    "text" : "Published by Pegasus Communications"
+  }, {
+    "name" : "Comment 7",
+    "text" : "orders_delay"
+  } ],
+  "views" : [ {
+    "name" : "Corporate Growth",
+    "elements" : [ {
+      "name" : "Sales Force",
+      "type" : "stock",
+      "x" : 252.0,
+      "y" : 446.0
+    }, {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : 149.0,
+      "y" : 446.0
+    }, {
+      "name" : "net hires",
+      "type" : "aux",
+      "x" : 149.0,
+      "y" : 484.0
+    }, {
+      "name" : "indicated sales force",
+      "type" : "aux",
+      "x" : 230.0,
+      "y" : 521.0
+    }, {
+      "name" : "sales person salary",
+      "type" : "aux",
+      "x" : 190.0,
+      "y" : 589.0
+    }, {
+      "name" : "sales force adjustment time",
+      "type" : "aux",
+      "x" : 141.0,
+      "y" : 361.0
+    }, {
+      "name" : "budget",
+      "type" : "aux",
+      "x" : 333.0,
+      "y" : 557.0
+    }, {
+      "name" : "revenue to sales",
+      "type" : "aux",
+      "x" : 322.0,
+      "y" : 630.0
+    }, {
+      "name" : "orders booked",
+      "type" : "aux",
+      "x" : 450.0,
+      "y" : 446.0
+    }, {
+      "name" : "Delivery Delay Recognized",
+      "type" : "stock",
+      "x" : 650.0,
+      "y" : 324.0
+    }, {
+      "name" : "Backlog",
+      "type" : "stock",
+      "x" : 550.0,
+      "y" : 645.0
+    }, {
+      "name" : "time for delivery delay recognition",
+      "type" : "aux",
+      "x" : 780.0,
+      "y" : 222.0
+    }, {
+      "name" : "sales effectiveness",
+      "type" : "aux",
+      "x" : 486.0,
+      "y" : 341.0
+    }, {
+      "name" : "delivery delay impending",
+      "type" : "aux",
+      "x" : 666.0,
+      "y" : 422.0
+    }, {
+      "name" : "delivery rate",
+      "type" : "aux",
+      "x" : 946.0,
+      "y" : 582.0
+    }, {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : 436.0,
+      "y" : 644.0
+    }, {
+      "name" : "orders entered",
+      "type" : "aux",
+      "x" : 436.0,
+      "y" : 682.0
+    }, {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : 678.0,
+      "y" : 645.0
+    }, {
+      "name" : "orders completed",
+      "type" : "aux",
+      "x" : 678.0,
+      "y" : 683.0
+    }, {
+      "name" : "Comment 1",
+      "type" : "comment",
+      "x" : 718.0,
+      "y" : 597.0,
+      "width" : 34.0,
+      "height" : 24.0
+    }, {
+      "name" : "Comment 2",
+      "type" : "comment",
+      "x" : 188.0,
+      "y" : 417.0,
+      "width" : 34.0,
+      "height" : 24.0
+    }, {
+      "name" : "effect of backlog on delivery rate lookup",
+      "type" : "lookup",
+      "x" : 774.0,
+      "y" : 502.0
+    }, {
+      "name" : "effect of delivery delay recognized lookup",
+      "type" : "lookup",
+      "x" : 344.0,
+      "y" : 186.0
+    }, {
+      "name" : "normal sales effectivness",
+      "type" : "aux",
+      "x" : 328.0,
+      "y" : 276.0
+    }, {
+      "name" : "normal delivery rate",
+      "type" : "aux",
+      "x" : 917.0,
+      "y" : 661.0
+    }, {
+      "name" : "effect of delivery delay recognized",
+      "type" : "aux",
+      "x" : 594.0,
+      "y" : 256.0
+    }, {
+      "name" : "effect of backlog on delivery rate",
+      "type" : "aux",
+      "x" : 736.0,
+      "y" : 564.0
+    }, {
+      "name" : "normal delivery delay recognized",
+      "type" : "aux",
+      "x" : 253.0,
+      "y" : 222.0
+    }, {
+      "name" : "normal backlog",
+      "type" : "aux",
+      "x" : 668.0,
+      "y" : 524.0
+    }, {
+      "name" : "Comment 3",
+      "type" : "comment",
+      "x" : 785.0,
+      "y" : 97.0,
+      "width" : 168.0,
+      "height" : 24.0
+    }, {
+      "name" : "Comment 4",
+      "type" : "comment",
+      "x" : 218.0,
+      "y" : 237.0,
+      "width" : 6.0,
+      "height" : 24.0
+    }, {
+      "name" : "Comment 5",
+      "type" : "comment",
+      "x" : 606.0,
+      "y" : 125.0,
+      "width" : 536.0,
+      "height" : 24.0
+    }, {
+      "name" : "Comment 6",
+      "type" : "comment",
+      "x" : 588.0,
+      "y" : 154.0,
+      "width" : 336.0,
+      "height" : 24.0
+    }, {
+      "name" : "Comment 7",
+      "type" : "comment",
+      "x" : 1141.0,
+      "y" : 313.0,
+      "width" : 400.0,
+      "height" : 400.0
+    } ],
+    "connectors" : [ {
+      "from" : "_0",
+      "to" : "Sales Force"
+    }, {
+      "from" : "indicated sales force",
+      "to" : "net hires"
+    }, {
+      "from" : "budget",
+      "to" : "indicated sales force"
+    }, {
+      "from" : "orders booked",
+      "to" : "budget"
+    }, {
+      "from" : "Sales Force",
+      "to" : "orders booked"
+    }, {
+      "from" : "_0",
+      "to" : "Backlog"
+    }, {
+      "from" : "_0",
+      "to" : "Backlog"
+    }, {
+      "from" : "orders booked",
+      "to" : "_0"
+    }, {
+      "from" : "delivery rate",
+      "to" : "_0"
+    }, {
+      "from" : "Backlog",
+      "to" : "delivery delay impending"
+    }, {
+      "from" : "delivery rate",
+      "to" : "delivery delay impending"
+    }, {
+      "from" : "sales effectiveness",
+      "to" : "orders booked"
+    }, {
+      "from" : "Sales Force",
+      "to" : "_0"
+    }, {
+      "from" : "Delivery Delay Recognized",
+      "to" : "effect of delivery delay recognized"
+    }, {
+      "from" : "effect of delivery delay recognized",
+      "to" : "sales effectiveness"
+    }, {
+      "from" : "Backlog",
+      "to" : "effect of backlog on delivery rate"
+    }, {
+      "from" : "effect of backlog on delivery rate",
+      "to" : "delivery rate"
+    }, {
+      "from" : "delivery delay impending",
+      "to" : "Delivery Delay Recognized"
+    }, {
+      "from" : "normal delivery delay recognized",
+      "to" : "effect of delivery delay recognized"
+    }, {
+      "from" : "effect of delivery delay recognized lookup",
+      "to" : "effect of delivery delay recognized"
+    }, {
+      "from" : "sales force adjustment time",
+      "to" : "_0"
+    }, {
+      "from" : "sales person salary",
+      "to" : "indicated sales force"
+    }, {
+      "from" : "revenue to sales",
+      "to" : "budget"
+    }, {
+      "from" : "normal sales effectivness",
+      "to" : "sales effectiveness"
+    }, {
+      "from" : "normal backlog",
+      "to" : "effect of backlog on delivery rate"
+    }, {
+      "from" : "effect of backlog on delivery rate lookup",
+      "to" : "effect of backlog on delivery rate"
+    }, {
+      "from" : "normal delivery rate",
+      "to" : "delivery rate"
+    }, {
+      "from" : "time for delivery delay recognition",
+      "to" : "Delivery Delay Recognized"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_0",
+      "points" : [ [ 149.0, 446.0 ] ]
+    }, {
+      "flowName" : "_0",
+      "points" : [ [ 436.0, 644.0 ] ]
+    }, {
+      "flowName" : "_0",
+      "points" : [ [ 678.0, 645.0 ] ]
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Month",
+    "duration" : 100.0,
+    "durationUnit" : "Month",
+    "dt" : 0.125
+  },
+  "metadata" : {
+    "author" : "Ventana Systems, Inc.",
+    "source" : "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+    "license" : "MIT",
+    "url" : "https://www.vensim.com/documentation/sample_models.html"
+  }
+}

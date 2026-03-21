@@ -1,0 +1,194 @@
+{
+  "name" : "Products",
+  "stocks" : [ {
+    "name" : "prod gen rate",
+    "comment" : "prod gen rate",
+    "initialValue" : 0.0,
+    "initialExpression" : "prod_dev_efficiency * prod_dev_budget",
+    "unit" : "Product / Month"
+  }, {
+    "name" : "Products",
+    "comment" : "Products",
+    "initialValue" : 10.0,
+    "unit" : "Product"
+  } ],
+  "flows" : [ {
+    "name" : "prod gen rate net flow",
+    "comment" : "Net flow for prod gen rate",
+    "equation" : "( prod_dev_efficiency * prod_dev_budget - prod_gen_rate ) / prod_dev_time",
+    "timeUnit" : "Month",
+    "sink" : "prod gen rate"
+  }, {
+    "name" : "Products inflow 1",
+    "equation" : "prod_gen_rate",
+    "timeUnit" : "Month",
+    "sink" : "Products"
+  }, {
+    "name" : "Products outflow 2",
+    "equation" : "prod_obsolescence_rate",
+    "timeUnit" : "Month",
+    "source" : "Products"
+  } ],
+  "variables" : [ {
+    "name" : "cash revenue",
+    "comment" : "cash revenue",
+    "equation" : "70000",
+    "unit" : "$/ Month"
+  }, {
+    "name" : "frac budget r and d",
+    "comment" : "frac budget r and d",
+    "equation" : "0.15",
+    "unit" : "Dimensionless"
+  }, {
+    "name" : "prod dev budget",
+    "comment" : "prod dev budget",
+    "equation" : "cash_revenue * frac_budget_r_and_d",
+    "unit" : "$/ Month"
+  }, {
+    "name" : "prod dev efficiency",
+    "comment" : "prod dev efficiency",
+    "equation" : "3.0E-5",
+    "unit" : "Product / $"
+  }, {
+    "name" : "prod dev time",
+    "comment" : "prod dev time",
+    "equation" : "12",
+    "unit" : "Month"
+  }, {
+    "name" : "prod obs time",
+    "comment" : "prod obs time",
+    "equation" : "60",
+    "unit" : "Months"
+  }, {
+    "name" : "prod obsolescence rate",
+    "comment" : "prod obsolescence rate",
+    "equation" : "Products / prod_obs_time",
+    "unit" : "Product / Month"
+  } ],
+  "comments" : [ {
+    "name" : "Comment 1",
+    "text" : "Products Model"
+  }, {
+    "name" : "Comment 2",
+    "text" : "Products"
+  } ],
+  "views" : [ {
+    "name" : "Products",
+    "elements" : [ {
+      "name" : "Products",
+      "type" : "stock",
+      "x" : 407.0,
+      "y" : 258.0
+    }, {
+      "name" : "cash revenue",
+      "type" : "aux",
+      "x" : 76.0,
+      "y" : 390.0
+    }, {
+      "name" : "frac budget r and d",
+      "type" : "aux",
+      "x" : 99.0,
+      "y" : 433.0
+    }, {
+      "name" : "prod dev budget",
+      "type" : "aux",
+      "x" : 249.0,
+      "y" : 386.0
+    }, {
+      "name" : "prod dev efficiency",
+      "type" : "aux",
+      "x" : 408.0,
+      "y" : 330.0
+    }, {
+      "name" : "prod dev time",
+      "type" : "aux",
+      "x" : 165.0,
+      "y" : 339.0
+    }, {
+      "name" : "prod obs time",
+      "type" : "aux",
+      "x" : 592.0,
+      "y" : 334.0
+    }, {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : 559.0,
+      "y" : 257.0
+    }, {
+      "name" : "prod obsolescence rate",
+      "type" : "aux",
+      "x" : 559.0,
+      "y" : 295.0
+    }, {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : 281.0,
+      "y" : 257.0
+    }, {
+      "name" : "prod gen rate",
+      "type" : "stock",
+      "x" : 281.0,
+      "y" : 295.0
+    }, {
+      "name" : "Comment 1",
+      "type" : "comment",
+      "x" : 400.0,
+      "y" : 98.0,
+      "width" : 160.0,
+      "height" : 80.0
+    }, {
+      "name" : "Comment 2",
+      "type" : "comment",
+      "x" : 1123.0,
+      "y" : 339.0,
+      "width" : 600.0,
+      "height" : 400.0
+    } ],
+    "connectors" : [ {
+      "from" : "prod dev budget",
+      "to" : "prod gen rate"
+    }, {
+      "from" : "prod dev efficiency",
+      "to" : "prod gen rate"
+    }, {
+      "from" : "prod dev time",
+      "to" : "prod gen rate"
+    }, {
+      "from" : "prod obs time",
+      "to" : "prod obsolescence rate"
+    }, {
+      "from" : "Products",
+      "to" : "_0"
+    }, {
+      "from" : "_0",
+      "to" : "Products"
+    }, {
+      "from" : "_0",
+      "to" : "Products"
+    }, {
+      "from" : "cash revenue",
+      "to" : "prod dev budget"
+    }, {
+      "from" : "frac budget r and d",
+      "to" : "prod dev budget"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_0",
+      "points" : [ [ 559.0, 257.0 ] ]
+    }, {
+      "flowName" : "_0",
+      "points" : [ [ 281.0, 257.0 ] ]
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Month",
+    "duration" : 60.0,
+    "durationUnit" : "Month"
+  },
+  "metadata" : {
+    "author" : "Ventana Systems, Inc.",
+    "source" : "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+    "license" : "MIT",
+    "url" : "https://www.vensim.com/documentation/sample_models.html"
+  }
+}

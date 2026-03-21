@@ -1,0 +1,396 @@
+{
+  "name" : "CUST2",
+  "stocks" : [ {
+    "name" : "Cumulative Revenue",
+    "comment" : "Cumulative Revenue",
+    "initialValue" : 0.0,
+    "unit" : "dollar"
+  }, {
+    "name" : "Capacity",
+    "comment" : "Capacity",
+    "initialValue" : 0.0,
+    "initialExpression" : "target_capacity",
+    "unit" : "Widget/Month"
+  }, {
+    "name" : "Customers",
+    "comment" : "Customers",
+    "initialValue" : 1000.0,
+    "unit" : "person"
+  }, {
+    "name" : "Potential Customers",
+    "comment" : "Potential Customers",
+    "initialValue" : 1000000.0,
+    "unit" : "person"
+  } ],
+  "flows" : [ {
+    "name" : "Cumulative Revenue net flow",
+    "comment" : "Net flow for Cumulative Revenue",
+    "equation" : "sales_revenue",
+    "timeUnit" : "Month",
+    "sink" : "Cumulative Revenue"
+  }, {
+    "name" : "Capacity net flow",
+    "comment" : "Net flow for Capacity",
+    "equation" : "capacity_adjustment",
+    "timeUnit" : "Month",
+    "sink" : "Capacity"
+  }, {
+    "name" : "Customers net flow",
+    "comment" : "Net flow for Customers",
+    "equation" : "new_customers",
+    "timeUnit" : "Month",
+    "sink" : "Customers"
+  }, {
+    "name" : "Potential Customers net flow",
+    "comment" : "Net flow for Potential Customers",
+    "equation" : "- new_customers",
+    "timeUnit" : "Month",
+    "sink" : "Potential Customers"
+  } ],
+  "variables" : [ {
+    "name" : "potential customer concentration",
+    "comment" : "potential customer concentration",
+    "equation" : "Potential_Customers/total_market",
+    "unit" : "dmnl"
+  }, {
+    "name" : "sales",
+    "comment" : "sales",
+    "equation" : "new_customers * widgets_per_person",
+    "unit" : "Widget/Month"
+  }, {
+    "name" : "sales revenue",
+    "comment" : "sales revenue",
+    "equation" : "sales * price",
+    "unit" : "dollar/Month"
+  }, {
+    "name" : "new customers",
+    "comment" : "new customers",
+    "equation" : "MIN(word_of_mouth_demand, Capacity/widgets_per_person)",
+    "unit" : "person/Month"
+  }, {
+    "name" : "capacity adjustment",
+    "comment" : "capacity adjustment",
+    "equation" : "(target_capacity - Capacity) / time_to_adjust_capacity",
+    "unit" : "Widget/Month/Month"
+  }, {
+    "name" : "contacts of noncustomers with customers",
+    "comment" : "contacts of noncustomers with customers",
+    "equation" : "contacts_with_customers*potential_customer_concentration",
+    "unit" : "contact/Month"
+  }, {
+    "name" : "contacts with customers",
+    "comment" : "contacts with customers",
+    "equation" : "Customers*sociability",
+    "unit" : "contact/Month"
+  }, {
+    "name" : "price",
+    "comment" : "price",
+    "equation" : "50",
+    "unit" : "dollar/Widget"
+  }, {
+    "name" : "fruitfulness",
+    "comment" : "fruitfulness",
+    "equation" : "0.01",
+    "unit" : "person/contact"
+  }, {
+    "name" : "sociability",
+    "comment" : "sociability",
+    "equation" : "20",
+    "unit" : "contact/person/Month"
+  }, {
+    "name" : "target capacity",
+    "comment" : "target capacity",
+    "equation" : "word_of_mouth_demand*widgets_per_person",
+    "unit" : "Widget/Month"
+  }, {
+    "name" : "time to adjust capacity",
+    "comment" : "time to adjust capacity",
+    "equation" : "12",
+    "unit" : "Month"
+  }, {
+    "name" : "total market",
+    "comment" : "total market",
+    "equation" : "Customers+Potential_Customers",
+    "unit" : "person"
+  }, {
+    "name" : "widgets per person",
+    "comment" : "widgets per person",
+    "equation" : "1",
+    "unit" : "Widget/person"
+  }, {
+    "name" : "word of mouth demand",
+    "comment" : "word of mouth demand",
+    "equation" : "contacts_of_noncustomers_with_customers*fruitfulness",
+    "unit" : "person/Month"
+  } ],
+  "comments" : [ {
+    "name" : "Comment 1",
+    "text" : "new customers,graph"
+  } ],
+  "views" : [ {
+    "name" : "Customers",
+    "elements" : [ {
+      "name" : "word of mouth demand",
+      "type" : "aux",
+      "x" : 449.0,
+      "y" : 159.0
+    }, {
+      "name" : "Customers",
+      "type" : "stock",
+      "x" : 704.0,
+      "y" : 223.0
+    }, {
+      "name" : "Potential Customers",
+      "type" : "stock",
+      "x" : 260.0,
+      "y" : 223.0
+    }, {
+      "name" : "contacts of noncustomers with customers",
+      "type" : "aux",
+      "x" : 528.0,
+      "y" : 36.0
+    }, {
+      "name" : "_476",
+      "type" : "flow",
+      "x" : 499.0,
+      "y" : 224.0
+    }, {
+      "name" : "new customers",
+      "type" : "aux",
+      "x" : 499.0,
+      "y" : 244.0
+    }, {
+      "name" : "fruitfulness",
+      "type" : "aux",
+      "x" : 369.0,
+      "y" : 117.0
+    }, {
+      "name" : "contacts with customers",
+      "type" : "aux",
+      "x" : 721.0,
+      "y" : 101.0
+    }, {
+      "name" : "potential customer concentration",
+      "type" : "aux",
+      "x" : 172.0,
+      "y" : 87.0
+    }, {
+      "name" : "total market",
+      "type" : "aux",
+      "x" : 315.0,
+      "y" : 376.0
+    }, {
+      "name" : "sociability",
+      "type" : "aux",
+      "x" : 669.0,
+      "y" : 171.0
+    }, {
+      "name" : "Capacity",
+      "type" : "stock",
+      "x" : 419.0,
+      "y" : 293.0
+    }, {
+      "name" : "widgets per person",
+      "type" : "aux",
+      "x" : 473.0,
+      "y" : 323.0
+    }, {
+      "name" : "Comment 1",
+      "type" : "comment",
+      "x" : 485.0,
+      "y" : 565.0,
+      "width" : 466.0,
+      "height" : 334.0
+    } ],
+    "connectors" : [ {
+      "from" : "word of mouth demand",
+      "to" : "_476"
+    }, {
+      "from" : "contacts of noncustomers with customers",
+      "to" : "word of mouth demand"
+    }, {
+      "from" : "sociability",
+      "to" : "contacts with customers"
+    }, {
+      "from" : "Customers",
+      "to" : "contacts with customers"
+    }, {
+      "from" : "potential customer concentration",
+      "to" : "contacts of noncustomers with customers"
+    }, {
+      "from" : "Potential Customers",
+      "to" : "potential customer concentration"
+    }, {
+      "from" : "contacts with customers",
+      "to" : "contacts of noncustomers with customers"
+    }, {
+      "from" : "_476",
+      "to" : "Potential Customers"
+    }, {
+      "from" : "_476",
+      "to" : "Customers"
+    }, {
+      "from" : "fruitfulness",
+      "to" : "word of mouth demand"
+    }, {
+      "from" : "Potential Customers",
+      "to" : "total market"
+    }, {
+      "from" : "Customers",
+      "to" : "total market"
+    }, {
+      "from" : "Capacity",
+      "to" : "new customers"
+    }, {
+      "from" : "widgets per person",
+      "to" : "new customers"
+    }, {
+      "from" : "total market",
+      "to" : "potential customer concentration"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_476",
+      "points" : [ [ 499.0, 224.0 ] ]
+    } ]
+  }, {
+    "name" : "Capacity",
+    "elements" : [ {
+      "name" : "target capacity",
+      "type" : "aux",
+      "x" : 368.0,
+      "y" : 189.0
+    }, {
+      "name" : "Capacity",
+      "type" : "stock",
+      "x" : 583.0,
+      "y" : 81.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 439.0,
+      "y" : 81.0
+    }, {
+      "name" : "capacity adjustment",
+      "type" : "aux",
+      "x" : 439.0,
+      "y" : 101.0
+    }, {
+      "name" : "time to adjust capacity",
+      "type" : "aux",
+      "x" : 253.0,
+      "y" : 151.0
+    }, {
+      "name" : "widgets per person",
+      "type" : "aux",
+      "x" : 208.0,
+      "y" : 240.0
+    }, {
+      "name" : "word of mouth demand",
+      "type" : "aux",
+      "x" : 152.0,
+      "y" : 191.0
+    } ],
+    "connectors" : [ {
+      "from" : "target capacity",
+      "to" : "Capacity"
+    }, {
+      "from" : "widgets per person",
+      "to" : "target capacity"
+    }, {
+      "from" : "time to adjust capacity",
+      "to" : "capacity adjustment"
+    }, {
+      "from" : "target capacity",
+      "to" : "capacity adjustment"
+    }, {
+      "from" : "Capacity",
+      "to" : "_48"
+    }, {
+      "from" : "_48",
+      "to" : "Capacity"
+    }, {
+      "from" : "word of mouth demand",
+      "to" : "target capacity"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_48",
+      "points" : [ [ 439.0, 81.0 ] ]
+    } ]
+  }, {
+    "name" : "Sales Revenue",
+    "elements" : [ {
+      "name" : "new customers",
+      "type" : "aux",
+      "x" : 279.0,
+      "y" : 175.0
+    }, {
+      "name" : "Capacity",
+      "type" : "stock",
+      "x" : 121.0,
+      "y" : 169.0
+    }, {
+      "name" : "word of mouth demand",
+      "type" : "aux",
+      "x" : 144.0,
+      "y" : 115.0
+    }, {
+      "name" : "price",
+      "type" : "aux",
+      "x" : 488.0,
+      "y" : 225.0
+    }, {
+      "name" : "Cumulative Revenue",
+      "type" : "stock",
+      "x" : 705.0,
+      "y" : 149.0
+    }, {
+      "name" : "sales",
+      "type" : "aux",
+      "x" : 448.0,
+      "y" : 168.0
+    }, {
+      "name" : "widgets per person",
+      "type" : "aux",
+      "x" : 229.0,
+      "y" : 228.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 579.0,
+      "y" : 147.0
+    }, {
+      "name" : "sales revenue",
+      "type" : "aux",
+      "x" : 579.0,
+      "y" : 167.0
+    } ],
+    "connectors" : [ {
+      "from" : "Capacity",
+      "to" : "new customers"
+    }, {
+      "from" : "word of mouth demand",
+      "to" : "new customers"
+    }, {
+      "from" : "new customers",
+      "to" : "sales"
+    }, {
+      "from" : "widgets per person",
+      "to" : "sales"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_48",
+      "points" : [ [ 579.0, 147.0 ] ]
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Month",
+    "duration" : 100.0,
+    "durationUnit" : "Month"
+  },
+  "metadata" : {
+    "author" : "Ventana Systems, Inc.",
+    "source" : "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+    "license" : "MIT",
+    "url" : "https://www.vensim.com/documentation/models.html"
+  }
+}

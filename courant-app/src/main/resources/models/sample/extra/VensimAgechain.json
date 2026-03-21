@@ -1,0 +1,286 @@
+{
+  "name" : "AGECHAIN",
+  "stocks" : [ {
+    "name" : "Population Middle",
+    "comment" : "Population Middle",
+    "initialValue" : 2.0E7,
+    "unit" : "person"
+  }, {
+    "name" : "Population Old",
+    "comment" : "Population Old",
+    "initialValue" : 1000000.0,
+    "unit" : "person"
+  }, {
+    "name" : "Population Young",
+    "comment" : "Population Young",
+    "initialValue" : 100000.0,
+    "unit" : "person"
+  } ],
+  "flows" : [ {
+    "name" : "Population Middle inflow 1",
+    "equation" : "aging_young",
+    "timeUnit" : "Year",
+    "sink" : "Population Middle"
+  }, {
+    "name" : "Population Middle outflow 2",
+    "equation" : "aging_middle",
+    "timeUnit" : "Year",
+    "source" : "Population Middle"
+  }, {
+    "name" : "Population Old inflow 1",
+    "equation" : "aging_middle",
+    "timeUnit" : "Year",
+    "sink" : "Population Old"
+  }, {
+    "name" : "Population Old outflow 2",
+    "equation" : "aging_old",
+    "timeUnit" : "Year",
+    "source" : "Population Old"
+  }, {
+    "name" : "Population Young inflow 1",
+    "equation" : "births",
+    "timeUnit" : "Year",
+    "sink" : "Population Young"
+  }, {
+    "name" : "Population Young outflow 2",
+    "equation" : "aging_young",
+    "timeUnit" : "Year",
+    "source" : "Population Young"
+  } ],
+  "variables" : [ {
+    "name" : "aging middle",
+    "comment" : "aging middle",
+    "equation" : "Population_Middle / average_time_in_middle",
+    "unit" : "person/Year"
+  }, {
+    "name" : "aging old",
+    "comment" : "aging old",
+    "equation" : "Population_Old / average_time_in_old",
+    "unit" : "person/Year"
+  }, {
+    "name" : "initial pop middle",
+    "comment" : "initial pop middle",
+    "equation" : "20000000",
+    "unit" : "person"
+  }, {
+    "name" : "initial pop old",
+    "comment" : "initial pop old",
+    "equation" : "1000000",
+    "unit" : "person"
+  }, {
+    "name" : "average time in middle",
+    "comment" : "average time in middle",
+    "equation" : "47",
+    "unit" : "Year"
+  }, {
+    "name" : "average time in old",
+    "comment" : "average time in old",
+    "equation" : "10",
+    "unit" : "Year"
+  }, {
+    "name" : "initial pop infant",
+    "comment" : "initial pop infant",
+    "equation" : "100000",
+    "unit" : "person"
+  }, {
+    "name" : "aging young",
+    "comment" : "aging young",
+    "equation" : "Population_Young / average_time_in_young",
+    "unit" : "person/Year"
+  }, {
+    "name" : "average time in young",
+    "comment" : "average time in young",
+    "equation" : "18",
+    "unit" : "Year"
+  }, {
+    "name" : "birth rate",
+    "comment" : "birth rate",
+    "equation" : "0.08",
+    "unit" : "fraction/Year"
+  }, {
+    "name" : "births",
+    "comment" : "births",
+    "equation" : "Population_Middle * birth_rate",
+    "unit" : "person/Year"
+  } ],
+  "comments" : [ {
+    "name" : "Comment 1",
+    "text" : "pop"
+  }, {
+    "name" : "Comment 2",
+    "text" : "AGE CHAIN MODEL"
+  } ],
+  "views" : [ {
+    "name" : "View 1",
+    "elements" : [ {
+      "name" : "Population Young",
+      "type" : "stock",
+      "x" : 390.0,
+      "y" : 239.0
+    }, {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : 277.0,
+      "y" : 237.0
+    }, {
+      "name" : "births",
+      "type" : "aux",
+      "x" : 277.0,
+      "y" : 275.0
+    }, {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : 510.0,
+      "y" : 237.0
+    }, {
+      "name" : "aging young",
+      "type" : "aux",
+      "x" : 510.0,
+      "y" : 275.0
+    }, {
+      "name" : "average time in young",
+      "type" : "aux",
+      "x" : 496.0,
+      "y" : 165.0
+    }, {
+      "name" : "birth rate",
+      "type" : "aux",
+      "x" : 257.0,
+      "y" : 310.0
+    }, {
+      "name" : "Population Middle",
+      "type" : "stock",
+      "x" : 630.0,
+      "y" : 239.0
+    }, {
+      "name" : "Population Old",
+      "type" : "stock",
+      "x" : 877.0,
+      "y" : 239.0
+    }, {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : 752.0,
+      "y" : 241.0
+    }, {
+      "name" : "aging middle",
+      "type" : "aux",
+      "x" : 752.0,
+      "y" : 279.0
+    }, {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : 986.0,
+      "y" : 238.0
+    }, {
+      "name" : "aging old",
+      "type" : "aux",
+      "x" : 986.0,
+      "y" : 276.0
+    }, {
+      "name" : "average time in middle",
+      "type" : "aux",
+      "x" : 724.0,
+      "y" : 163.0
+    }, {
+      "name" : "average time in old",
+      "type" : "aux",
+      "x" : 932.0,
+      "y" : 161.0
+    }, {
+      "name" : "initial pop infant",
+      "type" : "aux",
+      "x" : 293.0,
+      "y" : 169.0
+    }, {
+      "name" : "initial pop middle",
+      "type" : "aux",
+      "x" : 540.0,
+      "y" : 318.0
+    }, {
+      "name" : "initial pop old",
+      "type" : "aux",
+      "x" : 845.0,
+      "y" : 317.0
+    }, {
+      "name" : "Comment 1",
+      "type" : "comment",
+      "x" : 626.0,
+      "y" : 526.0,
+      "width" : 806.0,
+      "height" : 376.0
+    }, {
+      "name" : "Comment 2",
+      "type" : "comment",
+      "x" : 615.0,
+      "y" : 86.0,
+      "width" : 160.0,
+      "height" : 80.0
+    } ],
+    "connectors" : [ {
+      "from" : "Population Young",
+      "to" : "_0"
+    }, {
+      "from" : "average time in young",
+      "to" : "_0"
+    }, {
+      "from" : "birth rate",
+      "to" : "births"
+    }, {
+      "from" : "Population Middle",
+      "to" : "aging middle"
+    }, {
+      "from" : "Population Old",
+      "to" : "aging old"
+    }, {
+      "from" : "average time in middle",
+      "to" : "_0"
+    }, {
+      "from" : "average time in old",
+      "to" : "_0"
+    }, {
+      "from" : "Population Middle",
+      "to" : "births"
+    }, {
+      "from" : "initial pop infant",
+      "to" : "Population Young"
+    }, {
+      "from" : "initial pop middle",
+      "to" : "Population Middle"
+    }, {
+      "from" : "initial pop old",
+      "to" : "Population Old"
+    }, {
+      "from" : "_0",
+      "to" : "Population Middle"
+    }, {
+      "from" : "_0",
+      "to" : "Population Young"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_0",
+      "points" : [ [ 277.0, 237.0 ] ]
+    }, {
+      "flowName" : "_0",
+      "points" : [ [ 510.0, 237.0 ] ]
+    }, {
+      "flowName" : "_0",
+      "points" : [ [ 752.0, 241.0 ] ]
+    }, {
+      "flowName" : "_0",
+      "points" : [ [ 986.0, 238.0 ] ]
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Year",
+    "duration" : 100.0,
+    "durationUnit" : "Year",
+    "dt" : 0.25
+  },
+  "metadata" : {
+    "author" : "Ventana Systems, Inc.",
+    "source" : "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+    "license" : "MIT",
+    "url" : "https://www.vensim.com/documentation/sample_models.html"
+  }
+}

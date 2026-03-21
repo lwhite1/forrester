@@ -1,0 +1,131 @@
+{
+  "name" : "price1",
+  "views" : [ {
+    "name" : "View 1",
+    "elements" : [ {
+      "name" : "reference demand",
+      "type" : "aux",
+      "x" : 748.0,
+      "y" : 81.0
+    }, {
+      "name" : "effect price demand",
+      "type" : "aux",
+      "x" : 731.0,
+      "y" : 117.0
+    }, {
+      "name" : "price",
+      "type" : "aux",
+      "x" : 573.0,
+      "y" : 171.0
+    }, {
+      "name" : "demand",
+      "type" : "aux",
+      "x" : 533.0,
+      "y" : 80.0
+    }, {
+      "name" : "target price",
+      "type" : "aux",
+      "x" : 205.0,
+      "y" : 155.0
+    }, {
+      "name" : "time to adjust price up",
+      "type" : "aux",
+      "x" : 240.0,
+      "y" : 223.0
+    }, {
+      "name" : "target revenue",
+      "type" : "aux",
+      "x" : 147.0,
+      "y" : 95.0
+    }, {
+      "name" : "demand elasticity",
+      "type" : "aux",
+      "x" : 879.0,
+      "y" : 144.0
+    }, {
+      "name" : "initial price",
+      "type" : "aux",
+      "x" : 631.0,
+      "y" : 219.0
+    }, {
+      "name" : "expected demand",
+      "type" : "aux",
+      "x" : 409.0,
+      "y" : 79.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 423.0,
+      "y" : 171.0
+    }, {
+      "name" : "change in price",
+      "type" : "aux",
+      "x" : 423.0,
+      "y" : 191.0
+    }, {
+      "name" : "time to form expectations",
+      "type" : "aux",
+      "x" : 216.0,
+      "y" : 51.0
+    }, {
+      "name" : "reference price",
+      "type" : "aux",
+      "x" : 853.0,
+      "y" : 180.0
+    }, {
+      "name" : "time to adjust price down",
+      "type" : "aux",
+      "x" : 336.0,
+      "y" : 248.0
+    } ],
+    "connectors" : [ {
+      "from" : "reference demand",
+      "to" : "demand"
+    }, {
+      "from" : "effect price demand",
+      "to" : "demand"
+    }, {
+      "from" : "price",
+      "to" : "effect price demand"
+    }, {
+      "from" : "demand elasticity",
+      "to" : "effect price demand"
+    }, {
+      "from" : "target revenue",
+      "to" : "target price"
+    }, {
+      "from" : "demand",
+      "to" : "expected demand"
+    }, {
+      "from" : "time to form expectations",
+      "to" : "expected demand"
+    }, {
+      "from" : "price",
+      "to" : "change in price"
+    }, {
+      "from" : "target price",
+      "to" : "change in price"
+    }, {
+      "from" : "reference price",
+      "to" : "effect price demand"
+    }, {
+      "from" : "time to adjust price down",
+      "to" : "change in price"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_48",
+      "points" : [ [ 423.0, 171.0 ] ]
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Month",
+    "duration" : 100.0,
+    "durationUnit" : "Month"
+  },
+  "metadata" : {
+    "author" : "Ventana Systems, Inc.",
+    "source" : "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+    "license" : "MIT",
+    "url" : "https://www.vensim.com/documentation/models.html"
+  }
+}

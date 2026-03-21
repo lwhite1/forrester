@@ -1,0 +1,398 @@
+{
+  "name" : "RABFOX",
+  "stocks" : [ {
+    "name" : "Fox Population",
+    "comment" : "Fox Population",
+    "initialValue" : 30.0,
+    "unit" : "Fox"
+  }, {
+    "name" : "Rabbit Population",
+    "comment" : "Rabbit Population",
+    "initialValue" : 500.0,
+    "unit" : "Rabbit"
+  } ],
+  "flows" : [ {
+    "name" : "Fox Population inflow 1",
+    "equation" : "fox_births",
+    "timeUnit" : "Year",
+    "sink" : "Fox Population"
+  }, {
+    "name" : "Fox Population outflow 2",
+    "equation" : "fox_deaths",
+    "timeUnit" : "Year",
+    "source" : "Fox Population"
+  }, {
+    "name" : "Rabbit Population inflow 1",
+    "equation" : "rabbit_births",
+    "timeUnit" : "Year",
+    "sink" : "Rabbit Population"
+  }, {
+    "name" : "Rabbit Population outflow 2",
+    "equation" : "rabbit_deaths",
+    "timeUnit" : "Year",
+    "source" : "Rabbit Population"
+  } ],
+  "variables" : [ {
+    "name" : "average fox life",
+    "comment" : "average fox life",
+    "equation" : "4",
+    "unit" : "Year"
+  }, {
+    "name" : "average rabbit life",
+    "comment" : "average rabbit life",
+    "equation" : "2",
+    "unit" : "Year"
+  }, {
+    "name" : "carrying capacity",
+    "comment" : "carrying capacity",
+    "equation" : "500",
+    "unit" : "Rabbit"
+  }, {
+    "name" : "fox birth rate",
+    "comment" : "fox birth rate",
+    "equation" : "0.25",
+    "unit" : "1/Year"
+  }, {
+    "name" : "fox births",
+    "comment" : "fox births",
+    "equation" : "Fox_Population * fox_birth_rate",
+    "unit" : "Fox/Year"
+  }, {
+    "name" : "fox deaths",
+    "comment" : "fox deaths",
+    "equation" : "Fox_Population / average_fox_life * LOOKUP(fox_mortality_lookup, fox_food_availability)",
+    "unit" : "Fox/Year"
+  }, {
+    "name" : "fox food availability",
+    "comment" : "A lookup table showing the relationship between the input (crowding) along the x \t\t\t\t\t\t\t\t\t\t\t\t\t\t axis and the\n\t\t         output\n\t\t         (the effect that crowding has on the death rate) along the y-axis.",
+    "equation" : "fox_consumption_of_rabbits/(Fox_Population * fox_food_requirements )",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "fox food requirements",
+    "comment" : "fox food requirements",
+    "equation" : "25",
+    "unit" : "Rabbit/Year/Fox"
+  }, {
+    "name" : "fox consumption of rabbits",
+    "comment" : "fox consumption of rabbits",
+    "equation" : "Fox_Population * fox_food_requirements * LOOKUP(fox_rabbit_consumption_lookup, rabbit_crowding)",
+    "unit" : "Rabbit/Year"
+  }, {
+    "name" : "initial fox population",
+    "comment" : "initial fox population",
+    "equation" : "30",
+    "unit" : "Fox"
+  }, {
+    "name" : "initial rabbit population",
+    "comment" : "initial rabbit population",
+    "equation" : "500",
+    "unit" : "Rabbit"
+  }, {
+    "name" : "rabbit birth rate",
+    "comment" : "rabbit birth rate",
+    "equation" : "2",
+    "unit" : "1/Year"
+  }, {
+    "name" : "rabbit births",
+    "comment" : "rabbit births",
+    "equation" : "Rabbit_Population * rabbit_birth_rate",
+    "unit" : "Rabbit/Year"
+  }, {
+    "name" : "rabbit crowding",
+    "comment" : "rabbit crowding",
+    "equation" : "Rabbit_Population/carrying_capacity",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "rabbit deaths",
+    "comment" : "rabbit deaths",
+    "equation" : "MAX(Rabbit_Population / average_rabbit_life * LOOKUP(effect_of_crowding_on_deaths_lookup, rabbit_crowding), fox_consumption_of_rabbits)",
+    "unit" : "Rabbit/Year"
+  } ],
+  "lookupTables" : [ {
+    "name" : "effect of crowding on deaths lookup",
+    "comment" : "effect of crowding on deaths lookup",
+    "xValues" : [ 0.0, 3.0, 6.0, 8.0, 10.0 ],
+    "yValues" : [ 0.75, 2.5, 6.0, 11.0, 20.0 ],
+    "interpolation" : "LINEAR",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "fox mortality lookup",
+    "comment" : "fox mortality lookup",
+    "xValues" : [ 0.0, 0.3, 0.5, 1.0, 2.0 ],
+    "yValues" : [ 20.0, 5.0, 2.0, 1.0, 0.5 ],
+    "interpolation" : "LINEAR",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "fox rabbit consumption lookup",
+    "comment" : "Relating rabbits to foxes",
+    "xValues" : [ 0.0, 1.0, 2.0, 6.0 ],
+    "yValues" : [ 0.0, 1.0, 2.0, 2.0 ],
+    "interpolation" : "LINEAR",
+    "unit" : "Dmnl"
+  } ],
+  "comments" : [ {
+    "name" : "Comment 1",
+    "text" : "RABFOX"
+  }, {
+    "name" : "Comment 2",
+    "text" : "Phase"
+  }, {
+    "name" : "Comment 3",
+    "text" : "RABBIT & FOX MODEL|<<NnN>>|"
+  } ],
+  "views" : [ {
+    "name" : "1",
+    "elements" : [ {
+      "name" : "Fox Population",
+      "type" : "stock",
+      "x" : 969.0,
+      "y" : 261.0
+    }, {
+      "name" : "fox food availability",
+      "type" : "aux",
+      "x" : 893.0,
+      "y" : 397.0
+    }, {
+      "name" : "fox food requirements",
+      "type" : "aux",
+      "x" : 803.0,
+      "y" : 457.0
+    }, {
+      "name" : "average fox life",
+      "type" : "aux",
+      "x" : 1081.0,
+      "y" : 194.0
+    }, {
+      "name" : "fox consumption of rabbits",
+      "type" : "aux",
+      "x" : 688.0,
+      "y" : 350.0
+    }, {
+      "name" : "fox birth rate",
+      "type" : "aux",
+      "x" : 817.0,
+      "y" : 205.0
+    }, {
+      "name" : "initial fox population",
+      "type" : "aux",
+      "x" : 917.0,
+      "y" : 171.0
+    }, {
+      "name" : "fox mortality lookup",
+      "type" : "lookup",
+      "x" : 1072.0,
+      "y" : 405.0
+    }, {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : 856.0,
+      "y" : 253.0
+    }, {
+      "name" : "fox births",
+      "type" : "aux",
+      "x" : 856.0,
+      "y" : 291.0
+    }, {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : 1084.0,
+      "y" : 258.0
+    }, {
+      "name" : "fox deaths",
+      "type" : "aux",
+      "x" : 1084.0,
+      "y" : 296.0
+    }, {
+      "name" : "Rabbit Population",
+      "type" : "stock",
+      "x" : 285.0,
+      "y" : 247.0
+    }, {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : 171.0,
+      "y" : 247.0
+    }, {
+      "name" : "rabbit births",
+      "type" : "aux",
+      "x" : 171.0,
+      "y" : 285.0
+    }, {
+      "name" : "rabbit crowding",
+      "type" : "aux",
+      "x" : 393.0,
+      "y" : 406.0
+    }, {
+      "name" : "carrying capacity",
+      "type" : "aux",
+      "x" : 317.0,
+      "y" : 458.0
+    }, {
+      "name" : "average rabbit life",
+      "type" : "aux",
+      "x" : 415.0,
+      "y" : 135.0
+    }, {
+      "name" : "rabbit birth rate",
+      "type" : "aux",
+      "x" : 152.0,
+      "y" : 191.0
+    }, {
+      "name" : "initial rabbit population",
+      "type" : "aux",
+      "x" : 217.0,
+      "y" : 141.0
+    }, {
+      "name" : "effect of crowding on deaths lookup",
+      "type" : "lookup",
+      "x" : 595.0,
+      "y" : 166.0
+    }, {
+      "name" : "fox rabbit consumption lookup",
+      "type" : "lookup",
+      "x" : 561.0,
+      "y" : 458.0
+    }, {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : 452.0,
+      "y" : 255.0
+    }, {
+      "name" : "rabbit deaths",
+      "type" : "aux",
+      "x" : 452.0,
+      "y" : 293.0
+    }, {
+      "name" : "Comment 1",
+      "type" : "comment",
+      "x" : 568.0,
+      "y" : 656.0,
+      "width" : 656.0,
+      "height" : 370.0
+    }, {
+      "name" : "Comment 2",
+      "type" : "comment",
+      "x" : 1072.0,
+      "y" : 656.0,
+      "width" : 354.0,
+      "height" : 370.0
+    }, {
+      "name" : "Comment 3",
+      "type" : "comment",
+      "x" : 756.0,
+      "y" : 65.0,
+      "width" : 160.0,
+      "height" : 80.0
+    } ],
+    "connectors" : [ {
+      "from" : "Fox Population",
+      "to" : "fox food availability"
+    }, {
+      "from" : "fox food availability",
+      "to" : "fox deaths"
+    }, {
+      "from" : "Fox Population",
+      "to" : "_0"
+    }, {
+      "from" : "Fox Population",
+      "to" : "_0"
+    }, {
+      "from" : "fox consumption of rabbits",
+      "to" : "fox food availability"
+    }, {
+      "from" : "Fox Population",
+      "to" : "fox consumption of rabbits"
+    }, {
+      "from" : "fox mortality lookup",
+      "to" : "fox deaths"
+    }, {
+      "from" : "_0",
+      "to" : "Fox Population"
+    }, {
+      "from" : "_0",
+      "to" : "Fox Population"
+    }, {
+      "from" : "fox food requirements",
+      "to" : "fox consumption of rabbits"
+    }, {
+      "from" : "Rabbit Population",
+      "to" : "_0"
+    }, {
+      "from" : "Rabbit Population",
+      "to" : "_0"
+    }, {
+      "from" : "Rabbit Population",
+      "to" : "rabbit crowding"
+    }, {
+      "from" : "carrying capacity",
+      "to" : "rabbit crowding"
+    }, {
+      "from" : "average rabbit life",
+      "to" : "_0"
+    }, {
+      "from" : "_0",
+      "to" : "Rabbit Population"
+    }, {
+      "from" : "_0",
+      "to" : "Rabbit Population"
+    }, {
+      "from" : "fox rabbit consumption lookup",
+      "to" : "fox consumption of rabbits"
+    }, {
+      "from" : "rabbit crowding",
+      "to" : "fox consumption of rabbits"
+    }, {
+      "from" : "fox consumption of rabbits",
+      "to" : "rabbit deaths"
+    }, {
+      "from" : "rabbit birth rate",
+      "to" : "_0"
+    }, {
+      "from" : "effect of crowding on deaths lookup",
+      "to" : "_0"
+    }, {
+      "from" : "rabbit crowding",
+      "to" : "rabbit deaths"
+    }, {
+      "from" : "fox birth rate",
+      "to" : "_0"
+    }, {
+      "from" : "average fox life",
+      "to" : "_0"
+    }, {
+      "from" : "fox food requirements",
+      "to" : "fox food availability"
+    }, {
+      "from" : "initial fox population",
+      "to" : "Fox Population"
+    }, {
+      "from" : "initial rabbit population",
+      "to" : "Rabbit Population"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_0",
+      "points" : [ [ 856.0, 253.0 ] ]
+    }, {
+      "flowName" : "_0",
+      "points" : [ [ 1084.0, 258.0 ] ]
+    }, {
+      "flowName" : "_0",
+      "points" : [ [ 171.0, 247.0 ] ]
+    }, {
+      "flowName" : "_0",
+      "points" : [ [ 452.0, 255.0 ] ]
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Year",
+    "duration" : 50.0,
+    "durationUnit" : "Year",
+    "dt" : 0.25
+  },
+  "metadata" : {
+    "author" : "Ventana Systems, Inc.",
+    "source" : "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+    "license" : "MIT",
+    "url" : "https://www.vensim.com/documentation/sample_models.html"
+  }
+}

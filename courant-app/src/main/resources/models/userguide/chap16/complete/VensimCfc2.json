@@ -1,0 +1,163 @@
+{
+  "name" : "CFC2",
+  "stocks" : [ {
+    "name" : "CFC 11 in Troposphere",
+    "comment" : "CFC 11 in Troposphere",
+    "initialValue" : 0.0,
+    "unit" : "Mkg"
+  }, {
+    "name" : "CFC 11 in Stratosphere",
+    "comment" : "CFC 11 in Stratosphere",
+    "initialValue" : 0.0,
+    "unit" : "Mkg"
+  } ],
+  "flows" : [ {
+    "name" : "CFC 11 in Troposphere inflow 1",
+    "equation" : "atmospheric_CFC_11_releases",
+    "timeUnit" : "Year",
+    "sink" : "CFC 11 in Troposphere"
+  }, {
+    "name" : "CFC 11 in Troposphere outflow 2",
+    "equation" : "migration_to_stratosphere",
+    "timeUnit" : "Year",
+    "source" : "CFC 11 in Troposphere"
+  }, {
+    "name" : "CFC 11 in Stratosphere inflow 1",
+    "equation" : "migration_to_stratosphere",
+    "timeUnit" : "Year",
+    "sink" : "CFC 11 in Stratosphere"
+  }, {
+    "name" : "CFC 11 in Stratosphere outflow 2",
+    "equation" : "CFC_11_destroyed",
+    "timeUnit" : "Year",
+    "source" : "CFC 11 in Stratosphere"
+  } ],
+  "variables" : [ {
+    "name" : "atmospheric CFC 11 releases",
+    "comment" : "atmospheric CFC 11 releases",
+    "equation" : "0",
+    "unit" : ""
+  }, {
+    "name" : "CFC 11 destroyed",
+    "comment" : "CFC 11 destroyed",
+    "equation" : "CFC_11_in_Stratosphere / lifetime_of_CFC_11_in_stratosphere",
+    "unit" : "Mkg/Year"
+  }, {
+    "name" : "lifetime of CFC 11 in stratosphere",
+    "comment" : "lifetime of CFC 11 in stratosphere",
+    "equation" : "55",
+    "unit" : "Year"
+  }, {
+    "name" : "migration to stratosphere",
+    "comment" : "migration to stratosphere",
+    "equation" : "CFC_11_in_Troposphere / time_to_rise_to_stratosphere",
+    "unit" : "Mkg/Year"
+  }, {
+    "name" : "time to rise to stratosphere",
+    "comment" : "time to rise to stratosphere",
+    "equation" : "5",
+    "unit" : "Year"
+  } ],
+  "views" : [ {
+    "name" : "View 1",
+    "elements" : [ {
+      "name" : "CFC 11 in Troposphere",
+      "type" : "stock",
+      "x" : 408.0,
+      "y" : 77.0
+    }, {
+      "name" : "time to rise to stratosphere",
+      "type" : "aux",
+      "x" : 524.0,
+      "y" : 165.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 195.0,
+      "y" : 79.0
+    }, {
+      "name" : "atmospheric CFC 11 releases",
+      "type" : "aux",
+      "x" : 195.0,
+      "y" : 99.0
+    }, {
+      "name" : "_140",
+      "type" : "flow",
+      "x" : 599.0,
+      "y" : 77.0
+    }, {
+      "name" : "migration to stratosphere",
+      "type" : "aux",
+      "x" : 599.0,
+      "y" : 97.0
+    }, {
+      "name" : "CFC 11 in Stratosphere",
+      "type" : "stock",
+      "x" : 788.0,
+      "y" : 81.0
+    }, {
+      "name" : "_172",
+      "type" : "flow",
+      "x" : 940.0,
+      "y" : 76.0
+    }, {
+      "name" : "CFC 11 destroyed",
+      "type" : "aux",
+      "x" : 940.0,
+      "y" : 96.0
+    }, {
+      "name" : "lifetime of CFC 11 in stratosphere",
+      "type" : "aux",
+      "x" : 887.0,
+      "y" : 161.0
+    } ],
+    "connectors" : [ {
+      "from" : "_48",
+      "to" : "CFC 11 in Troposphere"
+    }, {
+      "from" : "_140",
+      "to" : "CFC 11 in Stratosphere"
+    }, {
+      "from" : "_140",
+      "to" : "CFC 11 in Troposphere"
+    }, {
+      "from" : "CFC 11 in Troposphere",
+      "to" : "migration to stratosphere"
+    }, {
+      "from" : "_172",
+      "to" : "CFC 11 in Stratosphere"
+    }, {
+      "from" : "CFC 11 in Stratosphere",
+      "to" : "CFC 11 destroyed"
+    }, {
+      "from" : "time to rise to stratosphere",
+      "to" : "migration to stratosphere"
+    }, {
+      "from" : "lifetime of CFC 11 in stratosphere",
+      "to" : "CFC 11 destroyed"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_48",
+      "points" : [ [ 195.0, 79.0 ] ]
+    }, {
+      "flowName" : "_140",
+      "points" : [ [ 599.0, 77.0 ] ]
+    }, {
+      "flowName" : "_172",
+      "points" : [ [ 940.0, 76.0 ] ]
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Year",
+    "duration" : 200.0,
+    "durationUnit" : "Year",
+    "dt" : 2.0,
+    "initialTime" : 1930.0
+  },
+  "metadata" : {
+    "author" : "Ventana Systems, Inc.",
+    "source" : "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+    "license" : "MIT",
+    "url" : "https://www.vensim.com/documentation/models.html"
+  }
+}

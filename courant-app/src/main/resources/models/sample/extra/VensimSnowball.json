@@ -1,0 +1,111 @@
+{
+  "name" : "SNOWBALL",
+  "stocks" : [ {
+    "name" : "Snowball Size",
+    "comment" : "Snowball Size",
+    "initialValue" : 0.25,
+    "unit" : "Kg"
+  } ],
+  "flows" : [ {
+    "name" : "Snowball Size net flow",
+    "comment" : "Net flow for Snowball Size",
+    "equation" : "snowball_growth",
+    "timeUnit" : "Minute",
+    "sink" : "Snowball Size"
+  } ],
+  "variables" : [ {
+    "name" : "initial snowball size",
+    "comment" : "initial snowball size",
+    "equation" : "0.25",
+    "unit" : "Kg"
+  }, {
+    "name" : "snowball growth",
+    "comment" : "snowball growth",
+    "equation" : "Snowball_Size * stickiness_of_snow",
+    "unit" : "Kg/Minute"
+  }, {
+    "name" : "stickiness of snow",
+    "comment" : "The amount of snow that sticks to a given amount of snow in a minute.",
+    "equation" : "1",
+    "unit" : "1/Minute"
+  } ],
+  "comments" : [ {
+    "name" : "Comment 1",
+    "text" : "Snowball Size,graph"
+  }, {
+    "name" : "Comment 2",
+    "text" : "SNOWBALL MODEL"
+  } ],
+  "views" : [ {
+    "name" : "1",
+    "elements" : [ {
+      "name" : "Snowball Size",
+      "type" : "stock",
+      "x" : 267.0,
+      "y" : 382.0
+    }, {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : 132.0,
+      "y" : 381.0
+    }, {
+      "name" : "snowball growth",
+      "type" : "aux",
+      "x" : 132.0,
+      "y" : 419.0
+    }, {
+      "name" : "stickiness of snow",
+      "type" : "aux",
+      "x" : 109.0,
+      "y" : 469.0
+    }, {
+      "name" : "initial snowball size",
+      "type" : "aux",
+      "x" : 303.0,
+      "y" : 466.0
+    }, {
+      "name" : "Comment 1",
+      "type" : "comment",
+      "x" : 735.0,
+      "y" : 482.0,
+      "width" : 400.0,
+      "height" : 400.0
+    }, {
+      "name" : "Comment 2",
+      "type" : "comment",
+      "x" : 426.0,
+      "y" : 203.0,
+      "width" : 160.0,
+      "height" : 80.0
+    } ],
+    "connectors" : [ {
+      "from" : "stickiness of snow",
+      "to" : "snowball growth"
+    }, {
+      "from" : "Snowball Size",
+      "to" : "_0"
+    }, {
+      "from" : "_0",
+      "to" : "Snowball Size"
+    }, {
+      "from" : "initial snowball size",
+      "to" : "Snowball Size"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_0",
+      "points" : [ [ 132.0, 381.0 ] ]
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Minute",
+    "duration" : 10.0,
+    "durationUnit" : "Minute",
+    "dt" : 0.25
+  },
+  "metadata" : {
+    "author" : "Ventana Systems, Inc.",
+    "source" : "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+    "license" : "MIT",
+    "url" : "https://www.vensim.com/documentation/sample_models.html"
+  }
+}

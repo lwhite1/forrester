@@ -1,0 +1,266 @@
+{
+  "name" : "change",
+  "stocks" : [ {
+    "name" : "adjusted",
+    "comment" : "adjusted",
+    "initialValue" : 0.0,
+    "unit" : "DMnl"
+  }, {
+    "name" : "stock",
+    "comment" : "stock",
+    "initialValue" : 100.0,
+    "unit" : "$"
+  } ],
+  "flows" : [ {
+    "name" : "adjusted net flow",
+    "comment" : "Net flow for adjusted",
+    "equation" : "IF(adjust != 0,1/TIME_STEP,0)",
+    "timeUnit" : "Month",
+    "sink" : "adjusted"
+  }, {
+    "name" : "stock inflow 1",
+    "equation" : "adjust",
+    "timeUnit" : "Month",
+    "sink" : "stock"
+  }, {
+    "name" : "stock inflow 2",
+    "equation" : "inflow",
+    "timeUnit" : "Month",
+    "sink" : "stock"
+  }, {
+    "name" : "stock outflow 3",
+    "equation" : "outflow",
+    "timeUnit" : "Month",
+    "source" : "stock"
+  } ],
+  "variables" : [ {
+    "name" : "adjust",
+    "comment" : "adjust",
+    "equation" : "IF(TIME >= adjust_time  and  not(adjusted),adjust_amount/TIME_STEP,0)",
+    "unit" : "$/Month"
+  }, {
+    "name" : "adjust amount",
+    "comment" : "adjust amount",
+    "equation" : "230",
+    "unit" : "$"
+  }, {
+    "name" : "adjust time",
+    "comment" : "adjust time",
+    "equation" : "FINAL_TIME",
+    "unit" : "Month"
+  }, {
+    "name" : "inflow",
+    "comment" : "inflow",
+    "equation" : "norm_inflow * (1-STEP(1,10))",
+    "unit" : "$/Month"
+  }, {
+    "name" : "init stock",
+    "comment" : "init stock",
+    "equation" : "100",
+    "unit" : "$"
+  }, {
+    "name" : "msg",
+    "comment" : "msg",
+    "equation" : "SAMPLE_IF_TRUE( not(msg), IF(not(msg)and  stock < target_stock,0,0),0)",
+    "unit" : "DMnl"
+  }, {
+    "name" : "norm inflow",
+    "comment" : "norm inflow",
+    "equation" : "100",
+    "unit" : "$/Month"
+  }, {
+    "name" : "outflow",
+    "comment" : "outflow",
+    "equation" : "stock/outflow_time",
+    "unit" : "$/Month"
+  }, {
+    "name" : "outflow time",
+    "comment" : "outflow time",
+    "equation" : "20",
+    "unit" : "Month"
+  }, {
+    "name" : "target stock",
+    "comment" : "target stock",
+    "equation" : "50",
+    "unit" : "$"
+  } ],
+  "comments" : [ {
+    "name" : "Comment 1",
+    "text" : "Change Model"
+  }, {
+    "name" : "Comment 2",
+    "text" : "Change"
+  } ],
+  "views" : [ {
+    "name" : "View 1",
+    "elements" : [ {
+      "name" : "stock",
+      "type" : "stock",
+      "x" : 296.0,
+      "y" : 427.0
+    }, {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : 189.0,
+      "y" : 431.0
+    }, {
+      "name" : "inflow",
+      "type" : "aux",
+      "x" : 189.0,
+      "y" : 469.0
+    }, {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : 423.0,
+      "y" : 421.0
+    }, {
+      "name" : "outflow",
+      "type" : "aux",
+      "x" : 423.0,
+      "y" : 459.0
+    }, {
+      "name" : "init stock",
+      "type" : "aux",
+      "x" : 273.0,
+      "y" : 337.0
+    }, {
+      "name" : "outflow time",
+      "type" : "aux",
+      "x" : 509.0,
+      "y" : 527.0
+    }, {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : 303.0,
+      "y" : 491.0
+    }, {
+      "name" : "adjust",
+      "type" : "aux",
+      "x" : 386.0,
+      "y" : 491.0
+    }, {
+      "name" : "adjust time",
+      "type" : "aux",
+      "x" : 391.0,
+      "y" : 604.0
+    }, {
+      "name" : "adjusted",
+      "type" : "stock",
+      "x" : 227.0,
+      "y" : 572.0
+    }, {
+      "name" : "FINAL TIME",
+      "type" : "aux",
+      "x" : 420.0,
+      "y" : 661.0
+    }, {
+      "name" : "adjust amount",
+      "type" : "aux",
+      "x" : 489.0,
+      "y" : 587.0
+    }, {
+      "name" : "Time",
+      "type" : "aux",
+      "x" : 419.0,
+      "y" : 488.0
+    }, {
+      "name" : "TIME STEP",
+      "type" : "aux",
+      "x" : 315.0,
+      "y" : 629.0
+    }, {
+      "name" : "target stock",
+      "type" : "aux",
+      "x" : 399.0,
+      "y" : 319.0
+    }, {
+      "name" : "msg",
+      "type" : "aux",
+      "x" : 512.0,
+      "y" : 368.0
+    }, {
+      "name" : "norm inflow",
+      "type" : "aux",
+      "x" : 113.0,
+      "y" : 512.0
+    }, {
+      "name" : "Comment 1",
+      "type" : "comment",
+      "x" : 303.0,
+      "y" : 191.0,
+      "width" : 160.0,
+      "height" : 80.0
+    }, {
+      "name" : "Comment 2",
+      "type" : "comment",
+      "x" : 1004.0,
+      "y" : 370.0,
+      "width" : 600.0,
+      "height" : 400.0
+    } ],
+    "connectors" : [ {
+      "from" : "init stock",
+      "to" : "stock"
+    }, {
+      "from" : "stock",
+      "to" : "_0"
+    }, {
+      "from" : "outflow time",
+      "to" : "outflow"
+    }, {
+      "from" : "_0",
+      "to" : "adjusted"
+    }, {
+      "from" : "FINAL TIME",
+      "to" : "adjust time"
+    }, {
+      "from" : "adjust time",
+      "to" : "adjust"
+    }, {
+      "from" : "adjusted",
+      "to" : "adjust"
+    }, {
+      "from" : "adjust amount",
+      "to" : "adjust"
+    }, {
+      "from" : "Time",
+      "to" : "adjust"
+    }, {
+      "from" : "TIME STEP",
+      "to" : "adjust"
+    }, {
+      "from" : "TIME STEP",
+      "to" : "adjusted"
+    }, {
+      "from" : "stock",
+      "to" : "msg"
+    }, {
+      "from" : "target stock",
+      "to" : "msg"
+    }, {
+      "from" : "norm inflow",
+      "to" : "inflow"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_0",
+      "points" : [ [ 189.0, 431.0 ] ]
+    }, {
+      "flowName" : "_0",
+      "points" : [ [ 423.0, 421.0 ] ]
+    }, {
+      "flowName" : "_0",
+      "points" : [ [ 303.0, 491.0 ] ]
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Month",
+    "duration" : 100.0,
+    "durationUnit" : "Month"
+  },
+  "metadata" : {
+    "author" : "Ventana Systems, Inc.",
+    "source" : "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+    "license" : "MIT",
+    "url" : "https://www.vensim.com/documentation/sample_models.html"
+  }
+}

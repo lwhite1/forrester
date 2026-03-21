@@ -1,0 +1,1231 @@
+{
+  "name" : "INTRO",
+  "stocks" : [ {
+    "name" : "Average Worker Hours",
+    "comment" : "The average number of hours worked per week",
+    "initialValue" : 40.0,
+    "unit" : "Hour/Month"
+  }, {
+    "name" : "Workforce",
+    "comment" : "The number of workers",
+    "initialValue" : 0.0,
+    "initialExpression" : "target_production/normal_productivity",
+    "unit" : "Person"
+  } ],
+  "flows" : [ {
+    "name" : "Average Worker Hours net flow",
+    "comment" : "Net flow for Average Worker Hours",
+    "equation" : "change_in_hours_worked",
+    "timeUnit" : "Month",
+    "sink" : "Average Worker Hours"
+  }, {
+    "name" : "Workforce net flow",
+    "comment" : "Net flow for Workforce",
+    "equation" : "net_hires",
+    "timeUnit" : "Month",
+    "sink" : "Workforce"
+  } ],
+  "variables" : [ {
+    "name" : "change in hours worked",
+    "comment" : "change in hours worked",
+    "equation" : "(required_worker_hours-Average_Worker_Hours) / delay_in_adding_or_removing_overtime_hours",
+    "unit" : "Hour/(Month*Month)"
+  }, {
+    "name" : "delay in adding or removing overtime hours",
+    "comment" : "delay in adding or removing overtime hours",
+    "equation" : "3",
+    "unit" : "Month"
+  }, {
+    "name" : "production",
+    "comment" : "Total amount produced.",
+    "equation" : "Workforce * required_worker_hours * productivity / normal_workweek",
+    "unit" : "Widget/Month"
+  }, {
+    "name" : "required worker hours",
+    "comment" : "The amount relative to normal that people have to work to\n\t\t         produce enough.",
+    "equation" : "IF((Workforce*productivity) == 0, 0, (target_production) / (Workforce*productivity)) * normal_workweek",
+    "unit" : "Hour/Month"
+  }, {
+    "name" : "net hires",
+    "comment" : "The net number of people hired (laid off if negative).",
+    "equation" : "(desired_workforce-Workforce)/time_to_hire_or_layoff",
+    "unit" : "Person/Month"
+  }, {
+    "name" : "normal workweek",
+    "comment" : "normal workweek",
+    "equation" : "40",
+    "unit" : "Hour/Month"
+  }, {
+    "name" : "time to hire or layoff",
+    "comment" : "time to hire or layoff",
+    "equation" : "6",
+    "unit" : "Month"
+  }, {
+    "name" : "desired workforce",
+    "comment" : "The desired number of workers.",
+    "equation" : "IF((productivity) == 0, 0, (target_production) / (productivity))",
+    "unit" : "Person"
+  }, {
+    "name" : "morale",
+    "comment" : "Morale - 1 is normal.",
+    "equation" : "LOOKUP(morale_lookup, Average_Worker_Hours/normal_workweek)",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "normal productivity",
+    "comment" : "The normal amount produced in the absence of morale effects.",
+    "equation" : "1",
+    "unit" : "Widget/Month/Person"
+  }, {
+    "name" : "productivity",
+    "comment" : "The amount each peson can produce given morale effects.",
+    "equation" : "normal_productivity*LOOKUP(effect_of_morale_on_productivity_lookup, morale)",
+    "unit" : "Widget/(Month*Person)"
+  }, {
+    "name" : "sales",
+    "comment" : "The total amount sold.",
+    "equation" : "IF(TIME > 20,120,100)",
+    "unit" : "Widget/Month"
+  }, {
+    "name" : "target production",
+    "comment" : "The target amount produced.",
+    "equation" : "sales",
+    "unit" : "Widget/Month"
+  } ],
+  "lookupTables" : [ {
+    "name" : "effect of morale on productivity lookup",
+    "comment" : "The effect that morale has on the ability to produce\\!\\!\\!",
+    "xValues" : [ 0.0, 1.0, 2.0, 2.63444, 3.29909, 3.97583 ],
+    "yValues" : [ 0.0, 1.0, 2.0, 2.36842, 2.52632, 2.57895 ],
+    "interpolation" : "LINEAR",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "morale lookup",
+    "comment" : "Lookup relating the average level of overtime to morale.\\!\\!\\!",
+    "xValues" : [ 0.0, 0.326284, 0.495468, 0.682779, 0.839879, 1.0, 1.14804, 1.3716, 1.66767, 2.0 ],
+    "yValues" : [ 1.5, 1.4386, 1.40351, 1.32018, 1.18421, 1.0, 0.833333, 0.640351, 0.526316, 0.5 ],
+    "interpolation" : "LINEAR",
+    "unit" : "Dmnl"
+  } ],
+  "comments" : [ {
+    "name" : "Comment 1",
+    "text" : "Welcome to the Vensim development environment"
+  }, {
+    "name" : "Comment 2",
+    "text" : "Feel free to explore and change things."
+  }, {
+    "name" : "Comment 3",
+    "text" : "Because this is a demo disk, nothing you do can be saved."
+  }, {
+    "name" : "Comment 4",
+    "text" : "For information or to purchase Vensim, visit"
+  }, {
+    "name" : "Comment 5",
+    "text" : "www.vensim.com"
+  }, {
+    "name" : "Comment 6",
+    "text" : "Use the page up and page down keys to look at the model"
+  }, {
+    "name" : "Comment 7",
+    "text" : "production,causes strip"
+  }, {
+    "name" : "Comment 8",
+    "text" : "12,2,0,391,125,40,20,3,7,0,3,0,0,0,0,192-192-192,0-0-0,|10||128-128-192"
+  }, {
+    "name" : "Comment 9",
+    "text" : "11,4,0,281,128,7,8,2,3,0,1,1,0,0,0,192-192-192,0-0-0,|10||0-0-0"
+  }, {
+    "name" : "Comment 10",
+    "text" : "12,6,0,811,279,39,29,3,7,0,3,0,0,0,0,192-192-192,0-0-0,|10||128-128-192"
+  }, {
+    "name" : "Comment 11",
+    "text" : "11,8,0,525,283,7,8,2,3,0,1,1,0,0,0,192-192-192,0-0-0,|10||0-0-0"
+  }, {
+    "name" : "Comment 12",
+    "text" : "12,13,0,831,172,20,20,2,7,0,3,1,0,0,0,192-192-192,0-0-0,|10||128-128-192"
+  }, {
+    "name" : "Comment 13",
+    "text" : "12,15,0,783,77,20,20,2,7,0,3,1,0,0,0,192-192-192,0-0-0,|10||128-128-192"
+  }, {
+    "name" : "Comment 14",
+    "text" : "12,17,0,687,511,20,20,2,7,0,3,1,0,0,0,192-192-192,0-0-0,|10||128-128-192"
+  }, {
+    "name" : "Comment 15",
+    "text" : "12,19,0,687,85,20,20,2,7,0,3,1,0,0,0,192-192-192,0-0-0,|10||128-128-192"
+  }, {
+    "name" : "Comment 16",
+    "text" : "12,21,0,743,381,20,20,2,7,0,3,1,0,0,0,192-192-192,0-0-0,|10||128-128-192"
+  }, {
+    "name" : "Comment 17",
+    "text" : "12,23,0,547,395,20,20,2,7,0,3,1,0,0,0,192-192-192,0-0-0,|10||128-128-192"
+  }, {
+    "name" : "Comment 18",
+    "text" : "12,25,0,199,251,20,20,2,7,0,3,1,0,0,0,192-192-192,0-0-0,|10||128-128-192"
+  }, {
+    "name" : "Comment 19",
+    "text" : "12,27,0,256,37,20,20,2,7,0,3,1,0,0,0,192-192-192,0-0-0,|10||192-192-192"
+  }, {
+    "name" : "Comment 20",
+    "text" : "12,29,0,525,279,8,5,8,7,0,3,0,0,0,0,128-255-128,0-0-0,|10||128-128-192"
+  }, {
+    "name" : "Comment 21",
+    "text" : "12,32,0,267,388,11,7,8,7,0,3,0,0,0,0,128-255-128,0-0-0,|10||128-128-192"
+  }, {
+    "name" : "Comment 22",
+    "text" : "12,34,0,23,511,20,20,2,7,0,3,1,0,0,0,192-192-192,0-0-0,|10||128-128-192"
+  }, {
+    "name" : "Comment 23",
+    "text" : "12,36,0,987,511,40,29,3,7,0,3,0,0,0,0,192-192-192,0-0-0,|10||128-128-192"
+  }, {
+    "name" : "Comment 24",
+    "text" : "12,38,48,828,509,8,8,0,3,0,3,-1,0,0,0,192-192-192,0-0-0,|10||192-192-192"
+  }, {
+    "name" : "Comment 25",
+    "text" : "12,41,0,1199,373,20,20,2,7,0,3,1,0,0,0,192-192-192,0-0-0,|10||128-128-192"
+  }, {
+    "name" : "Comment 26",
+    "text" : "12,43,0,893,387,20,20,2,7,0,3,1,0,0,0,192-192-192,0-0-0,|10||128-128-192"
+  }, {
+    "name" : "Comment 27",
+    "text" : "12,45,0,1101,91,20,20,2,7,0,3,1,0,0,0,128-255-128,0-0-0,|10||128-128-192"
+  }, {
+    "name" : "Comment 28",
+    "text" : "12,47,0,896,508,11,15,8,7,0,3,0,0,0,0,166-202-240,0-0-0,|10||128-128-192"
+  }, {
+    "name" : "Comment 29",
+    "text" : "11,49,0,895,511,7,8,2,3,0,1,-128,0,0,0,166-202-240,0-0-0,|10||0-0-0"
+  }, {
+    "name" : "Comment 30",
+    "text" : "12,52,0,437,675,39,27,3,7,0,3,0,0,0,0,192-192-192,0-0-0,|10||128-128-192"
+  } ],
+  "views" : [ {
+    "name" : "text",
+    "elements" : [ {
+      "name" : "Comment 1",
+      "type" : "comment",
+      "x" : 293.0,
+      "y" : 36.0,
+      "width" : 470.0,
+      "height" : 26.0
+    }, {
+      "name" : "Comment 2",
+      "type" : "comment",
+      "x" : 279.0,
+      "y" : 81.0,
+      "width" : 282.0,
+      "height" : 22.0
+    }, {
+      "name" : "Comment 3",
+      "type" : "comment",
+      "x" : 285.0,
+      "y" : 111.0,
+      "width" : 354.0,
+      "height" : 22.0
+    }, {
+      "name" : "Comment 4",
+      "type" : "comment",
+      "x" : 277.0,
+      "y" : 256.0,
+      "width" : 336.0,
+      "height" : 22.0
+    }, {
+      "name" : "Comment 5",
+      "type" : "comment",
+      "x" : 275.0,
+      "y" : 309.0,
+      "width" : 272.0,
+      "height" : 40.0
+    }, {
+      "name" : "Comment 6",
+      "type" : "comment",
+      "x" : 283.0,
+      "y" : 131.0,
+      "width" : 358.0,
+      "height" : 22.0
+    } ]
+  }, {
+    "name" : "Whole Model",
+    "elements" : [ {
+      "name" : "Workforce",
+      "type" : "stock",
+      "x" : 381.0,
+      "y" : 69.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 259.0,
+      "y" : 67.0
+    }, {
+      "name" : "net hires",
+      "type" : "aux",
+      "x" : 259.0,
+      "y" : 87.0
+    }, {
+      "name" : "desired workforce",
+      "type" : "aux",
+      "x" : 211.0,
+      "y" : 144.0
+    }, {
+      "name" : "productivity",
+      "type" : "aux",
+      "x" : 171.0,
+      "y" : 219.0
+    }, {
+      "name" : "target production",
+      "type" : "aux",
+      "x" : 396.0,
+      "y" : 144.0
+    }, {
+      "name" : "effect of morale on productivity lookup",
+      "type" : "lookup",
+      "x" : 73.0,
+      "y" : 304.0
+    }, {
+      "name" : "morale",
+      "type" : "aux",
+      "x" : 181.0,
+      "y" : 291.0
+    }, {
+      "name" : "normal productivity",
+      "type" : "aux",
+      "x" : 95.0,
+      "y" : 147.0
+    }, {
+      "name" : "sales",
+      "type" : "aux",
+      "x" : 353.0,
+      "y" : 184.0
+    }, {
+      "name" : "Average Worker Hours",
+      "type" : "stock",
+      "x" : 295.0,
+      "y" : 332.0
+    }, {
+      "name" : "morale lookup",
+      "type" : "lookup",
+      "x" : 153.0,
+      "y" : 356.0
+    }, {
+      "name" : "required worker hours",
+      "type" : "aux",
+      "x" : 484.0,
+      "y" : 264.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 420.0,
+      "y" : 333.0
+    }, {
+      "name" : "change in hours worked",
+      "type" : "aux",
+      "x" : 420.0,
+      "y" : 360.0
+    }, {
+      "name" : "Time",
+      "type" : "aux",
+      "x" : 272.0,
+      "y" : 183.0
+    }, {
+      "name" : "delay in adding or removing overtime hours",
+      "type" : "aux",
+      "x" : 560.0,
+      "y" : 303.0
+    }, {
+      "name" : "time to hire or layoff",
+      "type" : "aux",
+      "x" : 111.0,
+      "y" : 105.0
+    }, {
+      "name" : "normal workweek",
+      "type" : "aux",
+      "x" : 289.0,
+      "y" : 263.0
+    }, {
+      "name" : "production",
+      "type" : "aux",
+      "x" : 559.0,
+      "y" : 87.0
+    }, {
+      "name" : "Comment 7",
+      "type" : "comment",
+      "x" : 867.0,
+      "y" : 365.0,
+      "width" : 390.0,
+      "height" : 714.0
+    } ],
+    "connectors" : [ {
+      "from" : "desired workforce",
+      "to" : "net hires"
+    }, {
+      "from" : "Workforce",
+      "to" : "_48"
+    }, {
+      "from" : "productivity",
+      "to" : "desired workforce"
+    }, {
+      "from" : "target production",
+      "to" : "desired workforce"
+    }, {
+      "from" : "effect of morale on productivity lookup",
+      "to" : "productivity"
+    }, {
+      "from" : "morale",
+      "to" : "productivity"
+    }, {
+      "from" : "normal productivity",
+      "to" : "productivity"
+    }, {
+      "from" : "sales",
+      "to" : "target production"
+    }, {
+      "from" : "Average Worker Hours",
+      "to" : "morale"
+    }, {
+      "from" : "morale lookup",
+      "to" : "morale"
+    }, {
+      "from" : "Average Worker Hours",
+      "to" : "_48"
+    }, {
+      "from" : "productivity",
+      "to" : "required worker hours"
+    }, {
+      "from" : "target production",
+      "to" : "required worker hours"
+    }, {
+      "from" : "Workforce",
+      "to" : "required worker hours"
+    }, {
+      "from" : "Time",
+      "to" : "sales"
+    }, {
+      "from" : "delay in adding or removing overtime hours",
+      "to" : "_48"
+    }, {
+      "from" : "time to hire or layoff",
+      "to" : "net hires"
+    }, {
+      "from" : "normal productivity",
+      "to" : "Workforce"
+    }, {
+      "from" : "target production",
+      "to" : "Workforce"
+    }, {
+      "from" : "normal workweek",
+      "to" : "morale"
+    }, {
+      "from" : "normal workweek",
+      "to" : "Average Worker Hours"
+    }, {
+      "from" : "normal workweek",
+      "to" : "required worker hours"
+    }, {
+      "from" : "normal workweek",
+      "to" : "production"
+    }, {
+      "from" : "productivity",
+      "to" : "production"
+    }, {
+      "from" : "required worker hours",
+      "to" : "production"
+    }, {
+      "from" : "Workforce",
+      "to" : "production"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_48",
+      "points" : [ [ 259.0, 67.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 420.0, 333.0 ] ]
+    } ]
+  }, {
+    "name" : "Reinforcing Loop",
+    "elements" : [ {
+      "name" : "production",
+      "type" : "aux",
+      "x" : 369.0,
+      "y" : 119.0
+    }, {
+      "name" : "required worker hours",
+      "type" : "aux",
+      "x" : 209.0,
+      "y" : 77.0
+    }, {
+      "name" : "productivity",
+      "type" : "aux",
+      "x" : 83.0,
+      "y" : 167.0
+    }, {
+      "name" : "Workforce",
+      "type" : "stock",
+      "x" : 507.0,
+      "y" : 100.0
+    }, {
+      "name" : "morale",
+      "type" : "aux",
+      "x" : 147.0,
+      "y" : 259.0
+    }, {
+      "name" : "sales",
+      "type" : "aux",
+      "x" : 455.0,
+      "y" : 163.0
+    }, {
+      "name" : "target production",
+      "type" : "aux",
+      "x" : 425.0,
+      "y" : 189.0
+    }, {
+      "name" : "net hires",
+      "type" : "aux",
+      "x" : 512.0,
+      "y" : 171.0
+    }, {
+      "name" : "Average Worker Hours",
+      "type" : "stock",
+      "x" : 307.0,
+      "y" : 235.0
+    }, {
+      "name" : "desired workforce",
+      "type" : "aux",
+      "x" : 561.0,
+      "y" : 252.0
+    }, {
+      "name" : "normal productivity",
+      "type" : "aux",
+      "x" : 363.0,
+      "y" : 139.0
+    }, {
+      "name" : "effect of morale on productivity lookup",
+      "type" : "lookup",
+      "x" : 309.0,
+      "y" : 239.0
+    }, {
+      "name" : "Time",
+      "type" : "aux",
+      "x" : 367.0,
+      "y" : 183.0
+    }, {
+      "name" : "morale lookup",
+      "type" : "lookup",
+      "x" : 359.0,
+      "y" : 307.0
+    }, {
+      "name" : "time to hire or layoff",
+      "type" : "aux",
+      "x" : 495.0,
+      "y" : 223.0
+    }, {
+      "name" : "change in hours worked",
+      "type" : "aux",
+      "x" : 348.0,
+      "y" : 156.0
+    }, {
+      "name" : "delay in adding or removing overtime hours",
+      "type" : "aux",
+      "x" : 599.0,
+      "y" : 141.0
+    }, {
+      "name" : "normal productivity",
+      "type" : "aux",
+      "x" : 579.0,
+      "y" : 51.0
+    }, {
+      "name" : "normal workweek",
+      "type" : "aux",
+      "x" : 393.0,
+      "y" : 61.0
+    } ],
+    "connectors" : [ {
+      "from" : "required worker hours",
+      "to" : "production"
+    }, {
+      "from" : "Workforce",
+      "to" : "production"
+    }, {
+      "from" : "morale",
+      "to" : "productivity",
+      "polarity" : "+"
+    }, {
+      "from" : "net hires",
+      "to" : "Workforce"
+    }, {
+      "from" : "Average Worker Hours",
+      "to" : "morale",
+      "polarity" : "-"
+    }, {
+      "from" : "target production",
+      "to" : "desired workforce"
+    }, {
+      "from" : "productivity",
+      "to" : "desired workforce"
+    }, {
+      "from" : "desired workforce",
+      "to" : "net hires"
+    }, {
+      "from" : "Workforce",
+      "to" : "net hires"
+    }, {
+      "from" : "sales",
+      "to" : "target production"
+    }, {
+      "from" : "productivity",
+      "to" : "required worker hours",
+      "polarity" : "-"
+    }, {
+      "from" : "target production",
+      "to" : "required worker hours"
+    }, {
+      "from" : "Workforce",
+      "to" : "required worker hours"
+    }, {
+      "from" : "normal productivity",
+      "to" : "productivity"
+    }, {
+      "from" : "Time",
+      "to" : "sales"
+    }, {
+      "from" : "productivity",
+      "to" : "production"
+    }, {
+      "from" : "effect of morale on productivity lookup",
+      "to" : "productivity"
+    }, {
+      "from" : "morale lookup",
+      "to" : "morale"
+    }, {
+      "from" : "time to hire or layoff",
+      "to" : "net hires"
+    }, {
+      "from" : "change in hours worked",
+      "to" : "Average Worker Hours",
+      "polarity" : "+"
+    }, {
+      "from" : "Average Worker Hours",
+      "to" : "change in hours worked"
+    }, {
+      "from" : "delay in adding or removing overtime hours",
+      "to" : "change in hours worked"
+    }, {
+      "from" : "required worker hours",
+      "to" : "change in hours worked",
+      "polarity" : "+"
+    }, {
+      "from" : "normal productivity",
+      "to" : "Workforce"
+    }, {
+      "from" : "target production",
+      "to" : "Workforce"
+    }, {
+      "from" : "normal workweek",
+      "to" : "production"
+    }, {
+      "from" : "normal workweek",
+      "to" : "required worker hours"
+    }, {
+      "from" : "normal workweek",
+      "to" : "Average Worker Hours"
+    }, {
+      "from" : "normal workweek",
+      "to" : "morale"
+    } ]
+  }, {
+    "name" : "Balancing Loop",
+    "elements" : [ {
+      "name" : "Workforce",
+      "type" : "stock",
+      "x" : 315.0,
+      "y" : 76.0
+    }, {
+      "name" : "net hires",
+      "type" : "aux",
+      "x" : 177.0,
+      "y" : 113.0
+    }, {
+      "name" : "normal productivity",
+      "type" : "aux",
+      "x" : 387.0,
+      "y" : 64.0
+    }, {
+      "name" : "target production",
+      "type" : "aux",
+      "x" : 293.0,
+      "y" : 152.0
+    }, {
+      "name" : "desired workforce",
+      "type" : "aux",
+      "x" : 131.0,
+      "y" : 189.0
+    }, {
+      "name" : "time to hire or layoff",
+      "type" : "aux",
+      "x" : 89.0,
+      "y" : 119.0
+    }, {
+      "name" : "productivity",
+      "type" : "aux",
+      "x" : 143.0,
+      "y" : 279.0
+    }, {
+      "name" : "target production",
+      "type" : "aux",
+      "x" : 281.0,
+      "y" : 215.0
+    }, {
+      "name" : "effect of morale on productivity lookup",
+      "type" : "lookup",
+      "x" : 191.0,
+      "y" : 267.0
+    }, {
+      "name" : "morale",
+      "type" : "aux",
+      "x" : 212.0,
+      "y" : 315.0
+    }, {
+      "name" : "normal productivity",
+      "type" : "aux",
+      "x" : 87.0,
+      "y" : 333.0
+    }, {
+      "name" : "Average Worker Hours",
+      "type" : "stock",
+      "x" : 351.0,
+      "y" : 323.0
+    }, {
+      "name" : "morale lookup",
+      "type" : "lookup",
+      "x" : 319.0,
+      "y" : 369.0
+    }, {
+      "name" : "normal workweek",
+      "type" : "aux",
+      "x" : 176.0,
+      "y" : 421.0
+    }, {
+      "name" : "change in hours worked",
+      "type" : "aux",
+      "x" : 443.0,
+      "y" : 249.0
+    }, {
+      "name" : "delay in adding or removing overtime hours",
+      "type" : "aux",
+      "x" : 583.0,
+      "y" : 223.0
+    }, {
+      "name" : "required worker hours",
+      "type" : "aux",
+      "x" : 437.0,
+      "y" : 147.0
+    }, {
+      "name" : "target production",
+      "type" : "aux",
+      "x" : 499.0,
+      "y" : 227.0
+    } ],
+    "connectors" : [ {
+      "from" : "net hires",
+      "to" : "Workforce",
+      "polarity" : "+"
+    }, {
+      "from" : "normal productivity",
+      "to" : "Workforce",
+      "polarity" : "+"
+    }, {
+      "from" : "target production",
+      "to" : "Workforce",
+      "polarity" : "+"
+    }, {
+      "from" : "desired workforce",
+      "to" : "net hires",
+      "polarity" : "+"
+    }, {
+      "from" : "time to hire or layoff",
+      "to" : "net hires",
+      "polarity" : "+"
+    }, {
+      "from" : "Workforce",
+      "to" : "net hires",
+      "polarity" : "+"
+    }, {
+      "from" : "productivity",
+      "to" : "desired workforce",
+      "polarity" : "-"
+    }, {
+      "from" : "target production",
+      "to" : "desired workforce",
+      "polarity" : "+"
+    }, {
+      "from" : "effect of morale on productivity lookup",
+      "to" : "productivity",
+      "polarity" : "+"
+    }, {
+      "from" : "morale",
+      "to" : "productivity",
+      "polarity" : "+"
+    }, {
+      "from" : "normal productivity",
+      "to" : "productivity",
+      "polarity" : "+"
+    }, {
+      "from" : "Average Worker Hours",
+      "to" : "morale",
+      "polarity" : "-"
+    }, {
+      "from" : "morale lookup",
+      "to" : "morale",
+      "polarity" : "+"
+    }, {
+      "from" : "normal workweek",
+      "to" : "morale",
+      "polarity" : "+"
+    }, {
+      "from" : "change in hours worked",
+      "to" : "Average Worker Hours",
+      "polarity" : "+"
+    }, {
+      "from" : "normal workweek",
+      "to" : "Average Worker Hours",
+      "polarity" : "+"
+    }, {
+      "from" : "Average Worker Hours",
+      "to" : "change in hours worked",
+      "polarity" : "+"
+    }, {
+      "from" : "delay in adding or removing overtime hours",
+      "to" : "change in hours worked",
+      "polarity" : "+"
+    }, {
+      "from" : "required worker hours",
+      "to" : "change in hours worked",
+      "polarity" : "+"
+    }, {
+      "from" : "normal workweek",
+      "to" : "required worker hours",
+      "polarity" : "+"
+    }, {
+      "from" : "productivity",
+      "to" : "required worker hours",
+      "polarity" : "+"
+    }, {
+      "from" : "target production",
+      "to" : "required worker hours",
+      "polarity" : "+"
+    }, {
+      "from" : "Workforce",
+      "to" : "required worker hours",
+      "polarity" : "-"
+    } ]
+  }, {
+    "name" : "production",
+    "elements" : [ {
+      "name" : "Workforce",
+      "type" : "stock",
+      "x" : 180.0,
+      "y" : 69.0
+    }, {
+      "name" : "morale",
+      "type" : "aux",
+      "x" : 92.0,
+      "y" : 119.0
+    }, {
+      "name" : "productivity",
+      "type" : "aux",
+      "x" : 195.0,
+      "y" : 119.0
+    }, {
+      "name" : "production",
+      "type" : "aux",
+      "x" : 360.0,
+      "y" : 72.0
+    }, {
+      "name" : "required worker hours",
+      "type" : "aux",
+      "x" : 183.0,
+      "y" : 29.0
+    }, {
+      "name" : "net hires",
+      "type" : "aux",
+      "x" : 13.0,
+      "y" : 27.0
+    }, {
+      "name" : "normal productivity",
+      "type" : "aux",
+      "x" : 13.0,
+      "y" : 27.0
+    }, {
+      "name" : "target production",
+      "type" : "aux",
+      "x" : 13.0,
+      "y" : 27.0
+    }, {
+      "name" : "Average Worker Hours",
+      "type" : "stock",
+      "x" : 7.0,
+      "y" : 53.0
+    }, {
+      "name" : "normal productivity",
+      "type" : "aux",
+      "x" : 123.0,
+      "y" : 47.0
+    }, {
+      "name" : "target production",
+      "type" : "aux",
+      "x" : -11.0,
+      "y" : 0.0
+    }, {
+      "name" : "morale lookup",
+      "type" : "lookup",
+      "x" : 120.0,
+      "y" : 120.0
+    }, {
+      "name" : "effect of morale on productivity lookup",
+      "type" : "lookup",
+      "x" : 237.0,
+      "y" : 116.0
+    }, {
+      "name" : "normal productivity",
+      "type" : "aux",
+      "x" : 35.0,
+      "y" : 73.0
+    }, {
+      "name" : "target production",
+      "type" : "aux",
+      "x" : 28.0,
+      "y" : 107.0
+    }, {
+      "name" : "normal workweek",
+      "type" : "aux",
+      "x" : 48.0,
+      "y" : 71.0
+    } ],
+    "connectors" : [ {
+      "from" : "Workforce",
+      "to" : "production"
+    }, {
+      "from" : "productivity",
+      "to" : "production"
+    }, {
+      "from" : "morale",
+      "to" : "productivity"
+    }, {
+      "from" : "required worker hours",
+      "to" : "production"
+    }, {
+      "from" : "net hires",
+      "to" : "Workforce"
+    }, {
+      "from" : "Average Worker Hours",
+      "to" : "morale"
+    }, {
+      "from" : "normal productivity",
+      "to" : "productivity"
+    }, {
+      "from" : "productivity",
+      "to" : "required worker hours"
+    }, {
+      "from" : "target production",
+      "to" : "required worker hours"
+    }, {
+      "from" : "Workforce",
+      "to" : "required worker hours"
+    }, {
+      "from" : "morale lookup",
+      "to" : "morale"
+    }, {
+      "from" : "effect of morale on productivity lookup",
+      "to" : "productivity"
+    }, {
+      "from" : "normal productivity",
+      "to" : "Workforce"
+    }, {
+      "from" : "target production",
+      "to" : "Workforce"
+    }, {
+      "from" : "normal workweek",
+      "to" : "required worker hours"
+    }, {
+      "from" : "normal workweek",
+      "to" : "production"
+    } ]
+  }, {
+    "name" : "Workforce",
+    "elements" : [ {
+      "name" : "Workforce",
+      "type" : "stock",
+      "x" : 315.0,
+      "y" : 103.0
+    }, {
+      "name" : "desired workforce",
+      "type" : "aux",
+      "x" : 192.0,
+      "y" : 188.0
+    }, {
+      "name" : "normal productivity",
+      "type" : "aux",
+      "x" : 371.0,
+      "y" : 147.0
+    }, {
+      "name" : "target production",
+      "type" : "aux",
+      "x" : 388.0,
+      "y" : 125.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 224.0,
+      "y" : 101.0
+    }, {
+      "name" : "net hires",
+      "type" : "aux",
+      "x" : 224.0,
+      "y" : 120.0
+    }, {
+      "name" : "time to hire or layoff",
+      "type" : "aux",
+      "x" : 108.0,
+      "y" : 153.0
+    }, {
+      "name" : "normal productivity",
+      "type" : "aux",
+      "x" : 445.0,
+      "y" : 148.0
+    }, {
+      "name" : "target production",
+      "type" : "aux",
+      "x" : 359.0,
+      "y" : 179.0
+    } ],
+    "connectors" : [ {
+      "from" : "_48",
+      "to" : "Workforce"
+    }, {
+      "from" : "Workforce",
+      "to" : "_48"
+    }, {
+      "from" : "desired workforce",
+      "to" : "net hires"
+    }, {
+      "from" : "time to hire or layoff",
+      "to" : "net hires"
+    }, {
+      "from" : "normal productivity",
+      "to" : "Workforce"
+    }, {
+      "from" : "target production",
+      "to" : "Workforce"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_48",
+      "points" : [ [ 224.0, 101.0 ] ]
+    } ]
+  }, {
+    "name" : "graphics",
+    "elements" : [ {
+      "name" : "Comment 8",
+      "type" : "comment",
+      "x" : 172.0,
+      "y" : 127.0,
+      "width" : 80.0,
+      "height" : 40.0
+    }, {
+      "name" : "Comment 9",
+      "type" : "comment",
+      "x" : 616.0,
+      "y" : 280.0,
+      "width" : 80.0,
+      "height" : 58.0
+    }, {
+      "name" : "Comment 10",
+      "type" : "comment",
+      "x" : 431.0,
+      "y" : 277.0,
+      "width" : 82.0,
+      "height" : 58.0
+    }, {
+      "name" : "Comment 11",
+      "type" : "comment",
+      "x" : 152.0,
+      "y" : 392.0,
+      "width" : 80.0,
+      "height" : 40.0
+    }, {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : 716.0,
+      "y" : 277.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 267.0,
+      "y" : 392.0
+    }, {
+      "name" : "Comment 12",
+      "type" : "comment",
+      "x" : 527.0,
+      "y" : 175.0,
+      "width" : 40.0,
+      "height" : 40.0
+    }, {
+      "name" : "Comment 13",
+      "type" : "comment",
+      "x" : 529.0,
+      "y" : 40.0,
+      "width" : 40.0,
+      "height" : 40.0
+    }, {
+      "name" : "Comment 14",
+      "type" : "comment",
+      "x" : 639.0,
+      "y" : 163.0,
+      "width" : 40.0,
+      "height" : 40.0
+    }, {
+      "name" : "Comment 15",
+      "type" : "comment",
+      "x" : 637.0,
+      "y" : 20.0,
+      "width" : 40.0,
+      "height" : 40.0
+    }, {
+      "name" : "Comment 16",
+      "type" : "comment",
+      "x" : 271.0,
+      "y" : 512.0,
+      "width" : 40.0,
+      "height" : 40.0
+    }, {
+      "name" : "Comment 17",
+      "type" : "comment",
+      "x" : 464.0,
+      "y" : 511.0,
+      "width" : 40.0,
+      "height" : 40.0
+    }, {
+      "name" : "Comment 18",
+      "type" : "comment",
+      "x" : 29.0,
+      "y" : 300.0,
+      "width" : 40.0,
+      "height" : 40.0
+    }, {
+      "name" : "Comment 19",
+      "type" : "comment",
+      "x" : 49.0,
+      "y" : 204.0,
+      "width" : 40.0,
+      "height" : 40.0
+    }, {
+      "name" : "Comment 20",
+      "type" : "comment",
+      "x" : 280.0,
+      "y" : 133.0,
+      "width" : 24.0,
+      "height" : 14.0
+    }, {
+      "name" : "Comment 21",
+      "type" : "comment",
+      "x" : 717.0,
+      "y" : 271.0,
+      "width" : 22.0,
+      "height" : 14.0
+    }, {
+      "name" : "Comment 22",
+      "type" : "comment",
+      "x" : 139.0,
+      "y" : 596.0,
+      "width" : 40.0,
+      "height" : 40.0
+    }, {
+      "name" : "Comment 23",
+      "type" : "comment",
+      "x" : 156.0,
+      "y" : 513.0,
+      "width" : 40.0,
+      "height" : 40.0
+    }, {
+      "name" : "Comment 24",
+      "type" : "comment",
+      "x" : 1183.0,
+      "y" : 508.0,
+      "width" : 78.0,
+      "height" : 58.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 1087.0,
+      "y" : 507.0
+    }, {
+      "name" : "Comment 25",
+      "type" : "comment",
+      "x" : 857.0,
+      "y" : 625.0,
+      "width" : 40.0,
+      "height" : 40.0
+    }, {
+      "name" : "Comment 26",
+      "type" : "comment",
+      "x" : 1043.0,
+      "y" : 175.0,
+      "width" : 40.0,
+      "height" : 40.0
+    }, {
+      "name" : "Comment 27",
+      "type" : "comment",
+      "x" : 1023.0,
+      "y" : 404.0,
+      "width" : 40.0,
+      "height" : 40.0
+    }, {
+      "name" : "Comment 28",
+      "type" : "comment",
+      "x" : 1119.0,
+      "y" : 235.0,
+      "width" : 40.0,
+      "height" : 40.0
+    }, {
+      "name" : "Comment 29",
+      "type" : "comment",
+      "x" : 1088.0,
+      "y" : 501.0,
+      "width" : 22.0,
+      "height" : 14.0
+    }, {
+      "name" : "Comment 30",
+      "type" : "comment",
+      "x" : 983.0,
+      "y" : 587.0,
+      "width" : 22.0,
+      "height" : 14.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 552.0,
+      "y" : 675.0
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_0",
+      "points" : [ [ 716.0, 277.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 267.0, 392.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 1087.0, 507.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 552.0, 675.0 ] ]
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Month",
+    "duration" : 100.0,
+    "durationUnit" : "Month",
+    "dt" : 0.125
+  },
+  "metadata" : {
+    "author" : "Ventana Systems, Inc.",
+    "source" : "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+    "license" : "MIT",
+    "url" : "https://www.vensim.com/documentation/sample_models.html"
+  }
+}

@@ -1,0 +1,159 @@
+{
+  "name" : "BPR1",
+  "cldVariables" : [ {
+    "name" : "Activate Service",
+    "comment" : "Activate Service"
+  }, {
+    "name" : "dedicated facilities",
+    "comment" : "dedicated facilities"
+  }, {
+    "name" : "Dispatch Service Technician",
+    "comment" : "Dispatch Service Technician"
+  }, {
+    "name" : "Process Order",
+    "comment" : "Process Order"
+  }, {
+    "name" : "Set Program Switch",
+    "comment" : "Set Program Switch"
+  }, {
+    "name" : "Take Order",
+    "comment" : "Take Order"
+  }, {
+    "name" : "Test",
+    "comment" : "Test"
+  }, {
+    "name" : "Tests OK",
+    "comment" : "Tests OK"
+  } ],
+  "causalLinks" : [ {
+    "from" : "Take Order",
+    "to" : "Process Order",
+    "polarity" : "UNKNOWN"
+  }, {
+    "from" : "Process Order",
+    "to" : "dedicated facilities",
+    "polarity" : "UNKNOWN"
+  }, {
+    "from" : "dedicated facilities",
+    "to" : "Set Program Switch",
+    "polarity" : "UNKNOWN"
+  }, {
+    "from" : "dedicated facilities",
+    "to" : "Dispatch Service Technician",
+    "polarity" : "UNKNOWN"
+  }, {
+    "from" : "Test",
+    "to" : "Tests OK",
+    "polarity" : "UNKNOWN"
+  }, {
+    "from" : "Tests OK",
+    "to" : "Activate Service",
+    "polarity" : "UNKNOWN"
+  }, {
+    "from" : "Set Program Switch",
+    "to" : "Test",
+    "polarity" : "UNKNOWN"
+  }, {
+    "from" : "Tests OK",
+    "to" : "Dispatch Service Technician",
+    "polarity" : "UNKNOWN"
+  }, {
+    "from" : "Dispatch Service Technician",
+    "to" : "Activate Service",
+    "polarity" : "UNKNOWN"
+  } ],
+  "comments" : [ {
+    "name" : "Comment 1",
+    "text" : "Business Process ReEngineering Model 1"
+  } ],
+  "views" : [ {
+    "name" : "1",
+    "elements" : [ {
+      "name" : "Take Order",
+      "type" : "cld_variable",
+      "x" : 329.0,
+      "y" : 248.0
+    }, {
+      "name" : "Process Order",
+      "type" : "cld_variable",
+      "x" : 499.0,
+      "y" : 252.0
+    }, {
+      "name" : "dedicated facilities",
+      "type" : "cld_variable",
+      "x" : 675.0,
+      "y" : 246.0
+    }, {
+      "name" : "Set Program Switch",
+      "type" : "cld_variable",
+      "x" : 868.0,
+      "y" : 256.0
+    }, {
+      "name" : "Dispatch Service Technician",
+      "type" : "cld_variable",
+      "x" : 685.0,
+      "y" : 394.0
+    }, {
+      "name" : "Test",
+      "type" : "cld_variable",
+      "x" : 873.0,
+      "y" : 342.0
+    }, {
+      "name" : "Tests OK",
+      "type" : "cld_variable",
+      "x" : 865.0,
+      "y" : 460.0
+    }, {
+      "name" : "Activate Service",
+      "type" : "cld_variable",
+      "x" : 1045.0,
+      "y" : 463.0
+    }, {
+      "name" : "Comment 1",
+      "type" : "comment",
+      "x" : 610.0,
+      "y" : 48.0,
+      "width" : 210.0,
+      "height" : 76.0
+    } ],
+    "connectors" : [ {
+      "from" : "Take Order",
+      "to" : "Process Order"
+    }, {
+      "from" : "Process Order",
+      "to" : "dedicated facilities"
+    }, {
+      "from" : "dedicated facilities",
+      "to" : "Set Program Switch"
+    }, {
+      "from" : "dedicated facilities",
+      "to" : "Dispatch Service Technician"
+    }, {
+      "from" : "Test",
+      "to" : "Tests OK"
+    }, {
+      "from" : "Tests OK",
+      "to" : "Activate Service"
+    }, {
+      "from" : "Set Program Switch",
+      "to" : "Test"
+    }, {
+      "from" : "Tests OK",
+      "to" : "Dispatch Service Technician"
+    }, {
+      "from" : "Dispatch Service Technician",
+      "to" : "Activate Service"
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Month",
+    "duration" : 100.0,
+    "durationUnit" : "Month"
+  },
+  "metadata" : {
+    "author" : "Ventana Systems, Inc.",
+    "source" : "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+    "license" : "MIT",
+    "url" : "https://www.vensim.com/documentation/sample_models.html"
+  }
+}

@@ -1,0 +1,266 @@
+{
+  "name" : "GRAVITY",
+  "stocks" : [ {
+    "name" : "Position 1",
+    "comment" : "Position 1",
+    "initialValue" : 0.0,
+    "unit" : "Meter"
+  }, {
+    "name" : "Position 2",
+    "comment" : "Position 2",
+    "initialValue" : 1.0,
+    "unit" : "Meter"
+  }, {
+    "name" : "speed 1",
+    "comment" : "speed 1",
+    "initialValue" : 0.0,
+    "unit" : "Meter/Second"
+  }, {
+    "name" : "speed 2",
+    "comment" : "speed 2",
+    "initialValue" : 0.0,
+    "unit" : "Meter/Second"
+  } ],
+  "flows" : [ {
+    "name" : "Position 1 net flow",
+    "comment" : "Net flow for Position 1",
+    "equation" : "speed_1",
+    "timeUnit" : "Second",
+    "sink" : "Position 1"
+  }, {
+    "name" : "Position 2 net flow",
+    "comment" : "Net flow for Position 2",
+    "equation" : "speed_2",
+    "timeUnit" : "Second",
+    "sink" : "Position 2"
+  }, {
+    "name" : "speed 1 net flow",
+    "comment" : "Net flow for speed 1",
+    "equation" : "acceleration_1",
+    "timeUnit" : "Second",
+    "sink" : "speed 1"
+  }, {
+    "name" : "speed 2 net flow",
+    "comment" : "Net flow for speed 2",
+    "equation" : "acceleration_2",
+    "timeUnit" : "Second",
+    "sink" : "speed 2"
+  } ],
+  "variables" : [ {
+    "name" : "acceleration 1",
+    "comment" : "acceleration 1",
+    "equation" : "attraction_force/mass_1",
+    "unit" : "Meter/Second/Second"
+  }, {
+    "name" : "acceleration 2",
+    "comment" : "acceleration 2",
+    "equation" : "-attraction_force/mass_2",
+    "unit" : "Meter/(Second*Second)"
+  }, {
+    "name" : "attraction force",
+    "comment" : "attraction force",
+    "equation" : "g * mass_1 * mass_2 /(distance * distance)",
+    "unit" : "Kg*Meter/Second/Second"
+  }, {
+    "name" : "distance",
+    "comment" : "distance",
+    "equation" : "Position_2 - Position_1",
+    "unit" : "Meter"
+  }, {
+    "name" : "g",
+    "comment" : "g",
+    "equation" : "6.67E-11",
+    "unit" : "Meter*Meter*Meter/Second/Second/Kg"
+  }, {
+    "name" : "initial distance",
+    "comment" : "initial distance",
+    "equation" : "1",
+    "unit" : "Meter"
+  }, {
+    "name" : "mass 1",
+    "comment" : "mass 1",
+    "equation" : "10000",
+    "unit" : "Kg"
+  }, {
+    "name" : "mass 2",
+    "comment" : "mass 2",
+    "equation" : "1000",
+    "unit" : "Kg"
+  } ],
+  "comments" : [ {
+    "name" : "Comment 1",
+    "text" : "position"
+  }, {
+    "name" : "Comment 2",
+    "text" : "GRAVITY MODEL"
+  } ],
+  "views" : [ {
+    "name" : "View 1",
+    "elements" : [ {
+      "name" : "Position 1",
+      "type" : "stock",
+      "x" : 364.0,
+      "y" : 335.0
+    }, {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : 256.0,
+      "y" : 335.0
+    }, {
+      "name" : "speed 1",
+      "type" : "stock",
+      "x" : 256.0,
+      "y" : 363.0
+    }, {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : 239.0,
+      "y" : 435.0
+    }, {
+      "name" : "acceleration 1",
+      "type" : "aux",
+      "x" : 322.0,
+      "y" : 435.0
+    }, {
+      "name" : "mass 1",
+      "type" : "aux",
+      "x" : 341.0,
+      "y" : 493.0
+    }, {
+      "name" : "attraction force",
+      "type" : "aux",
+      "x" : 464.0,
+      "y" : 459.0
+    }, {
+      "name" : "g",
+      "type" : "aux",
+      "x" : 400.0,
+      "y" : 524.0
+    }, {
+      "name" : "distance",
+      "type" : "aux",
+      "x" : 467.0,
+      "y" : 401.0
+    }, {
+      "name" : "Position 2",
+      "type" : "stock",
+      "x" : 541.0,
+      "y" : 335.0
+    }, {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : 651.0,
+      "y" : 335.0
+    }, {
+      "name" : "speed 2",
+      "type" : "stock",
+      "x" : 651.0,
+      "y" : 363.0
+    }, {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : 669.0,
+      "y" : 440.0
+    }, {
+      "name" : "acceleration 2",
+      "type" : "aux",
+      "x" : 586.0,
+      "y" : 440.0
+    }, {
+      "name" : "mass 2",
+      "type" : "aux",
+      "x" : 560.0,
+      "y" : 497.0
+    }, {
+      "name" : "initial distance",
+      "type" : "aux",
+      "x" : 596.0,
+      "y" : 287.0
+    }, {
+      "name" : "Comment 1",
+      "type" : "comment",
+      "x" : 1019.0,
+      "y" : 412.0,
+      "width" : 400.0,
+      "height" : 400.0
+    }, {
+      "name" : "Comment 2",
+      "type" : "comment",
+      "x" : 559.0,
+      "y" : 175.0,
+      "width" : 160.0,
+      "height" : 80.0
+    } ],
+    "connectors" : [ {
+      "from" : "_0",
+      "to" : "Position 1"
+    }, {
+      "from" : "_0",
+      "to" : "speed 1"
+    }, {
+      "from" : "mass 1",
+      "to" : "acceleration 1"
+    }, {
+      "from" : "attraction force",
+      "to" : "acceleration 1"
+    }, {
+      "from" : "mass 1",
+      "to" : "attraction force"
+    }, {
+      "from" : "Position 1",
+      "to" : "distance"
+    }, {
+      "from" : "_0",
+      "to" : "Position 2"
+    }, {
+      "from" : "_0",
+      "to" : "speed 2"
+    }, {
+      "from" : "attraction force",
+      "to" : "acceleration 2"
+    }, {
+      "from" : "mass 2",
+      "to" : "attraction force"
+    }, {
+      "from" : "mass 2",
+      "to" : "acceleration 2"
+    }, {
+      "from" : "Position 2",
+      "to" : "distance"
+    }, {
+      "from" : "g",
+      "to" : "attraction force"
+    }, {
+      "from" : "distance",
+      "to" : "attraction force"
+    }, {
+      "from" : "initial distance",
+      "to" : "Position 2"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_0",
+      "points" : [ [ 256.0, 335.0 ] ]
+    }, {
+      "flowName" : "_0",
+      "points" : [ [ 239.0, 435.0 ] ]
+    }, {
+      "flowName" : "_0",
+      "points" : [ [ 651.0, 335.0 ] ]
+    }, {
+      "flowName" : "_0",
+      "points" : [ [ 669.0, 440.0 ] ]
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Second",
+    "duration" : 1000.0,
+    "durationUnit" : "Second",
+    "dt" : 5.0
+  },
+  "metadata" : {
+    "author" : "Ventana Systems, Inc.",
+    "source" : "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+    "license" : "MIT",
+    "url" : "https://www.vensim.com/documentation/sample_models.html"
+  }
+}

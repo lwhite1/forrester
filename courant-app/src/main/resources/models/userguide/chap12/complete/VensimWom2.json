@@ -1,0 +1,316 @@
+{
+  "name" : "WOM2",
+  "stocks" : [ {
+    "name" : "Customers",
+    "comment" : "Customers",
+    "initialValue" : 10000.0,
+    "unit" : "person"
+  }, {
+    "name" : "Potential Customers",
+    "comment" : "Potential Customers",
+    "initialValue" : 0.0,
+    "initialExpression" : "market_size - seed_customers",
+    "unit" : "person"
+  } ],
+  "flows" : [ {
+    "name" : "Customers inflow 1",
+    "equation" : "new_customers",
+    "timeUnit" : "Year",
+    "sink" : "Customers"
+  }, {
+    "name" : "Customers outflow 2",
+    "equation" : "leaving_customers",
+    "timeUnit" : "Year",
+    "source" : "Customers"
+  }, {
+    "name" : "Potential Customers inflow 1",
+    "equation" : "leaving_customers",
+    "timeUnit" : "Year",
+    "sink" : "Potential Customers"
+  }, {
+    "name" : "Potential Customers outflow 2",
+    "equation" : "new_customers",
+    "timeUnit" : "Year",
+    "source" : "Potential Customers"
+  } ],
+  "variables" : [ {
+    "name" : "new customers",
+    "comment" : "new customers",
+    "equation" : "sales / sales_size",
+    "unit" : "person/Year"
+  }, {
+    "name" : "advertising spending",
+    "comment" : "advertising spending",
+    "equation" : "c_advertising_spending",
+    "unit" : "$/Year"
+  }, {
+    "name" : "c advertising spending",
+    "comment" : "c advertising spending",
+    "equation" : "20000000",
+    "unit" : "$/Year"
+  }, {
+    "name" : "customer sales effectiveness",
+    "comment" : "customer sales effectiveness",
+    "equation" : "3",
+    "unit" : "widget/person/Year"
+  }, {
+    "name" : "fraction would be with real prospects",
+    "comment" : "fraction would be with real prospects",
+    "equation" : "Potential_Customers / market_size",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "leaving customers",
+    "comment" : "leaving customers",
+    "equation" : "Customers / obsolescence_time",
+    "unit" : "person/Year"
+  }, {
+    "name" : "market size",
+    "comment" : "market size",
+    "equation" : "100000000",
+    "unit" : "person"
+  }, {
+    "name" : "sales size",
+    "comment" : "sales size",
+    "equation" : "1",
+    "unit" : "widget/person"
+  }, {
+    "name" : "obsolescence time",
+    "comment" : "obsolescence time",
+    "equation" : "2",
+    "unit" : "Year"
+  }, {
+    "name" : "sales",
+    "comment" : "sales",
+    "equation" : "(would_be_word_of_mouth_sales + would_be_advertising_sales ) * fraction_would_be_with_real_prospects",
+    "unit" : "widget/Year"
+  }, {
+    "name" : "would be advertising sales",
+    "comment" : "would be advertising sales",
+    "equation" : "advertising_spending * advertising_effectiveness",
+    "unit" : "widget/Year"
+  }, {
+    "name" : "seed customers",
+    "comment" : "seed customers",
+    "equation" : "10000",
+    "unit" : "person"
+  }, {
+    "name" : "would be word of mouth sales",
+    "comment" : "would be word of mouth sales",
+    "equation" : "Customers * customer_sales_effectiveness",
+    "unit" : "widget/Year"
+  }, {
+    "name" : "advertising effectiveness",
+    "comment" : "advertising effectiveness",
+    "equation" : "0.1",
+    "unit" : "widget/$"
+  } ],
+  "comments" : [ {
+    "name" : "Comment 1",
+    "text" : "sales,Graph"
+  }, {
+    "name" : "Comment 2",
+    "text" : "advertising spending ($/Year)"
+  }, {
+    "name" : "Comment 3",
+    "text" : "Product Lifetime (years)"
+  } ],
+  "views" : [ {
+    "name" : "View 1",
+    "elements" : [ {
+      "name" : "Potential Customers",
+      "type" : "stock",
+      "x" : 380.0,
+      "y" : 137.0
+    }, {
+      "name" : "Customers",
+      "type" : "stock",
+      "x" : 645.0,
+      "y" : 136.0
+    }, {
+      "name" : "_300",
+      "type" : "flow",
+      "x" : 512.0,
+      "y" : 140.0
+    }, {
+      "name" : "new customers",
+      "type" : "aux",
+      "x" : 512.0,
+      "y" : 160.0
+    }, {
+      "name" : "_140",
+      "type" : "flow",
+      "x" : 512.0,
+      "y" : 20.0
+    }, {
+      "name" : "leaving customers",
+      "type" : "aux",
+      "x" : 512.0,
+      "y" : 40.0
+    }, {
+      "name" : "obsolescence time",
+      "type" : "aux",
+      "x" : 675.0,
+      "y" : 72.0
+    }, {
+      "name" : "seed customers",
+      "type" : "aux",
+      "x" : 507.0,
+      "y" : 85.0
+    }, {
+      "name" : "market size",
+      "type" : "aux",
+      "x" : 229.0,
+      "y" : 188.0
+    }, {
+      "name" : "sales size",
+      "type" : "aux",
+      "x" : 440.0,
+      "y" : 216.0
+    }, {
+      "name" : "fraction would be with real prospects",
+      "type" : "aux",
+      "x" : 284.0,
+      "y" : 255.0
+    }, {
+      "name" : "would be advertising sales",
+      "type" : "aux",
+      "x" : 407.0,
+      "y" : 319.0
+    }, {
+      "name" : "sales",
+      "type" : "aux",
+      "x" : 512.0,
+      "y" : 239.0
+    }, {
+      "name" : "advertising spending",
+      "type" : "aux",
+      "x" : 175.0,
+      "y" : 335.0
+    }, {
+      "name" : "advertising effectiveness",
+      "type" : "aux",
+      "x" : 155.0,
+      "y" : 305.0
+    }, {
+      "name" : "c advertising spending",
+      "type" : "aux",
+      "x" : 103.0,
+      "y" : 392.0
+    }, {
+      "name" : "customer sales effectiveness",
+      "type" : "aux",
+      "x" : 848.0,
+      "y" : 165.0
+    }, {
+      "name" : "would be word of mouth sales",
+      "type" : "aux",
+      "x" : 719.0,
+      "y" : 259.0
+    } ],
+    "connectors" : [ {
+      "from" : "obsolescence time",
+      "to" : "leaving customers"
+    }, {
+      "from" : "Customers",
+      "to" : "leaving customers"
+    }, {
+      "from" : "seed customers",
+      "to" : "Potential Customers"
+    }, {
+      "from" : "seed customers",
+      "to" : "Customers"
+    }, {
+      "from" : "market size",
+      "to" : "Potential Customers"
+    }, {
+      "from" : "sales size",
+      "to" : "new customers"
+    }, {
+      "from" : "sales",
+      "to" : "new customers"
+    }, {
+      "from" : "would be word of mouth sales",
+      "to" : "sales"
+    }, {
+      "from" : "Customers",
+      "to" : "would be word of mouth sales"
+    }, {
+      "from" : "would be advertising sales",
+      "to" : "sales"
+    }, {
+      "from" : "advertising spending",
+      "to" : "would be advertising sales"
+    }, {
+      "from" : "advertising effectiveness",
+      "to" : "would be advertising sales"
+    }, {
+      "from" : "c advertising spending",
+      "to" : "advertising spending"
+    }, {
+      "from" : "customer sales effectiveness",
+      "to" : "would be word of mouth sales"
+    }, {
+      "from" : "Potential Customers",
+      "to" : "fraction would be with real prospects"
+    }, {
+      "from" : "fraction would be with real prospects",
+      "to" : "sales"
+    }, {
+      "from" : "market size",
+      "to" : "fraction would be with real prospects"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_300",
+      "points" : [ [ 512.0, 140.0 ] ]
+    }, {
+      "flowName" : "_140",
+      "points" : [ [ 512.0, 20.0 ] ]
+    } ]
+  }, {
+    "name" : "View 2",
+    "elements" : [ {
+      "name" : "Comment 1",
+      "type" : "comment",
+      "x" : 671.0,
+      "y" : 251.0,
+      "width" : 570.0,
+      "height" : 480.0
+    }, {
+      "name" : "Comment 2",
+      "type" : "comment",
+      "x" : 160.0,
+      "y" : 51.0,
+      "width" : 248.0,
+      "height" : 24.0
+    }, {
+      "name" : "Comment 3",
+      "type" : "comment",
+      "x" : 160.0,
+      "y" : 191.0,
+      "width" : 206.0,
+      "height" : 24.0
+    }, {
+      "name" : "customer sales effectiveness",
+      "type" : "aux",
+      "x" : 160.0,
+      "y" : 360.0
+    }, {
+      "name" : "market size",
+      "type" : "aux",
+      "x" : 160.0,
+      "y" : 420.0
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Year",
+    "duration" : 5.0,
+    "durationUnit" : "Year",
+    "dt" : 0.0625
+  },
+  "metadata" : {
+    "author" : "Ventana Systems, Inc.",
+    "source" : "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+    "license" : "MIT",
+    "url" : "https://www.vensim.com/documentation/models.html"
+  }
+}

@@ -1,0 +1,505 @@
+{
+  "name" : "YEAST3",
+  "stocks" : [ {
+    "name" : "Yeast Count",
+    "comment" : "The number of yeast.",
+    "initialValue" : 100.0,
+    "unit" : "Cell"
+  } ],
+  "flows" : [ {
+    "name" : "Yeast Count inflow 1",
+    "equation" : "divisions",
+    "timeUnit" : "Minute",
+    "sink" : "Yeast Count"
+  }, {
+    "name" : "Yeast Count outflow 2",
+    "equation" : "terminations",
+    "timeUnit" : "Minute",
+    "source" : "Yeast Count"
+  } ],
+  "variables" : [ {
+    "name" : "average water",
+    "comment" : "The average amount of water.  Note use of ZIDZ to prevent problems on 0 \t\t\t\t\t\t\t\t yeast count.",
+    "equation" : "IF((Yeast_Count) == 0, 0, (Water) / (Yeast_Count))",
+    "unit" : "ml/Cell"
+  }, {
+    "name" : "average lifetime",
+    "comment" : "The average length of time a yeast survives.",
+    "equation" : "norm_lifetime* LOOKUP(life_from_temp_lookup, temperature/norm_temperature) * LOOKUP(life_from_water_lookup, average_water/norm_water) * LOOKUP(life_from_sugar_lookup, average_sugar/norm_sugar)",
+    "unit" : "Minute"
+  }, {
+    "name" : "average sugar",
+    "comment" : "The average amount of sugar.  Note the use of ZIDZ to prevent problems \t\t\t\t\t\t\t\t when Yeast Count is 0.",
+    "equation" : "IF((Yeast_Count) == 0, 0, (Sugar) / (Yeast_Count))",
+    "unit" : "g/Cell"
+  }, {
+    "name" : "division rate",
+    "comment" : "The rate at which yeast divide.",
+    "equation" : "norm_division_rate * LOOKUP(division_from_temp_lookup, temperature/norm_temperature) * LOOKUP(division_from_sugar_lookup, average_sugar/norm_sugar) * LOOKUP(division_from_water_lookup, average_water/norm_water)",
+    "unit" : "1/Minute"
+  }, {
+    "name" : "norm water",
+    "comment" : "The normal amount of water for a cell.",
+    "equation" : "0.001",
+    "unit" : "ml/Cell"
+  }, {
+    "name" : "norm sugar",
+    "comment" : "The normal amount of sugar.",
+    "equation" : "0.001",
+    "unit" : "g/Cell"
+  }, {
+    "name" : "norm lifetime",
+    "comment" : "The normal lifetime of a cell at normal temperature.",
+    "equation" : "250",
+    "unit" : "Minute"
+  }, {
+    "name" : "norm temperature",
+    "comment" : "The normal termperature used as a reference to determine division and \t\t\t\t\t\t\t\t termination effects.",
+    "equation" : "80",
+    "unit" : "degrees farenheit"
+  }, {
+    "name" : "norm division rate",
+    "comment" : "The normal rate of division at normal temperatures",
+    "equation" : "0.08",
+    "unit" : "1/Minute"
+  }, {
+    "name" : "divisions",
+    "comment" : "divisions",
+    "equation" : "Yeast_Count*division_rate",
+    "unit" : "Cell/Minute"
+  }, {
+    "name" : "Sugar",
+    "comment" : "The amount of sugar in the bowl.",
+    "equation" : "100",
+    "unit" : "g"
+  }, {
+    "name" : "temperature",
+    "comment" : "The temperature of the water in the bowl.",
+    "equation" : "85",
+    "unit" : "degrees farenheit"
+  }, {
+    "name" : "terminations",
+    "comment" : "The rate of termination of yeast.  Using a MIN to prevent silly results on extreme \t\t\t\t\t\t\t\t conditions\n\t\t         integration.",
+    "equation" : "MIN(Yeast_Count/TIME_STEP,Yeast_Count/average_lifetime)",
+    "unit" : "Cell/Minute"
+  }, {
+    "name" : "Water",
+    "comment" : "The amount of water in the bowl.",
+    "equation" : "100",
+    "unit" : "ml"
+  }, {
+    "name" : "RC START TIME",
+    "comment" : "RC START TIME",
+    "equation" : "10",
+    "unit" : "Minute"
+  } ],
+  "lookupTables" : [ {
+    "name" : "division from sugar lookup",
+    "comment" : "division from sugar lookup",
+    "xValues" : [ 0.0, 1.0 ],
+    "yValues" : [ 0.0, 1.0 ],
+    "interpolation" : "LINEAR",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "life from sugar lookup",
+    "comment" : "life from sugar lookup",
+    "xValues" : [ 0.0, 1.0 ],
+    "yValues" : [ 0.001, 1.0 ],
+    "interpolation" : "LINEAR",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "division from water lookup",
+    "comment" : "division from water lookup",
+    "xValues" : [ 0.0, 1.0 ],
+    "yValues" : [ 0.0, 1.0 ],
+    "interpolation" : "LINEAR",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "life from water lookup",
+    "comment" : "life from water lookup",
+    "xValues" : [ 0.0, 1.0 ],
+    "yValues" : [ 0.001, 1.0 ],
+    "interpolation" : "LINEAR",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "division from temp lookup",
+    "comment" : "division from temp lookup",
+    "xValues" : [ 0.0, 0.8, 1.0, 2.0 ],
+    "yValues" : [ 0.0, 0.0, 1.0, 1.0 ],
+    "interpolation" : "LINEAR",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "life from temp lookup",
+    "comment" : "life from temp lookup",
+    "xValues" : [ 0.0, 1.0, 1.25, 2.0 ],
+    "yValues" : [ 1.0, 1.0, 0.02, 0.001 ],
+    "interpolation" : "LINEAR",
+    "unit" : "Dmnl"
+  } ],
+  "subscripts" : [ {
+    "name" : "cold is dormant",
+    "labels" : [ "THE CONDITION temperature  50 IMPLIES divisions  0" ]
+  }, {
+    "name" : "hot is dead",
+    "labels" : [ "THE CONDITION temperature  RC STEP120", "_1IMPLIES Yeast Count  RC DECAY CHECK1", "Yeast Count", "_5" ]
+  }, {
+    "name" : "eat or die",
+    "labels" : [ "THE CONDITION Sugar  RC STEPSugar", "_0 AND temperature  65 IMPLIES Yeast Count  RC DECAY CHECK1", "Yeast Count", "_15" ]
+  }, {
+    "name" : "drink or die",
+    "labels" : [ "THE CONDITION Water  RC STEPWater", "_0 AND temperature  65 IMPLIES Yeast Count  RC DECAY CHECK1", "Yeast Count", "_1" ]
+  }, {
+    "name" : "big growth",
+    "labels" : [ "TEST INPUT divisions  1e022" ]
+  }, {
+    "name" : "hunger from growth",
+    "labels" : [ "THE CONDITION big growth IMPLIES Sugar  RC DECAY CHECK1", "Sugar", "_05", "INITIAL TIME" ]
+  }, {
+    "name" : "thirst from growth",
+    "labels" : [ "THE CONDITION big growth IMPLIES Water  RC DECAY CHECK1", "Water", "_05", "INITIAL TIME" ]
+  } ],
+  "views" : [ {
+    "name" : "1",
+    "elements" : [ {
+      "name" : "Yeast Count",
+      "type" : "stock",
+      "x" : 408.0,
+      "y" : 179.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 273.0,
+      "y" : 179.0
+    }, {
+      "name" : "divisions",
+      "type" : "aux",
+      "x" : 273.0,
+      "y" : 195.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 540.0,
+      "y" : 179.0
+    }, {
+      "name" : "terminations",
+      "type" : "aux",
+      "x" : 540.0,
+      "y" : 196.0
+    }, {
+      "name" : "division rate",
+      "type" : "aux",
+      "x" : 107.0,
+      "y" : 179.0
+    }, {
+      "name" : "average lifetime",
+      "type" : "aux",
+      "x" : 715.0,
+      "y" : 183.0
+    }, {
+      "name" : "temperature",
+      "type" : "aux",
+      "x" : 401.0,
+      "y" : 423.0
+    }, {
+      "name" : "Sugar",
+      "type" : "aux",
+      "x" : 405.0,
+      "y" : 49.0
+    }, {
+      "name" : "norm division rate",
+      "type" : "aux",
+      "x" : 107.0,
+      "y" : 99.0
+    }, {
+      "name" : "norm temperature",
+      "type" : "aux",
+      "x" : 407.0,
+      "y" : 448.0
+    }, {
+      "name" : "norm lifetime",
+      "type" : "aux",
+      "x" : 712.0,
+      "y" : 113.0
+    }, {
+      "name" : "Water",
+      "type" : "aux",
+      "x" : 411.0,
+      "y" : 321.0
+    }, {
+      "name" : "average water",
+      "type" : "aux",
+      "x" : 411.0,
+      "y" : 257.0
+    }, {
+      "name" : "norm water",
+      "type" : "aux",
+      "x" : 405.0,
+      "y" : 369.0
+    }, {
+      "name" : "norm sugar",
+      "type" : "aux",
+      "x" : 401.0,
+      "y" : 396.0
+    }, {
+      "name" : "average sugar",
+      "type" : "aux",
+      "x" : 407.0,
+      "y" : 115.0
+    }, {
+      "name" : "TIME STEP",
+      "type" : "aux",
+      "x" : 513.0,
+      "y" : 232.0
+    }, {
+      "name" : "division from sugar lookup",
+      "type" : "lookup",
+      "x" : 227.0,
+      "y" : 25.0
+    }, {
+      "name" : "division from temp lookup",
+      "type" : "lookup",
+      "x" : 225.0,
+      "y" : 55.0
+    }, {
+      "name" : "division from water lookup",
+      "type" : "lookup",
+      "x" : 224.0,
+      "y" : 84.0
+    }, {
+      "name" : "life from sugar lookup",
+      "type" : "lookup",
+      "x" : 585.0,
+      "y" : 61.0
+    }, {
+      "name" : "life from temp lookup",
+      "type" : "lookup",
+      "x" : 585.0,
+      "y" : 91.0
+    }, {
+      "name" : "life from water lookup",
+      "type" : "lookup",
+      "x" : 589.0,
+      "y" : 31.0
+    } ],
+    "connectors" : [ {
+      "from" : "_48",
+      "to" : "Yeast Count"
+    }, {
+      "from" : "_48",
+      "to" : "Yeast Count"
+    }, {
+      "from" : "Yeast Count",
+      "to" : "divisions"
+    }, {
+      "from" : "average lifetime",
+      "to" : "terminations"
+    }, {
+      "from" : "Yeast Count",
+      "to" : "terminations"
+    }, {
+      "from" : "division rate",
+      "to" : "divisions"
+    }, {
+      "from" : "norm division rate",
+      "to" : "division rate"
+    }, {
+      "from" : "norm temperature",
+      "to" : "division rate"
+    }, {
+      "from" : "temperature",
+      "to" : "division rate"
+    }, {
+      "from" : "norm lifetime",
+      "to" : "average lifetime"
+    }, {
+      "from" : "norm temperature",
+      "to" : "average lifetime"
+    }, {
+      "from" : "temperature",
+      "to" : "average lifetime"
+    }, {
+      "from" : "Sugar",
+      "to" : "average sugar"
+    }, {
+      "from" : "norm water",
+      "to" : "division rate"
+    }, {
+      "from" : "norm sugar",
+      "to" : "division rate"
+    }, {
+      "from" : "norm water",
+      "to" : "average lifetime"
+    }, {
+      "from" : "norm sugar",
+      "to" : "average lifetime"
+    }, {
+      "from" : "average sugar",
+      "to" : "division rate"
+    }, {
+      "from" : "TIME STEP",
+      "to" : "terminations"
+    }, {
+      "from" : "division from sugar lookup",
+      "to" : "division rate"
+    }, {
+      "from" : "division from temp lookup",
+      "to" : "division rate"
+    }, {
+      "from" : "division from water lookup",
+      "to" : "division rate"
+    }, {
+      "from" : "life from sugar lookup",
+      "to" : "average lifetime"
+    }, {
+      "from" : "life from temp lookup",
+      "to" : "average lifetime"
+    }, {
+      "from" : "life from water lookup",
+      "to" : "average lifetime"
+    }, {
+      "from" : "Yeast Count",
+      "to" : "average sugar"
+    }, {
+      "from" : "average sugar",
+      "to" : "average lifetime"
+    }, {
+      "from" : "average water",
+      "to" : "division rate"
+    }, {
+      "from" : "average water",
+      "to" : "average lifetime"
+    }, {
+      "from" : "Yeast Count",
+      "to" : "average water"
+    }, {
+      "from" : "Water",
+      "to" : "average water"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_48",
+      "points" : [ [ 273.0, 179.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 540.0, 179.0 ] ]
+    } ]
+  }, {
+    "name" : "View 2",
+    "elements" : [ {
+      "name" : "cold is dormant",
+      "type" : "aux",
+      "x" : 397.0,
+      "y" : 155.0
+    }, {
+      "name" : "divisions",
+      "type" : "aux",
+      "x" : 107.0,
+      "y" : 35.0
+    }, {
+      "name" : "temperature",
+      "type" : "aux",
+      "x" : 96.0,
+      "y" : 219.0
+    }, {
+      "name" : "drink or die",
+      "type" : "aux",
+      "x" : 387.0,
+      "y" : 215.0
+    }, {
+      "name" : "Yeast Count",
+      "type" : "stock",
+      "x" : 97.0,
+      "y" : 173.0
+    }, {
+      "name" : "eat or die",
+      "type" : "aux",
+      "x" : 381.0,
+      "y" : 117.0
+    }, {
+      "name" : "hot is dead",
+      "type" : "aux",
+      "x" : 387.0,
+      "y" : 184.0
+    }, {
+      "name" : "hunger from growth",
+      "type" : "aux",
+      "x" : 409.0,
+      "y" : 43.0
+    }, {
+      "name" : "Sugar",
+      "type" : "aux",
+      "x" : 113.0,
+      "y" : 67.0
+    }, {
+      "name" : "thirst from growth",
+      "type" : "aux",
+      "x" : 404.0,
+      "y" : 83.0
+    }, {
+      "name" : "Water",
+      "type" : "aux",
+      "x" : 112.0,
+      "y" : 147.0
+    }, {
+      "name" : "big growth",
+      "type" : "aux",
+      "x" : 237.0,
+      "y" : 37.0
+    }, {
+      "name" : "INITIAL TIME",
+      "type" : "aux",
+      "x" : 99.0,
+      "y" : 103.0
+    } ],
+    "connectors" : [ {
+      "from" : "divisions",
+      "to" : "cold is dormant"
+    }, {
+      "from" : "temperature",
+      "to" : "cold is dormant"
+    }, {
+      "from" : "Yeast Count",
+      "to" : "drink or die"
+    }, {
+      "from" : "temperature",
+      "to" : "eat or die"
+    }, {
+      "from" : "Yeast Count",
+      "to" : "eat or die"
+    }, {
+      "from" : "temperature",
+      "to" : "hot is dead"
+    }, {
+      "from" : "Yeast Count",
+      "to" : "hot is dead"
+    }, {
+      "from" : "Sugar",
+      "to" : "hunger from growth"
+    }, {
+      "from" : "Water",
+      "to" : "thirst from growth"
+    }, {
+      "from" : "divisions",
+      "to" : "big growth"
+    }, {
+      "from" : "temperature",
+      "to" : "drink or die"
+    }, {
+      "from" : "INITIAL TIME",
+      "to" : "hunger from growth"
+    }, {
+      "from" : "INITIAL TIME",
+      "to" : "thirst from growth"
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Minute",
+    "duration" : 300.0,
+    "durationUnit" : "Minute"
+  },
+  "metadata" : {
+    "author" : "Ventana Systems, Inc.",
+    "source" : "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+    "license" : "MIT",
+    "url" : "https://www.vensim.com/documentation/models.html"
+  }
+}
