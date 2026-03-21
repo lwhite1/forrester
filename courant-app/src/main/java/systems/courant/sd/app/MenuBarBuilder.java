@@ -64,11 +64,12 @@ final class MenuBarBuilder {
         Menu fileMenu = buildFileMenu();
         Menu editMenu = buildEditMenu();
         Menu viewMenu = buildViewMenu();
+        Menu layoutMenu = buildLayoutMenu();
         Menu simulateMenu = buildSimulateMenu();
         Menu helpMenu = buildHelpMenu();
 
         MenuBar menuBar = new MenuBar(fileMenu, editMenu, viewMenu,
-                simulateMenu, helpMenu);
+                layoutMenu, simulateMenu, helpMenu);
         return new Result(menuBar, undoItem, redoItem, popOutDashboardItem,
                 validationIssuesItem, List.copyOf(editorOnlyItems));
     }
@@ -180,6 +181,36 @@ final class MenuBarBuilder {
         editorOnlyItems.add(viewMenu);
 
         return viewMenu;
+    }
+
+    private Menu buildLayoutMenu() {
+        Menu layoutMenu = new Menu("Layout");
+
+        Menu alignMenu = new Menu("Align");
+        alignMenu.getItems().addAll(
+                registry.toMenuItem("Align Left"),
+                registry.toMenuItem("Align Center Horizontal",
+                        "Align Center (Horizontal)"),
+                registry.toMenuItem("Align Right"),
+                new SeparatorMenuItem(),
+                registry.toMenuItem("Align Top"),
+                registry.toMenuItem("Align Center Vertical",
+                        "Align Center (Vertical)"),
+                registry.toMenuItem("Align Bottom"));
+
+        Menu distributeMenu = new Menu("Distribute");
+        distributeMenu.getItems().addAll(
+                registry.toMenuItem("Distribute Horizontally"),
+                registry.toMenuItem("Distribute Vertically"));
+
+        MenuItem snapToGridItem = registry.toMenuItem("Snap to Grid");
+
+        layoutMenu.getItems().addAll(alignMenu, distributeMenu,
+                new SeparatorMenuItem(), snapToGridItem);
+        layoutMenu.setDisable(true);
+        editorOnlyItems.add(layoutMenu);
+
+        return layoutMenu;
     }
 
     private Menu buildSimulateMenu() {

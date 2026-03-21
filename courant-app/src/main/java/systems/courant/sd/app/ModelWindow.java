@@ -1,5 +1,6 @@
 package systems.courant.sd.app;
 
+import systems.courant.sd.app.canvas.controllers.AlignmentController;
 import systems.courant.sd.app.canvas.AnalysisRunner;
 import systems.courant.sd.app.canvas.ActivityLogPanel;
 import systems.courant.sd.app.canvas.BreadcrumbBar;
@@ -536,6 +537,35 @@ public class ModelWindow {
                 new KeyCodeCombination(KeyCode.A,
                         KeyCombination.SHORTCUT_DOWN));
 
+        // -- Layout --
+        commandRegistry.add("Align Top", "Layout",
+                layoutAction(() -> AlignmentController.alignTop(
+                        canvas.canvasState())));
+        commandRegistry.add("Align Center Vertical", "Layout",
+                layoutAction(() -> AlignmentController.alignCenterVertical(
+                        canvas.canvasState())));
+        commandRegistry.add("Align Bottom", "Layout",
+                layoutAction(() -> AlignmentController.alignBottom(
+                        canvas.canvasState())));
+        commandRegistry.add("Align Left", "Layout",
+                layoutAction(() -> AlignmentController.alignLeft(
+                        canvas.canvasState())));
+        commandRegistry.add("Align Center Horizontal", "Layout",
+                layoutAction(() -> AlignmentController.alignCenterHorizontal(
+                        canvas.canvasState())));
+        commandRegistry.add("Align Right", "Layout",
+                layoutAction(() -> AlignmentController.alignRight(
+                        canvas.canvasState())));
+        commandRegistry.add("Distribute Horizontally", "Layout",
+                layoutAction(() -> AlignmentController.distributeHorizontally(
+                        canvas.canvasState())));
+        commandRegistry.add("Distribute Vertically", "Layout",
+                layoutAction(() -> AlignmentController.distributeVertically(
+                        canvas.canvasState())));
+        commandRegistry.add("Snap to Grid", "Layout",
+                layoutAction(() -> AlignmentController.snapToGrid(
+                        canvas.canvasState())));
+
         // -- File --
         commandRegistry.add("New Model", "File", () -> {
                     showEditor(); fileController.newModel(); },
@@ -934,6 +964,16 @@ public class ModelWindow {
     private void switchToolAndFocus(CanvasToolBar.Tool tool) {
         canvas.switchTool(tool);
         canvas.requestFocus();
+    }
+
+    private Runnable layoutAction(Runnable operation) {
+        return () -> {
+            canvas.undo().saveUndoState("Layout");
+            operation.run();
+            canvas.regenerateConnectors();
+            canvas.requestRedraw();
+            canvas.requestFocus();
+        };
     }
 
     private static String formatElementType(ElementType type) {

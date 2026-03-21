@@ -130,15 +130,16 @@ class ModelWindowFxTest {
     }
 
     @Test
-    @DisplayName("Menu bar has File, Edit, View, Simulate, and Help menus")
+    @DisplayName("Menu bar has File, Edit, View, Layout, Simulate, and Help menus")
     void menuBarPresent(FxRobot robot) {
         MenuBar menuBar = robot.lookup(".menu-bar").queryAs(MenuBar.class);
-        assertThat(menuBar.getMenus()).hasSize(5);
+        assertThat(menuBar.getMenus()).hasSize(6);
         assertThat(menuBar.getMenus().get(0).getText()).isEqualTo("File");
         assertThat(menuBar.getMenus().get(1).getText()).isEqualTo("Edit");
         assertThat(menuBar.getMenus().get(2).getText()).isEqualTo("View");
-        assertThat(menuBar.getMenus().get(3).getText()).isEqualTo("Simulate");
-        assertThat(menuBar.getMenus().get(4).getText()).isEqualTo("Help");
+        assertThat(menuBar.getMenus().get(3).getText()).isEqualTo("Layout");
+        assertThat(menuBar.getMenus().get(4).getText()).isEqualTo("Simulate");
+        assertThat(menuBar.getMenus().get(5).getText()).isEqualTo("Help");
     }
 
     @Test
