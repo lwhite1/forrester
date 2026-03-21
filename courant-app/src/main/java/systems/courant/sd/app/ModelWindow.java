@@ -1023,7 +1023,14 @@ public class ModelWindow {
         if (dashboardPanel != null) {
             dashboardPanel.clear();
         }
-        statusBar.clearProgress();
+
+        // Reset all model-specific UI state
+        statusBar.clear();
+        loopNavigatorBar.setVisible(false);
+        loopNavigatorBar.setManaged(false);
+        loopNavigatorBar.resetFilter();
+        toolBar.deactivateLoopToggle();
+        canvas.analysis().setLoopHighlightActive(false);
 
         // Reset file state
         fileController.setCurrentFile(null);

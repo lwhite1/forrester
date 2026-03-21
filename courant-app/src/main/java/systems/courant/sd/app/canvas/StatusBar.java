@@ -214,4 +214,17 @@ public class StatusBar extends HBox {
             Platform.runLater(action);
         }
     }
+
+    /**
+     * Resets the entire status bar to its initial state, clearing all model-specific information.
+     */
+    public void clear() {
+        updateTool(CanvasToolBar.Tool.SELECT);
+        updateSelection(0);
+        updateElements(0, 0, 0, 0, 0, 0, 0);
+        updateZoom(1.0);
+        clearLoops();
+        clearValidation();
+        clearProgress();
+    }
 }

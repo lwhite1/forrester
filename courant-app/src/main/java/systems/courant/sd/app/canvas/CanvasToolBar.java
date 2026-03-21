@@ -209,6 +209,13 @@ public class CanvasToolBar extends ToolBar {
     }
 
     /**
+     * Deselects the Loops toggle button without firing the toggle callback.
+     */
+    public void deactivateLoopToggle() {
+        loopsButton.setSelected(false);
+    }
+
+    /**
      * Sets a callback invoked when the Loops toggle button is toggled on or off.
      */
     public void setOnLoopToggleChanged(Consumer<Boolean> callback) {
