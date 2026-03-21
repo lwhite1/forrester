@@ -27,6 +27,7 @@ public class MonteCarloResult {
     private static final Logger logger = LoggerFactory.getLogger(MonteCarloResult.class);
 
     private final List<RunResult> results;
+    private final List<ParameterSpec> parameterSpecs;
 
     /**
      * Creates a new Monte Carlo result from the given list of run results.
@@ -34,7 +35,18 @@ public class MonteCarloResult {
      * @param results the list of run results, one per iteration
      */
     public MonteCarloResult(List<RunResult> results) {
+        this(results, List.of());
+    }
+
+    /**
+     * Creates a new Monte Carlo result with parameter distribution metadata.
+     *
+     * @param results        the list of run results, one per iteration
+     * @param parameterSpecs descriptions of the varied parameters and their distributions
+     */
+    public MonteCarloResult(List<RunResult> results, List<ParameterSpec> parameterSpecs) {
         this.results = List.copyOf(results);
+        this.parameterSpecs = List.copyOf(parameterSpecs);
     }
 
     /**
@@ -79,6 +91,13 @@ public class MonteCarloResult {
      */
     public List<RunResult> getResults() {
         return Collections.unmodifiableList(results);
+    }
+
+    /**
+     * Returns the parameter distribution specifications, or an empty list if not available.
+     */
+    public List<ParameterSpec> getParameterSpecs() {
+        return parameterSpecs;
     }
 
     /**
