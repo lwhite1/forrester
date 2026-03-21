@@ -323,6 +323,7 @@ public final class ElementRenderer {
 
     /**
      * Draws a CLD variable as plain text (no rectangle), matching standard CLD notation.
+     * Wraps long names to multiple lines (up to 3) to fit within the element width.
      */
     public static void drawCldVariable(GraphicsContext gc, String name,
                                        double x, double y, double width, double height) {
@@ -330,8 +331,8 @@ public final class ElementRenderer {
         gc.setFont(LayoutMetrics.AUX_NAME_FONT);
         gc.setTextAlign(TextAlignment.CENTER);
         gc.setTextBaseline(VPos.CENTER);
-        gc.fillText(truncate(name, LayoutMetrics.AUX_NAME_FONT, width - 12),
-                x + width / 2, y + height / 2);
+        drawWrappedCldName(gc, name, LayoutMetrics.AUX_NAME_FONT,
+                x, y, width, height, LayoutMetrics.CLD_VAR_TEXT_PADDING);
     }
 
     /**
@@ -467,6 +468,34 @@ public final class ElementRenderer {
 
             for (int i = 0; i < lineCount; i++) {
                 String line = truncate(lines.get(i), font, maxWidth);
+                gc.fillText(line, x + width / 2, startY + i * lineHeight);
+            }
+        }
+    }
+
+    /**
+     * Draws a CLD variable name, wrapping to up to 3 lines (vs 2 for AUX elements)
+     * to accommodate the longer names typical in causal loop diagrams.
+     */
+    private static void drawWrappedCldName(GraphicsContext gc, String name, Font font,
+                                            double x, double y, double width, double height,
+                                            double padding) {
+        double maxWidth = width - padding;
+        MEASURE_TEXT.get().setFont(font);
+        MEASURE_TEXT.get().setText(name);
+        if (MEASURE_TEXT.get().getLayoutBounds().getWidth() <= maxWidth) {
+            gc.fillText(name, x + width / 2, y + height / 2);
+        } else {
+            List<String> lines = wrapText(name, font, maxWidth);
+            double lineHeight = measureLineHeight(font);
+            int lineCount = Math.min(lines.size(), 3);
+            double totalHeight = lineCount * lineHeight;
+            double startY = y + (height - totalHeight) / 2 + lineHeight / 2;
+
+            for (int i = 0; i < lineCount; i++) {
+                String line = (i == lineCount - 1 && lines.size() > lineCount)
+                        ? truncate(lines.get(i), font, maxWidth)
+                        : lines.get(i);
                 gc.fillText(line, x + width / 2, startY + i * lineHeight);
             }
         }
