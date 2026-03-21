@@ -66,7 +66,8 @@ public class CanvasState {
                     sizes.put(ep.name(), new Size(ep.width(), ep.height()));
                 } else if (ep.type() == ElementType.CLD_VARIABLE) {
                     double w = LayoutMetrics.cldVarWidthForName(ep.name());
-                    sizes.put(ep.name(), new Size(w, LayoutMetrics.CLD_VAR_HEIGHT));
+                    double h = LayoutMetrics.cldVarHeightForName(ep.name());
+                    sizes.put(ep.name(), new Size(w, h));
                 } else if (ep.type() == ElementType.AUX) {
                     double w = LayoutMetrics.auxWidthForName(ep.name());
                     sizes.put(ep.name(), new Size(w, LayoutMetrics.AUX_HEIGHT));

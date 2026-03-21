@@ -9,9 +9,13 @@ import systems.courant.sd.model.def.StockDef;
 import systems.courant.sd.model.def.VariableDef;
 import systems.courant.sd.model.graph.ElementSizes;
 
+import systems.courant.sd.app.canvas.renderers.ElementRenderer;
+
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
+
+import java.util.List;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -62,6 +66,8 @@ public final class LayoutMetrics {
     public static final double CLD_VAR_CORNER_RADIUS = 6;
     /** Horizontal padding around text for CLD variable auto-sizing. */
     public static final double CLD_VAR_TEXT_PADDING = 16;
+    /** Maximum auto-width for CLD variables before text wraps to a second line. */
+    public static final double CLD_VAR_MAX_AUTO_WIDTH = 140;
 
     // Causal link
     public static final double CAUSAL_LINK_WIDTH = 1.5;
@@ -272,13 +278,32 @@ public final class LayoutMetrics {
 
     /**
      * Computes the width for a CLD variable based on its text label.
-     * Returns the measured text width plus padding, clamped to the minimum.
+     * Returns the measured text width plus padding, clamped to the minimum
+     * and capped at {@link #CLD_VAR_MAX_AUTO_WIDTH} so long names wrap.
      */
     public static double cldVarWidthForName(String name) {
         Text text = new Text(name);
         text.setFont(AUX_NAME_FONT);
         double textWidth = text.getLayoutBounds().getWidth();
-        return Math.max(minWidthFor(ElementType.CLD_VARIABLE), textWidth + CLD_VAR_TEXT_PADDING);
+        return Math.max(minWidthFor(ElementType.CLD_VARIABLE),
+                Math.min(textWidth + CLD_VAR_TEXT_PADDING, CLD_VAR_MAX_AUTO_WIDTH));
+    }
+
+    /**
+     * Computes the height for a CLD variable, expanding to fit wrapped text lines.
+     * Returns the standard height for short names, or taller for names that wrap.
+     */
+    public static double cldVarHeightForName(String name) {
+        double maxWidth = cldVarWidthForName(name) - CLD_VAR_TEXT_PADDING;
+        Text text = new Text(name);
+        text.setFont(AUX_NAME_FONT);
+        if (text.getLayoutBounds().getWidth() <= maxWidth) {
+            return CLD_VAR_HEIGHT;
+        }
+        List<String> lines = ElementRenderer.wrapText(name, AUX_NAME_FONT, maxWidth);
+        int lineCount = Math.min(lines.size(), 3);
+        double lineHeight = ElementRenderer.measureLineHeight(AUX_NAME_FONT);
+        return Math.max(CLD_VAR_HEIGHT, lineCount * lineHeight + 8);
     }
 
     /**
@@ -336,7 +361,8 @@ public final class LayoutMetrics {
         }
         for (CldVariableDef c : def.cldVariables()) {
             double w = cldVarWidthForName(c.name());
-            overrides.put(c.name(), new ElementSizes(w, CLD_VAR_HEIGHT));
+            double h = cldVarHeightForName(c.name());
+            overrides.put(c.name(), new ElementSizes(w, h));
         }
         return overrides;
     }

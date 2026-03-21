@@ -507,11 +507,9 @@ public final class SvgExporter {
     private static void writeCldVariable(PrintWriter w, String name,
                                           double cx, double cy, double width, double height) {
         // Plain text only -- no rectangle, matching standard CLD notation
-        String label = ElementRenderer.truncate(name, LayoutMetrics.AUX_NAME_FONT, width - 12);
-        w.printf(Locale.US,
-                "  <text x=\"%.2f\" y=\"%.2f\" text-anchor=\"middle\" dominant-baseline=\"central\" " +
-                "font-family=\"sans-serif\" font-size=\"%.0f\" fill=\"%s\">%s</text>%n",
-                cx, cy, LayoutMetrics.AUX_NAME_FONT_SIZE, svgColor(ColorPalette.TEXT), escapeXml(label));
+        // Wrap to multiple lines like canvas rendering
+        writeSvgWrappedName(w, name, LayoutMetrics.AUX_NAME_FONT, LayoutMetrics.AUX_NAME_FONT_SIZE,
+                cx, cy, width, LayoutMetrics.CLD_VAR_TEXT_PADDING);
     }
 
     private static void writeComment(PrintWriter w, String text,
