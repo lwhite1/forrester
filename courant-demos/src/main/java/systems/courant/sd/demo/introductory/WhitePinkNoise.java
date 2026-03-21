@@ -6,7 +6,6 @@ package systems.courant.sd.demo.introductory;
 
 import systems.courant.sd.Simulation;
 import systems.courant.sd.model.ModelMetadata;
-import systems.courant.sd.model.compile.CompiledModel;
 import systems.courant.sd.model.compile.ModelCompiler;
 import systems.courant.sd.model.def.ModelDefinitionBuilder;
 import systems.courant.sd.model.def.VariableDef;
@@ -31,12 +30,14 @@ import java.util.List;
  *
  * <p>Validation errors (model may need manual fixes):
  * <ul>
+ *   <li>View 'Customer Orders' places non-existent element: TIME STEP</li>
  *   <li>View 'Customer Orders' places non-existent element: Time</li>
+ *   <li>View 'Customer Orders' places non-existent element: TIME STEP</li>
  *   <li>View 'Customer Orders' places non-existent element: _92</li>
  *   <li>View 'Customer Orders' connector references non-existent element: Time</li>
+ *   <li>View 'Customer Orders' connector references non-existent element: TIME STEP</li>
  *   <li>View 'Customer Orders' connector references non-existent element: _92</li>
- *   <li>View 'Customer Orders' connector references non-existent element: _92</li>
- *   <li>View 'Customer Orders' connector references non-existent element: 5</li>
+ *   <li>View 'Customer Orders' connector references non-existent element: TIME STEP</li>
  *   <li>View 'Customer Orders' flow route references non-existent flow: _92</li>
  *   <li>View 'Production and Inventory' places non-existent element: _48</li>
  *   <li>View 'Production and Inventory' places non-existent element: _48</li>
@@ -45,14 +46,8 @@ import java.util.List;
  *   <li>View 'Production and Inventory' connector references non-existent element: _48</li>
  *   <li>View 'Production and Inventory' connector references non-existent element: _48</li>
  *   <li>View 'Production and Inventory' connector references non-existent element: _48</li>
- *   <li>View 'Production and Inventory' connector references non-existent element: 5</li>
  *   <li>View 'Production and Inventory' connector references non-existent element: _48</li>
- *   <li>View 'Production and Inventory' connector references non-existent element: _48</li>
- *   <li>View 'Production and Inventory' connector references non-existent element: _48</li>
- *   <li>View 'Production and Inventory' connector references non-existent element: 12</li>
  *   <li>View 'Production and Inventory' connector references non-existent element: _1500</li>
- *   <li>View 'Production and Inventory' connector references non-existent element: _1500</li>
- *   <li>View 'Production and Inventory' connector references non-existent element: 2</li>
  *   <li>View 'Production and Inventory' connector references non-existent element: _1500</li>
  *   <li>View 'Production and Inventory' connector references non-existent element: _48</li>
  *   <li>View 'Production and Inventory' connector references non-existent element: _48</li>
@@ -67,26 +62,7 @@ import java.util.List;
  *   <li>View 'Labor' places non-existent element: _48</li>
  *   <li>View 'Labor' places non-existent element: _48</li>
  *   <li>View 'Labor' places non-existent element: _48</li>
- *   <li>View 'Labor' connector references non-existent element: 16</li>
- *   <li>View 'Labor' connector references non-existent element: 13</li>
- *   <li>View 'Labor' connector references non-existent element: 16</li>
- *   <li>View 'Labor' connector references non-existent element: 37</li>
- *   <li>View 'Labor' connector references non-existent element: 34</li>
- *   <li>View 'Labor' connector references non-existent element: 34</li>
- *   <li>View 'Labor' connector references non-existent element: 31</li>
- *   <li>View 'Labor' connector references non-existent element: 42</li>
- *   <li>View 'Labor' connector references non-existent element: 39</li>
- *   <li>View 'Labor' connector references non-existent element: 42</li>
  *   <li>View 'Labor' connector references non-existent element: _48</li>
- *   <li>View 'Labor' connector references non-existent element: 72</li>
- *   <li>View 'Labor' connector references non-existent element: 72</li>
- *   <li>View 'Labor' connector references non-existent element: 69</li>
- *   <li>View 'Labor' connector references non-existent element: 77</li>
- *   <li>View 'Labor' connector references non-existent element: 74</li>
- *   <li>View 'Labor' connector references non-existent element: 77</li>
- *   <li>View 'Labor' connector references non-existent element: 84</li>
- *   <li>View 'Labor' connector references non-existent element: 81</li>
- *   <li>View 'Labor' connector references non-existent element: 84</li>
  *   <li>View 'Labor' connector references non-existent element: _48</li>
  *   <li>View 'Labor' connector references non-existent element: _48</li>
  *   <li>View 'Labor' flow route references non-existent flow: _48</li>
@@ -95,11 +71,10 @@ import java.util.List;
  *   <li>View 'Labor' flow route references non-existent flow: _48</li>
  *   <li>View 'Labor' flow route references non-existent flow: _48</li>
  *   <li>View 'Labor' flow route references non-existent flow: _48</li>
+ *   <li>View 'Productivity' places non-existent element: TIME STEP</li>
  *   <li>View 'Productivity' places non-existent element: _92</li>
  *   <li>View 'Productivity' connector references non-existent element: _92</li>
- *   <li>View 'Productivity' connector references non-existent element: _92</li>
- *   <li>View 'Productivity' connector references non-existent element: 7</li>
- *   <li>View 'Productivity' connector references non-existent element: 22</li>
+ *   <li>View 'Productivity' connector references non-existent element: TIME STEP</li>
  *   <li>View 'Productivity' flow route references non-existent flow: _92</li>
  * </ul>
  */
@@ -114,27 +89,7 @@ public class WhitePinkNoise {
                 .name("1010_whitepinknoise")
                 .defaultSimulation("Week", 500.0, "Week", 0.125);
 
-        defineStocks(builder);
-        defineConstants(builder);
-        defineLookupTables(builder);
-        defineVariables(builder);
-        defineFlows(builder);
-
-        var definition = builder.build();
-        var compiled = new ModelCompiler().compile(definition);
-
-        compiled.getModel().setMetadata(ModelMetadata.builder()
-                .author("Dr. Erik Pruyt")
-                .source("Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5")
-                .license("CC-BY-NC-SA-4.0")
-                .url("https://simulation.tudelft.nl/SD/")
-                .build());
-
-        Simulation sim = compiled.createSimulation();
-        sim.execute();
-    }
-
-    private void defineStocks(ModelDefinitionBuilder builder) {
+        // Stocks
         builder.stock(new StockDef("Labor", "The labor force of the firm.", 0.0, "Desired_Labor", "People", null, List.of()));
         builder.stock(new StockDef("Vacancies", "The number of open positions the firm seeks to fill.", 0.0, "Desired_Vacancies", "People", null, List.of()));
         builder.stock(new StockDef("Pink Noise in Prody", "Pink Noise is first-order autocorrelated noise.  Pink noise provides a realistic  noise input to\n\t\t        models in which the next random shock depends in part on the previous  shocks.  The user\n\t\t        can specify the correlation time.  The mean and standard deviation are  specified\n\t\t         by the user.", 1.0, "Dimensionless", null));
@@ -143,12 +98,7 @@ public class WhitePinkNoise {
         builder.stock(new StockDef("Work in Process Inventory", "WIP inventory accumulates the difference between production starts and  completions.", 0.0, "Desired_WIP", "Widgets", null, List.of()));
         builder.stock(new StockDef("Pink Noise", "Pink Noise is first-order autocorrelated noise.  Pink noise provides a realistic  noise input to\n\t\t        models in which the next random shock depends in part on the previous  shocks.  The user\n\t\t        can specify the correlation time.  The mean is 0 and the standard deviation  is specified\n\t\t         by the user.", 0.0, "Dimensionless", null));
 
-    }
-
-    private void defineConstants(ModelDefinitionBuilder builder) {
-        builder.constant("TIME_STEP", 0.125, "Week");
-        builder.constant("INITIAL_TIME", 0.0, "Week");
-        builder.constant("FINAL_TIME", 500.0, "Week");
+        // Constants
         builder.constant("Average Duration of Employment", 100.0, "Weeks");
         builder.constant("Average Layoff Time", 8.0, "Weeks");
         builder.constant("Average Time to Fill Vacancies", 8.0, "Weeks");
@@ -188,14 +138,10 @@ public class WhitePinkNoise {
         builder.constant("Noise Standard Deviation", 0.0, "Dimensionless");
         builder.constant("Noise Seed", 1.0, "Dimensionless");
 
-    }
+        // Lookup tables
+        builder.lookupTable(new LookupTableDef("Table for Order Fulfillment", "The ability to ship is constrained by inventory availability.  As the inventory  level drops, the \n\t\t        fraction of customer orders that can be filled decreases.  When inventory is  zero, shipments\n\t\t         cease.  Unfilled customer orders are lost.\\!\\!\\!", new double[]{0.0, 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0}, new double[]{0.0, 0.2, 0.4, 0.58, 0.73, 0.85, 0.93, 0.97, 0.99, 1.0, 1.0}, "LINEAR", "Dimensionless"));
 
-    private void defineLookupTables(ModelDefinitionBuilder builder) {
-        builder.lookupTable(new LookupTableDef("Table for Order Fulfillment", "The ability to ship is constrained by inventory availability.  As the inventory  level drops, the \n\t\t        fraction of customer orders that can be filled decreases.  When inventory is  zero, shipments\n\t\t         cease.  Unfilled customer orders are lost.\\!\\!\\!", new double[]{0.0, 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0}, new double[]{0.0, 0.2, 0.4, 0.58, 0.73, 0.85, 0.93, 0.97, 0.99, 1.0, 1.0}, "LINEAR"));
-
-    }
-
-    private void defineVariables(ModelDefinitionBuilder builder) {
+        // Variables
         builder.variable(new VariableDef("Adjustment for Labor", "Adjusts the desired hiring rate to bring labor in line with the desired  level.", "(Desired_Labor - Labor)/Labor_Adjustment_Time", "People/Week"));
         builder.variable(new VariableDef("Production Start Rate", "The production start rate is determined by the labor force,  productivity,  and the workweek.", "Switch_for_Labor_in_Production*Labor*Workweek*Productivity + (1-Switch_for_Labor_in_Production )*Desired_Production_Start_Rate", "Widgets/Week"));
         builder.variable(new VariableDef("Adjustment for Vacancies", "Adjusts vacancy creation so the firm has the desired number of vacancies.", "(Desired_Vacancies - Vacancies)/Vacancy_Adjustment_Time", "People/Week"));
@@ -241,9 +187,7 @@ public class WhitePinkNoise {
         builder.variable(new VariableDef("Change in Pink Noise", "Change in the pink noise value; Pink noise is a first order exponential smoothing  delay of the white\n\t\t         noise input.", "(White_Noise - Pink_Noise)/Noise_Correlation_Time", "1/Week"));
         builder.variable(new VariableDef("White Noise", "White noise input to the pink noise process.", "Noise_Standard_Deviation*((24*Noise_Correlation_Time/TIME_STEP)**0.5*(RANDOM_UNIFORM(0, 1, 0) - 0.5 ))", "Dimensionless"));
 
-    }
-
-    private void defineFlows(ModelDefinitionBuilder builder) {
+        // Flows
         builder.flow(new FlowDef("Labor inflow 1", null, "Hiring_Rate", "Week", null, "Labor"));
         builder.flow(new FlowDef("Labor outflow 2", null, "Quit_Rate", "Week", "Labor", null));
         builder.flow(new FlowDef("Labor outflow 3", null, "Layoff_Rate", "Week", "Labor", null));
@@ -257,5 +201,18 @@ public class WhitePinkNoise {
         builder.flow(new FlowDef("Work in Process Inventory inflow 1", null, "Production_Start_Rate", "Week", null, "Work in Process Inventory"));
         builder.flow(new FlowDef("Work in Process Inventory outflow 2", null, "Production_Rate", "Week", "Work in Process Inventory", null));
         builder.flow(new FlowDef("Pink Noise net flow", "Net flow for Pink Noise", "Change_in_Pink_Noise", "Week", null, "Pink Noise"));
+
+        var definition = builder.build();
+        var compiled = new ModelCompiler().compile(definition);
+
+        compiled.getModel().setMetadata(ModelMetadata.builder()
+                .author("Dr. Erik Pruyt")
+                .source("Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5")
+                .license("CC-BY-NC-SA-4.0")
+                .url("https://simulation.tudelft.nl/SD/")
+                .build());
+
+        Simulation sim = compiled.createSimulation();
+        sim.execute();
     }
 }

@@ -6,7 +6,6 @@ package systems.courant.sd.demo.epidemiology;
 
 import systems.courant.sd.Simulation;
 import systems.courant.sd.model.ModelMetadata;
-import systems.courant.sd.model.compile.CompiledModel;
 import systems.courant.sd.model.compile.ModelCompiler;
 import systems.courant.sd.model.def.ModelDefinitionBuilder;
 import systems.courant.sd.model.def.VariableDef;
@@ -28,16 +27,8 @@ import java.util.List;
  *   <li>View 'View 1' places non-existent element: _412</li>
  *   <li>View 'View 1' places non-existent element: _140</li>
  *   <li>View 'View 1' places non-existent element: _348</li>
- *   <li>View 'View 1' connector references non-existent element: 7</li>
- *   <li>View 'View 1' connector references non-existent element: 7</li>
- *   <li>View 'View 1' connector references non-existent element: 11</li>
- *   <li>View 'View 1' connector references non-existent element: 11</li>
- *   <li>View 'View 1' connector references non-existent element: 15</li>
- *   <li>View 'View 1' connector references non-existent element: 15</li>
  *   <li>View 'View 1' connector references non-existent element: _412</li>
- *   <li>View 'View 1' connector references non-existent element: 40</li>
  *   <li>View 'View 1' connector references non-existent element: _140</li>
- *   <li>View 'View 1' connector references non-existent element: 30</li>
  *   <li>View 'View 1' connector references non-existent element: _412</li>
  *   <li>View 'View 1' flow route references non-existent flow: _412</li>
  *   <li>View 'View 1' flow route references non-existent flow: _140</li>
@@ -62,9 +53,6 @@ public class PneumonicPlague {
         builder.stock(new StockDef("deceased population", "deceased population", 0.0, "persons", null));
 
         // Constants
-        builder.constant("TIME_STEP", 0.0625, "Week");
-        builder.constant("INITIAL_TIME", 0.0, "Week");
-        builder.constant("FINAL_TIME", 6.0, "Week");
         builder.constant("fatality ratio", 0.9, "Dmnl");
         builder.constant("initial total population", 10000.0, "persons");
         builder.constant("contact rate", 20.0, "persons/persons/Week");

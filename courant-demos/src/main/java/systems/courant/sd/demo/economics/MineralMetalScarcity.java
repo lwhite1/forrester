@@ -6,7 +6,6 @@ package systems.courant.sd.demo.economics;
 
 import systems.courant.sd.Simulation;
 import systems.courant.sd.model.ModelMetadata;
-import systems.courant.sd.model.compile.CompiledModel;
 import systems.courant.sd.model.compile.ModelCompiler;
 import systems.courant.sd.model.def.ModelDefinitionBuilder;
 import systems.courant.sd.model.def.VariableDef;
@@ -46,43 +45,11 @@ import systems.courant.sd.model.def.StockDef;
  *   <li>View 'Demand Supply' places non-existent element: _428</li>
  *   <li>View 'Demand Supply' places non-existent element: _48</li>
  *   <li>View 'Demand Supply' places non-existent element: _48</li>
- *   <li>View 'Demand Supply' connector references non-existent element: 4</li>
- *   <li>View 'Demand Supply' connector references non-existent element: 7</li>
  *   <li>View 'Demand Supply' connector references non-existent element: _508</li>
- *   <li>View 'Demand Supply' connector references non-existent element: 16</li>
- *   <li>View 'Demand Supply' connector references non-existent element: 24</li>
- *   <li>View 'Demand Supply' connector references non-existent element: 24</li>
- *   <li>View 'Demand Supply' connector references non-existent element: 21</li>
- *   <li>View 'Demand Supply' connector references non-existent element: _156</li>
- *   <li>View 'Demand Supply' connector references non-existent element: 27</li>
- *   <li>View 'Demand Supply' connector references non-existent element: 39</li>
- *   <li>View 'Demand Supply' connector references non-existent element: 36</li>
- *   <li>View 'Demand Supply' connector references non-existent element: 39</li>
- *   <li>View 'Demand Supply' connector references non-existent element: 44</li>
- *   <li>View 'Demand Supply' connector references non-existent element: 44</li>
- *   <li>View 'Demand Supply' connector references non-existent element: 41</li>
- *   <li>View 'Demand Supply' connector references non-existent element: 76</li>
- *   <li>View 'Demand Supply' connector references non-existent element: 63</li>
- *   <li>View 'Demand Supply' connector references non-existent element: 60</li>
- *   <li>View 'Demand Supply' connector references non-existent element: 63</li>
  *   <li>View 'Demand Supply' connector references non-existent element: _48</li>
  *   <li>View 'Demand Supply' connector references non-existent element: _636</li>
- *   <li>View 'Demand Supply' connector references non-existent element: 81</li>
- *   <li>View 'Demand Supply' connector references non-existent element: 81</li>
- *   <li>View 'Demand Supply' connector references non-existent element: 78</li>
- *   <li>View 'Demand Supply' connector references non-existent element: 94</li>
- *   <li>View 'Demand Supply' connector references non-existent element: 94</li>
- *   <li>View 'Demand Supply' connector references non-existent element: 91</li>
- *   <li>View 'Demand Supply' connector references non-existent element: 98</li>
- *   <li>View 'Demand Supply' connector references non-existent element: 98</li>
- *   <li>View 'Demand Supply' connector references non-existent element: 103</li>
- *   <li>View 'Demand Supply' connector references non-existent element: 100</li>
- *   <li>View 'Demand Supply' connector references non-existent element: 103</li>
  *   <li>View 'Demand Supply' connector references non-existent element: _48</li>
  *   <li>View 'Demand Supply' connector references non-existent element: _48</li>
- *   <li>View 'Demand Supply' connector references non-existent element: 113</li>
- *   <li>View 'Demand Supply' connector references non-existent element: 110</li>
- *   <li>View 'Demand Supply' connector references non-existent element: 113</li>
  *   <li>View 'Demand Supply' connector references non-existent element: _48</li>
  *   <li>View 'Demand Supply' connector references non-existent element: _48</li>
  *   <li>View 'Demand Supply' connector references non-existent element: _48</li>
@@ -90,8 +57,6 @@ import systems.courant.sd.model.def.StockDef;
  *   <li>View 'Demand Supply' connector references non-existent element: _48</li>
  *   <li>View 'Demand Supply' connector references non-existent element: _48</li>
  *   <li>View 'Demand Supply' connector references non-existent element: _428</li>
- *   <li>View 'Demand Supply' connector references non-existent element: _636</li>
- *   <li>View 'Demand Supply' connector references non-existent element: 132</li>
  *   <li>View 'Demand Supply' connector references non-existent element: _48</li>
  *   <li>View 'Demand Supply' connector references non-existent element: _48</li>
  *   <li>View 'Demand Supply' flow route references non-existent flow: _156</li>
@@ -131,9 +96,6 @@ public class MineralMetalScarcity {
         builder.stock(new StockDef("Intrinsic Demand", "Intrinsic Demand", 100000.0, "t/Year", null));
 
         // Constants
-        builder.constant("TIME_STEP", 0.0625, "Year");
-        builder.constant("INITIAL_TIME", 2000.0, "Year");
-        builder.constant("FINAL_TIME", 2200.0, "Year");
         builder.constant("demand supply time", 1.0, "Year");
         builder.constant("planning time", 1.0, "Year");
         builder.constant("closing time", 1.0, "Year");

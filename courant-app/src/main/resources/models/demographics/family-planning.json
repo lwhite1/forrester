@@ -1,0 +1,667 @@
+{
+  "name" : "0607UnintendedFamilyPlanningBenefits",
+  "stocks" : [ {
+    "name" : "adults",
+    "comment" : "adults",
+    "initialValue" : 3000000.0,
+    "unit" : ""
+  }, {
+    "name" : "kids",
+    "comment" : "kids",
+    "initialValue" : 1000000.0,
+    "unit" : ""
+  }, {
+    "name" : "unborns",
+    "comment" : "unborns",
+    "initialValue" : 68000.0,
+    "unit" : ""
+  }, {
+    "name" : "retirees",
+    "comment" : "retirees",
+    "initialValue" : 750000.0,
+    "unit" : ""
+  }, {
+    "name" : "youngsters",
+    "comment" : "youngsters",
+    "initialValue" : 1000000.0,
+    "unit" : ""
+  } ],
+  "flows" : [ {
+    "name" : "adults inflow 1",
+    "equation" : "from_young_adults_to_adults",
+    "timeUnit" : "Year",
+    "sink" : "adults"
+  }, {
+    "name" : "adults outflow 2",
+    "equation" : "from_adults_to_retirees",
+    "timeUnit" : "Year",
+    "source" : "adults"
+  }, {
+    "name" : "kids inflow 1",
+    "equation" : "births",
+    "timeUnit" : "Year",
+    "sink" : "kids"
+  }, {
+    "name" : "kids outflow 2",
+    "equation" : "growing_up",
+    "timeUnit" : "Year",
+    "source" : "kids"
+  }, {
+    "name" : "unborns inflow 1",
+    "equation" : "conceptions",
+    "timeUnit" : "Year",
+    "sink" : "unborns"
+  }, {
+    "name" : "unborns outflow 2",
+    "equation" : "births",
+    "timeUnit" : "Year",
+    "source" : "unborns"
+  }, {
+    "name" : "unborns outflow 3",
+    "equation" : "early_ended_pregnancies",
+    "timeUnit" : "Year",
+    "source" : "unborns"
+  }, {
+    "name" : "retirees inflow 1",
+    "equation" : "from_adults_to_retirees",
+    "timeUnit" : "Year",
+    "sink" : "retirees"
+  }, {
+    "name" : "retirees outflow 2",
+    "equation" : "deaths",
+    "timeUnit" : "Year",
+    "source" : "retirees"
+  }, {
+    "name" : "youngsters inflow 1",
+    "equation" : "growing_up",
+    "timeUnit" : "Year",
+    "sink" : "youngsters"
+  }, {
+    "name" : "youngsters outflow 2",
+    "equation" : "from_young_adults_to_adults",
+    "timeUnit" : "Year",
+    "source" : "youngsters"
+  } ],
+  "variables" : [ {
+    "name" : "percentage of youngsters with criminal behavior",
+    "comment" : "percentage of youngsters with criminal behavior",
+    "equation" : "0.5",
+    "unit" : ""
+  }, {
+    "name" : "crimes by others",
+    "comment" : "crimes by others",
+    "equation" : "26000000",
+    "unit" : ""
+  }, {
+    "name" : "crimes",
+    "comment" : "crimes",
+    "equation" : "criminal_kids*ciminal_acts_per_criminal_kid + ciminal_acts_per_criminal_youngster*criminal_youngsters + criminal_acts_per_criminal_adult *criminal_adults + criminal_acts_per_criminal_retiree *criminal_retirees + crimes_by_others",
+    "unit" : ""
+  }, {
+    "name" : "criminal kids",
+    "comment" : "criminal kids",
+    "equation" : "kids*percentage_of_kids_and_youngsters_with_criminal_behavior",
+    "unit" : ""
+  }, {
+    "name" : "ciminal acts per criminal kid",
+    "comment" : "ciminal acts per criminal kid",
+    "equation" : "2",
+    "unit" : ""
+  }, {
+    "name" : "criminal youngsters",
+    "comment" : "criminal youngsters",
+    "equation" : "youngsters*percentage_of_youngsters_with_criminal_behavior",
+    "unit" : ""
+  }, {
+    "name" : "ciminal acts per criminal youngster",
+    "comment" : "ciminal acts per criminal youngster",
+    "equation" : "4",
+    "unit" : ""
+  }, {
+    "name" : "annual fertility rate adults",
+    "comment" : "annual fertility rate adults",
+    "equation" : "0.03",
+    "unit" : ""
+  }, {
+    "name" : "annual fertility rate youngsters",
+    "comment" : "annual fertility rate youngsters",
+    "equation" : "0.001",
+    "unit" : ""
+  }, {
+    "name" : "average time as adult",
+    "comment" : "average time as adult",
+    "equation" : "40",
+    "unit" : ""
+  }, {
+    "name" : "average time as kid",
+    "comment" : "average time as kid",
+    "equation" : "12",
+    "unit" : ""
+  }, {
+    "name" : "average time as retirees",
+    "comment" : "average time as retirees",
+    "equation" : "15",
+    "unit" : ""
+  }, {
+    "name" : "average time as youngster",
+    "comment" : "average time as youngster",
+    "equation" : "12",
+    "unit" : ""
+  }, {
+    "name" : "average time pregnancy",
+    "comment" : "average time pregnancy",
+    "equation" : "0.75",
+    "unit" : ""
+  }, {
+    "name" : "births",
+    "comment" : "births",
+    "equation" : "(1-percentage_early_ended_pregnancies) * unborns/average_time_pregnancy",
+    "unit" : ""
+  }, {
+    "name" : "percentage early ended pregnancies",
+    "comment" : "percentage early ended pregnancies",
+    "equation" : "0.75",
+    "unit" : ""
+  }, {
+    "name" : "criminal acts per criminal adult",
+    "comment" : "criminal acts per criminal adult",
+    "equation" : "12",
+    "unit" : ""
+  }, {
+    "name" : "criminal acts per criminal retiree",
+    "comment" : "criminal acts per criminal retiree",
+    "equation" : "4",
+    "unit" : ""
+  }, {
+    "name" : "criminal adults",
+    "comment" : "criminal adults",
+    "equation" : "adults*percentage_of_adults_with_criminal_behavior",
+    "unit" : ""
+  }, {
+    "name" : "criminal retirees",
+    "comment" : "criminal retirees",
+    "equation" : "retirees*percentage_of_retirees_with_criminal_behavior",
+    "unit" : ""
+  }, {
+    "name" : "ini youngsters",
+    "comment" : "ini youngsters",
+    "equation" : "1000000",
+    "unit" : ""
+  }, {
+    "name" : "ini adults",
+    "comment" : "ini adults",
+    "equation" : "3000000",
+    "unit" : ""
+  }, {
+    "name" : "ini kids",
+    "comment" : "ini kids",
+    "equation" : "1000000",
+    "unit" : ""
+  }, {
+    "name" : "percentage of adults with criminal behavior",
+    "comment" : "percentage of adults with criminal behavior",
+    "equation" : "0.6",
+    "unit" : ""
+  }, {
+    "name" : "percentage of retirees with criminal behavior",
+    "comment" : "percentage of retirees with criminal behavior",
+    "equation" : "0.1",
+    "unit" : ""
+  }, {
+    "name" : "total multiproblem family population",
+    "comment" : "\"total multi-problem family population\"",
+    "equation" : "adults+kids+retirees+youngsters",
+    "unit" : ""
+  }, {
+    "name" : "percentage of kids and youngsters with criminal behavior",
+    "comment" : "percentage of kids and youngsters with criminal behavior",
+    "equation" : "0.05",
+    "unit" : ""
+  }, {
+    "name" : "ini unborns",
+    "comment" : "ini unborns",
+    "equation" : "68000",
+    "unit" : ""
+  }, {
+    "name" : "ini retirees",
+    "comment" : "ini retirees",
+    "equation" : "750000",
+    "unit" : ""
+  }, {
+    "name" : "deaths",
+    "comment" : "deaths",
+    "equation" : "retirees/average_time_as_retirees",
+    "unit" : ""
+  }, {
+    "name" : "early ended pregnancies",
+    "comment" : "early ended pregnancies",
+    "equation" : "percentage_early_ended_pregnancies*unborns/average_time_pregnancy",
+    "unit" : ""
+  }, {
+    "name" : "from adults to retirees",
+    "comment" : "from adults to retirees",
+    "equation" : "adults/average_time_as_adult",
+    "unit" : ""
+  }, {
+    "name" : "from young adults to adults",
+    "comment" : "from young adults to adults",
+    "equation" : "youngsters/average_time_as_youngster",
+    "unit" : ""
+  }, {
+    "name" : "growing up",
+    "comment" : "growing up",
+    "equation" : "kids/average_time_as_kid",
+    "unit" : ""
+  }, {
+    "name" : "conceptions",
+    "comment" : "conceptions",
+    "equation" : "adults*annual_fertility_rate_adults + youngsters*annual_fertility_rate_youngsters",
+    "unit" : ""
+  } ],
+  "views" : [ {
+    "name" : "View 1",
+    "elements" : [ {
+      "name" : "kids",
+      "type" : "stock",
+      "x" : 416.0,
+      "y" : 147.0
+    }, {
+      "name" : "youngsters",
+      "type" : "stock",
+      "x" : 605.0,
+      "y" : 145.0
+    }, {
+      "name" : "adults",
+      "type" : "stock",
+      "x" : 813.0,
+      "y" : 141.0
+    }, {
+      "name" : "retirees",
+      "type" : "stock",
+      "x" : 1015.0,
+      "y" : 141.0
+    }, {
+      "name" : "_444",
+      "type" : "flow",
+      "x" : 510.0,
+      "y" : 146.0
+    }, {
+      "name" : "growing up",
+      "type" : "aux",
+      "x" : 510.0,
+      "y" : 165.0
+    }, {
+      "name" : "_684",
+      "type" : "flow",
+      "x" : 709.0,
+      "y" : 143.0
+    }, {
+      "name" : "from young adults to adults",
+      "type" : "aux",
+      "x" : 709.0,
+      "y" : 170.0
+    }, {
+      "name" : "_620",
+      "type" : "flow",
+      "x" : 914.0,
+      "y" : 143.0
+    }, {
+      "name" : "from adults to retirees",
+      "type" : "aux",
+      "x" : 914.0,
+      "y" : 170.0
+    }, {
+      "name" : "average time as kid",
+      "type" : "aux",
+      "x" : 521.0,
+      "y" : 230.0
+    }, {
+      "name" : "average time as youngster",
+      "type" : "aux",
+      "x" : 717.0,
+      "y" : 233.0
+    }, {
+      "name" : "average time as adult",
+      "type" : "aux",
+      "x" : 916.0,
+      "y" : 245.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 1123.0,
+      "y" : 142.0
+    }, {
+      "name" : "deaths",
+      "type" : "aux",
+      "x" : 1123.0,
+      "y" : 161.0
+    }, {
+      "name" : "average time as retirees",
+      "type" : "aux",
+      "x" : 1132.0,
+      "y" : 231.0
+    }, {
+      "name" : "unborns",
+      "type" : "stock",
+      "x" : 217.0,
+      "y" : 152.0
+    }, {
+      "name" : "_300",
+      "type" : "flow",
+      "x" : 316.0,
+      "y" : 149.0
+    }, {
+      "name" : "births",
+      "type" : "aux",
+      "x" : 316.0,
+      "y" : 168.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 120.0,
+      "y" : 151.0
+    }, {
+      "name" : "conceptions",
+      "type" : "aux",
+      "x" : 120.0,
+      "y" : 170.0
+    }, {
+      "name" : "average time pregnancy",
+      "type" : "aux",
+      "x" : 360.0,
+      "y" : 237.0
+    }, {
+      "name" : "annual fertility rate youngsters",
+      "type" : "aux",
+      "x" : 93.0,
+      "y" : 62.0
+    }, {
+      "name" : "annual fertility rate adults",
+      "type" : "aux",
+      "x" : 170.0,
+      "y" : -4.0
+    }, {
+      "name" : "ini unborns",
+      "type" : "aux",
+      "x" : 215.0,
+      "y" : 108.0
+    }, {
+      "name" : "ini kids",
+      "type" : "aux",
+      "x" : 414.0,
+      "y" : 109.0
+    }, {
+      "name" : "ini youngsters",
+      "type" : "aux",
+      "x" : 595.0,
+      "y" : 102.0
+    }, {
+      "name" : "ini adults",
+      "type" : "aux",
+      "x" : 808.0,
+      "y" : 96.0
+    }, {
+      "name" : "ini retirees",
+      "type" : "aux",
+      "x" : 1015.0,
+      "y" : 102.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 217.0,
+      "y" : 202.0
+    }, {
+      "name" : "early ended pregnancies",
+      "type" : "aux",
+      "x" : 263.0,
+      "y" : 202.0
+    }, {
+      "name" : "percentage early ended pregnancies",
+      "type" : "aux",
+      "x" : 299.0,
+      "y" : 273.0
+    }, {
+      "name" : "percentage of kids and youngsters with criminal behavior",
+      "type" : "aux",
+      "x" : 152.0,
+      "y" : 301.0
+    }, {
+      "name" : "percentage of adults with criminal behavior",
+      "type" : "aux",
+      "x" : 743.0,
+      "y" : 299.0
+    }, {
+      "name" : "criminal youngsters",
+      "type" : "aux",
+      "x" : 606.0,
+      "y" : 374.0
+    }, {
+      "name" : "criminal adults",
+      "type" : "aux",
+      "x" : 816.0,
+      "y" : 383.0
+    }, {
+      "name" : "criminal retirees",
+      "type" : "aux",
+      "x" : 1022.0,
+      "y" : 385.0
+    }, {
+      "name" : "ciminal acts per criminal youngster",
+      "type" : "aux",
+      "x" : 473.0,
+      "y" : 372.0
+    }, {
+      "name" : "criminal acts per criminal adult",
+      "type" : "aux",
+      "x" : 723.0,
+      "y" : 387.0
+    }, {
+      "name" : "criminal acts per criminal retiree",
+      "type" : "aux",
+      "x" : 915.0,
+      "y" : 383.0
+    }, {
+      "name" : "crimes",
+      "type" : "aux",
+      "x" : 474.0,
+      "y" : 504.0
+    }, {
+      "name" : "total multiproblem family population",
+      "type" : "aux",
+      "x" : 777.0,
+      "y" : -32.0
+    }, {
+      "name" : "percentage of retirees with criminal behavior",
+      "type" : "aux",
+      "x" : 916.0,
+      "y" : 301.0
+    }, {
+      "name" : "ciminal acts per criminal kid",
+      "type" : "aux",
+      "x" : 246.0,
+      "y" : 368.0
+    }, {
+      "name" : "criminal kids",
+      "type" : "aux",
+      "x" : 351.0,
+      "y" : 369.0
+    }, {
+      "name" : "crimes by others",
+      "type" : "aux",
+      "x" : 398.0,
+      "y" : 580.0
+    }, {
+      "name" : "percentage of youngsters with criminal behavior",
+      "type" : "aux",
+      "x" : 585.0,
+      "y" : 291.0
+    } ],
+    "connectors" : [ {
+      "from" : "kids",
+      "to" : "_444"
+    }, {
+      "from" : "youngsters",
+      "to" : "_684"
+    }, {
+      "from" : "adults",
+      "to" : "_620"
+    }, {
+      "from" : "retirees",
+      "to" : "_48"
+    }, {
+      "from" : "average time as kid",
+      "to" : "growing up"
+    }, {
+      "from" : "average time as youngster",
+      "to" : "from young adults to adults"
+    }, {
+      "from" : "average time as adult",
+      "to" : "from adults to retirees"
+    }, {
+      "from" : "average time as retirees",
+      "to" : "deaths"
+    }, {
+      "from" : "average time pregnancy",
+      "to" : "births"
+    }, {
+      "from" : "youngsters",
+      "to" : "_48"
+    }, {
+      "from" : "adults",
+      "to" : "_48"
+    }, {
+      "from" : "annual fertility rate youngsters",
+      "to" : "_48"
+    }, {
+      "from" : "annual fertility rate adults",
+      "to" : "_48"
+    }, {
+      "from" : "ini kids",
+      "to" : "kids"
+    }, {
+      "from" : "ini youngsters",
+      "to" : "youngsters"
+    }, {
+      "from" : "ini adults",
+      "to" : "adults"
+    }, {
+      "from" : "ini retirees",
+      "to" : "retirees"
+    }, {
+      "from" : "average time pregnancy",
+      "to" : "early ended pregnancies"
+    }, {
+      "from" : "percentage early ended pregnancies",
+      "to" : "early ended pregnancies"
+    }, {
+      "from" : "percentage early ended pregnancies",
+      "to" : "births"
+    }, {
+      "from" : "unborns",
+      "to" : "early ended pregnancies"
+    }, {
+      "from" : "ini unborns",
+      "to" : "unborns"
+    }, {
+      "from" : "youngsters",
+      "to" : "criminal youngsters"
+    }, {
+      "from" : "adults",
+      "to" : "criminal adults"
+    }, {
+      "from" : "percentage of adults with criminal behavior",
+      "to" : "criminal adults"
+    }, {
+      "from" : "retirees",
+      "to" : "criminal retirees"
+    }, {
+      "from" : "criminal youngsters",
+      "to" : "crimes"
+    }, {
+      "from" : "ciminal acts per criminal youngster",
+      "to" : "crimes"
+    }, {
+      "from" : "criminal acts per criminal adult",
+      "to" : "crimes"
+    }, {
+      "from" : "criminal adults",
+      "to" : "crimes"
+    }, {
+      "from" : "criminal acts per criminal retiree",
+      "to" : "crimes"
+    }, {
+      "from" : "criminal retirees",
+      "to" : "crimes"
+    }, {
+      "from" : "kids",
+      "to" : "total multiproblem family population"
+    }, {
+      "from" : "youngsters",
+      "to" : "total multiproblem family population"
+    }, {
+      "from" : "adults",
+      "to" : "total multiproblem family population"
+    }, {
+      "from" : "retirees",
+      "to" : "total multiproblem family population"
+    }, {
+      "from" : "percentage of retirees with criminal behavior",
+      "to" : "criminal retirees"
+    }, {
+      "from" : "unborns",
+      "to" : "births"
+    }, {
+      "from" : "ciminal acts per criminal kid",
+      "to" : "crimes"
+    }, {
+      "from" : "criminal kids",
+      "to" : "crimes"
+    }, {
+      "from" : "kids",
+      "to" : "criminal kids"
+    }, {
+      "from" : "percentage of kids and youngsters with criminal behavior",
+      "to" : "criminal kids"
+    }, {
+      "from" : "crimes by others",
+      "to" : "crimes"
+    }, {
+      "from" : "percentage of youngsters with criminal behavior",
+      "to" : "criminal youngsters"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_444",
+      "points" : [ [ 510.0, 146.0 ] ]
+    }, {
+      "flowName" : "_684",
+      "points" : [ [ 709.0, 143.0 ] ]
+    }, {
+      "flowName" : "_620",
+      "points" : [ [ 914.0, 143.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 1123.0, 142.0 ] ]
+    }, {
+      "flowName" : "_300",
+      "points" : [ [ 316.0, 149.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 120.0, 151.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 217.0, 202.0 ] ]
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Year",
+    "duration" : 50.0,
+    "durationUnit" : "Year",
+    "dt" : 0.125
+  },
+  "metadata" : {
+    "author" : "Dr. Erik Pruyt",
+    "source" : "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
+    "license" : "CC-BY-NC-SA-4.0",
+    "url" : "https://simulation.tudelft.nl/SD/"
+  }
+}

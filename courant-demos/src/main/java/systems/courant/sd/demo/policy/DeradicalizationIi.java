@@ -6,7 +6,6 @@ package systems.courant.sd.demo.policy;
 
 import systems.courant.sd.Simulation;
 import systems.courant.sd.model.ModelMetadata;
-import systems.courant.sd.model.compile.CompiledModel;
 import systems.courant.sd.model.compile.ModelCompiler;
 import systems.courant.sd.model.def.ModelDefinitionBuilder;
 import systems.courant.sd.model.def.VariableDef;
@@ -29,20 +28,11 @@ import systems.courant.sd.model.def.StockDef;
  *   <li>View 'View 1' places non-existent element: _140</li>
  *   <li>View 'View 1' places non-existent element: _588</li>
  *   <li>View 'View 1' places non-existent element: Time</li>
- *   <li>View 'View 1' connector references non-existent element: 5</li>
- *   <li>View 'View 1' connector references non-existent element: 5</li>
- *   <li>View 'View 1' connector references non-existent element: 2</li>
- *   <li>View 'View 1' connector references non-existent element: 24</li>
- *   <li>View 'View 1' connector references non-existent element: 24</li>
  *   <li>View 'View 1' connector references non-existent element: _428</li>
  *   <li>View 'View 1' connector references non-existent element: _48</li>
  *   <li>View 'View 1' connector references non-existent element: _48</li>
  *   <li>View 'View 1' connector references non-existent element: _428</li>
  *   <li>View 'View 1' connector references non-existent element: _428</li>
- *   <li>View 'View 1' connector references non-existent element: 68</li>
- *   <li>View 'View 1' connector references non-existent element: 68</li>
- *   <li>View 'View 1' connector references non-existent element: 72</li>
- *   <li>View 'View 1' connector references non-existent element: 72</li>
  *   <li>View 'View 1' connector references non-existent element: _140</li>
  *   <li>View 'View 1' connector references non-existent element: _140</li>
  *   <li>View 'View 1' connector references non-existent element: _588</li>
@@ -73,9 +63,6 @@ public class DeradicalizationIi {
         builder.stock(new StockDef("animal distress", "animal distress", 100.0, "Dmnl", null));
 
         // Constants
-        builder.constant("TIME_STEP", 0.125, "Year");
-        builder.constant("INITIAL_TIME", 1980.0, "Year");
-        builder.constant("FINAL_TIME", 2080.0, "Year");
         builder.constant("commitment of radical individuals to radical action", 1.0, "1/citizens");
         builder.constant("potential fraction of extremists", 0.1, "Dmnl");
         builder.constant("average time to change states", 10.0, "Year");

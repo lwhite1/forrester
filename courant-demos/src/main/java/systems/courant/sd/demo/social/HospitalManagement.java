@@ -6,7 +6,6 @@ package systems.courant.sd.demo.social;
 
 import systems.courant.sd.Simulation;
 import systems.courant.sd.model.ModelMetadata;
-import systems.courant.sd.model.compile.CompiledModel;
 import systems.courant.sd.model.compile.ModelCompiler;
 import systems.courant.sd.model.def.ModelDefinitionBuilder;
 import systems.courant.sd.model.def.VariableDef;
@@ -33,25 +32,8 @@ import java.util.List;
  *   <li>View 'View 1' places non-existent element: _316</li>
  *   <li>View 'View 1' places non-existent element: _588</li>
  *   <li>View 'View 1' places non-existent element: _48</li>
- *   <li>View 'View 1' connector references non-existent element: 7</li>
- *   <li>View 'View 1' connector references non-existent element: 4</li>
- *   <li>View 'View 1' connector references non-existent element: 7</li>
- *   <li>View 'View 1' connector references non-existent element: 11</li>
- *   <li>View 'View 1' connector references non-existent element: 11</li>
- *   <li>View 'View 1' connector references non-existent element: 15</li>
- *   <li>View 'View 1' connector references non-existent element: 15</li>
- *   <li>View 'View 1' connector references non-existent element: 20</li>
- *   <li>View 'View 1' connector references non-existent element: 17</li>
- *   <li>View 'View 1' connector references non-existent element: 20</li>
- *   <li>View 'View 1' connector references non-existent element: 25</li>
- *   <li>View 'View 1' connector references non-existent element: 25</li>
- *   <li>View 'View 1' connector references non-existent element: 28</li>
  *   <li>View 'View 1' connector references non-existent element: _316</li>
- *   <li>View 'View 1' connector references non-existent element: 32</li>
  *   <li>View 'View 1' connector references non-existent element: _588</li>
- *   <li>View 'View 1' connector references non-existent element: 38</li>
- *   <li>View 'View 1' connector references non-existent element: 38</li>
- *   <li>View 'View 1' connector references non-existent element: 35</li>
  *   <li>View 'View 1' connector references non-existent element: _588</li>
  *   <li>View 'View 1' connector references non-existent element: _588</li>
  *   <li>View 'View 1' connector references non-existent element: _380</li>
@@ -91,9 +73,6 @@ public class HospitalManagement {
         builder.stock(new StockDef("PreOperative Patients on the Waiting List for Hospitalisation", "\"Pre-Operative Patients on the Waiting List for Hospitalisation\"", 2000.0, "patient", null));
 
         // Constants
-        builder.constant("TIME_STEP", 0.03125, "Week");
-        builder.constant("INITIAL_TIME", 0.0, "Week");
-        builder.constant("FINAL_TIME", 156.0, "Week");
         builder.constant("Average Administrative Processing Time before Hospitalisation", 1.0, "Week");
         builder.constant("Average Administrative Processing Time before Hospitalisation of Transfer to Aftercare", 1.0, "Week");
         builder.constant("Capacity Extension of the Aftercare", 0.0, "patient");

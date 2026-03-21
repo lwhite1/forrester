@@ -6,7 +6,6 @@ package systems.courant.sd.demo.social;
 
 import systems.courant.sd.Simulation;
 import systems.courant.sd.model.ModelMetadata;
-import systems.courant.sd.model.compile.CompiledModel;
 import systems.courant.sd.model.compile.ModelCompiler;
 import systems.courant.sd.model.def.ModelDefinitionBuilder;
 import systems.courant.sd.model.def.VariableDef;
@@ -32,27 +31,10 @@ import systems.courant.sd.model.def.StockDef;
  *   <li>View 'View 1' places non-existent element: _556</li>
  *   <li>View 'View 1' places non-existent element: _48</li>
  *   <li>View 'View 1' places non-existent element: _48</li>
- *   <li>View 'View 1' connector references non-existent element: 7</li>
- *   <li>View 'View 1' connector references non-existent element: 7</li>
- *   <li>View 'View 1' connector references non-existent element: 4</li>
- *   <li>View 'View 1' connector references non-existent element: 11</li>
- *   <li>View 'View 1' connector references non-existent element: 11</li>
+ *   <li>View 'View 1' places non-existent element: TIME STEP</li>
  *   <li>View 'View 1' connector references non-existent element: _48</li>
- *   <li>View 'View 1' connector references non-existent element: 24</li>
- *   <li>View 'View 1' connector references non-existent element: 24</li>
- *   <li>View 'View 1' connector references non-existent element: 21</li>
- *   <li>View 'View 1' connector references non-existent element: 29</li>
- *   <li>View 'View 1' connector references non-existent element: 29</li>
- *   <li>View 'View 1' connector references non-existent element: 26</li>
  *   <li>View 'View 1' connector references non-existent element: _140</li>
- *   <li>View 'View 1' connector references non-existent element: 58</li>
- *   <li>View 'View 1' connector references non-existent element: 55</li>
- *   <li>View 'View 1' connector references non-existent element: 58</li>
- *   <li>View 'View 1' connector references non-existent element: 68</li>
- *   <li>View 'View 1' connector references non-existent element: 65</li>
- *   <li>View 'View 1' connector references non-existent element: 68</li>
- *   <li>View 'View 1' connector references non-existent element: _140</li>
- *   <li>View 'View 1' connector references non-existent element: 84</li>
+ *   <li>View 'View 1' connector references non-existent element: TIME STEP</li>
  *   <li>View 'View 1' connector references non-existent element: _140</li>
  *   <li>View 'View 1' connector references non-existent element: _48</li>
  *   <li>View 'View 1' connector references non-existent element: _48</li>
@@ -83,9 +65,6 @@ public class ProstitutionTrafficking {
         builder.stock(new StockDef("children", "children", 4000000.0, "person", null));
 
         // Constants
-        builder.constant("TIME_STEP", 0.0078125, "Year");
-        builder.constant("INITIAL_TIME", 2000.0, "Year");
-        builder.constant("FINAL_TIME", 2040.0, "Year");
         builder.constant("delivery time", 1.0, "Year");
         builder.constant("naked costs per sex service", 20.0, "euro/service");
         builder.constant("frequency of prostitution visit", 24.0, "");

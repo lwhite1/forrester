@@ -6,7 +6,6 @@ package systems.courant.sd.demo.management;
 
 import systems.courant.sd.Simulation;
 import systems.courant.sd.model.ModelMetadata;
-import systems.courant.sd.model.compile.CompiledModel;
 import systems.courant.sd.model.compile.ModelCompiler;
 import systems.courant.sd.model.def.ModelDefinitionBuilder;
 import systems.courant.sd.model.def.VariableDef;
@@ -27,19 +26,7 @@ import systems.courant.sd.model.def.StockDef;
  *   <li>View 'View 1' places non-existent element: _48</li>
  *   <li>View 'View 1' places non-existent element: _48</li>
  *   <li>View 'View 1' places non-existent element: _48</li>
- *   <li>View 'View 1' connector references non-existent element: 5</li>
- *   <li>View 'View 1' connector references non-existent element: 5</li>
- *   <li>View 'View 1' connector references non-existent element: 2</li>
- *   <li>View 'View 1' connector references non-existent element: 10</li>
- *   <li>View 'View 1' connector references non-existent element: 7</li>
- *   <li>View 'View 1' connector references non-existent element: 10</li>
  *   <li>View 'View 1' connector references non-existent element: _48</li>
- *   <li>View 'View 1' connector references non-existent element: 19</li>
- *   <li>View 'View 1' connector references non-existent element: 16</li>
- *   <li>View 'View 1' connector references non-existent element: 19</li>
- *   <li>View 'View 1' connector references non-existent element: 24</li>
- *   <li>View 'View 1' connector references non-existent element: 24</li>
- *   <li>View 'View 1' connector references non-existent element: 21</li>
  *   <li>View 'View 1' connector references non-existent element: _48</li>
  *   <li>View 'View 1' connector references non-existent element: _48</li>
  *   <li>View 'View 1' connector references non-existent element: _48</li>
@@ -66,9 +53,6 @@ public class ManagingFaculty {
         builder.stock(new StockDef("professors", "professors", 25.0, "person", null));
 
         // Constants
-        builder.constant("TIME_STEP", 0.0625, "Month");
-        builder.constant("INITIAL_TIME", 0.0, "Month");
-        builder.constant("FINAL_TIME", 200.0, "Month");
         builder.constant("budgetcoverage", 1.0, "Month");
         builder.constant("teaching fee", 150000.0, "euro/Month");
         builder.constant("average hiring time", 12.0, "Month");

@@ -6,7 +6,6 @@ package systems.courant.sd.demo.management;
 
 import systems.courant.sd.Simulation;
 import systems.courant.sd.model.ModelMetadata;
-import systems.courant.sd.model.compile.CompiledModel;
 import systems.courant.sd.model.compile.ModelCompiler;
 import systems.courant.sd.model.def.ModelDefinitionBuilder;
 import systems.courant.sd.model.def.VariableDef;
@@ -33,38 +32,14 @@ import java.util.List;
  *   <li>View 'View 1' places non-existent element: _668</li>
  *   <li>View 'View 1' places non-existent element: _48</li>
  *   <li>View 'View 1' places non-existent element: _48</li>
- *   <li>View 'View 1' connector references non-existent element: 5</li>
- *   <li>View 'View 1' connector references non-existent element: 5</li>
- *   <li>View 'View 1' connector references non-existent element: 2</li>
- *   <li>View 'View 1' connector references non-existent element: 10</li>
- *   <li>View 'View 1' connector references non-existent element: 7</li>
- *   <li>View 'View 1' connector references non-existent element: 10</li>
- *   <li>View 'View 1' connector references non-existent element: 16</li>
- *   <li>View 'View 1' connector references non-existent element: _636</li>
- *   <li>View 'View 1' connector references non-existent element: 18</li>
  *   <li>View 'View 1' connector references non-existent element: _636</li>
  *   <li>View 'View 1' connector references non-existent element: _636</li>
- *   <li>View 'View 1' connector references non-existent element: 27</li>
- *   <li>View 'View 1' connector references non-existent element: 27</li>
- *   <li>View 'View 1' connector references non-existent element: 24</li>
- *   <li>View 'View 1' connector references non-existent element: 32</li>
- *   <li>View 'View 1' connector references non-existent element: 29</li>
- *   <li>View 'View 1' connector references non-existent element: 32</li>
- *   <li>View 'View 1' connector references non-existent element: 38</li>
- *   <li>View 'View 1' connector references non-existent element: _668</li>
- *   <li>View 'View 1' connector references non-existent element: 40</li>
  *   <li>View 'View 1' connector references non-existent element: _668</li>
  *   <li>View 'View 1' connector references non-existent element: _668</li>
  *   <li>View 'View 1' connector references non-existent element: _48</li>
  *   <li>View 'View 1' connector references non-existent element: _48</li>
  *   <li>View 'View 1' connector references non-existent element: _48</li>
  *   <li>View 'View 1' connector references non-existent element: _48</li>
- *   <li>View 'View 1' connector references non-existent element: 64</li>
- *   <li>View 'View 1' connector references non-existent element: 64</li>
- *   <li>View 'View 1' connector references non-existent element: 61</li>
- *   <li>View 'View 1' connector references non-existent element: 70</li>
- *   <li>View 'View 1' connector references non-existent element: 70</li>
- *   <li>View 'View 1' connector references non-existent element: 67</li>
  *   <li>View 'View 1' flow route references non-existent flow: _48</li>
  *   <li>View 'View 1' flow route references non-existent flow: _48</li>
  *   <li>View 'View 1' flow route references non-existent flow: _636</li>
@@ -95,9 +70,6 @@ public class ProductionManagement {
         builder.stock(new StockDef("production capacity components line", "production capacity components line", 0.0, "number_of_components_per_finished_product*internal_order_rate_final_product", "component/week", null, List.of()));
 
         // Constants
-        builder.constant("TIME_STEP", 0.0625, "Week");
-        builder.constant("INITIAL_TIME", 0.0, "Week");
-        builder.constant("FINAL_TIME", 208.0, "Week");
         builder.constant("desired component inventory coverage", 1.5, "week");
         builder.constant("assembly time", 1.0, "week");
         builder.constant("component production time", 1.0, "week");

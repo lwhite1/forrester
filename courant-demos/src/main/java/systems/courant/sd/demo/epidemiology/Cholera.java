@@ -6,7 +6,6 @@ package systems.courant.sd.demo.epidemiology;
 
 import systems.courant.sd.Simulation;
 import systems.courant.sd.model.ModelMetadata;
-import systems.courant.sd.model.compile.CompiledModel;
 import systems.courant.sd.model.compile.ModelCompiler;
 import systems.courant.sd.model.def.ModelDefinitionBuilder;
 import systems.courant.sd.model.def.VariableDef;
@@ -34,33 +33,14 @@ import java.util.List;
  *   <li>View 'View 1' places non-existent element: _652</li>
  *   <li>View 'View 1' places non-existent element: _668</li>
  *   <li>View 'View 1' places non-existent element: _48</li>
- *   <li>View 'View 1' connector references non-existent element: 8</li>
  *   <li>View 'View 1' connector references non-existent element: _556</li>
- *   <li>View 'View 1' connector references non-existent element: 13</li>
- *   <li>View 'View 1' connector references non-existent element: 13</li>
- *   <li>View 'View 1' connector references non-existent element: 17</li>
- *   <li>View 'View 1' connector references non-existent element: 17</li>
- *   <li>View 'View 1' connector references non-existent element: 21</li>
- *   <li>View 'View 1' connector references non-existent element: 21</li>
- *   <li>View 'View 1' connector references non-existent element: 25</li>
- *   <li>View 'View 1' connector references non-existent element: 25</li>
- *   <li>View 'View 1' connector references non-existent element: 29</li>
- *   <li>View 'View 1' connector references non-existent element: 29</li>
- *   <li>View 'View 1' connector references non-existent element: 33</li>
- *   <li>View 'View 1' connector references non-existent element: 33</li>
  *   <li>View 'View 1' connector references non-existent element: _684</li>
- *   <li>View 'View 1' connector references non-existent element: 66</li>
- *   <li>View 'View 1' connector references non-existent element: 45</li>
  *   <li>View 'View 1' connector references non-existent element: _604</li>
  *   <li>View 'View 1' connector references non-existent element: _652</li>
- *   <li>View 'View 1' connector references non-existent element: 70</li>
  *   <li>View 'View 1' connector references non-existent element: _156</li>
  *   <li>View 'View 1' connector references non-existent element: _604</li>
  *   <li>View 'View 1' connector references non-existent element: _604</li>
  *   <li>View 'View 1' connector references non-existent element: _172</li>
- *   <li>View 'View 1' connector references non-existent element: 75</li>
- *   <li>View 'View 1' connector references non-existent element: 75</li>
- *   <li>View 'View 1' connector references non-existent element: 72</li>
  *   <li>View 'View 1' connector references non-existent element: _48</li>
  *   <li>View 'View 1' connector references non-existent element: _48</li>
  *   <li>View 'View 1' flow route references non-existent flow: _556</li>
@@ -94,9 +74,6 @@ public class Cholera {
         builder.stock(new StockDef("susceptible population", "susceptible population", 3000000.0, "", null));
 
         // Constants
-        builder.constant("TIME_STEP", 0.5, "Day");
-        builder.constant("INITIAL_TIME", 0.0, "Day");
-        builder.constant("FINAL_TIME", 3650.0, "Day");
         builder.constant("level of prevention", 0.1, "Dmnl");
         builder.constant("connectedness of aquifers", 0.28, "");
         builder.constant("effect of the average health condition on the fraction of mildly infected of all infected", 0.95, "");

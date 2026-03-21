@@ -1,0 +1,253 @@
+{
+  "name" : "1013Mass starvation Oostvaardersplassen",
+  "stocks" : [ {
+    "name" : "large herbivores",
+    "comment" : "large herbivores",
+    "initialValue" : 75.0,
+    "unit" : ""
+  } ],
+  "flows" : [ {
+    "name" : "large herbivores inflow 1",
+    "equation" : "births",
+    "timeUnit" : "Year",
+    "sink" : "large herbivores"
+  }, {
+    "name" : "large herbivores outflow 2",
+    "equation" : "deaths",
+    "timeUnit" : "Year",
+    "source" : "large herbivores"
+  } ],
+  "variables" : [ {
+    "name" : "deaths",
+    "comment" : "deaths",
+    "equation" : "death_randomizer*death_season*large_herbivores*percentage_death_rates/length_of_death_season",
+    "unit" : ""
+  }, {
+    "name" : "birth randomizer",
+    "comment" : "birth randomizer",
+    "equation" : "RANDOM_NORMAL(0, 2, 1, 0.5, 2)",
+    "unit" : ""
+  }, {
+    "name" : "birth season",
+    "comment" : "birth season",
+    "equation" : "PULSE_TRAIN(1982.5, length_of_the_birth_seaseon ,1 , 2050 )",
+    "unit" : ""
+  }, {
+    "name" : "births",
+    "comment" : "births",
+    "equation" : "birth_randomizer*birth_season*large_herbivores*percentage_birth_rate/length_of_the_birth_seaseon",
+    "unit" : ""
+  }, {
+    "name" : "death randomizer",
+    "comment" : "death randomizer",
+    "equation" : "RANDOM_UNIFORM(0.5, 3, 3)",
+    "unit" : ""
+  }, {
+    "name" : "death season",
+    "comment" : "death season",
+    "equation" : "PULSE_TRAIN(1982.5, length_of_death_season , 1 , 2050)",
+    "unit" : ""
+  }, {
+    "name" : "length of death season",
+    "comment" : "length of death season",
+    "equation" : "0.25",
+    "unit" : ""
+  }, {
+    "name" : "length of the birth seaseon",
+    "comment" : "length of the birth seaseon",
+    "equation" : "0.25",
+    "unit" : ""
+  }, {
+    "name" : "percentage birth rate",
+    "comment" : "percentage birth rate",
+    "equation" : "LOOKUP(percentage_birth_rate_lookup, large_herbivores)",
+    "unit" : ""
+  }, {
+    "name" : "percentage death rates",
+    "comment" : "percentage death rates",
+    "equation" : "LOOKUP(percentage_death_rates_lookup, large_herbivores)",
+    "unit" : ""
+  }, {
+    "name" : "smoothed birth info",
+    "comment" : "smoothed birth info",
+    "equation" : "SMOOTH3(births, 1 )",
+    "unit" : ""
+  }, {
+    "name" : "smoothed info on nr of herbivores",
+    "comment" : "smoothed info on nr of herbivores",
+    "equation" : "SMOOTH3(large_herbivores, 1 )",
+    "unit" : ""
+  }, {
+    "name" : "smoothed nr of deaths",
+    "comment" : "\"smoothed nr. of deaths\"",
+    "equation" : "SMOOTH3(deaths, 1)",
+    "unit" : ""
+  } ],
+  "lookupTables" : [ {
+    "name" : "percentage_birth_rate_lookup",
+    "xValues" : [ 0.0, 1000.0, 2000.0, 3000.0, 4000.0, 5000.0 ],
+    "yValues" : [ 0.5, 0.42, 0.36, 0.28, 0.2, 0.15 ],
+    "interpolation" : "LINEAR"
+  }, {
+    "name" : "percentage_death_rates_lookup",
+    "xValues" : [ 0.0, 1000.0, 2000.0, 3000.0, 4000.0, 5000.0, 6000.0 ],
+    "yValues" : [ 0.05, 0.08, 0.12, 0.2, 0.3, 0.45, 0.7 ],
+    "interpolation" : "LINEAR"
+  } ],
+  "views" : [ {
+    "name" : "View 1",
+    "elements" : [ {
+      "name" : "large herbivores",
+      "type" : "stock",
+      "x" : 529.0,
+      "y" : 254.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 406.0,
+      "y" : 254.0
+    }, {
+      "name" : "births",
+      "type" : "aux",
+      "x" : 406.0,
+      "y" : 273.0
+    }, {
+      "name" : "percentage birth rate",
+      "type" : "aux",
+      "x" : 303.0,
+      "y" : 159.0
+    }, {
+      "name" : "birth season",
+      "type" : "aux",
+      "x" : 317.0,
+      "y" : 327.0
+    }, {
+      "name" : "birth randomizer",
+      "type" : "aux",
+      "x" : 255.0,
+      "y" : 293.0
+    }, {
+      "name" : "length of the birth seaseon",
+      "type" : "aux",
+      "x" : 231.0,
+      "y" : 224.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 674.0,
+      "y" : 252.0
+    }, {
+      "name" : "deaths",
+      "type" : "aux",
+      "x" : 674.0,
+      "y" : 271.0
+    }, {
+      "name" : "percentage death rates",
+      "type" : "aux",
+      "x" : 813.0,
+      "y" : 169.0
+    }, {
+      "name" : "length of death season",
+      "type" : "aux",
+      "x" : 803.0,
+      "y" : 221.0
+    }, {
+      "name" : "death randomizer",
+      "type" : "aux",
+      "x" : 811.0,
+      "y" : 293.0
+    }, {
+      "name" : "death season",
+      "type" : "aux",
+      "x" : 765.0,
+      "y" : 350.0
+    }, {
+      "name" : "smoothed birth info",
+      "type" : "aux",
+      "x" : 403.0,
+      "y" : 452.0
+    }, {
+      "name" : "smoothed info on nr of herbivores",
+      "type" : "aux",
+      "x" : 548.0,
+      "y" : 457.0
+    }, {
+      "name" : "smoothed nr of deaths",
+      "type" : "aux",
+      "x" : 694.0,
+      "y" : 455.0
+    } ],
+    "connectors" : [ {
+      "from" : "large herbivores",
+      "to" : "births"
+    }, {
+      "from" : "birth season",
+      "to" : "births"
+    }, {
+      "from" : "birth randomizer",
+      "to" : "births"
+    }, {
+      "from" : "length of the birth seaseon",
+      "to" : "births"
+    }, {
+      "from" : "percentage birth rate",
+      "to" : "births"
+    }, {
+      "from" : "large herbivores",
+      "to" : "deaths"
+    }, {
+      "from" : "death season",
+      "to" : "deaths"
+    }, {
+      "from" : "death randomizer",
+      "to" : "deaths"
+    }, {
+      "from" : "length of death season",
+      "to" : "_48"
+    }, {
+      "from" : "percentage death rates",
+      "to" : "_48"
+    }, {
+      "from" : "length of the birth seaseon",
+      "to" : "birth season"
+    }, {
+      "from" : "length of death season",
+      "to" : "death season"
+    }, {
+      "from" : "large herbivores",
+      "to" : "percentage birth rate"
+    }, {
+      "from" : "large herbivores",
+      "to" : "percentage death rates"
+    }, {
+      "from" : "births",
+      "to" : "smoothed birth info"
+    }, {
+      "from" : "large herbivores",
+      "to" : "smoothed info on nr of herbivores"
+    }, {
+      "from" : "deaths",
+      "to" : "smoothed nr of deaths"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_48",
+      "points" : [ [ 406.0, 254.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 674.0, 252.0 ] ]
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Year",
+    "duration" : 65.0,
+    "durationUnit" : "Year",
+    "dt" : 0.25,
+    "initialTime" : 1985.0
+  },
+  "metadata" : {
+    "author" : "Dr. Erik Pruyt",
+    "source" : "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
+    "license" : "CC-BY-NC-SA-4.0",
+    "url" : "https://simulation.tudelft.nl/SD/"
+  }
+}

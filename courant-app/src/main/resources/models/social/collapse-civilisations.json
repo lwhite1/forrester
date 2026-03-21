@@ -1,0 +1,292 @@
+{
+  "name" : "1822_CollapseOfCivilisations",
+  "stocks" : [ {
+    "name" : "Population",
+    "comment" : "If we assume 2,000,000 inhabitants in the moment of collapse (+800 A.D.),  we can obtain the initial value in year 1000 B.D., with a rate of 0.17%.  They  were 100.000 inhabitants aprox.",
+    "initialValue" : 100000.0,
+    "unit" : "person"
+  }, {
+    "name" : "Fertility of Lands",
+    "comment" : "With the initial value of 5,000,000 kg/km2 we can obtain 40,000,000 kg if  we have  8 km2 of Land. This is equal to the inicial food demanded for  100,000 inhabitants with a Consumed food per person equal to 400 kg every  year.",
+    "initialValue" : 5000000.0,
+    "unit" : "kg/(km2*year)"
+  }, {
+    "name" : "Lands",
+    "comment" : "Initial value is obtained from the total food consumed 40,000,000 kg every  year for the initial value of inhabitants: 100.000 persons, and an Initial  fertility of Land of 5.000.000 kg/km2 and year. (40,000,000/5,000,000=8)",
+    "initialValue" : 8.0,
+    "unit" : "km2"
+  }, {
+    "name" : "Forest",
+    "comment" : "Initial value is obtained from an assumed density of 400 person/km2, and  from the final inhabitants assumed: 2.000.000 persons (2 000 000/400=5,000)",
+    "initialValue" : 5000.0,
+    "unit" : "km2"
+  } ],
+  "flows" : [ {
+    "name" : "Population inflow 1",
+    "equation" : "Natural_Increase",
+    "timeUnit" : "Year",
+    "sink" : "Population"
+  }, {
+    "name" : "Population outflow 2",
+    "equation" : "Emigration",
+    "timeUnit" : "Year",
+    "source" : "Population"
+  }, {
+    "name" : "Fertility of Lands net flow",
+    "comment" : "Net flow for Fertility of Lands",
+    "equation" : "-Losses",
+    "timeUnit" : "Year",
+    "sink" : "Fertility of Lands"
+  }, {
+    "name" : "Lands net flow",
+    "comment" : "Net flow for Lands",
+    "equation" : "Deforestation",
+    "timeUnit" : "Year",
+    "sink" : "Lands"
+  }, {
+    "name" : "Forest net flow",
+    "comment" : "Net flow for Forest",
+    "equation" : "-Deforestation",
+    "timeUnit" : "Year",
+    "sink" : "Forest"
+  } ],
+  "variables" : [ {
+    "name" : "Deforestation",
+    "comment" : "Basically they deforest the amount of km2 that they need to close the Gap  (kg) considering the Land Fertility (kg/km2).      Function MAX is used to  prevent error if model need to divide by 0 .    Function MIN is used to  atemperate the response of model.  Intensity gives us a way to regulate  the speed of the model.  So, Intensity=1 means that every year they  deforest all the forest they need.",
+    "equation" : "MIN(Gap/MAX(Fertility_of_Lands,1),Forest/4)/Intensity",
+    "unit" : "km2/year"
+  }, {
+    "name" : "Losses",
+    "comment" : "We can accept that Loses of Fertility are proportional to the Fertility  that exist, and of the difference from the Lands and Forests with a  quadratic relation (we like to avoid the use of a Table). We need to use  as exponent 1.9 to see the collapse in year 800, as text explains. If we  use 2 as exponent, the collapse occus in year 1000.",
+    "equation" : "Fertility_of_Lands*MIN(2,(Lands/Forest)**1.9)/Intensity",
+    "unit" : "kg/(km2*year)/year"
+  }, {
+    "name" : "Natural Increase",
+    "comment" : "The calculated value of 0.17% is the net value from birth and deceases.  With this rate population goes from 100,000 to 2,000,000 inhabitants in  1,800 years.",
+    "equation" : "Population*Natural_Increase_Rate",
+    "unit" : "person/year"
+  }, {
+    "name" : "Natural Increase Rate",
+    "comment" : "If the population doubles every 408 years, as in the text, the percentage  must be 0,170 % as we can see (1+0.0017)^408=2",
+    "equation" : "0.0017",
+    "unit" : "1/year"
+  }, {
+    "name" : "Emigration Ratio",
+    "comment" : "Percentage of persons emigrating because of food shortage.",
+    "equation" : "0.05",
+    "unit" : "1/year"
+  }, {
+    "name" : "Intensity",
+    "comment" : "The same variable is used to regulate: 1.- The period of time that  population decide to close the gap, and deforest all that they need. 2.-  The speed in with teh Fertility of lands are taken place.",
+    "equation" : "1",
+    "unit" : "year"
+  }, {
+    "name" : "Emigration",
+    "comment" : "We assume that if know the amount of Gap of food (kg/year) and the  comsumption per person and year (kg/person/year), we can obtain the  equivalent number of people without food (personas/año). We correct the  obtained value, aplying the Emigration Ratio (5%) asssuming that only a  small part of this people really emigrates (they redistribute the existing  food).",
+    "equation" : "(Gap/Consumed_Food_per_Person)*Emigration_Ratio",
+    "unit" : "person/year"
+  }, {
+    "name" : "Consumed Food per Person",
+    "comment" : "We assume a few more than 1 kilo per person and day.",
+    "equation" : "400",
+    "unit" : "kg/(person*year)"
+  }, {
+    "name" : "Demand of Food",
+    "comment" : "Demand of Food",
+    "equation" : "Consumed_Food_per_Person*Population",
+    "unit" : "kg/year"
+  }, {
+    "name" : "Gap",
+    "comment" : "Gap",
+    "equation" : "Demand_of_Food-Food_Produced",
+    "unit" : "kg/year"
+  }, {
+    "name" : "Food Produced",
+    "comment" : "Food Produced",
+    "equation" : "Fertility_of_Lands*Lands",
+    "unit" : "kg/year"
+  } ],
+  "views" : [ {
+    "name" : "View 1",
+    "elements" : [ {
+      "name" : "Forest",
+      "type" : "stock",
+      "x" : 238.0,
+      "y" : 132.0
+    }, {
+      "name" : "Lands",
+      "type" : "stock",
+      "x" : 598.0,
+      "y" : 133.0
+    }, {
+      "name" : "Population",
+      "type" : "stock",
+      "x" : 301.0,
+      "y" : 501.0
+    }, {
+      "name" : "Fertility of Lands",
+      "type" : "stock",
+      "x" : 397.0,
+      "y" : 260.0
+    }, {
+      "name" : "_204",
+      "type" : "flow",
+      "x" : 429.0,
+      "y" : 140.0
+    }, {
+      "name" : "Deforestation",
+      "type" : "aux",
+      "x" : 429.0,
+      "y" : 159.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 515.0,
+      "y" : 260.0
+    }, {
+      "name" : "Losses",
+      "type" : "aux",
+      "x" : 515.0,
+      "y" : 241.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 389.0,
+      "y" : 504.0
+    }, {
+      "name" : "Emigration",
+      "type" : "aux",
+      "x" : 389.0,
+      "y" : 485.0
+    }, {
+      "name" : "Food Produced",
+      "type" : "aux",
+      "x" : 569.0,
+      "y" : 379.0
+    }, {
+      "name" : "Demand of Food",
+      "type" : "aux",
+      "x" : 203.0,
+      "y" : 352.0
+    }, {
+      "name" : "Consumed Food per Person",
+      "type" : "aux",
+      "x" : 316.0,
+      "y" : 403.0
+    }, {
+      "name" : "Gap",
+      "type" : "aux",
+      "x" : 340.0,
+      "y" : 323.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 149.0,
+      "y" : 496.0
+    }, {
+      "name" : "Natural Increase",
+      "type" : "aux",
+      "x" : 149.0,
+      "y" : 477.0
+    }, {
+      "name" : "Emigration Ratio",
+      "type" : "aux",
+      "x" : 493.0,
+      "y" : 441.0
+    }, {
+      "name" : "Natural Increase Rate",
+      "type" : "aux",
+      "x" : 139.0,
+      "y" : 407.0
+    }, {
+      "name" : "Intensity",
+      "type" : "aux",
+      "x" : 546.0,
+      "y" : 189.0
+    } ],
+    "connectors" : [ {
+      "from" : "Forest",
+      "to" : "Losses"
+    }, {
+      "from" : "Lands",
+      "to" : "Losses"
+    }, {
+      "from" : "Fertility of Lands",
+      "to" : "Deforestation"
+    }, {
+      "from" : "Fertility of Lands",
+      "to" : "Losses"
+    }, {
+      "from" : "Forest",
+      "to" : "Deforestation"
+    }, {
+      "from" : "Gap",
+      "to" : "Deforestation"
+    }, {
+      "from" : "Fertility of Lands",
+      "to" : "Food Produced"
+    }, {
+      "from" : "Lands",
+      "to" : "Food Produced"
+    }, {
+      "from" : "Food Produced",
+      "to" : "Gap"
+    }, {
+      "from" : "Demand of Food",
+      "to" : "Gap"
+    }, {
+      "from" : "Consumed Food per Person",
+      "to" : "Demand of Food"
+    }, {
+      "from" : "Consumed Food per Person",
+      "to" : "Emigration"
+    }, {
+      "from" : "Gap",
+      "to" : "Emigration"
+    }, {
+      "from" : "Population",
+      "to" : "Demand of Food"
+    }, {
+      "from" : "Population",
+      "to" : "Natural Increase"
+    }, {
+      "from" : "Emigration Ratio",
+      "to" : "Emigration"
+    }, {
+      "from" : "Natural Increase Rate",
+      "to" : "Natural Increase"
+    }, {
+      "from" : "Intensity",
+      "to" : "Deforestation"
+    }, {
+      "from" : "Intensity",
+      "to" : "Losses"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_204",
+      "points" : [ [ 429.0, 140.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 515.0, 260.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 389.0, 504.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 149.0, 496.0 ] ]
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Year",
+    "duration" : 2000.0,
+    "durationUnit" : "Year",
+    "dt" : 0.25,
+    "initialTime" : -1000.0
+  },
+  "metadata" : {
+    "author" : "Dr. Erik Pruyt",
+    "source" : "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
+    "license" : "CC-BY-NC-SA-4.0",
+    "url" : "https://simulation.tudelft.nl/SD/"
+  }
+}

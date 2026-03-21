@@ -6,7 +6,6 @@ package systems.courant.sd.demo.economics;
 
 import systems.courant.sd.Simulation;
 import systems.courant.sd.model.ModelMetadata;
-import systems.courant.sd.model.compile.CompiledModel;
 import systems.courant.sd.model.compile.ModelCompiler;
 import systems.courant.sd.model.def.ModelDefinitionBuilder;
 import systems.courant.sd.model.def.VariableDef;
@@ -36,30 +35,6 @@ import systems.courant.sd.model.def.StockDef;
  *   <li>View 'View 1' places non-existent element: Time</li>
  *   <li>View 'View 1' places non-existent element: Time</li>
  *   <li>View 'View 1' places non-existent element: Time</li>
- *   <li>View 'View 1' connector references non-existent element: 6</li>
- *   <li>View 'View 1' connector references non-existent element: 6</li>
- *   <li>View 'View 1' connector references non-existent element: 3</li>
- *   <li>View 'View 1' connector references non-existent element: 11</li>
- *   <li>View 'View 1' connector references non-existent element: 8</li>
- *   <li>View 'View 1' connector references non-existent element: 11</li>
- *   <li>View 'View 1' connector references non-existent element: 16</li>
- *   <li>View 'View 1' connector references non-existent element: 16</li>
- *   <li>View 'View 1' connector references non-existent element: 13</li>
- *   <li>View 'View 1' connector references non-existent element: 21</li>
- *   <li>View 'View 1' connector references non-existent element: 18</li>
- *   <li>View 'View 1' connector references non-existent element: 21</li>
- *   <li>View 'View 1' connector references non-existent element: 73</li>
- *   <li>View 'View 1' connector references non-existent element: 73</li>
- *   <li>View 'View 1' connector references non-existent element: 70</li>
- *   <li>View 'View 1' connector references non-existent element: 78</li>
- *   <li>View 'View 1' connector references non-existent element: 75</li>
- *   <li>View 'View 1' connector references non-existent element: 78</li>
- *   <li>View 'View 1' connector references non-existent element: 130</li>
- *   <li>View 'View 1' connector references non-existent element: 127</li>
- *   <li>View 'View 1' connector references non-existent element: 130</li>
- *   <li>View 'View 1' connector references non-existent element: 137</li>
- *   <li>View 'View 1' connector references non-existent element: 137</li>
- *   <li>View 'View 1' connector references non-existent element: 134</li>
  *   <li>View 'View 1' connector references non-existent element: Time</li>
  *   <li>View 'View 1' connector references non-existent element: Time</li>
  *   <li>View 'View 1' connector references non-existent element: Time</li>
@@ -89,37 +64,13 @@ public class Globalization {
                 .name("1819_GlobalizationEZ608fromZOO")
                 .defaultSimulation("Year", 50.0, "Year", 0.0625);
 
-        defineStocks(builder);
-        defineConstants(builder);
-        defineLookupTables(builder);
-        defineVariables(builder);
-        defineFlows(builder);
-
-        var definition = builder.build();
-        var compiled = new ModelCompiler().compile(definition);
-
-        compiled.getModel().setMetadata(ModelMetadata.builder()
-                .author("Dr. Erik Pruyt")
-                .source("Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5")
-                .license("CC-BY-NC-SA-4.0")
-                .url("https://simulation.tudelft.nl/SD/")
-                .build());
-
-        Simulation sim = compiled.createSimulation();
-        sim.execute();
-    }
-
-    private void defineStocks(ModelDefinitionBuilder builder) {
+        // Stocks
         builder.stock(new StockDef("production capacity", "production capacity", 1.0, "1", null));
         builder.stock(new StockDef("production capacity 0", "production capacity 0", 0.1, "1", null));
         builder.stock(new StockDef("standards", "standards", 1.0, "1", null));
         builder.stock(new StockDef("standards 0", "standards 0", 0.1, "1", null));
-    }
 
-    private void defineConstants(ModelDefinitionBuilder builder) {
-        builder.constant("TIME_STEP", 0.0625, "Year");
-        builder.constant("INITIAL_TIME", 0.0, "Year");
-        builder.constant("FINAL_TIME", 50.0, "Year");
+        // Constants
         builder.constant("CUSTOMS DUTY 0", 0.0, "1");
         builder.constant("INVESTMENT FACTOR 0", 2.0, "1");
         builder.constant("EXPORT SUBSIDY", 0.0, "1");
@@ -146,14 +97,12 @@ public class Globalization {
         builder.constant("TAX RATE 0", 0.2, "1");
         builder.constant("DEPRECIATION RATE", 0.05, "1/Year");
         builder.constant("DEPRECIATION RATE 0", 0.05, "1/Year");
-    }
 
-    private void defineLookupTables(ModelDefinitionBuilder builder) {
+        // Lookup tables
         builder.lookupTable(new LookupTableDef("purchase_decision_lookup", null, new double[]{0.0, 0.5, 1.0, 1.5, 2.0, 5.0}, new double[]{1.0, 1.0, 0.5, 0.0, 0.0, 0.0}, "LINEAR"));
         builder.lookupTable(new LookupTableDef("purchase_decision_0_lookup", null, new double[]{0.0, 0.5, 1.0, 1.5, 2.0, 5.0}, new double[]{1.0, 1.0, 0.5, 0.0, 0.0, 0.0}, "LINEAR"));
-    }
 
-    private void defineVariables(ModelDefinitionBuilder builder) {
+        // Variables
         builder.variable(new VariableDef("progress function", "progress function", "IF(TIME<10, 2, PROGRESS_FACTOR)", "1"));
         builder.variable(new VariableDef("progress function 0", "progress function 0", "IF(TIME<10, 1, PROGRESS_FACTOR_0)", "1"));
         builder.variable(new VariableDef("investment function 0", "investment function 0", "IF(TIME<10, 0.2, INVESTMENT_FACTOR_0)", "1"));
@@ -190,9 +139,8 @@ public class Globalization {
         builder.variable(new VariableDef("surplus 0", "surplus 0", "supply_0-demand_0", "1/Year"));
         builder.variable(new VariableDef("depreciation", "depreciation", "DEPRECIATION_RATE*production_capacity", "1/Year"));
         builder.variable(new VariableDef("depreciation 0", "depreciation 0", "DEPRECIATION_RATE_0*production_capacity_0", "1/Year"));
-    }
 
-    private void defineFlows(ModelDefinitionBuilder builder) {
+        // Flows
         builder.flow(new FlowDef("production capacity inflow 1", null, "investment", "Year", null, "production capacity"));
         builder.flow(new FlowDef("production capacity outflow 2", null, "depreciation", "Year", "production capacity", null));
         builder.flow(new FlowDef("production capacity 0 inflow 1", null, "investment_0", "Year", null, "production capacity 0"));
@@ -201,5 +149,18 @@ public class Globalization {
         builder.flow(new FlowDef("standards outflow 2", null, "deterioration", "Year", "standards", null));
         builder.flow(new FlowDef("standards 0 inflow 1", null, "progress_0", "Year", null, "standards 0"));
         builder.flow(new FlowDef("standards 0 outflow 2", null, "deterioration_0", "Year", "standards 0", null));
+
+        var definition = builder.build();
+        var compiled = new ModelCompiler().compile(definition);
+
+        compiled.getModel().setMetadata(ModelMetadata.builder()
+                .author("Dr. Erik Pruyt")
+                .source("Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5")
+                .license("CC-BY-NC-SA-4.0")
+                .url("https://simulation.tudelft.nl/SD/")
+                .build());
+
+        Simulation sim = compiled.createSimulation();
+        sim.execute();
     }
 }

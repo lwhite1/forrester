@@ -6,7 +6,6 @@ package systems.courant.sd.demo.demographics;
 
 import systems.courant.sd.Simulation;
 import systems.courant.sd.model.ModelMetadata;
-import systems.courant.sd.model.compile.CompiledModel;
 import systems.courant.sd.model.compile.ModelCompiler;
 import systems.courant.sd.model.def.ModelDefinitionBuilder;
 import systems.courant.sd.model.def.VariableDef;
@@ -29,19 +28,9 @@ import systems.courant.sd.model.def.StockDef;
  *   <li>View 'View 1' places non-existent element: _236</li>
  *   <li>View 'View 1' places non-existent element: _48</li>
  *   <li>View 'View 1' places non-existent element: Time</li>
- *   <li>View 'View 1' connector references non-existent element: 7</li>
- *   <li>View 'View 1' connector references non-existent element: 7</li>
- *   <li>View 'View 1' connector references non-existent element: 4</li>
- *   <li>View 'View 1' connector references non-existent element: 11</li>
- *   <li>View 'View 1' connector references non-existent element: 11</li>
- *   <li>View 'View 1' connector references non-existent element: 15</li>
- *   <li>View 'View 1' connector references non-existent element: 15</li>
  *   <li>View 'View 1' connector references non-existent element: _300</li>
  *   <li>View 'View 1' connector references non-existent element: _236</li>
  *   <li>View 'View 1' connector references non-existent element: _48</li>
- *   <li>View 'View 1' connector references non-existent element: 30</li>
- *   <li>View 'View 1' connector references non-existent element: 27</li>
- *   <li>View 'View 1' connector references non-existent element: 30</li>
  *   <li>View 'View 1' connector references non-existent element: _300</li>
  *   <li>View 'View 1' connector references non-existent element: _236</li>
  *   <li>View 'View 1' connector references non-existent element: _48</li>
@@ -70,9 +59,6 @@ public class AgingChain {
         builder.stock(new StockDef("retirees", "retirees", 3000000.0, "personen", null));
 
         // Constants
-        builder.constant("TIME_STEP", 0.03125, "Year");
-        builder.constant("INITIAL_TIME", 2010.0, "Year");
-        builder.constant("FINAL_TIME", 2100.0, "Year");
         builder.constant("average birth rate per adult", 0.02, "personen/personen/Year");
         builder.constant("average childhood period", 22.0, "Year");
         builder.constant("average adult participation ratio", 0.5, "Dmnl");

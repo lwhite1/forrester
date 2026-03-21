@@ -6,7 +6,6 @@ package systems.courant.sd.demo.technology;
 
 import systems.courant.sd.Simulation;
 import systems.courant.sd.model.ModelMetadata;
-import systems.courant.sd.model.compile.CompiledModel;
 import systems.courant.sd.model.compile.ModelCompiler;
 import systems.courant.sd.model.def.ModelDefinitionBuilder;
 import systems.courant.sd.model.def.VariableDef;
@@ -23,6 +22,9 @@ import systems.courant.sd.model.def.StockDef;
  *
  * <p>Import warnings:
  * <ul>
+ *   <li>Duplicate normalized equation name 'average_time_to_turn_SD_Workshoppers_into_System_Dynamicist' (from '"average time to turn SD Workshoppers into System Dynamicist."', previously from 'average time to turn SD Workshoppers into System Dynamicist') — later definition wins</li>
+ *   <li>Duplicate normalized equation name 'new_SD_workshoppers' (from '"new SD workshoppers."', previously from 'new SD workshoppers') — later definition wins</li>
+ *   <li>Duplicate normalized equation name 'System_Dynamicists' (from '"System Dynamicists."', previously from 'System Dynamicists') — later definition wins</li>
  *   <li>Duplicate normalized name 'average_time_to_turn_SD_Workshoppers_into_System_Dynamicist' (from '"average time to turn SD Workshoppers into System Dynamicist."') — skipped</li>
  *   <li>Duplicate normalized name 'new_SD_workshoppers' (from '"new SD workshoppers."') — skipped</li>
  *   <li>Duplicate normalized name 'System_Dynamicists' (from '"System Dynamicists."') — skipped</li>
@@ -32,25 +34,13 @@ import systems.courant.sd.model.def.StockDef;
  * <ul>
  *   <li>View 'View 1' places non-existent element: _48</li>
  *   <li>View 'View 1' places non-existent element: _48</li>
- *   <li>View 'View 1' connector references non-existent element: 5</li>
- *   <li>View 'View 1' connector references non-existent element: 5</li>
- *   <li>View 'View 1' connector references non-existent element: 2</li>
- *   <li>View 'View 1' connector references non-existent element: 10</li>
- *   <li>View 'View 1' connector references non-existent element: 7</li>
- *   <li>View 'View 1' connector references non-existent element: 10</li>
  *   <li>View 'View 1' connector references non-existent element: _48</li>
  *   <li>View 'View 1' flow route references non-existent flow: _48</li>
  *   <li>View 'View 1' flow route references non-existent flow: _48</li>
  *   <li>View 'View 2' places non-existent element: _48</li>
  *   <li>View 'View 2' places non-existent element: _48</li>
- *   <li>View 'View 2' connector references non-existent element: 6</li>
- *   <li>View 'View 2' connector references non-existent element: 6</li>
- *   <li>View 'View 2' connector references non-existent element: 3</li>
  *   <li>View 'View 2' connector references non-existent element: _48</li>
  *   <li>View 'View 2' connector references non-existent element: _48</li>
- *   <li>View 'View 2' connector references non-existent element: 14</li>
- *   <li>View 'View 2' connector references non-existent element: 11</li>
- *   <li>View 'View 2' connector references non-existent element: 14</li>
  *   <li>View 'View 2' connector references non-existent element: _48</li>
  *   <li>View 'View 2' flow route references non-existent flow: _48</li>
  *   <li>View 'View 2' flow route references non-existent flow: _48</li>
@@ -73,9 +63,6 @@ public class ShaleGas {
         builder.stock(new StockDef("SD Workshoppers", "SD Workshoppers", 0.0, "", null));
 
         // Constants
-        builder.constant("TIME_STEP", 0.0625, "Year");
-        builder.constant("INITIAL_TIME", 0.0, "Year");
-        builder.constant("FINAL_TIME", 100.0, "Year");
         builder.constant("average time to turn SD Workshoppers into System Dynamicist", 1.0, "");
         builder.constant("initial gas resource base", 120.0, "whateverunitsofreserve");
         builder.constant("new gas demand growth rate", 0.02, "whateverunitsofreserve/Year/Year");

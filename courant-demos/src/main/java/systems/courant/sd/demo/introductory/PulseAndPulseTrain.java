@@ -6,7 +6,6 @@ package systems.courant.sd.demo.introductory;
 
 import systems.courant.sd.Simulation;
 import systems.courant.sd.model.ModelMetadata;
-import systems.courant.sd.model.compile.CompiledModel;
 import systems.courant.sd.model.compile.ModelCompiler;
 import systems.courant.sd.model.def.ModelDefinitionBuilder;
 import systems.courant.sd.model.def.VariableDef;
@@ -25,12 +24,10 @@ import systems.courant.sd.model.def.StockDef;
  * <ul>
  *   <li>View 'View 1' places non-existent element: _0</li>
  *   <li>View 'View 1' places non-existent element: _0</li>
- *   <li>View 'View 1' connector references non-existent element: 6</li>
- *   <li>View 'View 1' connector references non-existent element: 6</li>
- *   <li>View 'View 1' connector references non-existent element: 2</li>
- *   <li>View 'View 1' connector references non-existent element: 12</li>
- *   <li>View 'View 1' connector references non-existent element: 8</li>
- *   <li>View 'View 1' connector references non-existent element: 12</li>
+ *   <li>View 'View 1' places non-existent element: TIME STEP</li>
+ *   <li>View 'View 1' places non-existent element: TIME STEP</li>
+ *   <li>View 'View 1' connector references non-existent element: TIME STEP</li>
+ *   <li>View 'View 1' connector references non-existent element: TIME STEP</li>
  *   <li>View 'View 1' flow route references non-existent flow: _0</li>
  *   <li>View 'View 1' flow route references non-existent flow: _0</li>
  * </ul>
@@ -48,11 +45,6 @@ public class PulseAndPulseTrain {
 
         // Stocks
         builder.stock(new StockDef("stock", "stock", 0.0, "", null));
-
-        // Constants
-        builder.constant("TIME_STEP", 0.125, "Month");
-        builder.constant("INITIAL_TIME", 0.0, "Month");
-        builder.constant("FINAL_TIME", 40.0, "Month");
 
         // Variables
         builder.variable(new VariableDef("inflow", "inflow", "2*PULSE_TRAIN(5, TIME_STEP , 2 , 35)/TIME_STEP", "units/Year"));

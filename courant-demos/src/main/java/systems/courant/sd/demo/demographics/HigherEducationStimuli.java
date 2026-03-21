@@ -6,7 +6,6 @@ package systems.courant.sd.demo.demographics;
 
 import systems.courant.sd.Simulation;
 import systems.courant.sd.model.ModelMetadata;
-import systems.courant.sd.model.compile.CompiledModel;
 import systems.courant.sd.model.compile.ModelCompiler;
 import systems.courant.sd.model.def.ModelDefinitionBuilder;
 import systems.courant.sd.model.def.VariableDef;
@@ -24,6 +23,7 @@ import systems.courant.sd.model.def.StockDef;
  *
  * <p>Validation errors (model may need manual fixes):
  * <ul>
+ *   <li>View 'View 1' places non-existent element: TIME STEP</li>
  *   <li>View 'View 1' places non-existent element: Time</li>
  *   <li>View 'View 1' places non-existent element: _48</li>
  *   <li>View 'View 1' places non-existent element: _636</li>
@@ -31,42 +31,25 @@ import systems.courant.sd.model.def.StockDef;
  *   <li>View 'View 1' places non-existent element: _48</li>
  *   <li>View 'View 1' places non-existent element: _540</li>
  *   <li>View 'View 1' places non-existent element: _48</li>
+ *   <li>View 'View 1' places non-existent element: TIME STEP</li>
  *   <li>View 'View 1' places non-existent element: Time</li>
  *   <li>View 'View 1' places non-existent element: Time</li>
  *   <li>View 'View 1' places non-existent element: _48</li>
  *   <li>View 'View 1' places non-existent element: _48</li>
  *   <li>View 'View 1' places non-existent element: _48</li>
  *   <li>View 'View 1' places non-existent element: Time</li>
+ *   <li>View 'View 1' connector references non-existent element: TIME STEP</li>
  *   <li>View 'View 1' connector references non-existent element: Time</li>
- *   <li>View 'View 1' connector references non-existent element: 15</li>
- *   <li>View 'View 1' connector references non-existent element: 15</li>
- *   <li>View 'View 1' connector references non-existent element: 12</li>
- *   <li>View 'View 1' connector references non-existent element: 20</li>
+ *   <li>View 'View 1' connector references non-existent element: TIME STEP</li>
  *   <li>View 'View 1' connector references non-existent element: _48</li>
  *   <li>View 'View 1' connector references non-existent element: _636</li>
- *   <li>View 'View 1' connector references non-existent element: 28</li>
- *   <li>View 'View 1' connector references non-existent element: 25</li>
- *   <li>View 'View 1' connector references non-existent element: 28</li>
  *   <li>View 'View 1' connector references non-existent element: _636</li>
- *   <li>View 'View 1' connector references non-existent element: 41</li>
- *   <li>View 'View 1' connector references non-existent element: 41</li>
- *   <li>View 'View 1' connector references non-existent element: 38</li>
- *   <li>View 'View 1' connector references non-existent element: 46</li>
  *   <li>View 'View 1' connector references non-existent element: _48</li>
  *   <li>View 'View 1' connector references non-existent element: _540</li>
- *   <li>View 'View 1' connector references non-existent element: 54</li>
- *   <li>View 'View 1' connector references non-existent element: 51</li>
- *   <li>View 'View 1' connector references non-existent element: 54</li>
  *   <li>View 'View 1' connector references non-existent element: _540</li>
+ *   <li>View 'View 1' connector references non-existent element: TIME STEP</li>
  *   <li>View 'View 1' connector references non-existent element: Time</li>
- *   <li>View 'View 1' connector references non-existent element: _48</li>
- *   <li>View 'View 1' connector references non-existent element: 78</li>
- *   <li>View 'View 1' connector references non-existent element: 84</li>
- *   <li>View 'View 1' connector references non-existent element: 84</li>
- *   <li>View 'View 1' connector references non-existent element: 81</li>
- *   <li>View 'View 1' connector references non-existent element: 89</li>
- *   <li>View 'View 1' connector references non-existent element: 86</li>
- *   <li>View 'View 1' connector references non-existent element: 89</li>
+ *   <li>View 'View 1' connector references non-existent element: TIME STEP</li>
  *   <li>View 'View 1' connector references non-existent element: _48</li>
  *   <li>View 'View 1' connector references non-existent element: _48</li>
  *   <li>View 'View 1' connector references non-existent element: _48</li>
@@ -75,20 +58,12 @@ import systems.courant.sd.model.def.StockDef;
  *   <li>View 'View 1' connector references non-existent element: _48</li>
  *   <li>View 'View 1' connector references non-existent element: _48</li>
  *   <li>View 'View 1' connector references non-existent element: _48</li>
- *   <li>View 'View 1' connector references non-existent element: 123</li>
- *   <li>View 'View 1' connector references non-existent element: 123</li>
- *   <li>View 'View 1' connector references non-existent element: 120</li>
  *   <li>View 'View 1' connector references non-existent element: _48</li>
  *   <li>View 'View 1' connector references non-existent element: _48</li>
- *   <li>View 'View 1' connector references non-existent element: 141</li>
- *   <li>View 'View 1' connector references non-existent element: 141</li>
+ *   <li>View 'View 1' connector references non-existent element: _48</li>
  *   <li>View 'View 1' connector references non-existent element: _48</li>
  *   <li>View 'View 1' connector references non-existent element: Time</li>
  *   <li>View 'View 1' connector references non-existent element: _48</li>
- *   <li>View 'View 1' connector references non-existent element: _636</li>
- *   <li>View 'View 1' connector references non-existent element: 144</li>
- *   <li>View 'View 1' connector references non-existent element: _540</li>
- *   <li>View 'View 1' connector references non-existent element: 146</li>
  *   <li>View 'View 1' flow route references non-existent flow: _48</li>
  *   <li>View 'View 1' flow route references non-existent flow: _636</li>
  *   <li>View 'View 1' flow route references non-existent flow: _48</li>
@@ -118,9 +93,6 @@ public class HigherEducationStimuli {
         builder.stock(new StockDef("BSc studenten", "BSc studenten", 0.0, "student", null));
 
         // Constants
-        builder.constant("TIME_STEP", 0.015625, "Year");
-        builder.constant("INITIAL_TIME", 1990.0, "Year");
-        builder.constant("FINAL_TIME", 2030.0, "Year");
         builder.constant("hoogte boete per langstudeerder", 3000.0, "");
         builder.constant("jaarlijkse lump sum en andere gelden", 1000000.0, "");
         builder.constant("subsidie per BSc afstudeerder", 5000.0, "euro/student");

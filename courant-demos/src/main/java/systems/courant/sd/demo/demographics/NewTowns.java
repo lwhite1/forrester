@@ -6,7 +6,6 @@ package systems.courant.sd.demo.demographics;
 
 import systems.courant.sd.Simulation;
 import systems.courant.sd.model.ModelMetadata;
-import systems.courant.sd.model.compile.CompiledModel;
 import systems.courant.sd.model.compile.ModelCompiler;
 import systems.courant.sd.model.def.ModelDefinitionBuilder;
 import systems.courant.sd.model.def.VariableDef;
@@ -32,48 +31,12 @@ import systems.courant.sd.model.def.StockDef;
  *   <li>View 'View 1' places non-existent element: _684</li>
  *   <li>View 'View 1' places non-existent element: _140</li>
  *   <li>View 'View 1' places non-existent element: _48</li>
- *   <li>View 'View 1' connector references non-existent element: 60</li>
- *   <li>View 'View 1' connector references non-existent element: 67</li>
- *   <li>View 'View 1' connector references non-existent element: 72</li>
- *   <li>View 'View 1' connector references non-existent element: 77</li>
- *   <li>View 'View 1' connector references non-existent element: 72</li>
- *   <li>View 'View 1' connector references non-existent element: 72</li>
- *   <li>View 'View 1' connector references non-existent element: 77</li>
- *   <li>View 'View 1' connector references non-existent element: 67</li>
- *   <li>View 'View 1' connector references non-existent element: 60</li>
- *   <li>View 'View 1' connector references non-existent element: 84</li>
- *   <li>View 'View 1' connector references non-existent element: 116</li>
- *   <li>View 'View 1' connector references non-existent element: 59</li>
- *   <li>View 'View 1' connector references non-existent element: 59</li>
- *   <li>View 'View 1' connector references non-existent element: 56</li>
  *   <li>View 'View 1' connector references non-existent element: _48</li>
  *   <li>View 'View 1' connector references non-existent element: _48</li>
- *   <li>View 'View 1' connector references non-existent element: 66</li>
- *   <li>View 'View 1' connector references non-existent element: 63</li>
- *   <li>View 'View 1' connector references non-existent element: 66</li>
- *   <li>View 'View 1' connector references non-existent element: 71</li>
- *   <li>View 'View 1' connector references non-existent element: 71</li>
- *   <li>View 'View 1' connector references non-existent element: 68</li>
- *   <li>View 'View 1' connector references non-existent element: 76</li>
- *   <li>View 'View 1' connector references non-existent element: 73</li>
- *   <li>View 'View 1' connector references non-existent element: 76</li>
- *   <li>View 'View 1' connector references non-existent element: 83</li>
- *   <li>View 'View 1' connector references non-existent element: 83</li>
- *   <li>View 'View 1' connector references non-existent element: 80</li>
  *   <li>View 'View 1' connector references non-existent element: _48</li>
- *   <li>View 'View 1' connector references non-existent element: 88</li>
- *   <li>View 'View 1' connector references non-existent element: 78</li>
- *   <li>View 'View 1' connector references non-existent element: 88</li>
  *   <li>View 'View 1' connector references non-existent element: _684</li>
- *   <li>View 'View 1' connector references non-existent element: 94</li>
- *   <li>View 'View 1' connector references non-existent element: 94</li>
- *   <li>View 'View 1' connector references non-existent element: 79</li>
  *   <li>View 'View 1' connector references non-existent element: _140</li>
  *   <li>View 'View 1' connector references non-existent element: _140</li>
- *   <li>View 'View 1' connector references non-existent element: 110</li>
- *   <li>View 'View 1' connector references non-existent element: 115</li>
- *   <li>View 'View 1' connector references non-existent element: 112</li>
- *   <li>View 'View 1' connector references non-existent element: 115</li>
  *   <li>View 'View 1' flow route references non-existent flow: _48</li>
  *   <li>View 'View 1' flow route references non-existent flow: _48</li>
  *   <li>View 'View 1' flow route references non-existent flow: _48</li>
@@ -101,9 +64,6 @@ public class NewTowns {
         builder.stock(new StockDef("huizen", "huizen", 14000.0, "units", null));
 
         // Constants
-        builder.constant("TIME_STEP", 0.03125, "Year");
-        builder.constant("INITIAL_TIME", 0.0, "Year");
-        builder.constant("FINAL_TIME", 200.0, "Year");
         builder.constant("switch jobs", 1.0, "");
         builder.constant("grondgebruik per bedrijf", 0.1, "ha/structure");
         builder.constant("totale grondoppervlakte", 5000.0, "ha");

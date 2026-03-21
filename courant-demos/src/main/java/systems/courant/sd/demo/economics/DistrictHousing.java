@@ -6,7 +6,6 @@ package systems.courant.sd.demo.economics;
 
 import systems.courant.sd.Simulation;
 import systems.courant.sd.model.ModelMetadata;
-import systems.courant.sd.model.compile.CompiledModel;
 import systems.courant.sd.model.compile.ModelCompiler;
 import systems.courant.sd.model.def.ModelDefinitionBuilder;
 import systems.courant.sd.model.def.VariableDef;
@@ -30,24 +29,11 @@ import java.util.List;
  *   <li>View 'View 1' places non-existent element: _48</li>
  *   <li>View 'View 1' places non-existent element: _48</li>
  *   <li>View 'View 1' places non-existent element: _48</li>
- *   <li>View 'View 1' connector references non-existent element: 5</li>
- *   <li>View 'View 1' connector references non-existent element: 2</li>
- *   <li>View 'View 1' connector references non-existent element: 5</li>
- *   <li>View 'View 1' connector references non-existent element: 9</li>
  *   <li>View 'View 1' connector references non-existent element: _48</li>
  *   <li>View 'View 1' connector references non-existent element: _48</li>
- *   <li>View 'View 1' connector references non-existent element: 26</li>
- *   <li>View 'View 1' connector references non-existent element: 23</li>
- *   <li>View 'View 1' connector references non-existent element: 26</li>
- *   <li>View 'View 1' connector references non-existent element: _48</li>
- *   <li>View 'View 1' connector references non-existent element: 35</li>
- *   <li>View 'View 1' connector references non-existent element: 35</li>
- *   <li>View 'View 1' connector references non-existent element: 32</li>
  *   <li>View 'View 1' connector references non-existent element: _48</li>
  *   <li>View 'View 1' connector references non-existent element: _48</li>
- *   <li>View 'View 1' connector references non-existent element: 46</li>
- *   <li>View 'View 1' connector references non-existent element: 43</li>
- *   <li>View 'View 1' connector references non-existent element: 46</li>
+ *   <li>View 'View 1' connector references non-existent element: _48</li>
  *   <li>View 'View 1' connector references non-existent element: _48</li>
  *   <li>View 'View 1' flow route references non-existent flow: _48</li>
  *   <li>View 'View 1' flow route references non-existent flow: _48</li>
@@ -71,9 +57,6 @@ public class DistrictHousing {
         builder.stock(new StockDef("total quality of all social housing apartments", "total quality of all social housing apartments", 0.0, "initial_average_quality_of_the_social_housing_apartments*social_housing_families", "", null, List.of()));
 
         // Constants
-        builder.constant("TIME_STEP", 0.0625, "Year");
-        builder.constant("INITIAL_TIME", 0.0, "Year");
-        builder.constant("FINAL_TIME", 50.0, "Year");
         builder.constant("average lifetime", 30.0, "Year");
         builder.constant("importance foshf", 2.0, "");
         builder.constant("importance qosha", 1.0, "");

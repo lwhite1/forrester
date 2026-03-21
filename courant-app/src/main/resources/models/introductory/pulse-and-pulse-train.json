@@ -1,0 +1,99 @@
+{
+  "name" : "1008_PULSEandPULSETRAIN",
+  "stocks" : [ {
+    "name" : "stock",
+    "comment" : "stock",
+    "initialValue" : 0.0,
+    "unit" : ""
+  } ],
+  "flows" : [ {
+    "name" : "stock inflow 1",
+    "equation" : "inflow",
+    "timeUnit" : "Month",
+    "sink" : "stock"
+  }, {
+    "name" : "stock outflow 2",
+    "equation" : "outflow",
+    "timeUnit" : "Month",
+    "source" : "stock"
+  } ],
+  "variables" : [ {
+    "name" : "inflow",
+    "comment" : "inflow",
+    "equation" : "2*PULSE_TRAIN(5, TIME_STEP , 2 , 35)/TIME_STEP",
+    "unit" : "units/Year"
+  }, {
+    "name" : "outflow",
+    "comment" : "outflow",
+    "equation" : "PULSE_TRAIN(6, 1, 2 , 40 ) * stock/TIME_STEP",
+    "unit" : "units/Year"
+  } ],
+  "views" : [ {
+    "name" : "View 1",
+    "elements" : [ {
+      "name" : "stock",
+      "type" : "stock",
+      "x" : 482.0,
+      "y" : 255.0
+    }, {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : 377.0,
+      "y" : 248.0
+    }, {
+      "name" : "inflow",
+      "type" : "aux",
+      "x" : 377.0,
+      "y" : 267.0
+    }, {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : 580.0,
+      "y" : 253.0
+    }, {
+      "name" : "outflow",
+      "type" : "aux",
+      "x" : 580.0,
+      "y" : 272.0
+    }, {
+      "name" : "TIME STEP",
+      "type" : "aux",
+      "x" : 580.0,
+      "y" : 302.0
+    }, {
+      "name" : "TIME STEP",
+      "type" : "aux",
+      "x" : 377.0,
+      "y" : 297.0
+    } ],
+    "connectors" : [ {
+      "from" : "stock",
+      "to" : "outflow"
+    }, {
+      "from" : "TIME STEP",
+      "to" : "outflow"
+    }, {
+      "from" : "TIME STEP",
+      "to" : "inflow"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_0",
+      "points" : [ [ 377.0, 248.0 ] ]
+    }, {
+      "flowName" : "_0",
+      "points" : [ [ 580.0, 253.0 ] ]
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Month",
+    "duration" : 40.0,
+    "durationUnit" : "Month",
+    "dt" : 0.125
+  },
+  "metadata" : {
+    "author" : "Dr. Erik Pruyt",
+    "source" : "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
+    "license" : "CC-BY-NC-SA-4.0",
+    "url" : "https://simulation.tudelft.nl/SD/"
+  }
+}

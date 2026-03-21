@@ -1,0 +1,1275 @@
+{
+  "name" : "1816_EnergyTransitionManagement_Q2b_EN",
+  "stocks" : [ {
+    "name" : "installed capacity T3",
+    "comment" : "installed capacity T3",
+    "initialValue" : 1.5,
+    "unit" : "MW"
+  }, {
+    "name" : "marginal cost new capacity T3",
+    "comment" : "marginal cost new capacity T3",
+    "initialValue" : 8000000.0,
+    "unit" : "EURO/MW"
+  }, {
+    "name" : "capacity under construction T3",
+    "comment" : "capacity under construction T3",
+    "initialValue" : 0.5,
+    "unit" : "MW"
+  }, {
+    "name" : "cumulatively decommissioned capacity T3",
+    "comment" : "cumulatively decommissioned capacity T3",
+    "initialValue" : 10.0,
+    "unit" : "MW"
+  }, {
+    "name" : "capacity under construction T1",
+    "comment" : "capacity under construction T1",
+    "initialValue" : 700.0,
+    "unit" : "MW"
+  }, {
+    "name" : "capacity under construction T2",
+    "comment" : "capacity under construction T2",
+    "initialValue" : 0.5,
+    "unit" : "MW"
+  }, {
+    "name" : "cumulatively decommissioned capacity T2",
+    "comment" : "cumulatively decommissioned capacity T2",
+    "initialValue" : 10.0,
+    "unit" : "MW"
+  }, {
+    "name" : "marginal cost new capacity T2",
+    "comment" : "marginal cost new capacity T2",
+    "initialValue" : 8000000.0,
+    "unit" : "EURO/MW"
+  }, {
+    "name" : "installed capacity T2",
+    "comment" : "installed capacity T2",
+    "initialValue" : 1.5,
+    "unit" : "MW"
+  }, {
+    "name" : "marginal cost new capacity T1",
+    "comment" : "marginal cost new capacity T1",
+    "initialValue" : 1000000.0,
+    "unit" : "EURO/MW"
+  }, {
+    "name" : "cumulatively decommissioned capacity T1",
+    "comment" : "cumulatively decommissioned capacity T1",
+    "initialValue" : 1.0E7,
+    "unit" : "MW"
+  }, {
+    "name" : "installed capacity T1",
+    "comment" : "installed capacity T1",
+    "initialValue" : 0.0,
+    "initialExpression" : "initial_capacity_T1",
+    "unit" : "MW"
+  } ],
+  "flows" : [ {
+    "name" : "installed capacity T3 inflow 1",
+    "equation" : "commissioning_capacity_T3",
+    "timeUnit" : "Year",
+    "sink" : "installed capacity T3"
+  }, {
+    "name" : "installed capacity T3 outflow 2",
+    "equation" : "decommissioning_capacity_T3",
+    "timeUnit" : "Year",
+    "source" : "installed capacity T3"
+  }, {
+    "name" : "marginal cost new capacity T3 inflow 1",
+    "equation" : "marginal_cost_capacity_T3",
+    "timeUnit" : "Year",
+    "sink" : "marginal cost new capacity T3"
+  }, {
+    "name" : "marginal cost new capacity T3 outflow 2",
+    "equation" : "marginal_cost_new_capacity_previous_year_T3",
+    "timeUnit" : "Year",
+    "source" : "marginal cost new capacity T3"
+  }, {
+    "name" : "capacity under construction T3 inflow 1",
+    "equation" : "newly_planned_capacity_T3",
+    "timeUnit" : "Year",
+    "sink" : "capacity under construction T3"
+  }, {
+    "name" : "capacity under construction T3 outflow 2",
+    "equation" : "commissioning_capacity_T3",
+    "timeUnit" : "Year",
+    "source" : "capacity under construction T3"
+  }, {
+    "name" : "cumulatively decommissioned capacity T3 net flow",
+    "comment" : "Net flow for cumulatively decommissioned capacity T3",
+    "equation" : "decommissioning_capacity_T3",
+    "timeUnit" : "Year",
+    "sink" : "cumulatively decommissioned capacity T3"
+  }, {
+    "name" : "capacity under construction T1 inflow 1",
+    "equation" : "newly_planned_capacity_T1",
+    "timeUnit" : "Year",
+    "sink" : "capacity under construction T1"
+  }, {
+    "name" : "capacity under construction T1 outflow 2",
+    "equation" : "commissioning_capacity_T1",
+    "timeUnit" : "Year",
+    "source" : "capacity under construction T1"
+  }, {
+    "name" : "capacity under construction T2 inflow 1",
+    "equation" : "newly_planned_capacity_T2",
+    "timeUnit" : "Year",
+    "sink" : "capacity under construction T2"
+  }, {
+    "name" : "capacity under construction T2 outflow 2",
+    "equation" : "commissioning_capacity_T2",
+    "timeUnit" : "Year",
+    "source" : "capacity under construction T2"
+  }, {
+    "name" : "cumulatively decommissioned capacity T2 net flow",
+    "comment" : "Net flow for cumulatively decommissioned capacity T2",
+    "equation" : "decommissioning_capacity_T2",
+    "timeUnit" : "Year",
+    "sink" : "cumulatively decommissioned capacity T2"
+  }, {
+    "name" : "marginal cost new capacity T2 inflow 1",
+    "equation" : "marginal_cost_capacity_T2",
+    "timeUnit" : "Year",
+    "sink" : "marginal cost new capacity T2"
+  }, {
+    "name" : "marginal cost new capacity T2 outflow 2",
+    "equation" : "marginal_cost_new_capacity_previous_year_T2",
+    "timeUnit" : "Year",
+    "source" : "marginal cost new capacity T2"
+  }, {
+    "name" : "installed capacity T2 inflow 1",
+    "equation" : "commissioning_capacity_T2",
+    "timeUnit" : "Year",
+    "sink" : "installed capacity T2"
+  }, {
+    "name" : "installed capacity T2 outflow 2",
+    "equation" : "decommissioning_capacity_T2",
+    "timeUnit" : "Year",
+    "source" : "installed capacity T2"
+  }, {
+    "name" : "marginal cost new capacity T1 inflow 1",
+    "equation" : "marginal_cost_capacity_T1",
+    "timeUnit" : "Year",
+    "sink" : "marginal cost new capacity T1"
+  }, {
+    "name" : "marginal cost new capacity T1 outflow 2",
+    "equation" : "marginal_cost_new_capacity_previous_year_T1",
+    "timeUnit" : "Year",
+    "source" : "marginal cost new capacity T1"
+  }, {
+    "name" : "cumulatively decommissioned capacity T1 net flow",
+    "comment" : "Net flow for cumulatively decommissioned capacity T1",
+    "equation" : "decommissioning_capacity_T1",
+    "timeUnit" : "Year",
+    "sink" : "cumulatively decommissioned capacity T1"
+  }, {
+    "name" : "installed capacity T1 inflow 1",
+    "equation" : "commissioning_capacity_T1",
+    "timeUnit" : "Year",
+    "sink" : "installed capacity T1"
+  }, {
+    "name" : "installed capacity T1 outflow 2",
+    "equation" : "decommissioning_capacity_T1",
+    "timeUnit" : "Year",
+    "source" : "installed capacity T1"
+  } ],
+  "variables" : [ {
+    "name" : "marginal cost new capacity previous year T3",
+    "comment" : "marginal cost new capacity previous year T3",
+    "equation" : "marginal_cost_new_capacity_T3/learning_curve_period",
+    "unit" : "EURO/MW/YEAR"
+  }, {
+    "name" : "marginal cost new capacity previous year T2",
+    "comment" : "marginal cost new capacity previous year T2",
+    "equation" : "marginal_cost_new_capacity_T2/learning_curve_period",
+    "unit" : "EURO/MW/YEAR"
+  }, {
+    "name" : "marginal cost new capacity previous year T1",
+    "comment" : "marginal cost new capacity previous year T1",
+    "equation" : "marginal_cost_new_capacity_T1/learning_curve_period",
+    "unit" : "EURO/MW/YEAR"
+  }, {
+    "name" : "learning curve period",
+    "comment" : "learning curve period",
+    "equation" : "1",
+    "unit" : "YEAR"
+  }, {
+    "name" : "sustainable fraction of total installed capacity",
+    "comment" : "sustainable fraction of total installed capacity",
+    "equation" : "1-installed_capacity_T1/total_installed_capacity",
+    "unit" : "dmnl"
+  }, {
+    "name" : "average construction time T3",
+    "comment" : "average construction time T3",
+    "equation" : "1",
+    "unit" : "YEAR"
+  }, {
+    "name" : "cumulatively installed capacity T3",
+    "comment" : "cumulatively installed capacity T3",
+    "equation" : "cumulatively_decommissioned_capacity_T3 + installed_capacity_T3",
+    "unit" : "MW"
+  }, {
+    "name" : "desired fraction new capacity T3",
+    "comment" : "MIN(1, MAX(0, 1-(desired fraction new capacity of technology 2 + desired  fraction new capacity of technology 3)))",
+    "equation" : "MIN(1, MAX(0, 1/marginal_cost_new_capacity_T3/(1/marginal_cost_new_capacity_T1+1/marginal_cost_new_capacity_T3 +1/marginal_cost_new_capacity_T2)))",
+    "unit" : "dmnl"
+  }, {
+    "name" : "newly planned capacity T3",
+    "comment" : "newly planned capacity T3",
+    "equation" : "MAX(expected_new_capacity_to_be_installed * desired_fraction_new_capacity_T3,0)",
+    "unit" : "MW/YEAR"
+  }, {
+    "name" : "cumulatively installed capacity previous year T3",
+    "comment" : "cumulatively installed capacity previous year T3",
+    "equation" : "DELAY_FIXED( cumulatively_installed_capacity_T3, 1, cumulatively_installed_capacity_T3)",
+    "unit" : "MW"
+  }, {
+    "name" : "commissioning capacity T3",
+    "comment" : "commissioning capacity T3",
+    "equation" : "capacity_under_construction_T3/average_construction_time_T3",
+    "unit" : "MW/YEAR"
+  }, {
+    "name" : "initial capacity T3",
+    "comment" : "initial capacity T3",
+    "equation" : "1.5",
+    "unit" : "MW"
+  }, {
+    "name" : "initial capacity under construction T3",
+    "comment" : "initial capacity under construction T3",
+    "equation" : "0.5",
+    "unit" : "MW"
+  }, {
+    "name" : "decommissioning capacity T3",
+    "comment" : "decommissioning capacity T3",
+    "equation" : "installed_capacity_T3/lifetime_techmology_T3",
+    "unit" : "MW/YEAR"
+  }, {
+    "name" : "lifetime techmology T3",
+    "comment" : "lifetime techmology T3",
+    "equation" : "30",
+    "unit" : "YEAR"
+  }, {
+    "name" : "marginal cost capacity T3",
+    "comment" : "marginal cost capacity T3",
+    "equation" : "marginal_cost_new_capacity_previous_year_T3 * (cumulatively_installed_capacity_T3 /  cumulatively_installed_capacity_previous_year_T3)**(-experience_curve_parameter_T3)",
+    "unit" : "EURO/MW/YEAR"
+  }, {
+    "name" : "progress ratio T3",
+    "comment" : "progress ratio T3",
+    "equation" : "0.8",
+    "unit" : "dmnl"
+  }, {
+    "name" : "initial cumulatively decommissioned capacity T3",
+    "comment" : "initial cumulatively decommissioned capacity T3",
+    "equation" : "10",
+    "unit" : "MW"
+  }, {
+    "name" : "initial marginal cost new capacity T3",
+    "comment" : "initial marginal cost new capacity T3",
+    "equation" : "8000000",
+    "unit" : "EURO/MW"
+  }, {
+    "name" : "experience curve parameter T3",
+    "comment" : "experience curve parameter T3",
+    "equation" : "-LOG(progress_ratio_T3, 2)",
+    "unit" : "dmnl"
+  }, {
+    "name" : "average construction time T2",
+    "comment" : "average construction time T2",
+    "equation" : "1",
+    "unit" : "YEAR"
+  }, {
+    "name" : "cumulatively installed capacity T2",
+    "comment" : "cumulatively installed capacity T2",
+    "equation" : "cumulatively_decommissioned_capacity_T2 + installed_capacity_T2",
+    "unit" : "MW"
+  }, {
+    "name" : "desired fraction new capacity T2",
+    "comment" : "MIN(1, MAX(0, 1-(desired fraction new capacity of technology 2 + desired  fraction new capacity of technology 3)))",
+    "equation" : "MIN(1, MAX(0, 1/marginal_cost_new_capacity_T2/(1/marginal_cost_new_capacity_T1+1/marginal_cost_new_capacity_T2 +1/marginal_cost_new_capacity_T3)))",
+    "unit" : "dmnl"
+  }, {
+    "name" : "cumulatively installed capacity previous year T2",
+    "comment" : "cumulatively installed capacity previous year T2",
+    "equation" : "DELAY_FIXED( cumulatively_installed_capacity_T2, 1, cumulatively_installed_capacity_T2)",
+    "unit" : "MW"
+  }, {
+    "name" : "commissioning capacity T2",
+    "comment" : "commissioning capacity T2",
+    "equation" : "capacity_under_construction_T2/average_construction_time_T2",
+    "unit" : "MW/YEAR"
+  }, {
+    "name" : "marginal cost capacity T2",
+    "comment" : "marginal cost capacity T2",
+    "equation" : "marginal_cost_new_capacity_previous_year_T2 * (cumulatively_installed_capacity_T2 /  cumulatively_installed_capacity_previous_year_T2 )**(-experience_curve_parameter_T2)",
+    "unit" : "EURO/MW/YEAR"
+  }, {
+    "name" : "initial capacity under construction T1",
+    "comment" : "initial capacity under construction T1",
+    "equation" : "700",
+    "unit" : "MW"
+  }, {
+    "name" : "average construction time T1",
+    "comment" : "average construction time T1",
+    "equation" : "1",
+    "unit" : "YEAR"
+  }, {
+    "name" : "initial cumulatively decommissioned capacity T2",
+    "comment" : "initial cumulatively decommissioned capacity T2",
+    "equation" : "10",
+    "unit" : "MW"
+  }, {
+    "name" : "desired fraction new capacity T1",
+    "comment" : "MIN(1, MAX(0, 1-(desired fraction new capacity of technology 2 + desired  fraction new capacity of technology 3)))",
+    "equation" : "1-(desired_fraction_new_capacity_T2+desired_fraction_new_capacity_T3)",
+    "unit" : "dmnl"
+  }, {
+    "name" : "initial marginal cost new capacity T2",
+    "comment" : "initial marginal cost new capacity T2",
+    "equation" : "8000000",
+    "unit" : "EURO/MW"
+  }, {
+    "name" : "commissioning capacity T1",
+    "comment" : "commissioning capacity T1",
+    "equation" : "capacity_under_construction_T1/average_construction_time_T1",
+    "unit" : "MW/YEAR"
+  }, {
+    "name" : "experience curve parameter T2",
+    "comment" : "experience curve parameter T2",
+    "equation" : "-LOG(progress_ratio_T2, 2)",
+    "unit" : "dmnl"
+  }, {
+    "name" : "initial capacity under construction T2",
+    "comment" : "initial capacity under construction T2",
+    "equation" : "0.5",
+    "unit" : "MW"
+  }, {
+    "name" : "total installed capacity",
+    "comment" : "total installed capacity",
+    "equation" : "installed_capacity_T1+installed_capacity_T2+installed_capacity_T3",
+    "unit" : "MW"
+  }, {
+    "name" : "newly planned capacity T2",
+    "comment" : "newly planned capacity T2",
+    "equation" : "MAX(expected_new_capacity_to_be_installed * desired_fraction_new_capacity_T2,0)",
+    "unit" : "MW/YEAR"
+  }, {
+    "name" : "decommissioning capacity T2",
+    "comment" : "decommissioning capacity T2",
+    "equation" : "installed_capacity_T2/lifetime_techmology_T2",
+    "unit" : "MW/YEAR"
+  }, {
+    "name" : "initial capacity T2",
+    "comment" : "initial capacity T2",
+    "equation" : "1.5",
+    "unit" : "MW"
+  }, {
+    "name" : "expected capacity required",
+    "comment" : "expected capacity required",
+    "equation" : "LOOKUP(expected_capacity_required_lookup, TIME)",
+    "unit" : "MW"
+  }, {
+    "name" : "lifetime techmology T2",
+    "comment" : "lifetime techmology T2",
+    "equation" : "30",
+    "unit" : "YEAR"
+  }, {
+    "name" : "newly planned capacity T1",
+    "comment" : "newly planned capacity T1",
+    "equation" : "MAX(expected_new_capacity_to_be_installed*desired_fraction_new_capacity_T1,0)",
+    "unit" : "MW/YEAR"
+  }, {
+    "name" : "expected new capacity to be installed",
+    "comment" : "NOGAL VEREENVOUDIGD TOV REALITEIT",
+    "equation" : "(expected_capacity_required - total_installed_capacity)/planning_period",
+    "unit" : "MW/YEAR"
+  }, {
+    "name" : "planning period",
+    "comment" : "planning period",
+    "equation" : "1",
+    "unit" : "YEAR"
+  }, {
+    "name" : "progress ratio T2",
+    "comment" : "progress ratio T2",
+    "equation" : "0.8",
+    "unit" : "dmnl"
+  }, {
+    "name" : "decommissioning capacity T1",
+    "comment" : "decommissioning capacity T1",
+    "equation" : "installed_capacity_T1/lifetime_techmology_T1",
+    "unit" : "MW/YEAR"
+  }, {
+    "name" : "progress ratio technology 3",
+    "comment" : "progress ratio technology 3",
+    "equation" : "0.8",
+    "unit" : "dmnl"
+  }, {
+    "name" : "experience curve parameter tech 3",
+    "comment" : "experience curve parameter tech 3",
+    "equation" : "-LOG(progress_ratio_technology_3, 2)",
+    "unit" : "dmnl"
+  }, {
+    "name" : "cumulatively installed capacity T1",
+    "comment" : "cumulatively installed capacity T1",
+    "equation" : "cumulatively_decommissioned_capacity_T1 + installed_capacity_T1",
+    "unit" : "MW"
+  }, {
+    "name" : "experience curve parameter tech 2",
+    "comment" : "experience curve parameter tech 2",
+    "equation" : "-LOG(progress_ratio_technology_2, 2)",
+    "unit" : "dmnl"
+  }, {
+    "name" : "cumulatively installed capacity previous year T1",
+    "comment" : "cumulatively installed capacity previous year T1",
+    "equation" : "DELAY_FIXED( cumulatively_installed_capacity_T1, 1, cumulatively_installed_capacity_T1)",
+    "unit" : "MW"
+  }, {
+    "name" : "initial marginal cost new capacity T1",
+    "comment" : "initial marginal cost new capacity T1",
+    "equation" : "1000000",
+    "unit" : "EURO/MW"
+  }, {
+    "name" : "lifetime technology 2",
+    "comment" : "lifetime technology 2",
+    "equation" : "30",
+    "unit" : "YEAR"
+  }, {
+    "name" : "initial cumulatively decommissioned capacity T1",
+    "comment" : "initial cumulatively decommissioned capacity T1",
+    "equation" : "10000000",
+    "unit" : "MW"
+  }, {
+    "name" : "progress ratio technology 2",
+    "comment" : "progress ratio technology 2",
+    "equation" : "0.8",
+    "unit" : "dmnl"
+  }, {
+    "name" : "marginal cost capacity T1",
+    "comment" : "marginal cost capacity T1",
+    "equation" : "marginal_cost_new_capacity_previous_year_T1 * (cumulatively_installed_capacity_T1 /  cumulatively_installed_capacity_previous_year_T1)**(-experience_curve_parameter_T1)",
+    "unit" : "EURO/MW/YEAR"
+  }, {
+    "name" : "initial capacity T1",
+    "comment" : "initial capacity T1",
+    "equation" : "15000-3",
+    "unit" : "MW"
+  }, {
+    "name" : "experience curve parameter T1",
+    "comment" : "experience curve parameter T1",
+    "equation" : "-LOG(progress_ratio_T1, 2)",
+    "unit" : "dmnl"
+  }, {
+    "name" : "lifetime techmology T1",
+    "comment" : "lifetime techmology T1",
+    "equation" : "30",
+    "unit" : "YEAR"
+  }, {
+    "name" : "progress ratio T1",
+    "comment" : "progress ratio T1",
+    "equation" : "0.9",
+    "unit" : "dmnl"
+  } ],
+  "lookupTables" : [ {
+    "name" : "expected_capacity_required_lookup",
+    "xValues" : [ 2010.0, 2100.0 ],
+    "yValues" : [ 15700.0, 45000.0 ],
+    "interpolation" : "LINEAR"
+  } ],
+  "views" : [ {
+    "name" : "technology1",
+    "elements" : [ {
+      "name" : "installed capacity T1",
+      "type" : "stock",
+      "x" : 590.0,
+      "y" : 375.0
+    }, {
+      "name" : "cumulatively decommissioned capacity T1",
+      "type" : "stock",
+      "x" : 861.0,
+      "y" : 376.0
+    }, {
+      "name" : "_1260",
+      "type" : "flow",
+      "x" : 725.0,
+      "y" : 368.0
+    }, {
+      "name" : "decommissioning capacity T1",
+      "type" : "aux",
+      "x" : 725.0,
+      "y" : 395.0
+    }, {
+      "name" : "_1148",
+      "type" : "flow",
+      "x" : 466.0,
+      "y" : 368.0
+    }, {
+      "name" : "commissioning capacity T1",
+      "type" : "aux",
+      "x" : 466.0,
+      "y" : 395.0
+    }, {
+      "name" : "lifetime techmology T1",
+      "type" : "aux",
+      "x" : 736.0,
+      "y" : 323.0
+    }, {
+      "name" : "cumulatively installed capacity T1",
+      "type" : "aux",
+      "x" : 743.0,
+      "y" : 241.0
+    }, {
+      "name" : "progress ratio T1",
+      "type" : "aux",
+      "x" : 611.0,
+      "y" : 270.0
+    }, {
+      "name" : "experience curve parameter T1",
+      "type" : "aux",
+      "x" : 550.0,
+      "y" : 217.0
+    }, {
+      "name" : "cumulatively installed capacity previous year T1",
+      "type" : "aux",
+      "x" : 734.0,
+      "y" : 154.0
+    }, {
+      "name" : "marginal cost new capacity T1",
+      "type" : "stock",
+      "x" : 422.0,
+      "y" : 123.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 526.0,
+      "y" : 113.0
+    }, {
+      "name" : "marginal cost capacity T1",
+      "type" : "aux",
+      "x" : 526.0,
+      "y" : 140.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 289.0,
+      "y" : 112.0
+    }, {
+      "name" : "marginal cost new capacity previous year T1",
+      "type" : "aux",
+      "x" : 289.0,
+      "y" : 139.0
+    }, {
+      "name" : "INITIAL TIME",
+      "type" : "aux",
+      "x" : 876.0,
+      "y" : 1150.0
+    }, {
+      "name" : "Time",
+      "type" : "aux",
+      "x" : 876.0,
+      "y" : 1150.0
+    }, {
+      "name" : "Time",
+      "type" : "aux",
+      "x" : 412.0,
+      "y" : 997.0
+    }, {
+      "name" : "desired fraction new capacity T1",
+      "type" : "aux",
+      "x" : 190.0,
+      "y" : 294.0
+    }, {
+      "name" : "initial capacity T1",
+      "type" : "aux",
+      "x" : 589.0,
+      "y" : 319.0
+    }, {
+      "name" : "initial cumulatively decommissioned capacity T1",
+      "type" : "aux",
+      "x" : 863.0,
+      "y" : 315.0
+    }, {
+      "name" : "initial marginal cost new capacity T1",
+      "type" : "aux",
+      "x" : 421.0,
+      "y" : 187.0
+    }, {
+      "name" : "expected new capacity to be installed",
+      "type" : "aux",
+      "x" : 248.0,
+      "y" : 463.0
+    }, {
+      "name" : "capacity under construction T1",
+      "type" : "stock",
+      "x" : 334.0,
+      "y" : 381.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 209.0,
+      "y" : 373.0
+    }, {
+      "name" : "newly planned capacity T1",
+      "type" : "aux",
+      "x" : 209.0,
+      "y" : 400.0
+    }, {
+      "name" : "average construction time T1",
+      "type" : "aux",
+      "x" : 466.0,
+      "y" : 295.0
+    }, {
+      "name" : "initial capacity under construction T1",
+      "type" : "aux",
+      "x" : 321.0,
+      "y" : 328.0
+    }, {
+      "name" : "expected capacity required",
+      "type" : "aux",
+      "x" : 198.0,
+      "y" : 537.0
+    }, {
+      "name" : "planning period",
+      "type" : "aux",
+      "x" : 381.0,
+      "y" : 449.0
+    }, {
+      "name" : "total installed capacity",
+      "type" : "aux",
+      "x" : 467.0,
+      "y" : 485.0
+    }, {
+      "name" : "Time",
+      "type" : "aux",
+      "x" : 91.0,
+      "y" : 538.0
+    }, {
+      "name" : "installed capacity T2",
+      "type" : "stock",
+      "x" : 537.0,
+      "y" : 546.0
+    }, {
+      "name" : "desired fraction new capacity T2",
+      "type" : "aux",
+      "x" : 256.0,
+      "y" : 225.0
+    }, {
+      "name" : "sustainable fraction of total installed capacity",
+      "type" : "aux",
+      "x" : 676.0,
+      "y" : 516.0
+    }, {
+      "name" : "installed capacity T3",
+      "type" : "stock",
+      "x" : 421.0,
+      "y" : 545.0
+    }, {
+      "name" : "desired fraction new capacity T3",
+      "type" : "aux",
+      "x" : 118.0,
+      "y" : 225.0
+    }, {
+      "name" : "learning curve period",
+      "type" : "aux",
+      "x" : 196.0,
+      "y" : 70.0
+    } ],
+    "connectors" : [ {
+      "from" : "_48",
+      "to" : "_48"
+    }, {
+      "from" : "marginal cost new capacity T1",
+      "to" : "marginal cost new capacity previous year T1"
+    }, {
+      "from" : "experience curve parameter T1",
+      "to" : "marginal cost capacity T1"
+    }, {
+      "from" : "cumulatively decommissioned capacity T1",
+      "to" : "cumulatively installed capacity T1"
+    }, {
+      "from" : "installed capacity T1",
+      "to" : "cumulatively installed capacity T1"
+    }, {
+      "from" : "installed capacity T1",
+      "to" : "_1260"
+    }, {
+      "from" : "initial capacity T1",
+      "to" : "installed capacity T1"
+    }, {
+      "from" : "initial cumulatively decommissioned capacity T1",
+      "to" : "cumulatively decommissioned capacity T1"
+    }, {
+      "from" : "initial marginal cost new capacity T1",
+      "to" : "marginal cost new capacity T1"
+    }, {
+      "from" : "_1148",
+      "to" : "capacity under construction T1"
+    }, {
+      "from" : "capacity under construction T1",
+      "to" : "_1148"
+    }, {
+      "from" : "expected new capacity to be installed",
+      "to" : "newly planned capacity T1"
+    }, {
+      "from" : "desired fraction new capacity T1",
+      "to" : "_48"
+    }, {
+      "from" : "average construction time T1",
+      "to" : "_1148"
+    }, {
+      "from" : "initial capacity under construction T1",
+      "to" : "capacity under construction T1"
+    }, {
+      "from" : "expected capacity required",
+      "to" : "expected new capacity to be installed"
+    }, {
+      "from" : "planning period",
+      "to" : "expected new capacity to be installed"
+    }, {
+      "from" : "total installed capacity",
+      "to" : "expected new capacity to be installed"
+    }, {
+      "from" : "installed capacity T1",
+      "to" : "total installed capacity"
+    }, {
+      "from" : "Time",
+      "to" : "expected capacity required"
+    }, {
+      "from" : "cumulatively installed capacity T1",
+      "to" : "marginal cost capacity T1"
+    }, {
+      "from" : "cumulatively installed capacity T1",
+      "to" : "cumulatively installed capacity previous year T1"
+    }, {
+      "from" : "cumulatively installed capacity previous year T1",
+      "to" : "marginal cost capacity T1"
+    }, {
+      "from" : "progress ratio T1",
+      "to" : "experience curve parameter T1"
+    }, {
+      "from" : "installed capacity T2",
+      "to" : "total installed capacity"
+    }, {
+      "from" : "desired fraction new capacity T2",
+      "to" : "desired fraction new capacity T1"
+    }, {
+      "from" : "installed capacity T1",
+      "to" : "sustainable fraction of total installed capacity"
+    }, {
+      "from" : "total installed capacity",
+      "to" : "sustainable fraction of total installed capacity"
+    }, {
+      "from" : "installed capacity T3",
+      "to" : "total installed capacity"
+    }, {
+      "from" : "desired fraction new capacity T3",
+      "to" : "desired fraction new capacity T1"
+    }, {
+      "from" : "lifetime techmology T1",
+      "to" : "_1260"
+    }, {
+      "from" : "learning curve period",
+      "to" : "_48"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_1260",
+      "points" : [ [ 725.0, 368.0 ] ]
+    }, {
+      "flowName" : "_1148",
+      "points" : [ [ 466.0, 368.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 526.0, 113.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 289.0, 112.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 209.0, 373.0 ] ]
+    } ]
+  }, {
+    "name" : "T2",
+    "elements" : [ {
+      "name" : "installed capacity T2",
+      "type" : "stock",
+      "x" : 587.0,
+      "y" : 387.0
+    }, {
+      "name" : "cumulatively decommissioned capacity T2",
+      "type" : "stock",
+      "x" : 858.0,
+      "y" : 388.0
+    }, {
+      "name" : "_892",
+      "type" : "flow",
+      "x" : 722.0,
+      "y" : 380.0
+    }, {
+      "name" : "decommissioning capacity T2",
+      "type" : "aux",
+      "x" : 722.0,
+      "y" : 407.0
+    }, {
+      "name" : "_956",
+      "type" : "flow",
+      "x" : 463.0,
+      "y" : 380.0
+    }, {
+      "name" : "commissioning capacity T2",
+      "type" : "aux",
+      "x" : 463.0,
+      "y" : 407.0
+    }, {
+      "name" : "lifetime techmology T2",
+      "type" : "aux",
+      "x" : 726.0,
+      "y" : 317.0
+    }, {
+      "name" : "cumulatively installed capacity T2",
+      "type" : "aux",
+      "x" : 746.0,
+      "y" : 256.0
+    }, {
+      "name" : "progress ratio T2",
+      "type" : "aux",
+      "x" : 613.0,
+      "y" : 261.0
+    }, {
+      "name" : "experience curve parameter T2",
+      "type" : "aux",
+      "x" : 547.0,
+      "y" : 212.0
+    }, {
+      "name" : "cumulatively installed capacity previous year T2",
+      "type" : "aux",
+      "x" : 742.0,
+      "y" : 176.0
+    }, {
+      "name" : "marginal cost new capacity T2",
+      "type" : "stock",
+      "x" : 419.0,
+      "y" : 135.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 521.0,
+      "y" : 120.0
+    }, {
+      "name" : "marginal cost capacity T2",
+      "type" : "aux",
+      "x" : 521.0,
+      "y" : 147.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 267.0,
+      "y" : 125.0
+    }, {
+      "name" : "marginal cost new capacity previous year T2",
+      "type" : "aux",
+      "x" : 267.0,
+      "y" : 152.0
+    }, {
+      "name" : "desired fraction new capacity T2",
+      "type" : "aux",
+      "x" : 242.0,
+      "y" : 256.0
+    }, {
+      "name" : "initial capacity T2",
+      "type" : "aux",
+      "x" : 588.0,
+      "y" : 338.0
+    }, {
+      "name" : "initial cumulatively decommissioned capacity T2",
+      "type" : "aux",
+      "x" : 864.0,
+      "y" : 322.0
+    }, {
+      "name" : "initial marginal cost new capacity T2",
+      "type" : "aux",
+      "x" : 418.0,
+      "y" : 197.0
+    }, {
+      "name" : "capacity under construction T2",
+      "type" : "stock",
+      "x" : 331.0,
+      "y" : 393.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 206.0,
+      "y" : 385.0
+    }, {
+      "name" : "newly planned capacity T2",
+      "type" : "aux",
+      "x" : 206.0,
+      "y" : 412.0
+    }, {
+      "name" : "average construction time T2",
+      "type" : "aux",
+      "x" : 463.0,
+      "y" : 307.0
+    }, {
+      "name" : "initial capacity under construction T2",
+      "type" : "aux",
+      "x" : 325.0,
+      "y" : 340.0
+    }, {
+      "name" : "expected new capacity to be installed",
+      "type" : "aux",
+      "x" : 92.0,
+      "y" : 404.0
+    }, {
+      "name" : "marginal cost new capacity T1",
+      "type" : "stock",
+      "x" : 99.0,
+      "y" : 316.0
+    }, {
+      "name" : "marginal cost new capacity T3",
+      "type" : "stock",
+      "x" : 139.0,
+      "y" : 207.0
+    }, {
+      "name" : "learning curve period",
+      "type" : "aux",
+      "x" : 256.0,
+      "y" : 60.0
+    } ],
+    "connectors" : [ {
+      "from" : "experience curve parameter T2",
+      "to" : "marginal cost capacity T2"
+    }, {
+      "from" : "cumulatively decommissioned capacity T2",
+      "to" : "cumulatively installed capacity T2"
+    }, {
+      "from" : "installed capacity T2",
+      "to" : "cumulatively installed capacity T2"
+    }, {
+      "from" : "installed capacity T2",
+      "to" : "_892"
+    }, {
+      "from" : "initial capacity T2",
+      "to" : "installed capacity T2"
+    }, {
+      "from" : "initial cumulatively decommissioned capacity T2",
+      "to" : "cumulatively decommissioned capacity T2"
+    }, {
+      "from" : "initial marginal cost new capacity T2",
+      "to" : "marginal cost new capacity T2"
+    }, {
+      "from" : "_956",
+      "to" : "capacity under construction T2"
+    }, {
+      "from" : "capacity under construction T2",
+      "to" : "_956"
+    }, {
+      "from" : "desired fraction new capacity T2",
+      "to" : "_48"
+    }, {
+      "from" : "average construction time T2",
+      "to" : "_956"
+    }, {
+      "from" : "lifetime techmology T2",
+      "to" : "_892"
+    }, {
+      "from" : "initial capacity under construction T2",
+      "to" : "capacity under construction T2"
+    }, {
+      "from" : "cumulatively installed capacity T2",
+      "to" : "marginal cost capacity T2"
+    }, {
+      "from" : "cumulatively installed capacity T2",
+      "to" : "cumulatively installed capacity previous year T2"
+    }, {
+      "from" : "cumulatively installed capacity previous year T2",
+      "to" : "marginal cost capacity T2"
+    }, {
+      "from" : "progress ratio T2",
+      "to" : "experience curve parameter T2"
+    }, {
+      "from" : "expected new capacity to be installed",
+      "to" : "newly planned capacity T2"
+    }, {
+      "from" : "marginal cost new capacity T2",
+      "to" : "marginal cost new capacity previous year T2"
+    }, {
+      "from" : "marginal cost new capacity T1",
+      "to" : "desired fraction new capacity T2"
+    }, {
+      "from" : "marginal cost new capacity T2",
+      "to" : "desired fraction new capacity T2"
+    }, {
+      "from" : "marginal cost new capacity T3",
+      "to" : "desired fraction new capacity T2"
+    }, {
+      "from" : "_48",
+      "to" : "_48"
+    }, {
+      "from" : "learning curve period",
+      "to" : "_48"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_892",
+      "points" : [ [ 722.0, 380.0 ] ]
+    }, {
+      "flowName" : "_956",
+      "points" : [ [ 463.0, 380.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 521.0, 120.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 267.0, 125.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 206.0, 385.0 ] ]
+    } ]
+  }, {
+    "name" : "T3",
+    "elements" : [ {
+      "name" : "installed capacity T3",
+      "type" : "stock",
+      "x" : 587.0,
+      "y" : 411.0
+    }, {
+      "name" : "cumulatively decommissioned capacity T3",
+      "type" : "stock",
+      "x" : 858.0,
+      "y" : 412.0
+    }, {
+      "name" : "_540",
+      "type" : "flow",
+      "x" : 722.0,
+      "y" : 404.0
+    }, {
+      "name" : "decommissioning capacity T3",
+      "type" : "aux",
+      "x" : 722.0,
+      "y" : 431.0
+    }, {
+      "name" : "_396",
+      "type" : "flow",
+      "x" : 463.0,
+      "y" : 404.0
+    }, {
+      "name" : "commissioning capacity T3",
+      "type" : "aux",
+      "x" : 463.0,
+      "y" : 431.0
+    }, {
+      "name" : "lifetime techmology T3",
+      "type" : "aux",
+      "x" : 728.0,
+      "y" : 347.0
+    }, {
+      "name" : "cumulatively installed capacity T3",
+      "type" : "aux",
+      "x" : 751.0,
+      "y" : 282.0
+    }, {
+      "name" : "progress ratio T3",
+      "type" : "aux",
+      "x" : 613.0,
+      "y" : 285.0
+    }, {
+      "name" : "experience curve parameter T3",
+      "type" : "aux",
+      "x" : 547.0,
+      "y" : 236.0
+    }, {
+      "name" : "cumulatively installed capacity previous year T3",
+      "type" : "aux",
+      "x" : 742.0,
+      "y" : 192.0
+    }, {
+      "name" : "marginal cost new capacity T3",
+      "type" : "stock",
+      "x" : 419.0,
+      "y" : 159.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 521.0,
+      "y" : 144.0
+    }, {
+      "name" : "marginal cost capacity T3",
+      "type" : "aux",
+      "x" : 521.0,
+      "y" : 171.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 268.0,
+      "y" : 150.0
+    }, {
+      "name" : "marginal cost new capacity previous year T3",
+      "type" : "aux",
+      "x" : 268.0,
+      "y" : 177.0
+    }, {
+      "name" : "desired fraction new capacity T3",
+      "type" : "aux",
+      "x" : 242.0,
+      "y" : 280.0
+    }, {
+      "name" : "initial capacity T3",
+      "type" : "aux",
+      "x" : 588.0,
+      "y" : 362.0
+    }, {
+      "name" : "initial cumulatively decommissioned capacity T3",
+      "type" : "aux",
+      "x" : 864.0,
+      "y" : 349.0
+    }, {
+      "name" : "initial marginal cost new capacity T3",
+      "type" : "aux",
+      "x" : 414.0,
+      "y" : 224.0
+    }, {
+      "name" : "capacity under construction T3",
+      "type" : "stock",
+      "x" : 331.0,
+      "y" : 417.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 206.0,
+      "y" : 409.0
+    }, {
+      "name" : "newly planned capacity T3",
+      "type" : "aux",
+      "x" : 206.0,
+      "y" : 436.0
+    }, {
+      "name" : "average construction time T3",
+      "type" : "aux",
+      "x" : 463.0,
+      "y" : 331.0
+    }, {
+      "name" : "initial capacity under construction T3",
+      "type" : "aux",
+      "x" : 325.0,
+      "y" : 364.0
+    }, {
+      "name" : "expected new capacity to be installed",
+      "type" : "aux",
+      "x" : 77.0,
+      "y" : 425.0
+    }, {
+      "name" : "marginal cost new capacity T1",
+      "type" : "stock",
+      "x" : 96.0,
+      "y" : 351.0
+    }, {
+      "name" : "marginal cost new capacity T2",
+      "type" : "stock",
+      "x" : 114.0,
+      "y" : 224.0
+    }, {
+      "name" : "learning curve period",
+      "type" : "aux",
+      "x" : 204.0,
+      "y" : 97.0
+    } ],
+    "connectors" : [ {
+      "from" : "experience curve parameter T3",
+      "to" : "marginal cost capacity T3"
+    }, {
+      "from" : "cumulatively decommissioned capacity T3",
+      "to" : "cumulatively installed capacity T3"
+    }, {
+      "from" : "installed capacity T3",
+      "to" : "cumulatively installed capacity T3"
+    }, {
+      "from" : "installed capacity T3",
+      "to" : "_540"
+    }, {
+      "from" : "initial capacity T3",
+      "to" : "installed capacity T3"
+    }, {
+      "from" : "initial cumulatively decommissioned capacity T3",
+      "to" : "cumulatively decommissioned capacity T3"
+    }, {
+      "from" : "initial marginal cost new capacity T3",
+      "to" : "marginal cost new capacity T3"
+    }, {
+      "from" : "_396",
+      "to" : "capacity under construction T3"
+    }, {
+      "from" : "capacity under construction T3",
+      "to" : "_396"
+    }, {
+      "from" : "desired fraction new capacity T3",
+      "to" : "_48"
+    }, {
+      "from" : "average construction time T3",
+      "to" : "_396"
+    }, {
+      "from" : "lifetime techmology T3",
+      "to" : "_540"
+    }, {
+      "from" : "initial capacity under construction T3",
+      "to" : "capacity under construction T3"
+    }, {
+      "from" : "cumulatively installed capacity T3",
+      "to" : "marginal cost capacity T3"
+    }, {
+      "from" : "cumulatively installed capacity T3",
+      "to" : "cumulatively installed capacity previous year T3"
+    }, {
+      "from" : "cumulatively installed capacity previous year T3",
+      "to" : "marginal cost capacity T3"
+    }, {
+      "from" : "progress ratio T3",
+      "to" : "experience curve parameter T3"
+    }, {
+      "from" : "expected new capacity to be installed",
+      "to" : "newly planned capacity T3"
+    }, {
+      "from" : "marginal cost new capacity T3",
+      "to" : "marginal cost new capacity previous year T3"
+    }, {
+      "from" : "marginal cost new capacity T1",
+      "to" : "desired fraction new capacity T3"
+    }, {
+      "from" : "marginal cost new capacity T3",
+      "to" : "desired fraction new capacity T3"
+    }, {
+      "from" : "marginal cost new capacity T2",
+      "to" : "desired fraction new capacity T3"
+    }, {
+      "from" : "_48",
+      "to" : "_48"
+    }, {
+      "from" : "learning curve period",
+      "to" : "_48"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_540",
+      "points" : [ [ 722.0, 404.0 ] ]
+    }, {
+      "flowName" : "_396",
+      "points" : [ [ 463.0, 404.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 521.0, 144.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 268.0, 150.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 206.0, 409.0 ] ]
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Year",
+    "duration" : 90.0,
+    "durationUnit" : "Year",
+    "dt" : 0.0078125,
+    "initialTime" : 2010.0
+  },
+  "metadata" : {
+    "author" : "Dr. Erik Pruyt",
+    "source" : "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
+    "license" : "CC-BY-NC-SA-4.0",
+    "url" : "https://simulation.tudelft.nl/SD/"
+  }
+}

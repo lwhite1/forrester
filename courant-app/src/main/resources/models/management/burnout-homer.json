@@ -1,0 +1,543 @@
+{
+  "name" : "1016_BurnoutHomer1",
+  "stocks" : [ {
+    "name" : "cumulative accomplishments",
+    "comment" : "cumulative accomplishments",
+    "initialValue" : 0.0,
+    "unit" : ""
+  }, {
+    "name" : "energy level",
+    "comment" : "energy level",
+    "initialValue" : 1.0,
+    "unit" : "energyunits"
+  }, {
+    "name" : "expected accomplishments per week",
+    "comment" : "expected accomplishments per week",
+    "initialValue" : 40.0,
+    "unit" : "tasks/week"
+  }, {
+    "name" : "hours worked per week",
+    "comment" : "hours worked per week",
+    "initialValue" : 40.0,
+    "unit" : "hour/week"
+  }, {
+    "name" : "perceived accomplishments per week",
+    "comment" : "perceived accomplishments per week",
+    "initialValue" : 0.0,
+    "initialExpression" : "accomplishments_per_week",
+    "unit" : "tasks/week"
+  } ],
+  "flows" : [ {
+    "name" : "cumulative accomplishments net flow",
+    "comment" : "Net flow for cumulative accomplishments",
+    "equation" : "accomplishments_per_week",
+    "timeUnit" : "Week",
+    "sink" : "cumulative accomplishments"
+  }, {
+    "name" : "energy level inflow 1",
+    "equation" : "energy_recovery",
+    "timeUnit" : "Week",
+    "sink" : "energy level"
+  }, {
+    "name" : "energy level outflow 2",
+    "equation" : "energy_depletion",
+    "timeUnit" : "Week",
+    "source" : "energy level"
+  }, {
+    "name" : "expected accomplishments per week net flow",
+    "comment" : "Net flow for expected accomplishments per week",
+    "equation" : "change_in_expected_accomplishments_per_week",
+    "timeUnit" : "Week",
+    "sink" : "expected accomplishments per week"
+  }, {
+    "name" : "hours worked per week net flow",
+    "comment" : "Net flow for hours worked per week",
+    "equation" : "change_in_hours_worked_per_week",
+    "timeUnit" : "Week",
+    "sink" : "hours worked per week"
+  }, {
+    "name" : "perceived accomplishments per week net flow",
+    "comment" : "Net flow for perceived accomplishments per week",
+    "equation" : "change_in_perceived_accomplishments_per_week",
+    "timeUnit" : "Week",
+    "sink" : "perceived accomplishments per week"
+  } ],
+  "variables" : [ {
+    "name" : "perceived adequacy of accomplishment",
+    "comment" : "perceived adequacy of accomplishment",
+    "equation" : "perceived_accomplishments_per_week / expected_accomplishments_per_week",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "fractional change in expectations from perceived adequacy",
+    "comment" : "fractional change in expectations from perceived adequacy",
+    "equation" : "LOOKUP(fractional_change_in_expectations_from_perceived_adequacy_lookup, perceived_adequacy_of_accomplishment)",
+    "unit" : "1/week"
+  }, {
+    "name" : "bias for fractional change in expectations",
+    "comment" : "bias for fractional change in expectations",
+    "equation" : "0.1",
+    "unit" : "1/week"
+  }, {
+    "name" : "change in expected accomplishments per week",
+    "comment" : "change in expected accomplishments per week",
+    "equation" : "expected_accomplishments_per_week * fractional_change_in_expected_accomplishments_per_week",
+    "unit" : "tasks/week/week"
+  }, {
+    "name" : "change in hours worked per week",
+    "comment" : "change in hours worked per week",
+    "equation" : "(indicated_hours_worked_per_week - hours_worked_per_week) / time_to_adjust_hours_worked_per_week",
+    "unit" : "hour / week / week"
+  }, {
+    "name" : "change in perceived accomplishments per week",
+    "comment" : "change in perceived accomplishments per week",
+    "equation" : "(accomplishments_per_week - perceived_accomplishments_per_week) / time_to_perceive_accomplishments_per_week",
+    "unit" : "tasks/week/week"
+  }, {
+    "name" : "effect of energy level on hours worked",
+    "comment" : "effect of energy level on hours worked",
+    "equation" : "LOOKUP(effect_of_energy_level_on_hours_worked_lookup, energy_level)",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "effect of high energy on further recovery",
+    "comment" : "effect of high energy on further recovery",
+    "equation" : "LOOKUP(effect_of_high_energy_on_further_recovery_lookup, energy_level)",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "effect of hours worked on energy depletion",
+    "comment" : "effect of hours worked on energy depletion",
+    "equation" : "LOOKUP(effect_of_hours_worked_on_energy_depletion_lookup, hours_worked_per_week)",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "effect of hours worked on recovery",
+    "comment" : "effect of hours worked on recovery",
+    "equation" : "LOOKUP(effect_of_hours_worked_on_recovery_lookup, hours_worked_per_week)",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "effect of low energy on further depletion",
+    "comment" : "effect of low energy on further depletion",
+    "equation" : "LOOKUP(effect_of_low_energy_on_further_depletion_lookup, energy_level)",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "effect of perceived adequacy on energy depletion",
+    "comment" : "effect of perceived adequacy on energy depletion",
+    "equation" : "LOOKUP(effect_of_perceived_adequacy_on_energy_depletion_lookup, perceived_adequacy_of_accomplishment)",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "effect of perceived adequacy on hours worked",
+    "comment" : "effect of perceived adequacy on hours worked",
+    "equation" : "LOOKUP(effect_of_perceived_adequacy_on_hours_worked_lookup, perceived_adequacy_of_accomplishment)",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "energy depletion",
+    "comment" : "energy depletion",
+    "equation" : "energy_depletion_normal * effect_of_perceived_adequacy_on_energy_depletion * effect_of_hours_worked_on_energy_depletion * effect_of_low_energy_on_further_depletion",
+    "unit" : "energyunits/week"
+  }, {
+    "name" : "energy depletion normal",
+    "comment" : "energy depletion normal",
+    "equation" : "0.06",
+    "unit" : "energyunits/week"
+  }, {
+    "name" : "indicated hours worked per week",
+    "comment" : "indicated hours worked per week",
+    "equation" : "MIN(limit_on_hours_worked_per_week, (hours_worked_per_week * effect_of_energy_level_on_hours_worked * effect_of_perceived_adequacy_on_hours_worked))",
+    "unit" : "hour/week"
+  }, {
+    "name" : "energy recovery",
+    "comment" : "energy recovery",
+    "equation" : "energy_recovery_normal * effect_of_hours_worked_on_recovery * effect_of_high_energy_on_further_recovery",
+    "unit" : "energyunits/week"
+  }, {
+    "name" : "energy recovery normal",
+    "comment" : "energy recovery normal",
+    "equation" : "0.3",
+    "unit" : "energyunits/week"
+  }, {
+    "name" : "fractional change in expected accomplishments per week",
+    "comment" : "fractional change in expected accomplishments per week",
+    "equation" : "bias_for_fractional_change_in_expectations + fractional_change_in_expectations_from_perceived_adequacy",
+    "unit" : "1/week"
+  }, {
+    "name" : "limit on hours worked per week",
+    "comment" : "limit on hours worked per week",
+    "equation" : "80",
+    "unit" : "hour/week"
+  }, {
+    "name" : "time to perceive accomplishments per week",
+    "comment" : "time to perceive accomplishments per week",
+    "equation" : "1",
+    "unit" : "week"
+  }, {
+    "name" : "time to adjust hours worked per week",
+    "comment" : "time to adjust hours worked per week",
+    "equation" : "1",
+    "unit" : "week"
+  }, {
+    "name" : "accomplishments per week",
+    "comment" : "accomplishments per week",
+    "equation" : "hours_worked_per_week * accomplishments_per_hour",
+    "unit" : "tasks/week"
+  }, {
+    "name" : "accomplishments per hour",
+    "comment" : "accomplishments per hour",
+    "equation" : "LOOKUP(accomplishments_per_hour_lookup, energy_level)",
+    "unit" : "tasks/hour"
+  } ],
+  "lookupTables" : [ {
+    "name" : "fractional_change_in_expectations_from_perceived_adequacy_lookup",
+    "xValues" : [ 0.0, 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6 ],
+    "yValues" : [ -0.7, -0.5, -0.35, -0.2, -0.1, 0.0, 0.1, 0.25, 0.4 ],
+    "interpolation" : "LINEAR"
+  }, {
+    "name" : "effect_of_energy_level_on_hours_worked_lookup",
+    "xValues" : [ 0.0, 0.2, 0.4, 0.6, 0.8, 1.0 ],
+    "yValues" : [ 0.0, 0.4, 0.7, 0.9, 1.0, 1.0 ],
+    "interpolation" : "LINEAR"
+  }, {
+    "name" : "effect_of_high_energy_on_further_recovery_lookup",
+    "xValues" : [ 0.0, 0.8, 0.85, 0.9, 0.95, 1.0 ],
+    "yValues" : [ 1.0, 1.0, 0.9, 0.7, 0.4, 0.0 ],
+    "interpolation" : "LINEAR"
+  }, {
+    "name" : "effect_of_hours_worked_on_energy_depletion_lookup",
+    "xValues" : [ 0.0, 20.0, 40.0, 60.0, 80.0, 100.0, 120.0 ],
+    "yValues" : [ 0.3, 0.6, 1.0, 1.5, 2.0, 2.5, 3.0 ],
+    "interpolation" : "LINEAR"
+  }, {
+    "name" : "effect_of_hours_worked_on_recovery_lookup",
+    "xValues" : [ 0.0, 20.0, 40.0, 60.0, 80.0, 100.0, 120.0 ],
+    "yValues" : [ 1.3, 1.2, 1.0, 0.7, 0.5, 0.35, 0.25 ],
+    "interpolation" : "LINEAR"
+  }, {
+    "name" : "effect_of_low_energy_on_further_depletion_lookup",
+    "xValues" : [ 0.0, 0.05, 0.1, 0.15, 0.2, 1.0 ],
+    "yValues" : [ 0.0, 0.4, 0.7, 0.9, 1.0, 1.0 ],
+    "interpolation" : "LINEAR"
+  }, {
+    "name" : "effect_of_perceived_adequacy_on_energy_depletion_lookup",
+    "xValues" : [ 0.0, 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6 ],
+    "yValues" : [ 5.0, 4.0, 3.1, 2.3, 1.6, 1.0, 0.6, 0.4, 0.3 ],
+    "interpolation" : "LINEAR"
+  }, {
+    "name" : "effect_of_perceived_adequacy_on_hours_worked_lookup",
+    "xValues" : [ 0.0, 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6 ],
+    "yValues" : [ 2.3, 1.9, 1.6, 1.35, 1.15, 1.0, 0.9, 0.8, 0.75 ],
+    "interpolation" : "LINEAR"
+  }, {
+    "name" : "accomplishments_per_hour_lookup",
+    "xValues" : [ 0.0, 0.2, 0.4, 0.6, 0.8, 1.0 ],
+    "yValues" : [ 0.0, 0.2, 0.4, 0.6, 0.8, 1.0 ],
+    "interpolation" : "LINEAR"
+  } ],
+  "views" : [ {
+    "name" : "View 1",
+    "elements" : [ {
+      "name" : "hours worked per week",
+      "type" : "stock",
+      "x" : 551.0,
+      "y" : 398.0
+    }, {
+      "name" : "accomplishments per hour",
+      "type" : "aux",
+      "x" : 584.0,
+      "y" : 504.0
+    }, {
+      "name" : "accomplishments per week",
+      "type" : "aux",
+      "x" : 805.0,
+      "y" : 494.0
+    }, {
+      "name" : "energy level",
+      "type" : "stock",
+      "x" : 493.0,
+      "y" : 598.0
+    }, {
+      "name" : "time to adjust hours worked per week",
+      "type" : "aux",
+      "x" : 267.0,
+      "y" : 366.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 437.0,
+      "y" : 390.0
+    }, {
+      "name" : "change in hours worked per week",
+      "type" : "aux",
+      "x" : 437.0,
+      "y" : 417.0
+    }, {
+      "name" : "indicated hours worked per week",
+      "type" : "aux",
+      "x" : 513.0,
+      "y" : 303.0
+    }, {
+      "name" : "limit on hours worked per week",
+      "type" : "aux",
+      "x" : 298.0,
+      "y" : 269.0
+    }, {
+      "name" : "effect of energy level on hours worked",
+      "type" : "aux",
+      "x" : 284.0,
+      "y" : 116.0
+    }, {
+      "name" : "effect of perceived adequacy on hours worked",
+      "type" : "aux",
+      "x" : 862.0,
+      "y" : 63.0
+    }, {
+      "name" : "perceived adequacy of accomplishment",
+      "type" : "aux",
+      "x" : 1269.0,
+      "y" : 395.0
+    }, {
+      "name" : "perceived accomplishments per week",
+      "type" : "stock",
+      "x" : 1099.0,
+      "y" : 495.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 976.0,
+      "y" : 496.0
+    }, {
+      "name" : "change in perceived accomplishments per week",
+      "type" : "aux",
+      "x" : 976.0,
+      "y" : 532.0
+    }, {
+      "name" : "time to perceive accomplishments per week",
+      "type" : "aux",
+      "x" : 1056.0,
+      "y" : 620.0
+    }, {
+      "name" : "expected accomplishments per week",
+      "type" : "stock",
+      "x" : 1061.0,
+      "y" : 200.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 928.0,
+      "y" : 195.0
+    }, {
+      "name" : "change in expected accomplishments per week",
+      "type" : "aux",
+      "x" : 928.0,
+      "y" : 231.0
+    }, {
+      "name" : "fractional change in expectations from perceived adequacy",
+      "type" : "aux",
+      "x" : 1015.0,
+      "y" : 414.0
+    }, {
+      "name" : "bias for fractional change in expectations",
+      "type" : "aux",
+      "x" : 713.0,
+      "y" : 290.0
+    }, {
+      "name" : "fractional change in expected accomplishments per week",
+      "type" : "aux",
+      "x" : 899.0,
+      "y" : 334.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 392.0,
+      "y" : 602.0
+    }, {
+      "name" : "energy recovery",
+      "type" : "aux",
+      "x" : 392.0,
+      "y" : 621.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 599.0,
+      "y" : 600.0
+    }, {
+      "name" : "energy depletion",
+      "type" : "aux",
+      "x" : 599.0,
+      "y" : 619.0
+    }, {
+      "name" : "energy recovery normal",
+      "type" : "aux",
+      "x" : 212.0,
+      "y" : 668.0
+    }, {
+      "name" : "effect of hours worked on recovery",
+      "type" : "aux",
+      "x" : 407.0,
+      "y" : 478.0
+    }, {
+      "name" : "effect of high energy on further recovery",
+      "type" : "aux",
+      "x" : 442.0,
+      "y" : 690.0
+    }, {
+      "name" : "energy depletion normal",
+      "type" : "aux",
+      "x" : 879.0,
+      "y" : 649.0
+    }, {
+      "name" : "effect of perceived adequacy on energy depletion",
+      "type" : "aux",
+      "x" : 828.0,
+      "y" : 707.0
+    }, {
+      "name" : "effect of hours worked on energy depletion",
+      "type" : "aux",
+      "x" : 725.0,
+      "y" : 552.0
+    }, {
+      "name" : "effect of low energy on further depletion",
+      "type" : "aux",
+      "x" : 591.0,
+      "y" : 721.0
+    }, {
+      "name" : "cumulative accomplishments",
+      "type" : "stock",
+      "x" : 1290.0,
+      "y" : 709.0
+    } ],
+    "connectors" : [ {
+      "from" : "hours worked per week",
+      "to" : "accomplishments per week"
+    }, {
+      "from" : "accomplishments per hour",
+      "to" : "accomplishments per week"
+    }, {
+      "from" : "energy level",
+      "to" : "accomplishments per hour"
+    }, {
+      "from" : "hours worked per week",
+      "to" : "_48"
+    }, {
+      "from" : "indicated hours worked per week",
+      "to" : "_48"
+    }, {
+      "from" : "time to adjust hours worked per week",
+      "to" : "_48"
+    }, {
+      "from" : "limit on hours worked per week",
+      "to" : "indicated hours worked per week"
+    }, {
+      "from" : "hours worked per week",
+      "to" : "indicated hours worked per week"
+    }, {
+      "from" : "effect of energy level on hours worked",
+      "to" : "indicated hours worked per week"
+    }, {
+      "from" : "effect of perceived adequacy on hours worked",
+      "to" : "indicated hours worked per week"
+    }, {
+      "from" : "energy level",
+      "to" : "effect of energy level on hours worked"
+    }, {
+      "from" : "perceived adequacy of accomplishment",
+      "to" : "effect of perceived adequacy on hours worked"
+    }, {
+      "from" : "perceived accomplishments per week",
+      "to" : "change in perceived accomplishments per week"
+    }, {
+      "from" : "time to perceive accomplishments per week",
+      "to" : "change in perceived accomplishments per week"
+    }, {
+      "from" : "accomplishments per week",
+      "to" : "change in perceived accomplishments per week"
+    }, {
+      "from" : "expected accomplishments per week",
+      "to" : "perceived adequacy of accomplishment"
+    }, {
+      "from" : "accomplishments per week",
+      "to" : "perceived accomplishments per week"
+    }, {
+      "from" : "bias for fractional change in expectations",
+      "to" : "fractional change in expected accomplishments per week"
+    }, {
+      "from" : "fractional change in expectations from perceived adequacy",
+      "to" : "fractional change in expected accomplishments per week"
+    }, {
+      "from" : "fractional change in expected accomplishments per week",
+      "to" : "change in expected accomplishments per week"
+    }, {
+      "from" : "expected accomplishments per week",
+      "to" : "_48"
+    }, {
+      "from" : "hours worked per week",
+      "to" : "effect of hours worked on recovery"
+    }, {
+      "from" : "effect of hours worked on recovery",
+      "to" : "_48"
+    }, {
+      "from" : "energy recovery normal",
+      "to" : "energy recovery"
+    }, {
+      "from" : "effect of high energy on further recovery",
+      "to" : "energy recovery"
+    }, {
+      "from" : "energy level",
+      "to" : "effect of high energy on further recovery"
+    }, {
+      "from" : "perceived adequacy of accomplishment",
+      "to" : "effect of perceived adequacy on energy depletion"
+    }, {
+      "from" : "hours worked per week",
+      "to" : "effect of hours worked on energy depletion"
+    }, {
+      "from" : "energy level",
+      "to" : "effect of low energy on further depletion"
+    }, {
+      "from" : "effect of low energy on further depletion",
+      "to" : "energy depletion"
+    }, {
+      "from" : "effect of perceived adequacy on energy depletion",
+      "to" : "energy depletion"
+    }, {
+      "from" : "energy depletion normal",
+      "to" : "energy depletion"
+    }, {
+      "from" : "effect of hours worked on energy depletion",
+      "to" : "energy depletion"
+    }, {
+      "from" : "perceived adequacy of accomplishment",
+      "to" : "fractional change in expectations from perceived adequacy"
+    }, {
+      "from" : "perceived accomplishments per week",
+      "to" : "perceived adequacy of accomplishment"
+    }, {
+      "from" : "accomplishments per week",
+      "to" : "cumulative accomplishments"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_48",
+      "points" : [ [ 437.0, 390.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 976.0, 496.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 928.0, 195.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 392.0, 602.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 599.0, 600.0 ] ]
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Week",
+    "duration" : 75.0,
+    "durationUnit" : "Week",
+    "dt" : 0.015625
+  },
+  "metadata" : {
+    "author" : "Dr. Erik Pruyt",
+    "source" : "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
+    "license" : "CC-BY-NC-SA-4.0",
+    "url" : "https://simulation.tudelft.nl/SD/"
+  }
+}

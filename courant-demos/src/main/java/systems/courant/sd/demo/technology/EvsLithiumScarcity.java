@@ -6,7 +6,6 @@ package systems.courant.sd.demo.technology;
 
 import systems.courant.sd.Simulation;
 import systems.courant.sd.model.ModelMetadata;
-import systems.courant.sd.model.compile.CompiledModel;
 import systems.courant.sd.model.compile.ModelCompiler;
 import systems.courant.sd.model.def.ModelDefinitionBuilder;
 import systems.courant.sd.model.def.VariableDef;
@@ -30,29 +29,12 @@ import systems.courant.sd.model.def.StockDef;
  *   <li>View 'Lithium' places non-existent element: _284</li>
  *   <li>View 'Lithium' places non-existent element: _48</li>
  *   <li>View 'Lithium' places non-existent element: _684</li>
- *   <li>View 'Lithium' connector references non-existent element: 7</li>
- *   <li>View 'Lithium' connector references non-existent element: 30</li>
- *   <li>View 'Lithium' connector references non-existent element: 7</li>
  *   <li>View 'Lithium' connector references non-existent element: _780</li>
- *   <li>View 'Lithium' connector references non-existent element: 15</li>
- *   <li>View 'Lithium' connector references non-existent element: 12</li>
- *   <li>View 'Lithium' connector references non-existent element: 15</li>
- *   <li>View 'Lithium' connector references non-existent element: 23</li>
- *   <li>View 'Lithium' connector references non-existent element: 23</li>
- *   <li>View 'Lithium' connector references non-existent element: 26</li>
  *   <li>View 'Lithium' connector references non-existent element: _156</li>
  *   <li>View 'Lithium' connector references non-existent element: _812</li>
- *   <li>View 'Lithium' connector references non-existent element: 33</li>
- *   <li>View 'Lithium' connector references non-existent element: 33</li>
  *   <li>View 'Lithium' connector references non-existent element: _284</li>
  *   <li>View 'Lithium' connector references non-existent element: _812</li>
- *   <li>View 'Lithium' connector references non-existent element: 69</li>
- *   <li>View 'Lithium' connector references non-existent element: 53</li>
- *   <li>View 'Lithium' connector references non-existent element: 53</li>
- *   <li>View 'Lithium' connector references non-existent element: 50</li>
  *   <li>View 'Lithium' connector references non-existent element: _48</li>
- *   <li>View 'Lithium' connector references non-existent element: 74</li>
- *   <li>View 'Lithium' connector references non-existent element: 74</li>
  *   <li>View 'Lithium' connector references non-existent element: _684</li>
  *   <li>View 'Lithium' connector references non-existent element: _684</li>
  *   <li>View 'Lithium' connector references non-existent element: _284</li>
@@ -88,9 +70,6 @@ public class EvsLithiumScarcity {
         builder.stock(new StockDef("unexploited lithium reserves", "unexploited lithium reserves", 13000.0, "ktonLi", null));
 
         // Constants
-        builder.constant("TIME_STEP", 0.015625, "Year");
-        builder.constant("INITIAL_TIME", 2009.0, "Year");
-        builder.constant("FINAL_TIME", 2100.0, "Year");
         builder.constant("battery per vehicle", 1.0, "accu/auto");
         builder.constant("average recycling time", 0.25, "year");
         builder.constant("processing and introduction time", 1.0, "year");

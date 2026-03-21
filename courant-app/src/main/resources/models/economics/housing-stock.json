@@ -1,0 +1,288 @@
+{
+  "name" : "0611HousingStockDynamicsA",
+  "stocks" : [ {
+    "name" : "houses",
+    "comment" : "houses",
+    "initialValue" : 5000000.0,
+    "unit" : "house"
+  }, {
+    "name" : "houses under construction",
+    "comment" : "houses under construction",
+    "initialValue" : 0.0,
+    "initialExpression" : "building * time_to_build_houses",
+    "unit" : "house"
+  }, {
+    "name" : "planned houses",
+    "comment" : "planned houses",
+    "initialValue" : 0.0,
+    "initialExpression" : "planning * average_time_from_planning_to_building",
+    "unit" : "house"
+  } ],
+  "flows" : [ {
+    "name" : "houses inflow 1",
+    "equation" : "completing",
+    "timeUnit" : "Month",
+    "sink" : "houses"
+  }, {
+    "name" : "houses outflow 2",
+    "equation" : "demolishing",
+    "timeUnit" : "Month",
+    "source" : "houses"
+  }, {
+    "name" : "houses under construction inflow 1",
+    "equation" : "building",
+    "timeUnit" : "Month",
+    "sink" : "houses under construction"
+  }, {
+    "name" : "houses under construction outflow 2",
+    "equation" : "completing",
+    "timeUnit" : "Month",
+    "source" : "houses under construction"
+  }, {
+    "name" : "planned houses inflow 1",
+    "equation" : "planning",
+    "timeUnit" : "Month",
+    "sink" : "planned houses"
+  }, {
+    "name" : "planned houses outflow 2",
+    "equation" : "building",
+    "timeUnit" : "Month",
+    "source" : "planned houses"
+  } ],
+  "variables" : [ {
+    "name" : "replacement houses",
+    "comment" : "replacement houses",
+    "equation" : "demolishing",
+    "unit" : "house/Month"
+  }, {
+    "name" : "planning",
+    "comment" : "planning",
+    "equation" : "replacement_houses + (houses_gap / average_time_to_respond_to_housing_gap)",
+    "unit" : "house/Month"
+  }, {
+    "name" : "average house lifetime",
+    "comment" : "average house lifetime",
+    "equation" : "1200",
+    "unit" : "Month"
+  }, {
+    "name" : "building",
+    "comment" : "building",
+    "equation" : "planned_houses / average_time_from_planning_to_building",
+    "unit" : "house/Month"
+  }, {
+    "name" : "completing",
+    "comment" : "completing",
+    "equation" : "houses_under_construction / time_to_build_houses",
+    "unit" : "house/Month"
+  }, {
+    "name" : "demolishing",
+    "comment" : "demolishing",
+    "equation" : "houses / average_house_lifetime",
+    "unit" : "house/Month"
+  }, {
+    "name" : "houses gap",
+    "comment" : "houses gap",
+    "equation" : "( desired_number_of_houses - houses)",
+    "unit" : "house"
+  }, {
+    "name" : "desired number of houses",
+    "comment" : "desired number of houses",
+    "equation" : "5e+006+STEP(50000,20)",
+    "unit" : "house"
+  }, {
+    "name" : "time to build houses",
+    "comment" : "time to build houses",
+    "equation" : "6",
+    "unit" : "Month"
+  }, {
+    "name" : "average time from planning to building",
+    "comment" : "average time from planning to building",
+    "equation" : "3",
+    "unit" : "Month"
+  }, {
+    "name" : "average time to respond to housing gap",
+    "comment" : "average time to respond to housing gap",
+    "equation" : "8",
+    "unit" : "Month"
+  } ],
+  "views" : [ {
+    "name" : "View 1",
+    "elements" : [ {
+      "name" : "planned houses",
+      "type" : "stock",
+      "x" : 181.0,
+      "y" : 104.0
+    }, {
+      "name" : "houses under construction",
+      "type" : "stock",
+      "x" : 334.0,
+      "y" : 104.0
+    }, {
+      "name" : "houses",
+      "type" : "stock",
+      "x" : 496.0,
+      "y" : 104.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 86.0,
+      "y" : 104.0
+    }, {
+      "name" : "planning",
+      "type" : "aux",
+      "x" : 86.0,
+      "y" : 121.0
+    }, {
+      "name" : "_204",
+      "type" : "flow",
+      "x" : 255.0,
+      "y" : 106.0
+    }, {
+      "name" : "building",
+      "type" : "aux",
+      "x" : 255.0,
+      "y" : 123.0
+    }, {
+      "name" : "_268",
+      "type" : "flow",
+      "x" : 415.0,
+      "y" : 106.0
+    }, {
+      "name" : "completing",
+      "type" : "aux",
+      "x" : 415.0,
+      "y" : 123.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 582.0,
+      "y" : 106.0
+    }, {
+      "name" : "demolishing",
+      "type" : "aux",
+      "x" : 582.0,
+      "y" : 123.0
+    }, {
+      "name" : "average house lifetime",
+      "type" : "aux",
+      "x" : 544.0,
+      "y" : 44.0
+    }, {
+      "name" : "time to build houses",
+      "type" : "aux",
+      "x" : 369.0,
+      "y" : 38.0
+    }, {
+      "name" : "average time from planning to building",
+      "type" : "aux",
+      "x" : 212.0,
+      "y" : 38.0
+    }, {
+      "name" : "houses gap",
+      "type" : "aux",
+      "x" : 291.0,
+      "y" : 174.0
+    }, {
+      "name" : "desired number of houses",
+      "type" : "aux",
+      "x" : 368.0,
+      "y" : 209.0
+    }, {
+      "name" : "average time to respond to housing gap",
+      "type" : "aux",
+      "x" : 78.0,
+      "y" : 42.0
+    }, {
+      "name" : "replacement houses",
+      "type" : "aux",
+      "x" : 181.0,
+      "y" : 215.0
+    } ],
+    "connectors" : [ {
+      "from" : "_48",
+      "to" : "planned houses"
+    }, {
+      "from" : "_204",
+      "to" : "houses under construction"
+    }, {
+      "from" : "_204",
+      "to" : "planned houses"
+    }, {
+      "from" : "_268",
+      "to" : "houses"
+    }, {
+      "from" : "_268",
+      "to" : "houses under construction"
+    }, {
+      "from" : "_48",
+      "to" : "houses"
+    }, {
+      "from" : "average time from planning to building",
+      "to" : "_204"
+    }, {
+      "from" : "time to build houses",
+      "to" : "_268"
+    }, {
+      "from" : "average house lifetime",
+      "to" : "_48"
+    }, {
+      "from" : "houses",
+      "to" : "houses gap"
+    }, {
+      "from" : "desired number of houses",
+      "to" : "houses gap"
+    }, {
+      "from" : "houses gap",
+      "to" : "planning"
+    }, {
+      "from" : "planned houses",
+      "to" : "building"
+    }, {
+      "from" : "houses under construction",
+      "to" : "completing"
+    }, {
+      "from" : "houses",
+      "to" : "demolishing"
+    }, {
+      "from" : "average time from planning to building",
+      "to" : "planned houses"
+    }, {
+      "from" : "time to build houses",
+      "to" : "houses under construction"
+    }, {
+      "from" : "average time to respond to housing gap",
+      "to" : "_48"
+    }, {
+      "from" : "demolishing",
+      "to" : "replacement houses"
+    }, {
+      "from" : "replacement houses",
+      "to" : "planning"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_48",
+      "points" : [ [ 86.0, 104.0 ] ]
+    }, {
+      "flowName" : "_204",
+      "points" : [ [ 255.0, 106.0 ] ]
+    }, {
+      "flowName" : "_268",
+      "points" : [ [ 415.0, 106.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 582.0, 106.0 ] ]
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Month",
+    "duration" : 100.0,
+    "durationUnit" : "Month",
+    "dt" : 0.5
+  },
+  "metadata" : {
+    "author" : "Dr. Erik Pruyt",
+    "source" : "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
+    "license" : "CC-BY-NC-SA-4.0",
+    "url" : "https://simulation.tudelft.nl/SD/"
+  }
+}

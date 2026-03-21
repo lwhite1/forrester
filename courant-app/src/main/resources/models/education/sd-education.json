@@ -1,0 +1,202 @@
+{
+  "name" : "0609SDEducationVersion1",
+  "stocks" : [ {
+    "name" : "SD professors",
+    "comment" : "SD professors",
+    "initialValue" : 1.0,
+    "unit" : "professor"
+  }, {
+    "name" : "SD trained",
+    "comment" : "SD trained",
+    "initialValue" : 0.0,
+    "unit" : ""
+  }, {
+    "name" : "students in SD programs",
+    "comment" : "students in SD programs",
+    "initialValue" : 10.0,
+    "unit" : "student"
+  } ],
+  "flows" : [ {
+    "name" : "SD professors net flow",
+    "comment" : "Net flow for SD professors",
+    "equation" : "new_professors_teaching_SD",
+    "timeUnit" : "Year",
+    "sink" : "SD professors"
+  }, {
+    "name" : "SD trained net flow",
+    "comment" : "Net flow for SD trained",
+    "equation" : "SD_students_finishing",
+    "timeUnit" : "Year",
+    "sink" : "SD trained"
+  }, {
+    "name" : "students in SD programs inflow 1",
+    "equation" : "SD_students_entering",
+    "timeUnit" : "Year",
+    "sink" : "students in SD programs"
+  }, {
+    "name" : "students in SD programs outflow 2",
+    "equation" : "SD_students_finishing",
+    "timeUnit" : "Year",
+    "source" : "students in SD programs"
+  } ],
+  "variables" : [ {
+    "name" : "new professors teaching SD",
+    "comment" : "new professors teaching SD",
+    "equation" : "10",
+    "unit" : ""
+  }, {
+    "name" : "average SD student cohort size per professor",
+    "comment" : "average SD student cohort size per professor",
+    "equation" : "25",
+    "unit" : "student/professor/Year"
+  }, {
+    "name" : "average time to finish SD studies",
+    "comment" : "average time to finish SD studies",
+    "equation" : "7",
+    "unit" : "Year"
+  }, {
+    "name" : "ini SD professors",
+    "comment" : "ini SD professors",
+    "equation" : "1",
+    "unit" : "professor"
+  }, {
+    "name" : "ini SD trained",
+    "comment" : "ini SD trained",
+    "equation" : "0",
+    "unit" : "student"
+  }, {
+    "name" : "ini students in SD programs",
+    "comment" : "ini students in SD programs",
+    "equation" : "10",
+    "unit" : "student"
+  }, {
+    "name" : "SD students entering",
+    "comment" : "SD students entering",
+    "equation" : "average_SD_student_cohort_size_per_professor*SD_professors",
+    "unit" : "student/Year"
+  }, {
+    "name" : "SD students finishing",
+    "comment" : "SD students finishing",
+    "equation" : "students_in_SD_programs/average_time_to_finish_SD_studies",
+    "unit" : "student/Year"
+  } ],
+  "views" : [ {
+    "name" : "View 1",
+    "elements" : [ {
+      "name" : "SD professors",
+      "type" : "stock",
+      "x" : 458.0,
+      "y" : 77.0
+    }, {
+      "name" : "ini SD professors",
+      "type" : "aux",
+      "x" : 467.0,
+      "y" : 115.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 308.0,
+      "y" : 71.0
+    }, {
+      "name" : "new professors teaching SD",
+      "type" : "aux",
+      "x" : 308.0,
+      "y" : 98.0
+    }, {
+      "name" : "students in SD programs",
+      "type" : "stock",
+      "x" : 463.0,
+      "y" : 186.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 308.0,
+      "y" : 190.0
+    }, {
+      "name" : "SD students entering",
+      "type" : "aux",
+      "x" : 308.0,
+      "y" : 217.0
+    }, {
+      "name" : "average SD student cohort size per professor",
+      "type" : "aux",
+      "x" : 200.0,
+      "y" : 150.0
+    }, {
+      "name" : "ini students in SD programs",
+      "type" : "aux",
+      "x" : 459.0,
+      "y" : 244.0
+    }, {
+      "name" : "average time to finish SD studies",
+      "type" : "aux",
+      "x" : 623.0,
+      "y" : 104.0
+    }, {
+      "name" : "SD trained",
+      "type" : "stock",
+      "x" : 746.0,
+      "y" : 190.0
+    }, {
+      "name" : "_348",
+      "type" : "flow",
+      "x" : 603.0,
+      "y" : 192.0
+    }, {
+      "name" : "SD students finishing",
+      "type" : "aux",
+      "x" : 603.0,
+      "y" : 219.0
+    }, {
+      "name" : "ini SD trained",
+      "type" : "aux",
+      "x" : 745.0,
+      "y" : 137.0
+    } ],
+    "connectors" : [ {
+      "from" : "average SD student cohort size per professor",
+      "to" : "_48"
+    }, {
+      "from" : "SD professors",
+      "to" : "_48"
+    }, {
+      "from" : "ini students in SD programs",
+      "to" : "students in SD programs"
+    }, {
+      "from" : "ini SD professors",
+      "to" : "SD professors"
+    }, {
+      "from" : "students in SD programs",
+      "to" : "_348"
+    }, {
+      "from" : "average time to finish SD studies",
+      "to" : "_348"
+    }, {
+      "from" : "ini SD trained",
+      "to" : "SD trained"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_48",
+      "points" : [ [ 308.0, 71.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 308.0, 190.0 ] ]
+    }, {
+      "flowName" : "_348",
+      "points" : [ [ 603.0, 192.0 ] ]
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Year",
+    "duration" : 50.0,
+    "durationUnit" : "Year",
+    "dt" : 0.0625,
+    "initialTime" : 1962.0
+  },
+  "metadata" : {
+    "author" : "Dr. Erik Pruyt",
+    "source" : "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
+    "license" : "CC-BY-NC-SA-4.0",
+    "url" : "https://simulation.tudelft.nl/SD/"
+  }
+}

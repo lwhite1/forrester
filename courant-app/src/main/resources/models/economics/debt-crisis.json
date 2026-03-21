@@ -1,0 +1,545 @@
+{
+  "name" : "1403_DebtCrisisBasedOnZ605",
+  "stocks" : [ {
+    "name" : "production plants",
+    "comment" : "production plants",
+    "initialValue" : 0.0,
+    "unit" : "$"
+  }, {
+    "name" : "debt",
+    "comment" : "debt",
+    "initialValue" : 0.0,
+    "unit" : "$"
+  }, {
+    "name" : "profit sum",
+    "comment" : "profit sum",
+    "initialValue" : 0.0,
+    "unit" : "$"
+  }, {
+    "name" : "interest sum",
+    "comment" : "interest sum",
+    "initialValue" : 0.0,
+    "unit" : "$"
+  } ],
+  "flows" : [ {
+    "name" : "production plants inflow 1",
+    "equation" : "expansion",
+    "timeUnit" : "Year",
+    "sink" : "production plants"
+  }, {
+    "name" : "production plants outflow 2",
+    "equation" : "deterioration",
+    "timeUnit" : "Year",
+    "source" : "production plants"
+  }, {
+    "name" : "debt inflow 1",
+    "equation" : "debt_increase",
+    "timeUnit" : "Year",
+    "sink" : "debt"
+  }, {
+    "name" : "debt outflow 2",
+    "equation" : "debt_decrease",
+    "timeUnit" : "Year",
+    "source" : "debt"
+  }, {
+    "name" : "profit sum net flow",
+    "comment" : "Net flow for profit sum",
+    "equation" : "profit_rate",
+    "timeUnit" : "Year",
+    "sink" : "profit sum"
+  }, {
+    "name" : "interest sum net flow",
+    "comment" : "Net flow for interest sum",
+    "equation" : "interest",
+    "timeUnit" : "Year",
+    "sink" : "interest sum"
+  } ],
+  "variables" : [ {
+    "name" : "INITIAL PRODUCTION PLANTS",
+    "comment" : "INITIAL PRODUCTION PLANTS",
+    "equation" : "0",
+    "unit" : "$"
+  }, {
+    "name" : "INITIAL DEBT",
+    "comment" : "INITIAL DEBT",
+    "equation" : "0",
+    "unit" : "$"
+  }, {
+    "name" : "expansion",
+    "comment" : "expansion",
+    "equation" : "INVESTMENT_EFFECTIVENESS*investment",
+    "unit" : "$/Year"
+  }, {
+    "name" : "revenue",
+    "comment" : "revenue",
+    "equation" : "price_factor*production",
+    "unit" : "$/Year"
+  }, {
+    "name" : "profit",
+    "comment" : "profit",
+    "equation" : "(1-INVESTMENT_FRACTION)*investment_generation/INVESTMENT_FRACTION",
+    "unit" : "$/Year"
+  }, {
+    "name" : "profit rate",
+    "comment" : "profit rate",
+    "equation" : "profit",
+    "unit" : "$/Year"
+  }, {
+    "name" : "INVESTMENT FRACTION",
+    "comment" : "INVESTMENT FRACTION",
+    "equation" : "0.5",
+    "unit" : "1"
+  }, {
+    "name" : "investment generation",
+    "comment" : "MAX((net revenue-repayment), 0)",
+    "equation" : "INVESTMENT_FRACTION*MAX((net_revenue-repayment), 0)",
+    "unit" : "$/Year"
+  }, {
+    "name" : "investment",
+    "comment" : "investment",
+    "equation" : "investment_generation+credit",
+    "unit" : "$/Year"
+  }, {
+    "name" : "INVESTMENT EFFECTIVENESS",
+    "comment" : "INVESTMENT EFFECTIVENESS",
+    "equation" : "0.5",
+    "unit" : "1"
+  }, {
+    "name" : "credit",
+    "comment" : "credit",
+    "equation" : "CREDIT_AMOUNT*CREDIT_FUNCTION",
+    "unit" : "$/Year"
+  }, {
+    "name" : "CREDIT FUNCTION",
+    "comment" : "CREDIT FUNCTION",
+    "equation" : "LOOKUP(CREDIT_FUNCTION_lookup, TIME)",
+    "unit" : "1"
+  }, {
+    "name" : "CREDIT AMOUNT",
+    "comment" : "CREDIT AMOUNT",
+    "equation" : "100",
+    "unit" : "$/Year"
+  }, {
+    "name" : "DEMAND",
+    "comment" : "DEMAND",
+    "equation" : "100",
+    "unit" : "Stück/Year"
+  }, {
+    "name" : "net revenue",
+    "comment" : "net revenue",
+    "equation" : "revenue-interest_payment",
+    "unit" : "$/Year"
+  }, {
+    "name" : "price factor",
+    "comment" : "price factor",
+    "equation" : "LOOKUP(price_factor_lookup, production/DEMAND)",
+    "unit" : "1"
+  }, {
+    "name" : "production",
+    "comment" : "production",
+    "equation" : "SPECIFIC_PRODUCTION*production_plants",
+    "unit" : "$/Year"
+  }, {
+    "name" : "DEBT REPAYMENT FRACTION",
+    "comment" : "DEBT REPAYMENT FRACTION",
+    "equation" : "0.5",
+    "unit" : "1"
+  }, {
+    "name" : "repayment",
+    "comment" : "repayment",
+    "equation" : "IF((net_revenue>0) and (debt>0), DEBT_REPAYMENT_FRACTION*net_revenue, 0)",
+    "unit" : "$/Year"
+  }, {
+    "name" : "debt decrease",
+    "comment" : "debt decrease",
+    "equation" : "repayment",
+    "unit" : "$/Year"
+  }, {
+    "name" : "debt increase",
+    "comment" : "debt increase",
+    "equation" : "credit+interest_debt",
+    "unit" : "$/Year"
+  }, {
+    "name" : "SPECIFIC PRODUCTION",
+    "comment" : "SPECIFIC PRODUCTION",
+    "equation" : "1",
+    "unit" : "($/Year)/$"
+  }, {
+    "name" : "deterioration",
+    "comment" : "deterioration",
+    "equation" : "DETERIORATION_RATE*production_plants",
+    "unit" : "$/Year"
+  }, {
+    "name" : "DETERIORATION RATE",
+    "comment" : "DETERIORATION RATE",
+    "equation" : "0.05",
+    "unit" : "1/Year"
+  }, {
+    "name" : "interest",
+    "comment" : "interest",
+    "equation" : "interest_payment",
+    "unit" : "$/Year"
+  }, {
+    "name" : "INTEREST RATE",
+    "comment" : "INTEREST RATE",
+    "equation" : "0.07",
+    "unit" : "1/Year"
+  }, {
+    "name" : "interest debt",
+    "comment" : "interest debt",
+    "equation" : "MAX(-net_revenue, 0)",
+    "unit" : "$/Year"
+  }, {
+    "name" : "interest payment",
+    "comment" : "interest payment",
+    "equation" : "INTEREST_RATE*debt",
+    "unit" : "$/Year"
+  } ],
+  "lookupTables" : [ {
+    "name" : "CREDIT_FUNCTION_lookup",
+    "xValues" : [ 0.0, 2.0, 4.0, 6.0, 8.0, 10.0, 12.0, 14.0, 16.0, 18.0, 200.0 ],
+    "yValues" : [ 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0 ],
+    "interpolation" : "LINEAR"
+  }, {
+    "name" : "price_factor_lookup",
+    "xValues" : [ 0.0, 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0 ],
+    "yValues" : [ 2.0, 2.0, 2.0, 2.0, 1.4, 1.0, 0.6, 0.1, 0.1, 0.1, 0.1 ],
+    "interpolation" : "LINEAR"
+  } ],
+  "views" : [ {
+    "name" : "View 1",
+    "elements" : [ {
+      "name" : "production plants",
+      "type" : "stock",
+      "x" : 175.0,
+      "y" : 199.0
+    }, {
+      "name" : "debt",
+      "type" : "stock",
+      "x" : 471.0,
+      "y" : 198.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 265.0,
+      "y" : 198.0
+    }, {
+      "name" : "expansion",
+      "type" : "aux",
+      "x" : 265.0,
+      "y" : 214.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 380.0,
+      "y" : 198.0
+    }, {
+      "name" : "debt increase",
+      "type" : "aux",
+      "x" : 380.0,
+      "y" : 220.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 565.0,
+      "y" : 196.0
+    }, {
+      "name" : "debt decrease",
+      "type" : "aux",
+      "x" : 565.0,
+      "y" : 218.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 78.0,
+      "y" : 199.0
+    }, {
+      "name" : "deterioration",
+      "type" : "aux",
+      "x" : 78.0,
+      "y" : 215.0
+    }, {
+      "name" : "INVESTMENT EFFECTIVENESS",
+      "type" : "aux",
+      "x" : 180.0,
+      "y" : 128.0
+    }, {
+      "name" : "CREDIT AMOUNT",
+      "type" : "aux",
+      "x" : 292.0,
+      "y" : 128.0
+    }, {
+      "name" : "CREDIT FUNCTION",
+      "type" : "aux",
+      "x" : 382.0,
+      "y" : 128.0
+    }, {
+      "name" : "DETERIORATION RATE",
+      "type" : "aux",
+      "x" : 74.0,
+      "y" : 286.0
+    }, {
+      "name" : "SPECIFIC PRODUCTION",
+      "type" : "aux",
+      "x" : 67.0,
+      "y" : 352.0
+    }, {
+      "name" : "DEMAND",
+      "type" : "aux",
+      "x" : 53.0,
+      "y" : 406.0
+    }, {
+      "name" : "production",
+      "type" : "aux",
+      "x" : 175.0,
+      "y" : 325.0
+    }, {
+      "name" : "price factor",
+      "type" : "aux",
+      "x" : 176.0,
+      "y" : 405.0
+    }, {
+      "name" : "INVESTMENT FRACTION",
+      "type" : "aux",
+      "x" : 68.0,
+      "y" : 451.0
+    }, {
+      "name" : "revenue",
+      "type" : "aux",
+      "x" : 265.0,
+      "y" : 372.0
+    }, {
+      "name" : "credit",
+      "type" : "aux",
+      "x" : 324.0,
+      "y" : 256.0
+    }, {
+      "name" : "interest debt",
+      "type" : "aux",
+      "x" : 381.0,
+      "y" : 331.0
+    }, {
+      "name" : "net revenue",
+      "type" : "aux",
+      "x" : 380.0,
+      "y" : 450.0
+    }, {
+      "name" : "investment generation",
+      "type" : "aux",
+      "x" : 231.0,
+      "y" : 451.0
+    }, {
+      "name" : "repayment",
+      "type" : "aux",
+      "x" : 527.0,
+      "y" : 449.0
+    }, {
+      "name" : "DEBT REPAYMENT FRACTION",
+      "type" : "aux",
+      "x" : 588.0,
+      "y" : 537.0
+    }, {
+      "name" : "interest payment",
+      "type" : "aux",
+      "x" : 479.0,
+      "y" : 331.0
+    }, {
+      "name" : "INTEREST RATE",
+      "type" : "aux",
+      "x" : 590.0,
+      "y" : 425.0
+    }, {
+      "name" : "investment",
+      "type" : "aux",
+      "x" : 288.0,
+      "y" : 325.0
+    }, {
+      "name" : "Time",
+      "type" : "aux",
+      "x" : 487.0,
+      "y" : 159.0
+    }, {
+      "name" : "profit",
+      "type" : "aux",
+      "x" : 187.0,
+      "y" : 522.0
+    }, {
+      "name" : "interest sum",
+      "type" : "stock",
+      "x" : 322.0,
+      "y" : 541.0
+    }, {
+      "name" : "profit sum",
+      "type" : "stock",
+      "x" : 324.0,
+      "y" : 609.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 412.0,
+      "y" : 540.0
+    }, {
+      "name" : "interest",
+      "type" : "aux",
+      "x" : 412.0,
+      "y" : 556.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 229.0,
+      "y" : 607.0
+    }, {
+      "name" : "profit rate",
+      "type" : "aux",
+      "x" : 229.0,
+      "y" : 630.0
+    }, {
+      "name" : "INITIAL PRODUCTION PLANTS",
+      "type" : "aux",
+      "x" : 64.0,
+      "y" : 136.0
+    }, {
+      "name" : "INITIAL DEBT",
+      "type" : "aux",
+      "x" : 483.0,
+      "y" : 129.0
+    } ],
+    "connectors" : [ {
+      "from" : "DETERIORATION RATE",
+      "to" : "deterioration"
+    }, {
+      "from" : "production plants",
+      "to" : "deterioration"
+    }, {
+      "from" : "production",
+      "to" : "price factor"
+    }, {
+      "from" : "SPECIFIC PRODUCTION",
+      "to" : "production"
+    }, {
+      "from" : "DEMAND",
+      "to" : "price factor"
+    }, {
+      "from" : "price factor",
+      "to" : "revenue"
+    }, {
+      "from" : "production",
+      "to" : "revenue"
+    }, {
+      "from" : "production plants",
+      "to" : "production"
+    }, {
+      "from" : "INVESTMENT EFFECTIVENESS",
+      "to" : "expansion"
+    }, {
+      "from" : "CREDIT AMOUNT",
+      "to" : "credit"
+    }, {
+      "from" : "CREDIT FUNCTION",
+      "to" : "credit"
+    }, {
+      "from" : "credit",
+      "to" : "debt increase"
+    }, {
+      "from" : "investment",
+      "to" : "expansion"
+    }, {
+      "from" : "credit",
+      "to" : "investment"
+    }, {
+      "from" : "INVESTMENT FRACTION",
+      "to" : "investment generation"
+    }, {
+      "from" : "investment generation",
+      "to" : "investment"
+    }, {
+      "from" : "revenue",
+      "to" : "net revenue"
+    }, {
+      "from" : "net revenue",
+      "to" : "investment generation"
+    }, {
+      "from" : "net revenue",
+      "to" : "repayment"
+    }, {
+      "from" : "DEBT REPAYMENT FRACTION",
+      "to" : "repayment"
+    }, {
+      "from" : "repayment",
+      "to" : "debt decrease"
+    }, {
+      "from" : "INTEREST RATE",
+      "to" : "interest payment"
+    }, {
+      "from" : "debt",
+      "to" : "interest payment"
+    }, {
+      "from" : "debt",
+      "to" : "repayment"
+    }, {
+      "from" : "interest payment",
+      "to" : "net revenue"
+    }, {
+      "from" : "net revenue",
+      "to" : "interest debt"
+    }, {
+      "from" : "interest debt",
+      "to" : "debt increase"
+    }, {
+      "from" : "repayment",
+      "to" : "investment generation"
+    }, {
+      "from" : "Time",
+      "to" : "CREDIT FUNCTION"
+    }, {
+      "from" : "INVESTMENT FRACTION",
+      "to" : "profit"
+    }, {
+      "from" : "investment generation",
+      "to" : "profit"
+    }, {
+      "from" : "profit",
+      "to" : "profit rate"
+    }, {
+      "from" : "interest payment",
+      "to" : "interest"
+    }, {
+      "from" : "INITIAL PRODUCTION PLANTS",
+      "to" : "production plants"
+    }, {
+      "from" : "INITIAL DEBT",
+      "to" : "debt"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_48",
+      "points" : [ [ 265.0, 198.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 380.0, 198.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 565.0, 196.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 78.0, 199.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 412.0, 540.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 229.0, 607.0 ] ]
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Year",
+    "duration" : 100.0,
+    "durationUnit" : "Year",
+    "dt" : 0.25
+  },
+  "metadata" : {
+    "author" : "Dr. Erik Pruyt",
+    "source" : "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
+    "license" : "CC-BY-NC-SA-4.0",
+    "url" : "https://simulation.tudelft.nl/SD/"
+  }
+}

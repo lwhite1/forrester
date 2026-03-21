@@ -6,7 +6,6 @@ package systems.courant.sd.demo.environment;
 
 import systems.courant.sd.Simulation;
 import systems.courant.sd.model.ModelMetadata;
-import systems.courant.sd.model.compile.CompiledModel;
 import systems.courant.sd.model.compile.ModelCompiler;
 import systems.courant.sd.model.def.ModelDefinitionBuilder;
 import systems.courant.sd.model.def.VariableDef;
@@ -28,21 +27,6 @@ import systems.courant.sd.model.def.StockDef;
  *   <li>View 'View 1' places non-existent element: _48</li>
  *   <li>View 'View 1' places non-existent element: _48</li>
  *   <li>View 'View 1' places non-existent element: _48</li>
- *   <li>View 'View 1' connector references non-existent element: 7</li>
- *   <li>View 'View 1' connector references non-existent element: 7</li>
- *   <li>View 'View 1' connector references non-existent element: 4</li>
- *   <li>View 'View 1' connector references non-existent element: 12</li>
- *   <li>View 'View 1' connector references non-existent element: 9</li>
- *   <li>View 'View 1' connector references non-existent element: 12</li>
- *   <li>View 'View 1' connector references non-existent element: 17</li>
- *   <li>View 'View 1' connector references non-existent element: 17</li>
- *   <li>View 'View 1' connector references non-existent element: 14</li>
- *   <li>View 'View 1' connector references non-existent element: 22</li>
- *   <li>View 'View 1' connector references non-existent element: 19</li>
- *   <li>View 'View 1' connector references non-existent element: 22</li>
- *   <li>View 'View 1' connector references non-existent element: 27</li>
- *   <li>View 'View 1' connector references non-existent element: 27</li>
- *   <li>View 'View 1' connector references non-existent element: 24</li>
  *   <li>View 'View 1' connector references non-existent element: _48</li>
  *   <li>View 'View 1' connector references non-existent element: _48</li>
  *   <li>View 'View 1' connector references non-existent element: _48</li>
@@ -70,9 +54,6 @@ public class EnvironmentalManagement {
         builder.stock(new StockDef("production capacity", "production capacity", 1.0, "Dmnl", null));
 
         // Constants
-        builder.constant("TIME_STEP", 0.2, "Year");
-        builder.constant("INITIAL_TIME", 0.0, "Year");
-        builder.constant("FINAL_TIME", 500.0, "Year");
         builder.constant("INITAL POPULATION", 1.0, "Dmnl");
         builder.constant("INITIAL CAPACITY", 1.0, "Dmnl");
         builder.constant("INITIAL POLLUTION", 1.0, "Dmnl");

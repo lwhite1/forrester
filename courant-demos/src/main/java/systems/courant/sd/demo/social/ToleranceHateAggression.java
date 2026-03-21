@@ -6,7 +6,6 @@ package systems.courant.sd.demo.social;
 
 import systems.courant.sd.Simulation;
 import systems.courant.sd.model.ModelMetadata;
-import systems.courant.sd.model.compile.CompiledModel;
 import systems.courant.sd.model.compile.ModelCompiler;
 import systems.courant.sd.model.def.ModelDefinitionBuilder;
 import systems.courant.sd.model.def.VariableDef;
@@ -31,30 +30,6 @@ import systems.courant.sd.model.def.StockDef;
  *   <li>View 'View 1' places non-existent element: _48</li>
  *   <li>View 'View 1' places non-existent element: _48</li>
  *   <li>View 'View 1' places non-existent element: _48</li>
- *   <li>View 'View 1' connector references non-existent element: 8</li>
- *   <li>View 'View 1' connector references non-existent element: 8</li>
- *   <li>View 'View 1' connector references non-existent element: 5</li>
- *   <li>View 'View 1' connector references non-existent element: 13</li>
- *   <li>View 'View 1' connector references non-existent element: 10</li>
- *   <li>View 'View 1' connector references non-existent element: 13</li>
- *   <li>View 'View 1' connector references non-existent element: 18</li>
- *   <li>View 'View 1' connector references non-existent element: 18</li>
- *   <li>View 'View 1' connector references non-existent element: 15</li>
- *   <li>View 'View 1' connector references non-existent element: 23</li>
- *   <li>View 'View 1' connector references non-existent element: 20</li>
- *   <li>View 'View 1' connector references non-existent element: 23</li>
- *   <li>View 'View 1' connector references non-existent element: 28</li>
- *   <li>View 'View 1' connector references non-existent element: 28</li>
- *   <li>View 'View 1' connector references non-existent element: 25</li>
- *   <li>View 'View 1' connector references non-existent element: 33</li>
- *   <li>View 'View 1' connector references non-existent element: 30</li>
- *   <li>View 'View 1' connector references non-existent element: 33</li>
- *   <li>View 'View 1' connector references non-existent element: 38</li>
- *   <li>View 'View 1' connector references non-existent element: 35</li>
- *   <li>View 'View 1' connector references non-existent element: 38</li>
- *   <li>View 'View 1' connector references non-existent element: 43</li>
- *   <li>View 'View 1' connector references non-existent element: 43</li>
- *   <li>View 'View 1' connector references non-existent element: 40</li>
  *   <li>View 'View 1' connector references non-existent element: _48</li>
  *   <li>View 'View 1' connector references non-existent element: _48</li>
  *   <li>View 'View 1' flow route references non-existent flow: _48</li>
@@ -85,9 +60,6 @@ public class ToleranceHateAggression {
         builder.stock(new StockDef("tolerance", "tolerance", 0.5, "1", null));
 
         // Constants
-        builder.constant("TIME_STEP", 0.0625, "Month");
-        builder.constant("INITIAL_TIME", 0.0, "Month");
-        builder.constant("FINAL_TIME", 50.0, "Month");
         builder.constant("EDUCATION ACTIVITY", 0.5, "1/Month");
         builder.constant("ENCOUNTER INTERVAL", 2.0, "Month");
         builder.constant("ENCOUNTER INTENSITY", 5.0, "1");

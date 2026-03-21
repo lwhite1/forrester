@@ -1,0 +1,605 @@
+{
+  "name" : "1407_ToleranceHateAggressionEZ509versionEP",
+  "stocks" : [ {
+    "name" : "unfamiliarity",
+    "comment" : "unfamiliarity",
+    "initialValue" : 0.1,
+    "unit" : "1"
+  }, {
+    "name" : "hate",
+    "comment" : "hate",
+    "initialValue" : 0.1,
+    "unit" : "1"
+  }, {
+    "name" : "restraint threshold",
+    "comment" : "restraint threshold",
+    "initialValue" : 0.5,
+    "unit" : "1"
+  }, {
+    "name" : "tolerance",
+    "comment" : "tolerance",
+    "initialValue" : 0.5,
+    "unit" : "1"
+  } ],
+  "flows" : [ {
+    "name" : "unfamiliarity inflow 1",
+    "equation" : "unfamiliar_experience",
+    "timeUnit" : "Month",
+    "sink" : "unfamiliarity"
+  }, {
+    "name" : "unfamiliarity outflow 2",
+    "equation" : "accustoming",
+    "timeUnit" : "Month",
+    "source" : "unfamiliarity"
+  }, {
+    "name" : "hate inflow 1",
+    "equation" : "hate_increase",
+    "timeUnit" : "Month",
+    "sink" : "hate"
+  }, {
+    "name" : "hate outflow 2",
+    "equation" : "hate_decrease",
+    "timeUnit" : "Month",
+    "source" : "hate"
+  }, {
+    "name" : "restraint threshold inflow 1",
+    "equation" : "restraint_buildup",
+    "timeUnit" : "Month",
+    "sink" : "restraint threshold"
+  }, {
+    "name" : "restraint threshold outflow 2",
+    "equation" : "restraint_loss",
+    "timeUnit" : "Month",
+    "source" : "restraint threshold"
+  }, {
+    "name" : "tolerance inflow 1",
+    "equation" : "increase_in_tolerance_through_educational_effort",
+    "timeUnit" : "Month",
+    "sink" : "tolerance"
+  }, {
+    "name" : "tolerance outflow 2",
+    "equation" : "tolerance_erosion",
+    "timeUnit" : "Month",
+    "source" : "tolerance"
+  } ],
+  "variables" : [ {
+    "name" : "unfamiliar experience",
+    "comment" : "unfamiliar experience",
+    "equation" : "intolerance*DEGREE_OF_UNFAMILIARITY*encounters*ENCOUNTER_INTENSITY*unfamiliarity*(1- unfamiliarity/MAX_UNFAMILIARITY) * (1+violence)",
+    "unit" : "1/Month"
+  }, {
+    "name" : "hate increase",
+    "comment" : "hate increase",
+    "equation" : "unfamiliarity*intolerance*social_problems*hate*(1-hate/MAX_HATE)/adaptation_TIME * ( 1+violence)",
+    "unit" : "1/Month"
+  }, {
+    "name" : "tolerance erosion",
+    "comment" : "tolerance erosion",
+    "equation" : "tolerance*hate/adaptation_TIME * (1+violence)",
+    "unit" : "1/Month"
+  }, {
+    "name" : "increase in tolerance through educational effort",
+    "comment" : "increase in tolerance through educational effort",
+    "equation" : "SMOOTH(education_effort*tolerance*(1-tolerance/MAX_TOLERANCE),1)",
+    "unit" : "1/Month"
+  }, {
+    "name" : "restraint loss",
+    "comment" : "restraint loss",
+    "equation" : "hate*social_problems*VIOLENCE_IN_MEDIA*restraint_threshold/adaptation_TIME",
+    "unit" : "1/Month"
+  }, {
+    "name" : "restraint buildup",
+    "comment" : "restraint buildup",
+    "equation" : "max_restraint*restraint_threshold*(1-restraint_threshold/max_restraint)/adaptation_TIME",
+    "unit" : "1/Month"
+  }, {
+    "name" : "EDUCATION ACTIVITY",
+    "comment" : "EDUCATION ACTIVITY",
+    "equation" : "0.5",
+    "unit" : "1/Month"
+  }, {
+    "name" : "education effort",
+    "comment" : "education effort",
+    "equation" : "0+EDUCATION_ACTIVITY*STEP(1, 15)",
+    "unit" : "1/Month"
+  }, {
+    "name" : "encounters",
+    "comment" : "encounters",
+    "equation" : "PULSE_TRAIN(5,1, ENCOUNTER_INTERVAL,50)",
+    "unit" : "1/Month"
+  }, {
+    "name" : "ENCOUNTER INTERVAL",
+    "comment" : "ENCOUNTER INTERVAL",
+    "equation" : "2",
+    "unit" : "Month"
+  }, {
+    "name" : "ENCOUNTER INTENSITY",
+    "comment" : "ENCOUNTER INTENSITY",
+    "equation" : "5",
+    "unit" : "1"
+  }, {
+    "name" : "DEGREE OF UNFAMILIARITY",
+    "comment" : "DEGREE OF UNFAMILIARITY",
+    "equation" : "0.5",
+    "unit" : "1"
+  }, {
+    "name" : "violence",
+    "comment" : "violence",
+    "equation" : "hate*violent_action",
+    "unit" : "1"
+  }, {
+    "name" : "VIOLENCE IN MEDIA",
+    "comment" : "VIOLENCE IN MEDIA",
+    "equation" : "0.4",
+    "unit" : "1"
+  }, {
+    "name" : "violent action",
+    "comment" : "violent action",
+    "equation" : "IF(hate-restraint_threshold>0, 1, 0)",
+    "unit" : "1"
+  }, {
+    "name" : "accustoming",
+    "comment" : "accustoming",
+    "equation" : "unfamiliarity*tolerance/adaptation_TIME",
+    "unit" : "1/Month"
+  }, {
+    "name" : "ETHICAL SCRUPLES",
+    "comment" : "ETHICAL SCRUPLES",
+    "equation" : "0.1",
+    "unit" : "1"
+  }, {
+    "name" : "hate decrease",
+    "comment" : "hate decrease",
+    "equation" : "hate*tolerance/adaptation_TIME",
+    "unit" : "1/Month"
+  }, {
+    "name" : "intolerance",
+    "comment" : "intolerance",
+    "equation" : "MAX_TOLERANCE-tolerance",
+    "unit" : "1"
+  }, {
+    "name" : "MAX UNFAMILIARITY",
+    "comment" : "MAX UNFAMILIARITY",
+    "equation" : "1",
+    "unit" : "1"
+  }, {
+    "name" : "MAX HATE",
+    "comment" : "MAX HATE",
+    "equation" : "1",
+    "unit" : "1"
+  }, {
+    "name" : "max restraint",
+    "comment" : "max restraint",
+    "equation" : "govt_authority*(1-VIOLENCE_IN_MEDIA)+ETHICAL_SCRUPLES",
+    "unit" : "1"
+  }, {
+    "name" : "MAX TOLERANCE",
+    "comment" : "MAX TOLERANCE",
+    "equation" : "1",
+    "unit" : "1"
+  }, {
+    "name" : "PROBLEM BEGINNING",
+    "comment" : "PROBLEM BEGINNING",
+    "equation" : "5",
+    "unit" : "Month"
+  }, {
+    "name" : "PROBLEM STRENGTH",
+    "comment" : "PROBLEM STRENGTH",
+    "equation" : "4",
+    "unit" : "1"
+  }, {
+    "name" : "social problems",
+    "comment" : "social problems",
+    "equation" : "STEP(PROBLEM_STRENGTH, PROBLEM_BEGINNING)",
+    "unit" : "1"
+  }, {
+    "name" : "govt authority",
+    "comment" : "govt authority",
+    "equation" : "0+GOVT_RESOLVE*STEP(1, 10)",
+    "unit" : "1"
+  }, {
+    "name" : "GOVT RESOLVE",
+    "comment" : "GOVT RESOLVE",
+    "equation" : "1",
+    "unit" : "1"
+  }, {
+    "name" : "adaptation TIME",
+    "comment" : "adaptation TIME",
+    "equation" : "5",
+    "unit" : "Month"
+  } ],
+  "views" : [ {
+    "name" : "View 1",
+    "elements" : [ {
+      "name" : "tolerance",
+      "type" : "stock",
+      "x" : 192.0,
+      "y" : 239.0
+    }, {
+      "name" : "unfamiliarity",
+      "type" : "stock",
+      "x" : 454.0,
+      "y" : 242.0
+    }, {
+      "name" : "restraint threshold",
+      "type" : "stock",
+      "x" : 420.0,
+      "y" : 732.0
+    }, {
+      "name" : "hate",
+      "type" : "stock",
+      "x" : 308.0,
+      "y" : 480.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 173.0,
+      "y" : 142.0
+    }, {
+      "name" : "increase in tolerance through educational effort",
+      "type" : "aux",
+      "x" : 255.0,
+      "y" : 142.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 196.0,
+      "y" : 302.0
+    }, {
+      "name" : "tolerance erosion",
+      "type" : "aux",
+      "x" : 236.0,
+      "y" : 302.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 306.0,
+      "y" : 405.0
+    }, {
+      "name" : "hate increase",
+      "type" : "aux",
+      "x" : 349.0,
+      "y" : 405.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 306.0,
+      "y" : 554.0
+    }, {
+      "name" : "hate decrease",
+      "type" : "aux",
+      "x" : 349.0,
+      "y" : 554.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 420.0,
+      "y" : 656.0
+    }, {
+      "name" : "restraint buildup",
+      "type" : "aux",
+      "x" : 457.0,
+      "y" : 656.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 422.0,
+      "y" : 809.0
+    }, {
+      "name" : "restraint loss",
+      "type" : "aux",
+      "x" : 460.0,
+      "y" : 809.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 455.0,
+      "y" : 304.0
+    }, {
+      "name" : "accustoming",
+      "type" : "aux",
+      "x" : 507.0,
+      "y" : 304.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 456.0,
+      "y" : 166.0
+    }, {
+      "name" : "unfamiliar experience",
+      "type" : "aux",
+      "x" : 503.0,
+      "y" : 166.0
+    }, {
+      "name" : "MAX TOLERANCE",
+      "type" : "aux",
+      "x" : 226.0,
+      "y" : 34.0
+    }, {
+      "name" : "intolerance",
+      "type" : "aux",
+      "x" : 356.0,
+      "y" : 191.0
+    }, {
+      "name" : "MAX HATE",
+      "type" : "aux",
+      "x" : 631.0,
+      "y" : 353.0
+    }, {
+      "name" : "social problems",
+      "type" : "aux",
+      "x" : 535.0,
+      "y" : 479.0
+    }, {
+      "name" : "PROBLEM BEGINNING",
+      "type" : "aux",
+      "x" : 635.0,
+      "y" : 405.0
+    }, {
+      "name" : "PROBLEM STRENGTH",
+      "type" : "aux",
+      "x" : 635.0,
+      "y" : 480.0
+    }, {
+      "name" : "adaptation TIME",
+      "type" : "aux",
+      "x" : 442.0,
+      "y" : 480.0
+    }, {
+      "name" : "govt authority",
+      "type" : "aux",
+      "x" : 622.0,
+      "y" : 643.0
+    }, {
+      "name" : "max restraint",
+      "type" : "aux",
+      "x" : 547.0,
+      "y" : 731.0
+    }, {
+      "name" : "ETHICAL SCRUPLES",
+      "type" : "aux",
+      "x" : 635.0,
+      "y" : 781.0
+    }, {
+      "name" : "VIOLENCE IN MEDIA",
+      "type" : "aux",
+      "x" : 633.0,
+      "y" : 834.0
+    }, {
+      "name" : "violence",
+      "type" : "aux",
+      "x" : 192.0,
+      "y" : 582.0
+    }, {
+      "name" : "violent action",
+      "type" : "aux",
+      "x" : 237.0,
+      "y" : 672.0
+    }, {
+      "name" : "education effort",
+      "type" : "aux",
+      "x" : 101.0,
+      "y" : 115.0
+    }, {
+      "name" : "MAX UNFAMILIARITY",
+      "type" : "aux",
+      "x" : 598.0,
+      "y" : 33.0
+    }, {
+      "name" : "DEGREE OF UNFAMILIARITY",
+      "type" : "aux",
+      "x" : 610.0,
+      "y" : 243.0
+    }, {
+      "name" : "EDUCATION ACTIVITY",
+      "type" : "aux",
+      "x" : 107.0,
+      "y" : 33.0
+    }, {
+      "name" : "GOVT RESOLVE",
+      "type" : "aux",
+      "x" : 619.0,
+      "y" : 559.0
+    }, {
+      "name" : "encounters",
+      "type" : "aux",
+      "x" : 384.0,
+      "y" : 100.0
+    }, {
+      "name" : "ENCOUNTER INTENSITY",
+      "type" : "aux",
+      "x" : 455.0,
+      "y" : 33.0
+    }, {
+      "name" : "ENCOUNTER INTERVAL",
+      "type" : "aux",
+      "x" : 339.0,
+      "y" : 33.0
+    } ],
+    "connectors" : [ {
+      "from" : "education effort",
+      "to" : "increase in tolerance through educational effort"
+    }, {
+      "from" : "MAX TOLERANCE",
+      "to" : "increase in tolerance through educational effort"
+    }, {
+      "from" : "MAX TOLERANCE",
+      "to" : "intolerance"
+    }, {
+      "from" : "tolerance",
+      "to" : "intolerance"
+    }, {
+      "from" : "tolerance",
+      "to" : "tolerance erosion"
+    }, {
+      "from" : "tolerance",
+      "to" : "accustoming"
+    }, {
+      "from" : "intolerance",
+      "to" : "unfamiliar experience"
+    }, {
+      "from" : "MAX UNFAMILIARITY",
+      "to" : "unfamiliar experience"
+    }, {
+      "from" : "DEGREE OF UNFAMILIARITY",
+      "to" : "unfamiliar experience"
+    }, {
+      "from" : "unfamiliarity",
+      "to" : "unfamiliar experience"
+    }, {
+      "from" : "unfamiliarity",
+      "to" : "accustoming"
+    }, {
+      "from" : "intolerance",
+      "to" : "hate increase"
+    }, {
+      "from" : "unfamiliarity",
+      "to" : "hate increase"
+    }, {
+      "from" : "MAX HATE",
+      "to" : "hate increase"
+    }, {
+      "from" : "social problems",
+      "to" : "hate increase"
+    }, {
+      "from" : "PROBLEM BEGINNING",
+      "to" : "social problems"
+    }, {
+      "from" : "PROBLEM STRENGTH",
+      "to" : "social problems"
+    }, {
+      "from" : "hate",
+      "to" : "hate increase"
+    }, {
+      "from" : "hate",
+      "to" : "hate decrease"
+    }, {
+      "from" : "hate",
+      "to" : "violent action"
+    }, {
+      "from" : "hate",
+      "to" : "violence"
+    }, {
+      "from" : "violent action",
+      "to" : "violence"
+    }, {
+      "from" : "restraint threshold",
+      "to" : "violent action"
+    }, {
+      "from" : "govt authority",
+      "to" : "max restraint"
+    }, {
+      "from" : "max restraint",
+      "to" : "restraint buildup"
+    }, {
+      "from" : "restraint threshold",
+      "to" : "restraint buildup"
+    }, {
+      "from" : "restraint threshold",
+      "to" : "restraint loss"
+    }, {
+      "from" : "ETHICAL SCRUPLES",
+      "to" : "max restraint"
+    }, {
+      "from" : "VIOLENCE IN MEDIA",
+      "to" : "max restraint"
+    }, {
+      "from" : "VIOLENCE IN MEDIA",
+      "to" : "restraint loss"
+    }, {
+      "from" : "adaptation TIME",
+      "to" : "hate decrease"
+    }, {
+      "from" : "tolerance",
+      "to" : "hate decrease"
+    }, {
+      "from" : "hate",
+      "to" : "tolerance erosion"
+    }, {
+      "from" : "adaptation TIME",
+      "to" : "accustoming"
+    }, {
+      "from" : "adaptation TIME",
+      "to" : "tolerance erosion"
+    }, {
+      "from" : "EDUCATION ACTIVITY",
+      "to" : "education effort"
+    }, {
+      "from" : "GOVT RESOLVE",
+      "to" : "govt authority"
+    }, {
+      "from" : "encounters",
+      "to" : "unfamiliar experience"
+    }, {
+      "from" : "ENCOUNTER INTENSITY",
+      "to" : "unfamiliar experience"
+    }, {
+      "from" : "ENCOUNTER INTERVAL",
+      "to" : "encounters"
+    }, {
+      "from" : "social problems",
+      "to" : "restraint loss"
+    }, {
+      "from" : "hate",
+      "to" : "restraint loss"
+    }, {
+      "from" : "tolerance",
+      "to" : "increase in tolerance through educational effort"
+    }, {
+      "from" : "adaptation TIME",
+      "to" : "restraint buildup"
+    }, {
+      "from" : "adaptation TIME",
+      "to" : "hate increase"
+    }, {
+      "from" : "adaptation TIME",
+      "to" : "restraint loss"
+    }, {
+      "from" : "violence",
+      "to" : "_48"
+    }, {
+      "from" : "violence",
+      "to" : "tolerance erosion"
+    }, {
+      "from" : "violence",
+      "to" : "_48"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_48",
+      "points" : [ [ 173.0, 142.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 196.0, 302.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 306.0, 405.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 306.0, 554.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 420.0, 656.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 422.0, 809.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 455.0, 304.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 456.0, 166.0 ] ]
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Month",
+    "duration" : 50.0,
+    "durationUnit" : "Month",
+    "dt" : 0.0625
+  },
+  "metadata" : {
+    "author" : "Dr. Erik Pruyt",
+    "source" : "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
+    "license" : "CC-BY-NC-SA-4.0",
+    "url" : "https://simulation.tudelft.nl/SD/"
+  }
+}

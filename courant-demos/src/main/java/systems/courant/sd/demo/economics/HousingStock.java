@@ -6,7 +6,6 @@ package systems.courant.sd.demo.economics;
 
 import systems.courant.sd.Simulation;
 import systems.courant.sd.model.ModelMetadata;
-import systems.courant.sd.model.compile.CompiledModel;
 import systems.courant.sd.model.compile.ModelCompiler;
 import systems.courant.sd.model.def.ModelDefinitionBuilder;
 import systems.courant.sd.model.def.VariableDef;
@@ -30,14 +29,10 @@ import java.util.List;
  *   <li>View 'View 1' places non-existent element: _268</li>
  *   <li>View 'View 1' places non-existent element: _48</li>
  *   <li>View 'View 1' connector references non-existent element: _48</li>
- *   <li>View 'View 1' connector references non-existent element: _48</li>
- *   <li>View 'View 1' connector references non-existent element: 4</li>
  *   <li>View 'View 1' connector references non-existent element: _204</li>
  *   <li>View 'View 1' connector references non-existent element: _204</li>
  *   <li>View 'View 1' connector references non-existent element: _268</li>
  *   <li>View 'View 1' connector references non-existent element: _268</li>
- *   <li>View 'View 1' connector references non-existent element: _48</li>
- *   <li>View 'View 1' connector references non-existent element: 11</li>
  *   <li>View 'View 1' connector references non-existent element: _48</li>
  *   <li>View 'View 1' connector references non-existent element: _204</li>
  *   <li>View 'View 1' connector references non-existent element: _268</li>
@@ -66,9 +61,6 @@ public class HousingStock {
         builder.stock(new StockDef("planned houses", "planned houses", 0.0, "planning * average_time_from_planning_to_building", "house", null, List.of()));
 
         // Constants
-        builder.constant("TIME_STEP", 0.5, "Month");
-        builder.constant("INITIAL_TIME", 0.0, "Month");
-        builder.constant("FINAL_TIME", 100.0, "Month");
         builder.constant("average house lifetime", 1200.0, "Month");
         builder.constant("time to build houses", 6.0, "Month");
         builder.constant("average time from planning to building", 3.0, "Month");

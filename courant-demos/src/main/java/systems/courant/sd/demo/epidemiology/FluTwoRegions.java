@@ -6,7 +6,6 @@ package systems.courant.sd.demo.epidemiology;
 
 import systems.courant.sd.Simulation;
 import systems.courant.sd.model.ModelMetadata;
-import systems.courant.sd.model.compile.CompiledModel;
 import systems.courant.sd.model.compile.ModelCompiler;
 import systems.courant.sd.model.def.ModelDefinitionBuilder;
 import systems.courant.sd.model.def.VariableDef;
@@ -32,27 +31,13 @@ import systems.courant.sd.model.def.StockDef;
  *   <li>View 'View 1' places non-existent element: _476</li>
  *   <li>View 'View 1' places non-existent element: Time</li>
  *   <li>View 'View 1' places non-existent element: Time</li>
- *   <li>View 'View 1' connector references non-existent element: 6</li>
- *   <li>View 'View 1' connector references non-existent element: 6</li>
- *   <li>View 'View 1' connector references non-existent element: 10</li>
- *   <li>View 'View 1' connector references non-existent element: 10</li>
  *   <li>View 'View 1' connector references non-existent element: _764</li>
  *   <li>View 'View 1' connector references non-existent element: _620</li>
- *   <li>View 'View 1' connector references non-existent element: 28</li>
- *   <li>View 'View 1' connector references non-existent element: 28</li>
- *   <li>View 'View 1' connector references non-existent element: 32</li>
- *   <li>View 'View 1' connector references non-existent element: 32</li>
- *   <li>View 'View 1' connector references non-existent element: 50</li>
  *   <li>View 'View 1' connector references non-existent element: _812</li>
  *   <li>View 'View 1' connector references non-existent element: _812</li>
- *   <li>View 'View 1' connector references non-existent element: 50</li>
  *   <li>View 'View 1' connector references non-existent element: _652</li>
  *   <li>View 'View 1' connector references non-existent element: _764</li>
  *   <li>View 'View 1' connector references non-existent element: _812</li>
- *   <li>View 'View 1' connector references non-existent element: 59</li>
- *   <li>View 'View 1' connector references non-existent element: 59</li>
- *   <li>View 'View 1' connector references non-existent element: 64</li>
- *   <li>View 'View 1' connector references non-existent element: 64</li>
  *   <li>View 'View 1' connector references non-existent element: _812</li>
  *   <li>View 'View 1' connector references non-existent element: Time</li>
  *   <li>View 'View 1' connector references non-existent element: Time</li>
@@ -87,9 +72,6 @@ public class FluTwoRegions {
         builder.stock(new StockDef("immune population region 2", "immune population region 2", 1.0E9, "persons", null));
 
         // Constants
-        builder.constant("TIME_STEP", 0.25, "Month");
-        builder.constant("INITIAL_TIME", 0.0, "Month");
-        builder.constant("FINAL_TIME", 48.0, "Month");
         builder.constant("initial value susceptible population region 2", 2.0E9, "persons");
         builder.constant("initial value infected population region 1", 10.0, "persons");
         builder.constant("initial value immune population region 1", 2.7E8, "persons");

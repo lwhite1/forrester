@@ -1321,6 +1321,582 @@
         "variables": 0,
         "parameters": 0
       }
+    },
+    {
+      "id": "oostvaardersplassen",
+      "name": "1013Mass starvation Oostvaardersplassen",
+      "displayName": "Oostvaardersplassen",
+      "description": "Models large herbivore population and mass starvation events in the Oostvaardersplassen nature reserve",
+      "category": "ecology",
+      "difficulty": "intermediate",
+      "path": "ecology/Oostvaardersplassen.json",
+      "tags": [],
+      "elements": {
+        "stocks": 0,
+        "flows": 0,
+        "variables": 0,
+        "parameters": 0
+      }
+    },
+    {
+      "id": "cholera",
+      "name": "1409_CholeraZBwoUnits",
+      "displayName": "Cholera",
+      "description": "Seven-stock cholera transmission model incorporating waterborne pathogen dynamics",
+      "category": "epidemiology",
+      "difficulty": "advanced",
+      "path": "epidemiology/Cholera.json",
+      "tags": [],
+      "elements": {
+        "stocks": 0,
+        "flows": 0,
+        "variables": 0,
+        "parameters": 0
+      }
+    },
+    {
+      "id": "deradicalization",
+      "name": "1416_deradicalisationI_EN",
+      "displayName": "Deradicalization",
+      "description": "Four-stock model of radicalization pathways and deradicalization policy interventions",
+      "category": "policy",
+      "difficulty": "advanced",
+      "path": "policy/Deradicalization.json",
+      "tags": [],
+      "elements": {
+        "stocks": 0,
+        "flows": 0,
+        "variables": 0,
+        "parameters": 0
+      }
+    },
+    {
+      "id": "unemployment",
+      "name": "1802_UnemploymentBasedOnEZ511",
+      "displayName": "Unemployment",
+      "description": "Five-stock model of unemployment dynamics with labor market feedback and skill deterioration",
+      "category": "social",
+      "difficulty": "advanced",
+      "path": "social/Unemployment.json",
+      "tags": [],
+      "elements": {
+        "stocks": 0,
+        "flows": 0,
+        "variables": 0,
+        "parameters": 0
+      }
+    },
+    {
+      "id": "globalization",
+      "name": "1819_GlobalizationEZ608fromZOO",
+      "displayName": "Globalization",
+      "description": "Four-stock model of globalization dynamics with trade, capital flows, and institutional feedback",
+      "category": "economics",
+      "difficulty": "advanced",
+      "path": "economics/Globalization.json",
+      "tags": [],
+      "elements": {
+        "stocks": 0,
+        "flows": 0,
+        "variables": 0,
+        "parameters": 0
+      }
+    },
+    {
+      "id": "aging-chain",
+      "name": "0604Aging",
+      "displayName": "Aging Chain",
+      "description": "Three-stock aging chain model demonstrating demographic cohort transitions",
+      "category": "demographics",
+      "difficulty": "intermediate",
+      "path": "demographics/aging-chain.json",
+      "tags": [],
+      "elements": {
+        "stocks": 0,
+        "flows": 0,
+        "variables": 0,
+        "parameters": 0
+      }
+    },
+    {
+      "id": "feral-pigs",
+      "name": "0605Feral Pigs SFD EN",
+      "displayName": "Feral Pigs",
+      "description": "Models feral pig population dynamics with density-dependent birth and death rates",
+      "category": "ecology",
+      "difficulty": "intermediate",
+      "path": "ecology/feral-pigs.json",
+      "tags": [],
+      "elements": {
+        "stocks": 0,
+        "flows": 0,
+        "variables": 0,
+        "parameters": 0
+      }
+    },
+    {
+      "id": "family-planning",
+      "name": "0607UnintendedFamilyPlanningBenefits",
+      "displayName": "Family Planning",
+      "description": "Five-stock model exploring unintended consequences of family planning programs on population dynamics",
+      "category": "demographics",
+      "difficulty": "advanced",
+      "path": "demographics/family-planning.json",
+      "tags": [],
+      "elements": {
+        "stocks": 0,
+        "flows": 0,
+        "variables": 0,
+        "parameters": 0
+      }
+    },
+    {
+      "id": "pneumonic-plague",
+      "name": "0608PneumonicPlagueChinaA",
+      "displayName": "Pneumonic Plague",
+      "description": "Four-stock SIR-based model of pneumonic plague transmission in China",
+      "category": "epidemiology",
+      "difficulty": "intermediate",
+      "path": "epidemiology/pneumonic-plague.json",
+      "tags": [],
+      "elements": {
+        "stocks": 0,
+        "flows": 0,
+        "variables": 0,
+        "parameters": 0
+      }
+    },
+    {
+      "id": "sd-education",
+      "name": "0609SDEducationVersion1",
+      "displayName": "Sd Education",
+      "description": "Models student flow through a system dynamics education program with enrollment and graduation",
+      "category": "education",
+      "difficulty": "introductory",
+      "path": "education/sd-education.json",
+      "tags": [],
+      "elements": {
+        "stocks": 0,
+        "flows": 0,
+        "variables": 0,
+        "parameters": 0
+      }
+    },
+    {
+      "id": "micro-chp-diffusion",
+      "name": "0610Diffusion and Adoption of Micro-CHP",
+      "displayName": "Micro Chp Diffusion",
+      "description": "Bass diffusion model applied to adoption of micro combined heat and power technology",
+      "category": "technology",
+      "difficulty": "intermediate",
+      "path": "technology/micro-chp-diffusion.json",
+      "tags": [],
+      "elements": {
+        "stocks": 0,
+        "flows": 0,
+        "variables": 0,
+        "parameters": 0
+      }
+    },
+    {
+      "id": "housing-stock",
+      "name": "0611HousingStockDynamicsA",
+      "displayName": "Housing Stock",
+      "description": "Three-stock model of housing construction, aging, and demolition dynamics",
+      "category": "economics",
+      "difficulty": "intermediate",
+      "path": "economics/housing-stock.json",
+      "tags": [],
+      "elements": {
+        "stocks": 0,
+        "flows": 0,
+        "variables": 0,
+        "parameters": 0
+      }
+    },
+    {
+      "id": "pulse-and-pulse-train",
+      "name": "1008_PULSEandPULSETRAIN",
+      "displayName": "Pulse And Pulse Train",
+      "description": "Demonstrates PULSE and PULSE TRAIN built-in functions with a simple accumulator",
+      "category": "introductory",
+      "difficulty": "introductory",
+      "path": "introductory/pulse-and-pulse-train.json",
+      "tags": [],
+      "elements": {
+        "stocks": 0,
+        "flows": 0,
+        "variables": 0,
+        "parameters": 0
+      }
+    },
+    {
+      "id": "white-pink-noise",
+      "name": "1010_whitepinknoise",
+      "displayName": "White Pink Noise",
+      "description": "Seven-stock reference model comparing white noise and pink noise generation techniques",
+      "category": "introductory",
+      "difficulty": "intermediate",
+      "path": "introductory/white-pink-noise.json",
+      "tags": [],
+      "elements": {
+        "stocks": 0,
+        "flows": 0,
+        "variables": 0,
+        "parameters": 0
+      }
+    },
+    {
+      "id": "shale-gas",
+      "name": "1012_ShaleGASwoUnits",
+      "displayName": "Shale Gas",
+      "description": "Models shale gas extraction dynamics including well depletion and drilling rates",
+      "category": "technology",
+      "difficulty": "intermediate",
+      "path": "technology/shale-gas.json",
+      "tags": [],
+      "elements": {
+        "stocks": 0,
+        "flows": 0,
+        "variables": 0,
+        "parameters": 0
+      }
+    },
+    {
+      "id": "burnout-homer",
+      "name": "1016_BurnoutHomer1",
+      "displayName": "Burnout Homer",
+      "description": "Five-stock model of workplace burnout dynamics based on Homer's formulation",
+      "category": "management",
+      "difficulty": "intermediate",
+      "path": "management/burnout-homer.json",
+      "tags": [],
+      "elements": {
+        "stocks": 0,
+        "flows": 0,
+        "variables": 0,
+        "parameters": 0
+      }
+    },
+    {
+      "id": "managing-faculty",
+      "name": "1401_ManagingFaculty",
+      "displayName": "Managing Faculty",
+      "description": "Two-stock model of university faculty hiring, tenure, and retirement dynamics",
+      "category": "management",
+      "difficulty": "intermediate",
+      "path": "management/managing-faculty.json",
+      "tags": [],
+      "elements": {
+        "stocks": 0,
+        "flows": 0,
+        "variables": 0,
+        "parameters": 0
+      }
+    },
+    {
+      "id": "debt-crisis",
+      "name": "1403_DebtCrisisBasedOnZ605",
+      "displayName": "Debt Crisis",
+      "description": "Four-stock model of sovereign debt accumulation, interest rate spirals, and fiscal crisis",
+      "category": "economics",
+      "difficulty": "advanced",
+      "path": "economics/debt-crisis.json",
+      "tags": [],
+      "elements": {
+        "stocks": 0,
+        "flows": 0,
+        "variables": 0,
+        "parameters": 0
+      }
+    },
+    {
+      "id": "environmental-management",
+      "name": "1404_EnvManagementInMiniworldWOcorrectunits",
+      "displayName": "Environmental Management",
+      "description": "Three-stock model of environmental management trade-offs between economic growth and ecological degradation",
+      "category": "environment",
+      "difficulty": "advanced",
+      "path": "environment/environmental-management.json",
+      "tags": [],
+      "elements": {
+        "stocks": 0,
+        "flows": 0,
+        "variables": 0,
+        "parameters": 0
+      }
+    },
+    {
+      "id": "flu-two-regions",
+      "name": "1405_Flu2regionsV2cIFTHENELSE",
+      "displayName": "Flu Two Regions",
+      "description": "Eight-stock SIR model of influenza spreading between two connected regions",
+      "category": "epidemiology",
+      "difficulty": "advanced",
+      "path": "epidemiology/flu-two-regions.json",
+      "tags": [],
+      "elements": {
+        "stocks": 0,
+        "flows": 0,
+        "variables": 0,
+        "parameters": 0
+      }
+    },
+    {
+      "id": "new-towns",
+      "name": "1406_NewTownsNL_v2",
+      "displayName": "New Towns",
+      "description": "Three-stock model of Dutch new town development with population aging and infrastructure dynamics",
+      "category": "demographics",
+      "difficulty": "advanced",
+      "path": "demographics/new-towns.json",
+      "tags": [],
+      "elements": {
+        "stocks": 0,
+        "flows": 0,
+        "variables": 0,
+        "parameters": 0
+      }
+    },
+    {
+      "id": "tolerance-hate-aggression",
+      "name": "1407_ToleranceHateAggressionEZ509versionEP",
+      "displayName": "Tolerance Hate Aggression",
+      "description": "Four-stock model of tolerance erosion, hate accumulation, and aggression feedback dynamics",
+      "category": "social",
+      "difficulty": "advanced",
+      "path": "social/tolerance-hate-aggression.json",
+      "tags": [],
+      "elements": {
+        "stocks": 0,
+        "flows": 0,
+        "variables": 0,
+        "parameters": 0
+      }
+    },
+    {
+      "id": "evs-lithium-scarcity",
+      "name": "1408_EVsLithiumScarcity_EN",
+      "displayName": "Evs Lithium Scarcity",
+      "description": "Seven-stock model of electric vehicle adoption constrained by lithium resource scarcity",
+      "category": "technology",
+      "difficulty": "advanced",
+      "path": "technology/evs-lithium-scarcity.json",
+      "tags": [],
+      "elements": {
+        "stocks": 0,
+        "flows": 0,
+        "variables": 0,
+        "parameters": 0
+      }
+    },
+    {
+      "id": "signalled-bank-run",
+      "name": "1410_SignalledBankRun",
+      "displayName": "Signalled Bank Run",
+      "description": "Two-stock model of bank runs triggered by signals of institutional weakness and depositor panic",
+      "category": "economics",
+      "difficulty": "advanced",
+      "path": "economics/signalled-bank-run.json",
+      "tags": [],
+      "elements": {
+        "stocks": 0,
+        "flows": 0,
+        "variables": 0,
+        "parameters": 0
+      }
+    },
+    {
+      "id": "production-management",
+      "name": "1413_ProductionManagement",
+      "displayName": "Production Management",
+      "description": "Six-stock production and inventory management model with workforce and backlog dynamics",
+      "category": "management",
+      "difficulty": "advanced",
+      "path": "management/production-management.json",
+      "tags": [],
+      "elements": {
+        "stocks": 0,
+        "flows": 0,
+        "variables": 0,
+        "parameters": 0
+      }
+    },
+    {
+      "id": "district-housing",
+      "name": "1414_DistrictHousingWOunits",
+      "displayName": "District Housing",
+      "description": "Two-stock model of housing supply and demand dynamics within a district",
+      "category": "economics",
+      "difficulty": "intermediate",
+      "path": "economics/district-housing.json",
+      "tags": [],
+      "elements": {
+        "stocks": 0,
+        "flows": 0,
+        "variables": 0,
+        "parameters": 0
+      }
+    },
+    {
+      "id": "mineral-metal-scarcity",
+      "name": "1415_MineralMetalScarcityI_EN",
+      "displayName": "Mineral Metal Scarcity",
+      "description": "Seven-stock model of mineral and metal resource depletion driven by demand growth and recycling limits",
+      "category": "economics",
+      "difficulty": "advanced",
+      "path": "economics/mineral-metal-scarcity.json",
+      "tags": [],
+      "elements": {
+        "stocks": 0,
+        "flows": 0,
+        "variables": 0,
+        "parameters": 0
+      }
+    },
+    {
+      "id": "hospital-management",
+      "name": "1803_HospitalManagement",
+      "displayName": "Hospital Management",
+      "description": "Four-stock model of hospital patient flow, staffing, and capacity management",
+      "category": "social",
+      "difficulty": "advanced",
+      "path": "social/hospital-management.json",
+      "tags": [],
+      "elements": {
+        "stocks": 0,
+        "flows": 0,
+        "variables": 0,
+        "parameters": 0
+      }
+    },
+    {
+      "id": "prostitution-trafficking",
+      "name": "1805_ProstitutionHumanTraffickingEN_withoutSolvingUnitErrors",
+      "displayName": "Prostitution Trafficking",
+      "description": "Three-stock model of human trafficking supply chains and policy intervention effectiveness",
+      "category": "social",
+      "difficulty": "advanced",
+      "path": "social/prostitution-trafficking.json",
+      "tags": [],
+      "elements": {
+        "stocks": 0,
+        "flows": 0,
+        "variables": 0,
+        "parameters": 0
+      }
+    },
+    {
+      "id": "real-estate-boom",
+      "name": "1807_RealEstateBoomAndBust_EN",
+      "displayName": "Real Estate Boom",
+      "description": "Four-stock model of speculative real estate boom-bust cycles with credit feedback",
+      "category": "economics",
+      "difficulty": "advanced",
+      "path": "economics/real-estate-boom.json",
+      "tags": [],
+      "elements": {
+        "stocks": 0,
+        "flows": 0,
+        "variables": 0,
+        "parameters": 0
+      }
+    },
+    {
+      "id": "orchestrated-bank-run",
+      "name": "1812_OrchestratedBankRun",
+      "displayName": "Orchestrated Bank Run",
+      "description": "Five-stock model of deliberately orchestrated bank runs through coordinated depositor withdrawal",
+      "category": "economics",
+      "difficulty": "advanced",
+      "path": "economics/orchestrated-bank-run.json",
+      "tags": [],
+      "elements": {
+        "stocks": 0,
+        "flows": 0,
+        "variables": 0,
+        "parameters": 0
+      }
+    },
+    {
+      "id": "deradicalization-ii",
+      "name": "1813_deradicalizationII_EN_ReadNoteOnUnitErrors",
+      "displayName": "Deradicalization Ii",
+      "description": "Extended five-stock deradicalization model with additional intervention mechanisms and social network effects",
+      "category": "policy",
+      "difficulty": "advanced",
+      "path": "policy/deradicalization-ii.json",
+      "tags": [],
+      "elements": {
+        "stocks": 0,
+        "flows": 0,
+        "variables": 0,
+        "parameters": 0
+      }
+    },
+    {
+      "id": "project-management",
+      "name": "1814_ProjectManagement_EN",
+      "displayName": "Project Management",
+      "description": "Five-stock model of project schedule and effort dynamics with rework and Brooks's Law effects",
+      "category": "management",
+      "difficulty": "advanced",
+      "path": "management/project-management.json",
+      "tags": [],
+      "elements": {
+        "stocks": 0,
+        "flows": 0,
+        "variables": 0,
+        "parameters": 0
+      }
+    },
+    {
+      "id": "energy-transition",
+      "name": "1816_EnergyTransitionManagement_Q2b_EN",
+      "displayName": "Energy Transition",
+      "description": "Twelve-stock model of energy system transition from fossil fuels to renewables with policy levers",
+      "category": "technology",
+      "difficulty": "advanced",
+      "path": "technology/energy-transition.json",
+      "tags": [],
+      "elements": {
+        "stocks": 0,
+        "flows": 0,
+        "variables": 0,
+        "parameters": 0
+      }
+    },
+    {
+      "id": "higher-education-stimuli",
+      "name": "1820_HigherEducationStimuli_NL_woUnits",
+      "displayName": "Higher Education Stimuli",
+      "description": "Four-stock model of higher education policy stimuli and their effects on enrollment and graduation",
+      "category": "demographics",
+      "difficulty": "advanced",
+      "path": "demographics/higher-education-stimuli.json",
+      "tags": [],
+      "elements": {
+        "stocks": 0,
+        "flows": 0,
+        "variables": 0,
+        "parameters": 0
+      }
+    },
+    {
+      "id": "collapse-civilisations",
+      "name": "1822_CollapseOfCivilisations",
+      "displayName": "Collapse Civilisations",
+      "description": "Four-stock model of civilizational collapse through resource depletion and institutional decay",
+      "category": "social",
+      "difficulty": "advanced",
+      "path": "social/collapse-civilisations.json",
+      "tags": [],
+      "elements": {
+        "stocks": 0,
+        "flows": 0,
+        "variables": 0,
+        "parameters": 0
+      }
     }
   ]
 }

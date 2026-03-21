@@ -6,7 +6,6 @@ package systems.courant.sd.demo.ecology;
 
 import systems.courant.sd.Simulation;
 import systems.courant.sd.model.ModelMetadata;
-import systems.courant.sd.model.compile.CompiledModel;
 import systems.courant.sd.model.compile.ModelCompiler;
 import systems.courant.sd.model.def.ModelDefinitionBuilder;
 import systems.courant.sd.model.def.VariableDef;
@@ -26,12 +25,6 @@ import systems.courant.sd.model.def.StockDef;
  * <ul>
  *   <li>View 'View 1' places non-existent element: _48</li>
  *   <li>View 'View 1' places non-existent element: _48</li>
- *   <li>View 'View 1' connector references non-existent element: 5</li>
- *   <li>View 'View 1' connector references non-existent element: 5</li>
- *   <li>View 'View 1' connector references non-existent element: 2</li>
- *   <li>View 'View 1' connector references non-existent element: 19</li>
- *   <li>View 'View 1' connector references non-existent element: 16</li>
- *   <li>View 'View 1' connector references non-existent element: 19</li>
  *   <li>View 'View 1' connector references non-existent element: _48</li>
  *   <li>View 'View 1' connector references non-existent element: _48</li>
  *   <li>View 'View 1' flow route references non-existent flow: _48</li>
@@ -53,9 +46,6 @@ public class Oostvaardersplassen {
         builder.stock(new StockDef("large herbivores", "large herbivores", 75.0, "", null));
 
         // Constants
-        builder.constant("TIME_STEP", 0.25, "Year");
-        builder.constant("INITIAL_TIME", 1985.0, "Year");
-        builder.constant("FINAL_TIME", 2050.0, "Year");
         builder.constant("length of death season", 0.25, "");
         builder.constant("length of the birth seaseon", 0.25, "");
 

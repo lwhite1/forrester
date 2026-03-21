@@ -6,7 +6,6 @@ package systems.courant.sd.demo.policy;
 
 import systems.courant.sd.Simulation;
 import systems.courant.sd.model.ModelMetadata;
-import systems.courant.sd.model.compile.CompiledModel;
 import systems.courant.sd.model.compile.ModelCompiler;
 import systems.courant.sd.model.def.ModelDefinitionBuilder;
 import systems.courant.sd.model.def.VariableDef;
@@ -29,21 +28,12 @@ import java.util.List;
  *   <li>View 'View 1' places non-existent element: _48</li>
  *   <li>View 'View 1' places non-existent element: _300</li>
  *   <li>View 'View 1' places non-existent element: _48</li>
- *   <li>View 'View 1' connector references non-existent element: 5</li>
- *   <li>View 'View 1' connector references non-existent element: 5</li>
- *   <li>View 'View 1' connector references non-existent element: 2</li>
- *   <li>View 'View 1' connector references non-existent element: 26</li>
- *   <li>View 'View 1' connector references non-existent element: 26</li>
  *   <li>View 'View 1' connector references non-existent element: _300</li>
  *   <li>View 'View 1' connector references non-existent element: _48</li>
  *   <li>View 'View 1' connector references non-existent element: _48</li>
  *   <li>View 'View 1' connector references non-existent element: _300</li>
- *   <li>View 'View 1' connector references non-existent element: 81</li>
- *   <li>View 'View 1' connector references non-existent element: 81</li>
- *   <li>View 'View 1' connector references non-existent element: 78</li>
  *   <li>View 'View 1' connector references non-existent element: _48</li>
  *   <li>View 'View 1' connector references non-existent element: _300</li>
- *   <li>View 'View 1' connector references non-existent element: 101</li>
  *   <li>View 'View 1' flow route references non-existent flow: _48</li>
  *   <li>View 'View 1' flow route references non-existent flow: _300</li>
  *   <li>View 'View 1' flow route references non-existent flow: _48</li>
@@ -67,9 +57,6 @@ public class Deradicalization {
         builder.stock(new StockDef("underlying phenimenon", "underlying phenimenon", 50.0, "Dmnl", null));
 
         // Constants
-        builder.constant("TIME_STEP", 0.125, "Year");
-        builder.constant("INITIAL_TIME", 1980.0, "Year");
-        builder.constant("FINAL_TIME", 2080.0, "Year");
         builder.constant("citizens that cannot be convinced", 3000000.0, "citizens");
         builder.constant("initial number of convinced citizens", 1000.0, "citizens");
         builder.constant("initial number of unconvinced citizens", 1.2999E7, "citizens");

@@ -6,7 +6,6 @@ package systems.courant.sd.demo.management;
 
 import systems.courant.sd.Simulation;
 import systems.courant.sd.model.ModelMetadata;
-import systems.courant.sd.model.compile.CompiledModel;
 import systems.courant.sd.model.compile.ModelCompiler;
 import systems.courant.sd.model.def.ModelDefinitionBuilder;
 import systems.courant.sd.model.def.VariableDef;
@@ -31,25 +30,10 @@ import java.util.List;
  *   <li>View 'View 1' places non-existent element: _48</li>
  *   <li>View 'View 1' places non-existent element: _48</li>
  *   <li>View 'View 1' places non-existent element: _48</li>
- *   <li>View 'View 1' connector references non-existent element: 12</li>
- *   <li>View 'View 1' connector references non-existent element: 12</li>
- *   <li>View 'View 1' connector references non-existent element: 9</li>
  *   <li>View 'View 1' connector references non-existent element: _48</li>
  *   <li>View 'View 1' connector references non-existent element: _48</li>
  *   <li>View 'View 1' connector references non-existent element: _48</li>
- *   <li>View 'View 1' connector references non-existent element: 32</li>
- *   <li>View 'View 1' connector references non-existent element: 32</li>
- *   <li>View 'View 1' connector references non-existent element: 29</li>
- *   <li>View 'View 1' connector references non-existent element: 43</li>
- *   <li>View 'View 1' connector references non-existent element: 43</li>
- *   <li>View 'View 1' connector references non-existent element: 40</li>
  *   <li>View 'View 1' connector references non-existent element: _48</li>
- *   <li>View 'View 1' connector references non-existent element: 56</li>
- *   <li>View 'View 1' connector references non-existent element: 56</li>
- *   <li>View 'View 1' connector references non-existent element: 53</li>
- *   <li>View 'View 1' connector references non-existent element: 61</li>
- *   <li>View 'View 1' connector references non-existent element: 58</li>
- *   <li>View 'View 1' connector references non-existent element: 61</li>
  *   <li>View 'View 1' connector references non-existent element: _48</li>
  *   <li>View 'View 1' flow route references non-existent flow: _48</li>
  *   <li>View 'View 1' flow route references non-existent flow: _48</li>
@@ -77,9 +61,6 @@ public class BurnoutHomer {
         builder.stock(new StockDef("perceived accomplishments per week", "perceived accomplishments per week", 0.0, "accomplishments_per_week", "tasks/week", null, List.of()));
 
         // Constants
-        builder.constant("TIME_STEP", 0.015625, "Week");
-        builder.constant("INITIAL_TIME", 0.0, "Week");
-        builder.constant("FINAL_TIME", 75.0, "Week");
         builder.constant("bias for fractional change in expectations", 0.1, "1/week");
         builder.constant("energy depletion normal", 0.06, "energyunits/week");
         builder.constant("energy recovery normal", 0.3, "energyunits/week");

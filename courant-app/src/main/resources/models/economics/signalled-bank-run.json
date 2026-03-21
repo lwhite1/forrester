@@ -1,0 +1,482 @@
+{
+  "name" : "1410_SignalledBankRun",
+  "stocks" : [ {
+    "name" : "estimated underlying asset value",
+    "comment" : "estimated underlying asset value",
+    "initialValue" : 25.0,
+    "unit" : "EURO"
+  }, {
+    "name" : "stock market value",
+    "comment" : "stock market value",
+    "initialValue" : 24.6,
+    "unit" : "EURO"
+  } ],
+  "flows" : [ {
+    "name" : "estimated underlying asset value inflow 1",
+    "equation" : "underlying_asset_increase",
+    "timeUnit" : "Week",
+    "sink" : "estimated underlying asset value"
+  }, {
+    "name" : "estimated underlying asset value outflow 2",
+    "equation" : "underlying_asset_loss",
+    "timeUnit" : "Week",
+    "source" : "estimated underlying asset value"
+  }, {
+    "name" : "stock market value inflow 1",
+    "equation" : "stock_market_value_increase",
+    "timeUnit" : "Week",
+    "sink" : "stock market value"
+  }, {
+    "name" : "stock market value outflow 2",
+    "equation" : "stock_market_value_loss",
+    "timeUnit" : "Week",
+    "source" : "stock market value"
+  } ],
+  "variables" : [ {
+    "name" : "liquid deposits and loans loss fraction",
+    "comment" : "liquid deposits and loans loss fraction",
+    "equation" : "average_bank_clients_fear_and_uncertainty/average_stickiness_of_deposits_and_loans",
+    "unit" : "1/Week"
+  }, {
+    "name" : "underlying asset loss",
+    "comment" : "underlying asset loss",
+    "equation" : "MAX((liquid_deposits_and_loans_loss_fraction*fraction_of_asset_loss_to_deposit_loss+ external_shock_real_value_loss)*estimated_underlying_asset_value ,0)",
+    "unit" : "EURO/Week"
+  }, {
+    "name" : "fraction of asset loss to deposit loss",
+    "comment" : "fraction of asset loss to deposit loss",
+    "equation" : "1",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "external shock real value loss",
+    "comment" : "0.01 - STEP(0.01,11)",
+    "equation" : "STEP(size_of_the_external_underlying_asset_shock,10) - STEP(size_of_the_external_underlying_asset_shock ,11)",
+    "unit" : "1/Week"
+  }, {
+    "name" : "size of the external underlying asset shock",
+    "comment" : "size of the external underlying asset shock",
+    "equation" : "0.35",
+    "unit" : "1/Week"
+  }, {
+    "name" : "stock market value increase",
+    "comment" : "stock market value increase",
+    "equation" : "MAX(stock_market_value * perceived_undervaluation/market_increase_delay,0)",
+    "unit" : "EURO/Week"
+  }, {
+    "name" : "action delay",
+    "comment" : "action delay",
+    "equation" : "1",
+    "unit" : "Week"
+  }, {
+    "name" : "average profitability",
+    "comment" : "average profitability",
+    "equation" : "0.002",
+    "unit" : "1/Week"
+  }, {
+    "name" : "average stickiness of deposits and loans",
+    "comment" : "average stickiness of deposits and loans",
+    "equation" : "4",
+    "unit" : "Week"
+  }, {
+    "name" : "degree of external climate of fear",
+    "comment" : "degree of external climate of fear",
+    "equation" : "2",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "market loss delay",
+    "comment" : "market loss delay",
+    "equation" : "1",
+    "unit" : "Week"
+  }, {
+    "name" : "financial intervention",
+    "comment" : "IF THEN ELSE(estimated asset value<initial underlying value*0.5, initial  underlying value*0.2, 0)",
+    "equation" : "MAX(0,(fraction_initial_guaranteed*initial_estimated_underlying_asset_value - estimated_underlying_asset_value )/action_delay) * policy_switch",
+    "unit" : "EURO/Week"
+  }, {
+    "name" : "fraction initial guaranteed",
+    "comment" : "fraction initial guaranteed",
+    "equation" : "0.5",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "initial market fear and uncertainty",
+    "comment" : "initial market fear and uncertainty",
+    "equation" : "0",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "initial stock market value",
+    "comment" : "initial stock market value",
+    "equation" : "24.6",
+    "unit" : "EURO"
+  }, {
+    "name" : "initial estimated underlying asset value",
+    "comment" : "initial estimated underlying asset value",
+    "equation" : "25",
+    "unit" : "EURO"
+  }, {
+    "name" : "instant market fear and uncertainty",
+    "comment" : "instant market fear and uncertainty",
+    "equation" : "MIN(stock_market_value_loss/(stock_market_value/market_loss_delay*stock_market_fear_factor ) * degree_of_external_climate_of_fear,1)",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "average bank clients fear and uncertainty",
+    "comment" : "average bank client's fear and uncertainty",
+    "equation" : "smoothed_market_fear_and_uncertainty",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "perceived overvaluation",
+    "comment" : "perceived overvaluation",
+    "equation" : "MAX((stock_market_value-estimated_underlying_asset_value)/stock_market_value,0)",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "perceived undervaluation",
+    "comment" : "perceived undervaluation",
+    "equation" : "MAX((estimated_underlying_asset_value-stock_market_value)/stock_market_value,0)",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "policy switch",
+    "comment" : "policy switch",
+    "equation" : "0",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "market increase delay",
+    "comment" : "market increase delay",
+    "equation" : "4",
+    "unit" : "Week"
+  }, {
+    "name" : "smoothed market fear and uncertainty",
+    "comment" : "smoothed market fear and uncertainty",
+    "equation" : "DELAY3I(instant_market_fear_and_uncertainty, uncertainty_and_fear_delay, initial_market_fear_and_uncertainty )",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "stock market fear factor",
+    "comment" : "stock market fear factor",
+    "equation" : "0.25",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "stock market value loss",
+    "comment" : "stock market value loss",
+    "equation" : "MAX(stock_market_value * (perceived_overvaluation/market_loss_delay),0)",
+    "unit" : "EURO/Week"
+  }, {
+    "name" : "uncertainty and fear delay",
+    "comment" : "uncertainty and fear delay",
+    "equation" : "2",
+    "unit" : "Week"
+  }, {
+    "name" : "underlying asset increase",
+    "comment" : "underlying asset increase",
+    "equation" : "average_profitability*estimated_underlying_asset_value + financial_intervention",
+    "unit" : "EURO/Week"
+  } ],
+  "comments" : [ {
+    "name" : "Comment 1",
+    "text" : "From: Erik Pruyt, 2009. Saving a Bank? Cracking the Case of the Fortis Bank? In: Proceedings of the 27th International Conference of the System Dynamics Society, Albuquerque, USA."
+  } ],
+  "views" : [ {
+    "name" : "View 1",
+    "elements" : [ {
+      "name" : "stock market value",
+      "type" : "stock",
+      "x" : 395.0,
+      "y" : 237.0
+    }, {
+      "name" : "estimated underlying asset value",
+      "type" : "stock",
+      "x" : 387.0,
+      "y" : 419.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 290.0,
+      "y" : 240.0
+    }, {
+      "name" : "stock market value loss",
+      "type" : "aux",
+      "x" : 290.0,
+      "y" : 259.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 511.0,
+      "y" : 238.0
+    }, {
+      "name" : "stock market value increase",
+      "type" : "aux",
+      "x" : 511.0,
+      "y" : 265.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 489.0,
+      "y" : 423.0
+    }, {
+      "name" : "underlying asset loss",
+      "type" : "aux",
+      "x" : 489.0,
+      "y" : 450.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 280.0,
+      "y" : 421.0
+    }, {
+      "name" : "underlying asset increase",
+      "type" : "aux",
+      "x" : 280.0,
+      "y" : 448.0
+    }, {
+      "name" : "perceived undervaluation",
+      "type" : "aux",
+      "x" : 498.0,
+      "y" : 341.0
+    }, {
+      "name" : "instant market fear and uncertainty",
+      "type" : "aux",
+      "x" : 464.0,
+      "y" : 122.0
+    }, {
+      "name" : "degree of external climate of fear",
+      "type" : "aux",
+      "x" : 559.0,
+      "y" : 69.0
+    }, {
+      "name" : "average bank clients fear and uncertainty",
+      "type" : "aux",
+      "x" : 676.0,
+      "y" : 277.0
+    }, {
+      "name" : "external shock real value loss",
+      "type" : "aux",
+      "x" : 561.0,
+      "y" : 505.0
+    }, {
+      "name" : "perceived overvaluation",
+      "type" : "aux",
+      "x" : 293.0,
+      "y" : 341.0
+    }, {
+      "name" : "initial stock market value",
+      "type" : "aux",
+      "x" : 391.0,
+      "y" : 318.0
+    }, {
+      "name" : "market increase delay",
+      "type" : "aux",
+      "x" : 545.0,
+      "y" : 178.0
+    }, {
+      "name" : "market loss delay",
+      "type" : "aux",
+      "x" : 299.0,
+      "y" : 125.0
+    }, {
+      "name" : "initial estimated underlying asset value",
+      "type" : "aux",
+      "x" : 473.0,
+      "y" : 558.0
+    }, {
+      "name" : "average stickiness of deposits and loans",
+      "type" : "aux",
+      "x" : 734.0,
+      "y" : 407.0
+    }, {
+      "name" : "average profitability",
+      "type" : "aux",
+      "x" : 190.0,
+      "y" : 387.0
+    }, {
+      "name" : "smoothed market fear and uncertainty",
+      "type" : "aux",
+      "x" : 662.0,
+      "y" : 206.0
+    }, {
+      "name" : "stock market fear factor",
+      "type" : "aux",
+      "x" : 377.0,
+      "y" : 67.0
+    }, {
+      "name" : "financial intervention",
+      "type" : "aux",
+      "x" : 294.0,
+      "y" : 534.0
+    }, {
+      "name" : "action delay",
+      "type" : "aux",
+      "x" : 130.0,
+      "y" : 471.0
+    }, {
+      "name" : "fraction initial guaranteed",
+      "type" : "aux",
+      "x" : 135.0,
+      "y" : 532.0
+    }, {
+      "name" : "initial market fear and uncertainty",
+      "type" : "aux",
+      "x" : 762.0,
+      "y" : 128.0
+    }, {
+      "name" : "uncertainty and fear delay",
+      "type" : "aux",
+      "x" : 660.0,
+      "y" : 116.0
+    }, {
+      "name" : "policy switch",
+      "type" : "aux",
+      "x" : 352.0,
+      "y" : 578.0
+    }, {
+      "name" : "size of the external underlying asset shock",
+      "type" : "aux",
+      "x" : 742.0,
+      "y" : 520.0
+    }, {
+      "name" : "Comment 1",
+      "type" : "comment",
+      "x" : 963.0,
+      "y" : 247.0,
+      "width" : 204.0,
+      "height" : 180.0
+    }, {
+      "name" : "liquid deposits and loans loss fraction",
+      "type" : "aux",
+      "x" : 659.0,
+      "y" : 349.0
+    }, {
+      "name" : "fraction of asset loss to deposit loss",
+      "type" : "aux",
+      "x" : 675.0,
+      "y" : 459.0
+    } ],
+    "connectors" : [ {
+      "from" : "stock market value",
+      "to" : "_48"
+    }, {
+      "from" : "stock market value",
+      "to" : "_48"
+    }, {
+      "from" : "estimated underlying asset value",
+      "to" : "_48"
+    }, {
+      "from" : "_48",
+      "to" : "instant market fear and uncertainty"
+    }, {
+      "from" : "stock market value",
+      "to" : "instant market fear and uncertainty"
+    }, {
+      "from" : "degree of external climate of fear",
+      "to" : "instant market fear and uncertainty"
+    }, {
+      "from" : "external shock real value loss",
+      "to" : "underlying asset loss"
+    }, {
+      "from" : "stock market value",
+      "to" : "perceived overvaluation"
+    }, {
+      "from" : "estimated underlying asset value",
+      "to" : "perceived overvaluation"
+    }, {
+      "from" : "estimated underlying asset value",
+      "to" : "perceived undervaluation"
+    }, {
+      "from" : "stock market value",
+      "to" : "perceived undervaluation"
+    }, {
+      "from" : "perceived overvaluation",
+      "to" : "stock market value loss"
+    }, {
+      "from" : "initial stock market value",
+      "to" : "stock market value"
+    }, {
+      "from" : "market increase delay",
+      "to" : "_48"
+    }, {
+      "from" : "market loss delay",
+      "to" : "_48"
+    }, {
+      "from" : "initial estimated underlying asset value",
+      "to" : "estimated underlying asset value"
+    }, {
+      "from" : "estimated underlying asset value",
+      "to" : "_48"
+    }, {
+      "from" : "average profitability",
+      "to" : "underlying asset increase"
+    }, {
+      "from" : "stock market fear factor",
+      "to" : "instant market fear and uncertainty"
+    }, {
+      "from" : "smoothed market fear and uncertainty",
+      "to" : "average bank clients fear and uncertainty"
+    }, {
+      "from" : "instant market fear and uncertainty",
+      "to" : "smoothed market fear and uncertainty"
+    }, {
+      "from" : "initial estimated underlying asset value",
+      "to" : "financial intervention"
+    }, {
+      "from" : "estimated underlying asset value",
+      "to" : "financial intervention"
+    }, {
+      "from" : "financial intervention",
+      "to" : "underlying asset increase"
+    }, {
+      "from" : "action delay",
+      "to" : "financial intervention"
+    }, {
+      "from" : "fraction initial guaranteed",
+      "to" : "financial intervention"
+    }, {
+      "from" : "initial market fear and uncertainty",
+      "to" : "smoothed market fear and uncertainty"
+    }, {
+      "from" : "uncertainty and fear delay",
+      "to" : "smoothed market fear and uncertainty"
+    }, {
+      "from" : "market loss delay",
+      "to" : "instant market fear and uncertainty"
+    }, {
+      "from" : "policy switch",
+      "to" : "financial intervention"
+    }, {
+      "from" : "perceived undervaluation",
+      "to" : "stock market value increase"
+    }, {
+      "from" : "size of the external underlying asset shock",
+      "to" : "external shock real value loss"
+    }, {
+      "from" : "liquid deposits and loans loss fraction",
+      "to" : "underlying asset loss"
+    }, {
+      "from" : "average bank clients fear and uncertainty",
+      "to" : "liquid deposits and loans loss fraction"
+    }, {
+      "from" : "fraction of asset loss to deposit loss",
+      "to" : "underlying asset loss"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_48",
+      "points" : [ [ 290.0, 240.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 511.0, 238.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 489.0, 423.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 280.0, 421.0 ] ]
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Week",
+    "duration" : 52.0,
+    "durationUnit" : "Week",
+    "dt" : 0.0078125
+  },
+  "metadata" : {
+    "author" : "Dr. Erik Pruyt",
+    "source" : "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
+    "license" : "CC-BY-NC-SA-4.0",
+    "url" : "https://simulation.tudelft.nl/SD/"
+  }
+}

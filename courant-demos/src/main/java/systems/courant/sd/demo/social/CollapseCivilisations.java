@@ -6,7 +6,6 @@ package systems.courant.sd.demo.social;
 
 import systems.courant.sd.Simulation;
 import systems.courant.sd.model.ModelMetadata;
-import systems.courant.sd.model.compile.CompiledModel;
 import systems.courant.sd.model.compile.ModelCompiler;
 import systems.courant.sd.model.def.ModelDefinitionBuilder;
 import systems.courant.sd.model.def.VariableDef;
@@ -27,17 +26,6 @@ import systems.courant.sd.model.def.StockDef;
  *   <li>View 'View 1' places non-existent element: _48</li>
  *   <li>View 'View 1' places non-existent element: _48</li>
  *   <li>View 'View 1' places non-existent element: _48</li>
- *   <li>View 'View 1' connector references non-existent element: 7</li>
- *   <li>View 'View 1' connector references non-existent element: 7</li>
- *   <li>View 'View 1' connector references non-existent element: 12</li>
- *   <li>View 'View 1' connector references non-existent element: 9</li>
- *   <li>View 'View 1' connector references non-existent element: 12</li>
- *   <li>View 'View 1' connector references non-existent element: 17</li>
- *   <li>View 'View 1' connector references non-existent element: 14</li>
- *   <li>View 'View 1' connector references non-existent element: 17</li>
- *   <li>View 'View 1' connector references non-existent element: 40</li>
- *   <li>View 'View 1' connector references non-existent element: 40</li>
- *   <li>View 'View 1' connector references non-existent element: 37</li>
  *   <li>View 'View 1' flow route references non-existent flow: _204</li>
  *   <li>View 'View 1' flow route references non-existent flow: _48</li>
  *   <li>View 'View 1' flow route references non-existent flow: _48</li>
@@ -62,9 +50,6 @@ public class CollapseCivilisations {
         builder.stock(new StockDef("Forest", "Initial value is obtained from an assumed density of 400 person/km2, and  from the final inhabitants assumed: 2.000.000 persons (2 000 000/400=5,000)", 5000.0, "km2", null));
 
         // Constants
-        builder.constant("TIME_STEP", 0.25, "Year");
-        builder.constant("INITIAL_TIME", -1000.0, "Year");
-        builder.constant("FINAL_TIME", 1000.0, "Year");
         builder.constant("Natural Increase Rate", 0.0017, "1/year");
         builder.constant("Emigration Ratio", 0.05, "1/year");
         builder.constant("Intensity", 1.0, "year");

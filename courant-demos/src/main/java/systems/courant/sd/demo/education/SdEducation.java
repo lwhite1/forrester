@@ -6,7 +6,6 @@ package systems.courant.sd.demo.education;
 
 import systems.courant.sd.Simulation;
 import systems.courant.sd.model.ModelMetadata;
-import systems.courant.sd.model.compile.CompiledModel;
 import systems.courant.sd.model.compile.ModelCompiler;
 import systems.courant.sd.model.def.ModelDefinitionBuilder;
 import systems.courant.sd.model.def.VariableDef;
@@ -26,16 +25,8 @@ import systems.courant.sd.model.def.StockDef;
  *   <li>View 'View 1' places non-existent element: _48</li>
  *   <li>View 'View 1' places non-existent element: _48</li>
  *   <li>View 'View 1' places non-existent element: _348</li>
- *   <li>View 'View 1' connector references non-existent element: 6</li>
- *   <li>View 'View 1' connector references non-existent element: 6</li>
- *   <li>View 'View 1' connector references non-existent element: 3</li>
- *   <li>View 'View 1' connector references non-existent element: 12</li>
- *   <li>View 'View 1' connector references non-existent element: 12</li>
- *   <li>View 'View 1' connector references non-existent element: 9</li>
  *   <li>View 'View 1' connector references non-existent element: _48</li>
  *   <li>View 'View 1' connector references non-existent element: _48</li>
- *   <li>View 'View 1' connector references non-existent element: 24</li>
- *   <li>View 'View 1' connector references non-existent element: 24</li>
  *   <li>View 'View 1' connector references non-existent element: _348</li>
  *   <li>View 'View 1' connector references non-existent element: _348</li>
  *   <li>View 'View 1' flow route references non-existent flow: _48</li>
@@ -60,9 +51,6 @@ public class SdEducation {
         builder.stock(new StockDef("students in SD programs", "students in SD programs", 10.0, "student", null));
 
         // Constants
-        builder.constant("TIME_STEP", 0.0625, "Year");
-        builder.constant("INITIAL_TIME", 1962.0, "Year");
-        builder.constant("FINAL_TIME", 2012.0, "Year");
         builder.constant("new professors teaching SD", 10.0, "");
         builder.constant("average SD student cohort size per professor", 25.0, "student/professor/Year");
         builder.constant("average time to finish SD studies", 7.0, "Year");

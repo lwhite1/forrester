@@ -6,7 +6,6 @@ package systems.courant.sd.demo.economics;
 
 import systems.courant.sd.Simulation;
 import systems.courant.sd.model.ModelMetadata;
-import systems.courant.sd.model.compile.CompiledModel;
 import systems.courant.sd.model.compile.ModelCompiler;
 import systems.courant.sd.model.def.ModelDefinitionBuilder;
 import systems.courant.sd.model.def.VariableDef;
@@ -33,17 +32,6 @@ import java.util.List;
  *   <li>View 'View 1' places non-existent element: _48</li>
  *   <li>View 'View 1' places non-existent element: _188</li>
  *   <li>View 'View 1' places non-existent element: Time</li>
- *   <li>View 'View 1' connector references non-existent element: 10</li>
- *   <li>View 'View 1' connector references non-existent element: 10</li>
- *   <li>View 'View 1' connector references non-existent element: 16</li>
- *   <li>View 'View 1' connector references non-existent element: 16</li>
- *   <li>View 'View 1' connector references non-existent element: 13</li>
- *   <li>View 'View 1' connector references non-existent element: 29</li>
- *   <li>View 'View 1' connector references non-existent element: 29</li>
- *   <li>View 'View 1' connector references non-existent element: 26</li>
- *   <li>View 'View 1' connector references non-existent element: 34</li>
- *   <li>View 'View 1' connector references non-existent element: 31</li>
- *   <li>View 'View 1' connector references non-existent element: 34</li>
  *   <li>View 'View 1' connector references non-existent element: _48</li>
  *   <li>View 'View 1' connector references non-existent element: _48</li>
  *   <li>View 'View 1' connector references non-existent element: _48</li>
@@ -51,11 +39,6 @@ import java.util.List;
  *   <li>View 'View 1' connector references non-existent element: _444</li>
  *   <li>View 'View 1' connector references non-existent element: _48</li>
  *   <li>View 'View 1' connector references non-existent element: _48</li>
- *   <li>View 'View 1' connector references non-existent element: 83</li>
- *   <li>View 'View 1' connector references non-existent element: 80</li>
- *   <li>View 'View 1' connector references non-existent element: 83</li>
- *   <li>View 'View 1' connector references non-existent element: 95</li>
- *   <li>View 'View 1' connector references non-existent element: 95</li>
  *   <li>View 'View 1' connector references non-existent element: _188</li>
  *   <li>View 'View 1' connector references non-existent element: _188</li>
  *   <li>View 'View 1' connector references non-existent element: Time</li>
@@ -85,9 +68,6 @@ public class RealEstateBoom {
         builder.stock(new StockDef("REU supply", "REU supply", 1800000.0, "real estate unit", null));
 
         // Constants
-        builder.constant("TIME_STEP", 0.0625, "Month");
-        builder.constant("INITIAL_TIME", 0.0, "Month");
-        builder.constant("FINAL_TIME", 240.0, "Month");
         builder.constant("subsidy", 960.0, "dollar/real estate unit");
         builder.constant("avg REU approval time", 1.0, "Month");
         builder.constant("avg emigration time", 1.0, "Month");
@@ -101,7 +81,7 @@ public class RealEstateBoom {
         builder.constant("workers per REU under construction", 25.0, "person/real estate unit");
 
         // Lookup tables
-        builder.lookupTable(new LookupTableDef("REU shortage price effect", "REU shortage price effect", new double[]{0.0, 10.0, 50.0, 100.0}, new double[]{0.6, 4.0, 7.5, 10.0}, "LINEAR"));
+        builder.lookupTable(new LookupTableDef("REU shortage price effect", "REU shortage price effect", new double[]{0.0, 10.0, 50.0, 100.0}, new double[]{0.6, 4.0, 7.5, 10.0}, "LINEAR", "Dmnl"));
         builder.lookupTable(new LookupTableDef("REU_demand_per_person_lookup", null, new double[]{0.0, 240.0}, new double[]{1.0, 2.0}, "LINEAR"));
 
         // Variables

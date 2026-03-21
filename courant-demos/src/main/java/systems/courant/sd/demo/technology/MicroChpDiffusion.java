@@ -6,7 +6,6 @@ package systems.courant.sd.demo.technology;
 
 import systems.courant.sd.Simulation;
 import systems.courant.sd.model.ModelMetadata;
-import systems.courant.sd.model.compile.CompiledModel;
 import systems.courant.sd.model.compile.ModelCompiler;
 import systems.courant.sd.model.def.ModelDefinitionBuilder;
 import systems.courant.sd.model.def.VariableDef;
@@ -47,9 +46,6 @@ public class MicroChpDiffusion {
         builder.stock(new StockDef("potential clients", "potential clients", 1.6E7, "persoon", null));
 
         // Constants
-        builder.constant("TIME_STEP", 0.125, "Month");
-        builder.constant("INITIAL_TIME", 0.0, "Month");
-        builder.constant("FINAL_TIME", 100.0, "Month");
         builder.constant("convincing degree", 0.01, "person/contact");
         builder.constant("social contacts per person per month", 50.0, "contact/person/Month");
 
