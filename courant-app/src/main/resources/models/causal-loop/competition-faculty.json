@@ -1,165 +1,158 @@
 {
-  "name" : "0201CompetitionFaculty",
-  "cldVariables" : [ {
-    "name" : "budget section A",
-    "comment" : "budget section A"
-  }, {
-    "name" : "budget section B",
-    "comment" : "budget section B"
-  }, {
-    "name" : "fraction of total budget to section A",
-    "comment" : "fraction of total budget to section A"
-  }, {
-    "name" : "scientific papers section A",
-    "comment" : "scientific papers section A"
-  }, {
-    "name" : "scientific papers section B",
-    "comment" : "scientific papers section B"
-  }, {
-    "name" : "scientific personnel section A",
-    "comment" : "scientific personnel section A"
-  }, {
-    "name" : "scientific personnel section B",
-    "comment" : "scientific personnel section B"
-  }, {
-    "name" : "total TPM budget",
-    "comment" : "total TPM budget"
-  } ],
-  "causalLinks" : [ {
-    "from" : "scientific papers section A",
-    "to" : "fraction of total budget to section A",
-    "polarity" : "POSITIVE"
-  }, {
-    "from" : "scientific papers section B",
-    "to" : "fraction of total budget to section A",
-    "polarity" : "NEGATIVE"
-  }, {
-    "from" : "scientific personnel section A",
-    "to" : "scientific papers section A",
-    "polarity" : "POSITIVE"
-  }, {
-    "from" : "scientific personnel section B",
-    "to" : "scientific papers section B",
-    "polarity" : "POSITIVE"
-  }, {
-    "from" : "fraction of total budget to section A",
-    "to" : "budget section B",
-    "polarity" : "NEGATIVE"
-  }, {
-    "from" : "fraction of total budget to section A",
-    "to" : "budget section A",
-    "polarity" : "POSITIVE"
-  }, {
-    "from" : "budget section A",
-    "to" : "scientific personnel section A",
-    "polarity" : "POSITIVE"
-  }, {
-    "from" : "total TPM budget",
-    "to" : "budget section A",
-    "polarity" : "POSITIVE"
-  }, {
-    "from" : "total TPM budget",
-    "to" : "budget section B",
-    "polarity" : "POSITIVE"
-  }, {
-    "from" : "budget section B",
-    "to" : "scientific personnel section B",
-    "polarity" : "POSITIVE"
-  } ],
-  "views" : [ {
-    "name" : "View 1",
-    "elements" : [ {
-      "name" : "scientific papers section A",
-      "type" : "cld_variable",
-      "x" : 253.0,
-      "y" : 207.0
-    }, {
-      "name" : "scientific papers section B",
-      "type" : "cld_variable",
-      "x" : 446.0,
-      "y" : 206.0
-    }, {
-      "name" : "fraction of total budget to section A",
-      "type" : "cld_variable",
-      "x" : 350.0,
-      "y" : 294.0
-    }, {
-      "name" : "scientific personnel section A",
-      "type" : "cld_variable",
-      "x" : 159.0,
-      "y" : 283.0
-    }, {
-      "name" : "scientific personnel section B",
-      "type" : "cld_variable",
-      "x" : 546.0,
-      "y" : 287.0
-    }, {
-      "name" : "budget section A",
-      "type" : "cld_variable",
-      "x" : 258.0,
-      "y" : 372.0
-    }, {
-      "name" : "budget section B",
-      "type" : "cld_variable",
-      "x" : 451.0,
-      "y" : 374.0
-    }, {
-      "name" : "total TPM budget",
-      "type" : "cld_variable",
-      "x" : 361.0,
-      "y" : 424.0
-    } ],
-    "connectors" : [ {
-      "from" : "scientific papers section A",
-      "to" : "fraction of total budget to section A",
-      "polarity" : "+"
-    }, {
-      "from" : "scientific papers section B",
-      "to" : "fraction of total budget to section A",
-      "polarity" : "-"
-    }, {
-      "from" : "scientific personnel section A",
-      "to" : "scientific papers section A",
-      "polarity" : "+"
-    }, {
-      "from" : "scientific personnel section B",
-      "to" : "scientific papers section B",
-      "polarity" : "+"
-    }, {
-      "from" : "fraction of total budget to section A",
-      "to" : "budget section B",
-      "polarity" : "-"
-    }, {
-      "from" : "fraction of total budget to section A",
-      "to" : "budget section A",
-      "polarity" : "+"
-    }, {
-      "from" : "budget section A",
-      "to" : "scientific personnel section A",
-      "polarity" : "+"
-    }, {
-      "from" : "total TPM budget",
-      "to" : "budget section A",
-      "polarity" : "+"
-    }, {
-      "from" : "total TPM budget",
-      "to" : "budget section B",
-      "polarity" : "+"
-    }, {
-      "from" : "budget section B",
-      "to" : "scientific personnel section B",
-      "polarity" : "+"
-    } ]
-  } ],
-  "defaultSimulation" : {
-    "timeStep" : "Month",
-    "duration" : 100.0,
-    "durationUnit" : "Month"
+  "name": "0201CompetitionFaculty",
+  "cldVariables": [
+    {
+      "name": "budget section A",
+      "comment": "budget section A"
+    },
+    {
+      "name": "budget section B",
+      "comment": "budget section B"
+    },
+    {
+      "name": "fraction of total budget to section A",
+      "comment": "fraction of total budget to section A"
+    },
+    {
+      "name": "scientific papers section A",
+      "comment": "scientific papers section A"
+    },
+    {
+      "name": "scientific papers section B",
+      "comment": "scientific papers section B"
+    },
+    {
+      "name": "scientific personnel section A",
+      "comment": "scientific personnel section A"
+    },
+    {
+      "name": "scientific personnel section B",
+      "comment": "scientific personnel section B"
+    },
+    {
+      "name": "total TPM budget",
+      "comment": "total TPM budget"
+    }
+  ],
+  "causalLinks": [
+    {
+      "from": "scientific papers section A",
+      "to": "fraction of total budget to section A",
+      "polarity": "POSITIVE"
+    },
+    {
+      "from": "scientific papers section B",
+      "to": "fraction of total budget to section A",
+      "polarity": "NEGATIVE"
+    },
+    {
+      "from": "scientific personnel section A",
+      "to": "scientific papers section A",
+      "polarity": "POSITIVE"
+    },
+    {
+      "from": "scientific personnel section B",
+      "to": "scientific papers section B",
+      "polarity": "POSITIVE"
+    },
+    {
+      "from": "fraction of total budget to section A",
+      "to": "budget section B",
+      "polarity": "NEGATIVE"
+    },
+    {
+      "from": "fraction of total budget to section A",
+      "to": "budget section A",
+      "polarity": "POSITIVE"
+    },
+    {
+      "from": "budget section A",
+      "to": "scientific personnel section A",
+      "polarity": "POSITIVE"
+    },
+    {
+      "from": "total TPM budget",
+      "to": "budget section A",
+      "polarity": "POSITIVE"
+    },
+    {
+      "from": "total TPM budget",
+      "to": "budget section B",
+      "polarity": "POSITIVE"
+    },
+    {
+      "from": "budget section B",
+      "to": "scientific personnel section B",
+      "polarity": "POSITIVE"
+    }
+  ],
+  "views": [
+    {
+      "name": "View 1",
+      "elements": [],
+      "connectors": [
+        {
+          "from": "scientific papers section A",
+          "to": "fraction of total budget to section A",
+          "polarity": "+"
+        },
+        {
+          "from": "scientific papers section B",
+          "to": "fraction of total budget to section A",
+          "polarity": "-"
+        },
+        {
+          "from": "scientific personnel section A",
+          "to": "scientific papers section A",
+          "polarity": "+"
+        },
+        {
+          "from": "scientific personnel section B",
+          "to": "scientific papers section B",
+          "polarity": "+"
+        },
+        {
+          "from": "fraction of total budget to section A",
+          "to": "budget section B",
+          "polarity": "-"
+        },
+        {
+          "from": "fraction of total budget to section A",
+          "to": "budget section A",
+          "polarity": "+"
+        },
+        {
+          "from": "budget section A",
+          "to": "scientific personnel section A",
+          "polarity": "+"
+        },
+        {
+          "from": "total TPM budget",
+          "to": "budget section A",
+          "polarity": "+"
+        },
+        {
+          "from": "total TPM budget",
+          "to": "budget section B",
+          "polarity": "+"
+        },
+        {
+          "from": "budget section B",
+          "to": "scientific personnel section B",
+          "polarity": "+"
+        }
+      ]
+    }
+  ],
+  "defaultSimulation": {
+    "timeStep": "Month",
+    "duration": 100.0,
+    "durationUnit": "Month"
   },
-  "metadata" : {
-    "author" : "Dr. Erik Pruyt",
-    "source" : "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
-    "license" : "CC-BY-NC-SA-4.0",
-    "url" : "https://simulation.tudelft.nl/SD/model_files_nested/02_01"
+  "metadata": {
+    "author": "Dr. Erik Pruyt",
+    "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
+    "license": "CC-BY-NC-SA-4.0",
+    "url": "https://simulation.tudelft.nl/SD/model_files_nested/02_01"
   }
 }
