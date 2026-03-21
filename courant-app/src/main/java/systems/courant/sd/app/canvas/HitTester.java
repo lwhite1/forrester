@@ -204,8 +204,8 @@ public final class HitTester {
     public static ConnectionId hitTestCausalLink(CanvasState state,
                                                   List<CausalLinkDef> causalLinks,
                                                   double worldX, double worldY) {
-        return hitTestCausalLink(state, causalLinks, worldX, worldY, false,
-                Double.NaN, Double.NaN);
+        CausalLinkGeometry.LoopContext loopCtx = CausalLinkGeometry.loopContext(state);
+        return hitTestCausalLink(state, causalLinks, worldX, worldY, false, loopCtx);
     }
 
     /**
@@ -217,8 +217,8 @@ public final class HitTester {
                                                   List<CausalLinkDef> causalLinks,
                                                   double worldX, double worldY,
                                                   boolean hideVariables) {
-        return hitTestCausalLink(state, causalLinks, worldX, worldY, hideVariables,
-                Double.NaN, Double.NaN);
+        CausalLinkGeometry.LoopContext loopCtx = CausalLinkGeometry.loopContext(state);
+        return hitTestCausalLink(state, causalLinks, worldX, worldY, hideVariables, loopCtx);
     }
 
     /**
@@ -231,6 +231,19 @@ public final class HitTester {
                                                   double worldX, double worldY,
                                                   boolean hideVariables,
                                                   double centroidX, double centroidY) {
+        CausalLinkGeometry.LoopContext loopCtx = CausalLinkGeometry.loopContext(state);
+        return hitTestCausalLink(state, causalLinks, worldX, worldY, hideVariables, loopCtx);
+    }
+
+    /**
+     * Returns the ConnectionId of the causal link at the given world coordinates,
+     * or null if no causal link is hit. Uses loop-aware curve geometry.
+     */
+    public static ConnectionId hitTestCausalLink(CanvasState state,
+                                                  List<CausalLinkDef> causalLinks,
+                                                  double worldX, double worldY,
+                                                  boolean hideVariables,
+                                                  CausalLinkGeometry.LoopContext loopCtx) {
         for (int i = causalLinks.size() - 1; i >= 0; i--) {
             CausalLinkDef link = causalLinks.get(i);
             String fromName = link.from();
@@ -255,7 +268,7 @@ public final class HitTester {
                 double halfW = LayoutMetrics.effectiveWidth(state, fromName) / 2;
                 double halfH = LayoutMetrics.effectiveHeight(state, fromName) / 2;
                 double[] lp = CausalLinkGeometry.selfLoopPoints(
-                        fromX, fromY, halfW, halfH, centroidX, centroidY);
+                        fromX, fromY, halfW, halfH, loopCtx, fromName);
                 dist = CausalLinkGeometry.pointToCubicDistance(worldX, worldY,
                         lp[0], lp[1], lp[2], lp[3], lp[4], lp[5], lp[6], lp[7]);
             } else {
@@ -263,8 +276,7 @@ public final class HitTester {
                 double toY = state.getY(toName);
 
                 CausalLinkGeometry.ControlPoint cp = CausalLinkGeometry.controlPoint(
-                        fromX, fromY, toX, toY, fromName, toName, causalLinks,
-                        centroidX, centroidY);
+                        fromX, fromY, toX, toY, fromName, toName, causalLinks, loopCtx);
 
                 FlowGeometry.Point2D clippedFrom = FlowGeometry.clipToElement(
                         state, fromName, cp.x(), cp.y());

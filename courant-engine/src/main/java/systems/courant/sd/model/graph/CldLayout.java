@@ -10,7 +10,6 @@ import systems.courant.sd.model.def.ViewDef;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -21,8 +20,9 @@ import java.util.Set;
  * CLD-specific layout algorithm. Detects whether the causal link graph
  * is cyclic or a DAG and applies the appropriate placement strategy:
  * <ul>
- *   <li><b>Cyclic</b>: Seeds nodes on an ellipse and runs force-directed
- *       relaxation so feedback loops form natural circular shapes.</li>
+ *   <li><b>Cyclic</b>: Uses SCC detection for loop-aware placement, seeding
+ *       each loop's nodes on a local ellipse and running force-directed
+ *       relaxation with loop cohesion.</li>
  *   <li><b>DAG</b>: Longest-path rank assignment with evenly spaced
  *       nodes per rank (layered left-to-right).</li>
  * </ul>
@@ -41,6 +41,9 @@ public final class CldLayout {
 
     /** Centripetal pull toward center (prevents drift). */
     private static final double K_CENTER = 0.002;
+
+    /** Loop cohesion constant — gently pulls loop members toward their loop centroid. */
+    private static final double K_LOOP_COHESION = 0.005;
 
     /** Number of force-directed iterations. */
     private static final int ITERATIONS = 75;
@@ -93,13 +96,12 @@ public final class CldLayout {
             return new ViewDef("Main", placements, List.of(), List.of());
         }
 
-        // Detect cycles
-        List<Set<String>> sccs = TarjanSCC.findNonTrivial(nodes, adj);
-        boolean hasCycle = !sccs.isEmpty();
+        // Detect cycles and compute loop info
+        CldLoopInfo loopInfo = CldLoopInfo.fromAdjacency(nodes, adj);
 
         Map<String, double[]> positions;
-        if (hasCycle) {
-            positions = forceDirectedLayout(nodes, adj);
+        if (!loopInfo.isEmpty()) {
+            positions = loopAwareLayout(nodes, adj, loopInfo);
         } else {
             positions = dagLayout(nodes, adj);
         }
@@ -122,30 +124,146 @@ public final class CldLayout {
     }
 
     /**
-     * Force-directed layout for cyclic graphs. Seeds nodes on an ellipse,
-     * then iteratively applies repulsion, attraction, and centripetal forces.
+     * Force-directed layout for cyclic graphs. Uses SCC detection for
+     * loop-aware node placement.
      */
     static Map<String, double[]> forceDirectedLayout(Set<String> nodes,
                                                       Map<String, Set<String>> adj) {
-        int n = nodes.size();
-        double radius = Math.max(200, n * 40);
-        Map<String, double[]> positions = new LinkedHashMap<>();
+        CldLoopInfo loopInfo = CldLoopInfo.fromAdjacency(nodes, adj);
+        return loopAwareLayout(nodes, adj, loopInfo);
+    }
 
-        // Seed on ellipse
-        int i = 0;
-        for (String node : nodes) {
-            double angle = 2 * Math.PI * i / n;
-            positions.put(node, new double[]{
-                    CENTER_X + radius * Math.cos(angle),
-                    CENTER_Y + radius * 0.7 * Math.sin(angle)
-            });
-            i++;
+    /**
+     * Loop-aware layout: seeds nodes per-SCC on local ellipses, places shared
+     * nodes at midpoints between loop centers, then runs force-directed
+     * relaxation with loop cohesion.
+     */
+    private static Map<String, double[]> loopAwareLayout(Set<String> nodes,
+                                                          Map<String, Set<String>> adj,
+                                                          CldLoopInfo loopInfo) {
+        int n = nodes.size();
+        Map<String, double[]> positions = new LinkedHashMap<>();
+        List<Set<String>> loops = loopInfo.loops();
+        int numLoops = loops.size();
+
+        if (numLoops == 0) {
+            // No loops — single ellipse seeding (existing behavior)
+            double radius = Math.max(200, n * 40);
+            int i = 0;
+            for (String node : nodes) {
+                double angle = 2 * Math.PI * i / n;
+                positions.put(node, new double[]{
+                        CENTER_X + radius * Math.cos(angle),
+                        CENTER_Y + radius * 0.7 * Math.sin(angle)
+                });
+                i++;
+            }
+        } else {
+            // Position loop centers on a ring (single loop stays at canvas center)
+            double loopRingRadius = numLoops == 1 ? 0 : Math.max(200, numLoops * 80);
+            double[][] loopCenters = new double[numLoops][];
+            for (int li = 0; li < numLoops; li++) {
+                double angle = 2 * Math.PI * li / numLoops;
+                loopCenters[li] = new double[]{
+                        CENTER_X + loopRingRadius * Math.cos(angle),
+                        CENTER_Y + loopRingRadius * 0.7 * Math.sin(angle)
+                };
+            }
+
+            // Place non-shared nodes on local ellipses around their loop center
+            Set<String> placed = new LinkedHashSet<>();
+            for (int li = 0; li < numLoops; li++) {
+                List<String> loopNodeList = new ArrayList<>();
+                for (String node : loops.get(li)) {
+                    if (!loopInfo.isSharedNode(node)) {
+                        loopNodeList.add(node);
+                    }
+                }
+                double localRadius = Math.max(150, loopNodeList.size() * 50);
+                for (int j = 0; j < loopNodeList.size(); j++) {
+                    String node = loopNodeList.get(j);
+                    double angle = 2 * Math.PI * j / Math.max(loopNodeList.size(), 1);
+                    positions.put(node, new double[]{
+                            loopCenters[li][0] + localRadius * Math.cos(angle),
+                            loopCenters[li][1] + localRadius * 0.7 * Math.sin(angle)
+                    });
+                    placed.add(node);
+                }
+            }
+
+            // Place shared nodes at midpoint of their loop centers
+            for (Map.Entry<String, Set<Integer>> entry : loopInfo.nodeToLoops().entrySet()) {
+                String node = entry.getKey();
+                Set<Integer> indices = entry.getValue();
+                if (indices.size() > 1 && !placed.contains(node)) {
+                    double mx = 0, my = 0;
+                    for (int li : indices) {
+                        mx += loopCenters[li][0];
+                        my += loopCenters[li][1];
+                    }
+                    positions.put(node, new double[]{mx / indices.size(), my / indices.size()});
+                    placed.add(node);
+                }
+            }
+
+            // Place non-loop nodes near connected placed nodes, or on an outer ring
+            int nonLoopIdx = 0;
+            for (String node : nodes) {
+                if (placed.contains(node)) {
+                    continue;
+                }
+                double nx = CENTER_X;
+                double ny = CENTER_Y;
+                boolean foundNeighbor = false;
+                for (String neighbor : adj.getOrDefault(node, Set.of())) {
+                    double[] np = positions.get(neighbor);
+                    if (np != null) {
+                        double offsetAngle = 2 * Math.PI * nonLoopIdx / Math.max(n, 1);
+                        nx = np[0] + 100 * Math.cos(offsetAngle);
+                        ny = np[1] + 100 * Math.sin(offsetAngle);
+                        foundNeighbor = true;
+                        break;
+                    }
+                }
+                if (!foundNeighbor) {
+                    double outerRadius = Math.max(200, n * 40) * 1.5;
+                    int nonLoopCount = n - placed.size();
+                    double angle = 2 * Math.PI * nonLoopIdx / Math.max(nonLoopCount, 1);
+                    nx = CENTER_X + outerRadius * Math.cos(angle);
+                    ny = CENTER_Y + outerRadius * 0.7 * Math.sin(angle);
+                }
+                positions.put(node, new double[]{nx, ny});
+                placed.add(node);
+                nonLoopIdx++;
+            }
         }
 
+        // Force-directed relaxation with loop cohesion
         List<String> nodeList = new ArrayList<>(nodes);
         Map<String, double[]> displacements = new HashMap<>();
 
         for (int iter = 0; iter < ITERATIONS; iter++) {
+            // Compute current loop centroids for cohesion force
+            double[][] loopCentroids = null;
+            if (numLoops > 0) {
+                loopCentroids = new double[numLoops][];
+                for (int li = 0; li < numLoops; li++) {
+                    double sx = 0, sy = 0;
+                    int cnt = 0;
+                    for (String node : loops.get(li)) {
+                        double[] p = positions.get(node);
+                        if (p != null) {
+                            sx += p[0];
+                            sy += p[1];
+                            cnt++;
+                        }
+                    }
+                    loopCentroids[li] = cnt > 0
+                            ? new double[]{sx / cnt, sy / cnt}
+                            : new double[]{CENTER_X, CENTER_Y};
+                }
+            }
+
             // Reset displacements
             for (String node : nodeList) {
                 displacements.put(node, new double[]{0, 0});
@@ -212,6 +330,23 @@ public final class CldLayout {
                 double dy = CENTER_Y - p[1];
                 displacements.get(node)[0] += K_CENTER * dx;
                 displacements.get(node)[1] += K_CENTER * dy;
+            }
+
+            // Loop cohesion: pull loop members toward their loop centroid
+            if (loopCentroids != null) {
+                for (int li = 0; li < numLoops; li++) {
+                    double[] gc = loopCentroids[li];
+                    for (String node : loops.get(li)) {
+                        double[] p = positions.get(node);
+                        if (p == null) {
+                            continue;
+                        }
+                        double dx = gc[0] - p[0];
+                        double dy = gc[1] - p[1];
+                        displacements.get(node)[0] += K_LOOP_COHESION * dx;
+                        displacements.get(node)[1] += K_LOOP_COHESION * dy;
+                    }
+                }
             }
 
             // Apply displacements with damping and max displacement cap

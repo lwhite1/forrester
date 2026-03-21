@@ -2,10 +2,15 @@ package systems.courant.sd.app.canvas;
 
 import systems.courant.sd.model.def.CausalLinkDef;
 import systems.courant.sd.model.def.CldVariableDef;
+import systems.courant.sd.model.def.ElementType;
+import systems.courant.sd.model.graph.CldLoopInfo;
 
 import javafx.scene.canvas.GraphicsContext;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Geometry utilities for curved causal links using quadratic Bézier curves.
@@ -229,7 +234,7 @@ public final class CausalLinkGeometry {
         double px = -ny;
         double py = nx;
 
-        double r = SELF_LOOP_RADIUS * 1.5;
+        double r = 1.5 * Math.max(halfW, halfH);
         double spread = Math.max(halfW, halfH) * 0.5;
 
         double startX = cx + px * spread;
@@ -270,6 +275,232 @@ public final class CausalLinkGeometry {
             return null;
         }
         return new double[]{sumX / count, sumY / count};
+    }
+
+    /**
+     * Pre-computed loop context for edge routing. Holds the loop membership
+     * info, per-loop centroids, and the global centroid so that each edge
+     * can be routed using the appropriate reference point.
+     */
+    public record LoopContext(
+            CldLoopInfo loopInfo,
+            Map<Integer, double[]> loopCentroids,
+            double globalCentroidX,
+            double globalCentroidY
+    ) {
+        /**
+         * Returns the centroid to use for an edge between the two named nodes.
+         * Same-loop edges use the loop centroid; cross-loop, shared-node, or
+         * non-loop edges use the global centroid.
+         */
+        public double[] centroidFor(String fromName, String toName) {
+            if (loopInfo != null && !loopInfo.isEmpty()) {
+                if (!loopInfo.isSharedNode(fromName) && !loopInfo.isSharedNode(toName)) {
+                    int common = loopInfo.commonLoopIndex(fromName, toName);
+                    if (common >= 0) {
+                        double[] lc = loopCentroids.get(common);
+                        if (lc != null) {
+                            return lc;
+                        }
+                    }
+                }
+            }
+            return new double[]{globalCentroidX, globalCentroidY};
+        }
+
+        /**
+         * Returns the bulge factor (k) for an edge between the two named nodes.
+         * Same-loop: 0.6, cross-loop: 0.25, default: 0.35.
+         */
+        public double bulgeFactorFor(String fromName, String toName) {
+            if (loopInfo == null || loopInfo.isEmpty()) {
+                return 0.35;
+            }
+            if (loopInfo.isSharedNode(fromName) || loopInfo.isSharedNode(toName)) {
+                return 0.25;
+            }
+            if (loopInfo.commonLoopIndex(fromName, toName) >= 0) {
+                return 0.6;
+            }
+            if (!loopInfo.loopsOf(fromName).isEmpty()
+                    && !loopInfo.loopsOf(toName).isEmpty()) {
+                return 0.25;
+            }
+            return 0.35;
+        }
+
+        /**
+         * Returns the centroid to use for a self-loop on the named node.
+         */
+        public double[] selfLoopCentroid(String name) {
+            if (loopInfo != null && !loopInfo.isEmpty()) {
+                Set<Integer> loops = loopInfo.loopsOf(name);
+                if (!loops.isEmpty()) {
+                    int idx = loops.iterator().next();
+                    double[] lc = loopCentroids.get(idx);
+                    if (lc != null) {
+                        return lc;
+                    }
+                }
+            }
+            return new double[]{globalCentroidX, globalCentroidY};
+        }
+    }
+
+    /**
+     * Creates a LoopContext from the canvas state and CLD variable list.
+     */
+    public static LoopContext loopContext(CanvasState state,
+                                          List<CldVariableDef> cldVariables) {
+        CldLoopInfo loopInfo = state.getCldLoopInfo();
+        double[] gc = graphCentroid(state, cldVariables);
+        double gx = gc != null ? gc[0] : Double.NaN;
+        double gy = gc != null ? gc[1] : Double.NaN;
+        Map<Integer, double[]> loopCentroids = computeLoopCentroids(loopInfo, state);
+        return new LoopContext(loopInfo, loopCentroids, gx, gy);
+    }
+
+    /**
+     * Creates a LoopContext from canvas state alone, computing the global
+     * centroid from CLD_VARIABLE elements on the canvas.
+     */
+    public static LoopContext loopContext(CanvasState state) {
+        CldLoopInfo loopInfo = state.getCldLoopInfo();
+        double sx = 0, sy = 0;
+        int count = 0;
+        for (String name : state.getDrawOrder()) {
+            if (state.getType(name).orElse(null) == ElementType.CLD_VARIABLE) {
+                double x = state.getX(name);
+                double y = state.getY(name);
+                if (!Double.isNaN(x) && !Double.isNaN(y)) {
+                    sx += x;
+                    sy += y;
+                    count++;
+                }
+            }
+        }
+        double gx = count > 0 ? sx / count : Double.NaN;
+        double gy = count > 0 ? sy / count : Double.NaN;
+        Map<Integer, double[]> loopCentroids = computeLoopCentroids(loopInfo, state);
+        return new LoopContext(loopInfo, loopCentroids, gx, gy);
+    }
+
+    private static Map<Integer, double[]> computeLoopCentroids(CldLoopInfo loopInfo,
+                                                                CanvasState state) {
+        Map<Integer, double[]> result = new LinkedHashMap<>();
+        if (loopInfo == null || loopInfo.isEmpty()) {
+            return result;
+        }
+        for (int i = 0; i < loopInfo.loops().size(); i++) {
+            double lsx = 0, lsy = 0;
+            int lcnt = 0;
+            for (String node : loopInfo.loops().get(i)) {
+                double x = state.getX(node);
+                double y = state.getY(node);
+                if (!Double.isNaN(x) && !Double.isNaN(y)) {
+                    lsx += x;
+                    lsy += y;
+                    lcnt++;
+                }
+            }
+            if (lcnt > 0) {
+                result.put(i, new double[]{lsx / lcnt, lsy / lcnt});
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Loop-aware control point. Uses per-loop centroids for intra-loop edges
+     * (k=0.6) and the global centroid for cross-loop edges (k=0.25).
+     */
+    public static ControlPoint controlPoint(double fromX, double fromY,
+                                             double toX, double toY,
+                                             String fromName, String toName,
+                                             List<CausalLinkDef> allLinks,
+                                             LoopContext loopCtx) {
+        if (loopCtx == null || Double.isNaN(loopCtx.globalCentroidX())) {
+            return controlPoint(fromX, fromY, toX, toY, fromName, toName, allLinks);
+        }
+
+        if (fromName.equals(toName)) {
+            return new ControlPoint(fromX, fromY - SELF_LOOP_RADIUS * 2);
+        }
+
+        double midX = (fromX + toX) / 2;
+        double midY = (fromY + toY) / 2;
+
+        double dx = toX - fromX;
+        double dy = toY - fromY;
+        double chordLen = Math.sqrt(dx * dx + dy * dy);
+
+        if (chordLen < 1) {
+            return new ControlPoint(midX, midY);
+        }
+
+        boolean canonical = fromName.compareTo(toName) < 0;
+        double cdx = canonical ? dx : -dx;
+        double cdy = canonical ? dy : -dy;
+        double perpX = -cdy / chordLen;
+        double perpY = cdx / chordLen;
+
+        double[] centroid = loopCtx.centroidFor(fromName, toName);
+        double k = loopCtx.bulgeFactorFor(fromName, toName);
+
+        double outDx = midX - centroid[0];
+        double outDy = midY - centroid[1];
+        double outDist = Math.sqrt(outDx * outDx + outDy * outDy);
+
+        double finalDirX;
+        double finalDirY;
+
+        if (outDist < 1) {
+            finalDirX = perpX;
+            finalDirY = perpY;
+        } else {
+            double outNx = outDx / outDist;
+            double outNy = outDy / outDist;
+
+            double dot = outNx * perpX + outNy * perpY;
+            if (dot < 0) {
+                perpX = -perpX;
+                perpY = -perpY;
+                dot = -dot;
+            }
+
+            double w = Math.min(1, dot);
+            finalDirX = perpX * (1 - w) + outNx * w;
+            finalDirY = perpY * (1 - w) + outNy * w;
+            double finalLen = Math.sqrt(finalDirX * finalDirX + finalDirY * finalDirY);
+            if (finalLen > 0.001) {
+                finalDirX /= finalLen;
+                finalDirY /= finalLen;
+            }
+        }
+
+        double bulge = k * chordLen;
+        bulge = Math.min(bulge, 120);
+
+        int direction = curveDirection(fromName, toName, allLinks);
+
+        return new ControlPoint(
+                midX + finalDirX * bulge * direction,
+                midY + finalDirY * bulge * direction
+        );
+    }
+
+    /**
+     * Loop-aware self-loop geometry. Uses the loop-specific centroid for
+     * radial direction and 1.5 × node radius for offset distance.
+     */
+    public static double[] selfLoopPoints(double cx, double cy,
+                                           double halfW, double halfH,
+                                           LoopContext loopCtx, String nodeName) {
+        if (loopCtx == null) {
+            return selfLoopPoints(cx, cy, halfW, halfH);
+        }
+        double[] centroid = loopCtx.selfLoopCentroid(nodeName);
+        return selfLoopPoints(cx, cy, halfW, halfH, centroid[0], centroid[1]);
     }
 
     /**

@@ -54,7 +54,7 @@ final class InteractionOverlayPass implements RenderPass {
     public void render(GraphicsContext gc, CanvasRenderer.RenderContext ctx) {
         List<ConnectorRoute> connectors = ctx.connectors();
         List<CausalLinkDef> allCausalLinks = ctx.editor().getCausalLinks();
-        double[] centroid = CausalLinkGeometry.graphCentroid(
+        CausalLinkGeometry.LoopContext loopCtx = CausalLinkGeometry.loopContext(
                 canvasState, ctx.editor().getCldVariables());
         boolean hideAux = ctx.hideVariables();
 
@@ -128,11 +128,11 @@ final class InteractionOverlayPass implements RenderPass {
         ConnectionId selectedConnection = ctx.selectedConnection();
         ConnectionId hoveredConnection = ctx.hoveredConnection();
         if (selectedConnection != null) {
-            drawConnectionHighlight(gc, connectors, allCausalLinks, selectedConnection, false, centroid);
+            drawConnectionHighlight(gc, connectors, allCausalLinks, selectedConnection, false, loopCtx);
         }
         if (hoveredConnection != null
                 && !hoveredConnection.equals(selectedConnection)) {
-            drawConnectionHighlight(gc, connectors, allCausalLinks, hoveredConnection, true, centroid);
+            drawConnectionHighlight(gc, connectors, allCausalLinks, hoveredConnection, true, loopCtx);
         }
 
         // Hover indicator (above loops, below selection)
@@ -329,28 +329,26 @@ final class InteractionOverlayPass implements RenderPass {
     private void drawConnectionHighlight(GraphicsContext gc, List<ConnectorRoute> connectors,
                                          List<CausalLinkDef> allLinks,
                                          ConnectionId connectionId, boolean isHover,
-                                         double[] centroid) {
-        double gx = centroid != null ? centroid[0] : Double.NaN;
-        double gy = centroid != null ? centroid[1] : Double.NaN;
+                                         CausalLinkGeometry.LoopContext loopCtx) {
         for (ConnectorRoute route : connectors) {
             if (route.from().equals(connectionId.from())
                     && route.to().equals(connectionId.to())) {
                 drawClippedHighlight(gc, connectionId.from(), connectionId.to(),
-                        isHover, false, allLinks, gx, gy);
+                        isHover, false, allLinks, loopCtx);
                 return;
             }
         }
         if (canvasState.hasElement(connectionId.from())
                 && canvasState.hasElement(connectionId.to())) {
             drawClippedHighlight(gc, connectionId.from(), connectionId.to(),
-                    isHover, true, allLinks, gx, gy);
+                    isHover, true, allLinks, loopCtx);
         }
     }
 
     private void drawClippedHighlight(GraphicsContext gc, String fromName, String toName,
                                       boolean isHover, boolean isCausalLink,
                                       List<CausalLinkDef> allLinks,
-                                      double gx, double gy) {
+                                      CausalLinkGeometry.LoopContext loopCtx) {
         if (!canvasState.hasElement(fromName) || !canvasState.hasElement(toName)) {
             return;
         }
@@ -377,7 +375,7 @@ final class InteractionOverlayPass implements RenderPass {
             }
 
             CausalLinkGeometry.ControlPoint cp = CausalLinkGeometry.controlPoint(
-                    fromX, fromY, toX, toY, fromName, toName, allLinks, gx, gy);
+                    fromX, fromY, toX, toY, fromName, toName, allLinks, loopCtx);
 
             FlowGeometry.Point2D clippedFrom = FlowGeometry.clipToElement(
                     canvasState, fromName, cp.x(), cp.y());

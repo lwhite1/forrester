@@ -4,6 +4,8 @@ import systems.courant.sd.model.def.ElementPlacement;
 import systems.courant.sd.model.def.ElementType;
 import systems.courant.sd.model.def.ViewDef;
 
+import systems.courant.sd.model.graph.CldLoopInfo;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -41,6 +43,7 @@ public class CanvasState {
     private final Object drawOrderLock = new Object();
     private List<String> drawOrderCache;
     private String viewName = DEFAULT_VIEW_NAME;
+    private CldLoopInfo cldLoopInfo;
 
     /**
      * Loads element positions and types from a ViewDef, clearing any previous state.
@@ -50,6 +53,7 @@ public class CanvasState {
         types.clear();
         sizes.clear();
         selection.clear();
+        cldLoopInfo = null;
         viewName = view.name();
 
         synchronized (drawOrderLock) {
@@ -231,6 +235,20 @@ public class CanvasState {
      */
     public Set<String> getSelection() {
         return Collections.unmodifiableSet(selection);
+    }
+
+    /**
+     * Returns the CLD loop membership info, or null if not set.
+     */
+    public CldLoopInfo getCldLoopInfo() {
+        return cldLoopInfo;
+    }
+
+    /**
+     * Sets the CLD loop membership info for loop-aware edge routing.
+     */
+    public void setCldLoopInfo(CldLoopInfo loopInfo) {
+        this.cldLoopInfo = loopInfo;
     }
 
     /**
