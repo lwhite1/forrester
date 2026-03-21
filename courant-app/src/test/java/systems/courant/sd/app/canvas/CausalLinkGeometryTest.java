@@ -5,11 +5,14 @@ import systems.courant.sd.model.def.CldVariableDef;
 import systems.courant.sd.model.def.ElementPlacement;
 import systems.courant.sd.model.def.ElementType;
 import systems.courant.sd.model.def.ViewDef;
+import systems.courant.sd.model.graph.CldLoopInfo;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -100,6 +103,122 @@ class CausalLinkGeometryTest {
             double cp2Y = lp[5]; // cp2Y
             assertThat(cp1Y).isLessThan(100);
             assertThat(cp2Y).isLessThan(100);
+        }
+    }
+
+    @Nested
+    class LoopAwareControlPoint {
+
+        @Test
+        void shouldUseLargerBulgeForSameLoopEdge() {
+            // A → B → A (same loop), k=0.6
+            List<CausalLinkDef> links = List.of(
+                    new CausalLinkDef("A", "B"),
+                    new CausalLinkDef("B", "A"));
+            CldLoopInfo loopInfo = CldLoopInfo.compute(
+                    List.of(new CldVariableDef("A"), new CldVariableDef("B")), links);
+
+            Map<Integer, double[]> loopCentroids = Map.of(0, new double[]{100, 0});
+            CausalLinkGeometry.LoopContext loopCtx = new CausalLinkGeometry.LoopContext(
+                    loopInfo, loopCentroids, 100, 0);
+
+            CausalLinkGeometry.ControlPoint cpLoop = CausalLinkGeometry.controlPoint(
+                    0, 0, 200, 0, "A", "B", links, loopCtx);
+
+            // Compare with old centroid-aware method (k=0.35)
+            CausalLinkGeometry.ControlPoint cpOld = CausalLinkGeometry.controlPoint(
+                    0, 0, 200, 0, "A", "B", links, 100, 0);
+
+            // Same-loop curve (k=0.6) should have larger offset than default (k=0.35)
+            double loopOffset = Math.abs(cpLoop.y());
+            double oldOffset = Math.abs(cpOld.y());
+            assertThat(loopOffset).isGreaterThan(oldOffset);
+        }
+
+        @Test
+        void shouldUseSmallerBulgeForCrossLoopEdge() {
+            // Loop1: A → B → A, Loop2: C → D → C, cross-edge: A → C
+            List<CausalLinkDef> links = List.of(
+                    new CausalLinkDef("A", "B"),
+                    new CausalLinkDef("B", "A"),
+                    new CausalLinkDef("C", "D"),
+                    new CausalLinkDef("D", "C"),
+                    new CausalLinkDef("A", "C"));
+            List<CldVariableDef> vars = List.of(
+                    new CldVariableDef("A"),
+                    new CldVariableDef("B"),
+                    new CldVariableDef("C"),
+                    new CldVariableDef("D"));
+            CldLoopInfo loopInfo = CldLoopInfo.compute(vars, links);
+            assertThat(loopInfo.inSameLoop("A", "C")).isFalse();
+
+            CausalLinkGeometry.LoopContext loopCtx = new CausalLinkGeometry.LoopContext(
+                    loopInfo, Map.of(), 100, 100);
+
+            // Cross-loop edges should use k=0.25 (gentle curve)
+            assertThat(loopCtx.bulgeFactorFor("A", "C")).isEqualTo(0.25);
+        }
+
+        @Test
+        void shouldUseSameLoopBulgeWhenAllInOneSCC() {
+            // A→B→A and B→C→B merge into one SCC {A,B,C}
+            // All intra-SCC edges get k=0.6
+            List<CausalLinkDef> links = List.of(
+                    new CausalLinkDef("A", "B"),
+                    new CausalLinkDef("B", "A"),
+                    new CausalLinkDef("B", "C"),
+                    new CausalLinkDef("C", "B"));
+            List<CldVariableDef> vars = List.of(
+                    new CldVariableDef("A"),
+                    new CldVariableDef("B"),
+                    new CldVariableDef("C"));
+            CldLoopInfo loopInfo = CldLoopInfo.compute(vars, links);
+
+            Map<Integer, double[]> loopCentroids = Map.of(0, new double[]{100, 100});
+            CausalLinkGeometry.LoopContext loopCtx = new CausalLinkGeometry.LoopContext(
+                    loopInfo, loopCentroids, 100, 100);
+
+            // All in same SCC → k=0.6
+            assertThat(loopCtx.bulgeFactorFor("A", "B")).isEqualTo(0.6);
+            assertThat(loopCtx.bulgeFactorFor("B", "C")).isEqualTo(0.6);
+        }
+
+        @Test
+        void shouldFallBackWhenLoopContextIsNull() {
+            List<CausalLinkDef> links = List.of(new CausalLinkDef("A", "B"));
+
+            CausalLinkGeometry.ControlPoint cp1 = CausalLinkGeometry.controlPoint(
+                    0, 0, 100, 0, "A", "B", links);
+            CausalLinkGeometry.ControlPoint cp2 = CausalLinkGeometry.controlPoint(
+                    0, 0, 100, 0, "A", "B", links, (CausalLinkGeometry.LoopContext) null);
+
+            assertThat(cp2.x()).isEqualTo(cp1.x());
+            assertThat(cp2.y()).isEqualTo(cp1.y());
+        }
+    }
+
+    @Nested
+    class LoopContextComputation {
+
+        @Test
+        void shouldComputeLoopContextFromCanvasState() {
+            CanvasState state = new CanvasState();
+            state.loadFrom(new ViewDef("test", List.of(
+                    new ElementPlacement("A", ElementType.CLD_VARIABLE, 0, 0),
+                    new ElementPlacement("B", ElementType.CLD_VARIABLE, 200, 0),
+                    new ElementPlacement("C", ElementType.CLD_VARIABLE, 100, 200)
+            ), List.of(), List.of()));
+            state.setCldLoopInfo(CldLoopInfo.compute(
+                    List.of(new CldVariableDef("A"), new CldVariableDef("B"),
+                            new CldVariableDef("C")),
+                    List.of(new CausalLinkDef("A", "B"),
+                            new CausalLinkDef("B", "C"),
+                            new CausalLinkDef("C", "A"))));
+
+            CausalLinkGeometry.LoopContext ctx = CausalLinkGeometry.loopContext(state);
+
+            assertThat(ctx.globalCentroidX()).isCloseTo(100, org.assertj.core.data.Offset.offset(1.0));
+            assertThat(ctx.loopCentroids()).isNotEmpty();
         }
     }
 

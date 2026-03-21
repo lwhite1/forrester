@@ -4,6 +4,7 @@ import systems.courant.sd.model.def.ConnectorRoute;
 import systems.courant.sd.model.def.ElementType;
 import systems.courant.sd.model.def.ValidationIssue;
 import systems.courant.sd.model.def.ViewDef;
+import systems.courant.sd.model.graph.CldLoopInfo;
 
 import javafx.application.Platform;
 import javafx.scene.canvas.Canvas;
@@ -153,6 +154,8 @@ public class ModelCanvas extends Canvas {
     public void setModel(ModelEditor editor, ViewDef view) {
         this.editor = editor;
         canvasState.loadFrom(view);
+        canvasState.setCldLoopInfo(
+                CldLoopInfo.compute(editor.getCldVariables(), editor.getCausalLinks()));
         this.connectors = editor.generateConnectors();
         invalidateAnalysis();
         redraw();

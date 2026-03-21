@@ -197,4 +197,91 @@ class CldLayoutTest {
             assertThat(positions).containsKeys("A", "B", "C");
         }
     }
+
+    @Nested
+    class LoopAwareLayout {
+        @Test
+        void shouldPlaceNodesFromMultipleSCCsNearDifferentCentroids() {
+            // Loop1: A → B → A, Loop2: C → D → C, cross-link: A → C
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("test")
+                    .cldVariable(new CldVariableDef("A"))
+                    .cldVariable(new CldVariableDef("B"))
+                    .cldVariable(new CldVariableDef("C"))
+                    .cldVariable(new CldVariableDef("D"))
+                    .causalLink(new CausalLinkDef("A", "B"))
+                    .causalLink(new CausalLinkDef("B", "A"))
+                    .causalLink(new CausalLinkDef("C", "D"))
+                    .causalLink(new CausalLinkDef("D", "C"))
+                    .causalLink(new CausalLinkDef("A", "C"))
+                    .build();
+
+            ViewDef view = CldLayout.layout(def);
+
+            assertThat(view.elements()).hasSize(4);
+
+            // Nodes in loop1 (A, B) should be closer to each other than to loop2 (C, D)
+            Map<String, double[]> positions = new LinkedHashMap<>();
+            for (ElementPlacement ep : view.elements()) {
+                positions.put(ep.name(), new double[]{ep.x(), ep.y()});
+            }
+
+            double distAB = dist(positions.get("A"), positions.get("B"));
+            double distCD = dist(positions.get("C"), positions.get("D"));
+            double distAC = dist(positions.get("A"), positions.get("C"));
+
+            // Intra-loop distances should be less than cross-loop distance
+            assertThat(distAB).isLessThan(distAC);
+            assertThat(distCD).isLessThan(distAC);
+        }
+
+        @Test
+        void shouldPlaceSharedNodeBetweenLoopCenters() {
+            // Loop1: A → B → A, Loop2: B → C → B
+            // B is shared between both loops
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("test")
+                    .cldVariable(new CldVariableDef("A"))
+                    .cldVariable(new CldVariableDef("B"))
+                    .cldVariable(new CldVariableDef("C"))
+                    .causalLink(new CausalLinkDef("A", "B"))
+                    .causalLink(new CausalLinkDef("B", "A"))
+                    .causalLink(new CausalLinkDef("B", "C"))
+                    .causalLink(new CausalLinkDef("C", "B"))
+                    .build();
+
+            ViewDef view = CldLayout.layout(def);
+
+            assertThat(view.elements()).hasSize(3);
+        }
+
+        @Test
+        void shouldHandleSingletonNodesOutsideLoops() {
+            // Loop: A → B → A, singleton: X (with link A → X)
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("test")
+                    .cldVariable(new CldVariableDef("A"))
+                    .cldVariable(new CldVariableDef("B"))
+                    .cldVariable(new CldVariableDef("X"))
+                    .causalLink(new CausalLinkDef("A", "B"))
+                    .causalLink(new CausalLinkDef("B", "A"))
+                    .causalLink(new CausalLinkDef("A", "X"))
+                    .build();
+
+            ViewDef view = CldLayout.layout(def);
+
+            assertThat(view.elements()).hasSize(3);
+            Set<String> names = new HashSet<>();
+            for (ElementPlacement ep : view.elements()) {
+                names.add(ep.name());
+            }
+            assertThat(names).containsExactlyInAnyOrder("A", "B", "X");
+        }
+
+        private double dist(double[] a, double[] b) {
+            double dx = a[0] - b[0];
+            double dy = a[1] - b[1];
+            return Math.sqrt(dx * dx + dy * dy);
+        }
+    }
 }
