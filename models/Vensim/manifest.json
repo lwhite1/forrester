@@ -1,1286 +1,1286 @@
 [
-  {
-    "url": "models/Vensim/Sample/INTRO.mdl",
-    "className": "VensimIntro",
-    "category": "sample",
-    "comment": "Model 'INTRO' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/sample_models.html"
+    {
+        "url": "models/Vensim/Sample/INTRO.mdl",
+        "className": "VensimIntro",
+        "category": "management",
+        "comment": "Model 'INTRO' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/sample_models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/Sample/BPR/BPR0.mdl",
+        "className": "VensimBpr0",
+        "category": "management",
+        "comment": "Model 'BPR0' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/sample_models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/Sample/BPR/BPR1.mdl",
+        "className": "VensimBpr1",
+        "category": "management",
+        "comment": "Model 'BPR1' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/sample_models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/Sample/BPR/BPR2.mdl",
+        "className": "VensimBpr2",
+        "category": "management",
+        "comment": "Model 'BPR2' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/sample_models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/Sample/BPR/BPR3.mdl",
+        "className": "VensimBpr3",
+        "category": "management",
+        "comment": "Model 'BPR3' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/sample_models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/Sample/EXTRA/AGE.MDL",
+        "className": "VensimAge",
+        "category": "demographics",
+        "comment": "Model 'AGE' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/sample_models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/Sample/EXTRA/AGECHAIN.MDL",
+        "className": "VensimAgechain",
+        "category": "demographics",
+        "comment": "Model 'AGECHAIN' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/sample_models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/Sample/EXTRA/AGEMODEL.MDL",
+        "className": "VensimAgemodel",
+        "category": "demographics",
+        "comment": "Model 'AGEMODEL' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/sample_models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/Sample/EXTRA/BALL.MDL",
+        "className": "VensimBall",
+        "category": "physics",
+        "comment": "Model 'BALL' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/sample_models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/Sample/EXTRA/BALLMODEL.MDL",
+        "className": "VensimBallmodel",
+        "category": "physics",
+        "comment": "Model 'BALLMODEL' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/sample_models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/Sample/EXTRA/BURNOUT.MDL",
+        "className": "VensimBurnout",
+        "category": "management",
+        "comment": "Model 'BURNOUT' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/sample_models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/Sample/EXTRA/BURNOUTMODEL.MDL",
+        "className": "VensimBurnoutmodel",
+        "category": "management",
+        "comment": "Model 'BURNOUTMODEL' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/sample_models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/Sample/EXTRA/CAFFEINE.MDL",
+        "className": "VensimCaffeine",
+        "category": "introductory",
+        "comment": "Model 'CAFFEINE' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/sample_models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/Sample/EXTRA/COMMOD.MDL",
+        "className": "VensimCommod",
+        "category": "economics",
+        "comment": "Model 'COMMOD' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/sample_models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/Sample/EXTRA/COMPETE1.MDL",
+        "className": "VensimCompete1",
+        "category": "economics",
+        "comment": "Model 'COMPETE1' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/sample_models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/Sample/EXTRA/COMPETE1MODEL.MDL",
+        "className": "VensimCompete1model",
+        "category": "economics",
+        "comment": "Model 'COMPETE1MODEL' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/sample_models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/Sample/EXTRA/COOL.MDL",
+        "className": "VensimCool",
+        "category": "introductory",
+        "comment": "Model 'COOL' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/sample_models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/Sample/EXTRA/CORPGRTH.MDL",
+        "className": "VensimCorpgrth",
+        "category": "economics",
+        "comment": "Model 'CORPGRTH' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/sample_models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/Sample/EXTRA/CORPGRTHE.MDL",
+        "className": "VensimCorpgrthe",
+        "category": "economics",
+        "comment": "Model 'CORPGRTHE' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/sample_models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/Sample/EXTRA/DELIV.MDL",
+        "className": "VensimDeliv",
+        "category": "marketing",
+        "comment": "Model 'DELIV' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/sample_models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/Sample/EXTRA/EIT.MDL",
+        "className": "VensimEit",
+        "category": "ecology",
+        "comment": "Model 'EIT' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/sample_models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/Sample/EXTRA/EPIDEMIC.MDL",
+        "className": "VensimEpidemic",
+        "category": "epidemiology",
+        "comment": "Model 'EPIDEMIC' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/sample_models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/Sample/EXTRA/GRAVITY.MDL",
+        "className": "VensimGravity",
+        "category": "physics",
+        "comment": "Model 'GRAVITY' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/sample_models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/Sample/EXTRA/NEP4SIMU.MDL",
+        "className": "VensimNep4simu",
+        "category": "introductory",
+        "comment": "Model 'NEP4SIMU' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/sample_models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/Sample/EXTRA/NEPHRON5.MDL",
+        "className": "VensimNephron5",
+        "category": "introductory",
+        "comment": "Model 'NEPHRON5' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/sample_models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/Sample/EXTRA/POPGAME.MDL",
+        "className": "VensimPopgame",
+        "category": "demographics",
+        "comment": "Model 'POPGAME' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/sample_models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/Sample/EXTRA/POPPYR.MDL",
+        "className": "VensimPoppyr",
+        "category": "demographics",
+        "comment": "Model 'POPPYR' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/sample_models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/Sample/EXTRA/PROCRAST.MDL",
+        "className": "VensimProcrast",
+        "category": "management",
+        "comment": "Model 'PROCRAST' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/sample_models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/Sample/EXTRA/PROJ.MDL",
+        "className": "VensimProj",
+        "category": "management",
+        "comment": "Model 'PROJ' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/sample_models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/Sample/EXTRA/RABFOX.MDL",
+        "className": "VensimRabfox",
+        "category": "ecology",
+        "comment": "Model 'RABFOX' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/sample_models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/Sample/EXTRA/SNOWBALL.MDL",
+        "className": "VensimSnowball",
+        "category": "introductory",
+        "comment": "Model 'SNOWBALL' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/sample_models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/Sample/EXTRA/SPEED.MDL",
+        "className": "VensimSpeed",
+        "category": "introductory",
+        "comment": "Model 'SPEED' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/sample_models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/Sample/EXTRA/TUBS.MDL",
+        "className": "VensimTubs",
+        "category": "introductory",
+        "comment": "Model 'TUBS' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/sample_models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/Sample/EXTRA/WORLD.MDL",
+        "className": "VensimWorld",
+        "category": "environment",
+        "comment": "Model 'WORLD' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/sample_models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/Sample/EXTRA/venread.mdl",
+        "className": "VensimVenread",
+        "category": "marketing",
+        "comment": "Model 'venread' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/sample_models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/Sample/FINANCE/FINANCE.mdl",
+        "className": "VensimFinance",
+        "category": "economics",
+        "comment": "Model 'FINANCE' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/sample_models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/Sample/KALMAN/WFKAL.MDL",
+        "className": "VensimWfkal",
+        "category": "management",
+        "comment": "Model 'WFKAL' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/sample_models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/Sample/KALMAN/COMPLETE/WFKAL.MDL",
+        "className": "VensimWfkal",
+        "category": "management",
+        "comment": "Model 'WFKAL' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/sample_models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/Sample/MAINT1/MAINT1.mdl",
+        "className": "VensimMaint1",
+        "category": "control",
+        "comment": "Model 'MAINT1' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/sample_models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/Sample/MARKET/MARKET.mdl",
+        "className": "VensimMarket",
+        "category": "economics",
+        "comment": "Model 'MARKET' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/sample_models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/Sample/MARKET/MARKET2.mdl",
+        "className": "VensimMarket2",
+        "category": "economics",
+        "comment": "Model 'MARKET2' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/sample_models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/Sample/MPROJ3/MPROJ3.mdl",
+        "className": "VensimMproj3",
+        "category": "management",
+        "comment": "Model 'MPROJ3' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/sample_models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/Sample/MPROJECT/MPROJ3.mdl",
+        "className": "VensimMproj3",
+        "category": "management",
+        "comment": "Model 'MPROJ3' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/sample_models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/Sample/Sub-Model/Market_model.mdl",
+        "className": "VensimMarketModel",
+        "category": "economics",
+        "comment": "Model 'Market_model' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/sample_models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/Sample/Sub-Model/Products.mdl",
+        "className": "VensimProducts",
+        "category": "marketing",
+        "comment": "Model 'Products' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/sample_models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/Sample/Sub-Model/advertising.mdl",
+        "className": "VensimAdvertising",
+        "category": "marketing",
+        "comment": "Model 'advertising' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/sample_models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/Sample/Sub-Model/market_model_original.mdl",
+        "className": "VensimMarketModelOriginal",
+        "category": "economics",
+        "comment": "Model 'market_model_original' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/sample_models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/Sample/URBAN/URBAN.mdl",
+        "className": "VensimUrban",
+        "category": "social",
+        "comment": "Model 'URBAN' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/sample_models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/Sample/VENAPP/INTRO.mdl",
+        "className": "VensimIntro",
+        "category": "management",
+        "comment": "Model 'INTRO' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/sample_models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/Sample/VENAPP/WORLDAPP.mdl",
+        "className": "VensimWorldapp",
+        "category": "environment",
+        "comment": "Model 'WORLDAPP' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/sample_models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/Sample/VENAPP/WORLDAPPEDITED.mdl",
+        "className": "VensimWorldappedited",
+        "category": "environment",
+        "comment": "Model 'WORLDAPPEDITED' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/sample_models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/Sample/VENAPP/change.mdl",
+        "className": "VensimChange",
+        "category": "introductory",
+        "comment": "Model 'change' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/sample_models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/Sample/VENAPP/flicker.mdl",
+        "className": "VensimFlicker",
+        "category": "introductory",
+        "comment": "Model 'flicker' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/sample_models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/Sample/VENAPP/mplayer.mdl",
+        "className": "VensimMplayer",
+        "category": "demographics",
+        "comment": "Model 'mplayer' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/sample_models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/Sample/VENAPP/change/change.mdl",
+        "className": "VensimChange",
+        "category": "introductory",
+        "comment": "Model 'change' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/sample_models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/Sample/VENAPP/flicker/flicker.mdl",
+        "className": "VensimFlicker",
+        "category": "introductory",
+        "comment": "Model 'flicker' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/sample_models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/Sample/VENAPP/template/WORLDAPP.mdl",
+        "className": "VensimWorldapp",
+        "category": "environment",
+        "comment": "Model 'WORLDAPP' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/sample_models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/Sample/WRLD3-03/World3_03_Scenarios.mdl",
+        "className": "VensimWorld303Scenarios",
+        "category": "environment",
+        "comment": "Model 'World3_03_Scenarios' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/sample_models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/Sample/WRLD3-03/wrld3-03.mdl",
+        "className": "VensimWrld303",
+        "category": "environment",
+        "comment": "Model 'wrld3-03' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/sample_models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/UserGuide/CHAP03/WFINV.MDL",
+        "className": "VensimWfinv",
+        "category": "management",
+        "comment": "Model 'WFINV' from Vensim User Guide, Chapter 03. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/UserGuide/CHAP04/COMPLETE/PROJECT.MDL",
+        "className": "VensimProject",
+        "category": "causal-loop",
+        "comment": "Model 'PROJECT' from Vensim User Guide, Chapter 04. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/UserGuide/CHAP05/COMPLETE/CUSTOMER.MDL",
+        "className": "VensimCustomer",
+        "category": "marketing",
+        "comment": "Model 'CUSTOMER' from Vensim User Guide, Chapter 05. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/UserGuide/CHAP06/COMPLETE/POP.MDL",
+        "className": "VensimPop",
+        "category": "demographics",
+        "comment": "Model 'POP' from Vensim User Guide, Chapter 06. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/UserGuide/CHAP07/Complete/price1.mdl",
+        "className": "VensimPrice1",
+        "category": "economics",
+        "comment": "Model 'price1' from Vensim User Guide, Chapter 07. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/UserGuide/CHAP07/Complete/price2.mdl",
+        "className": "VensimPrice2",
+        "category": "economics",
+        "comment": "Model 'price2' from Vensim User Guide, Chapter 07. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/UserGuide/CHAP07/Complete/price3.mdl",
+        "className": "VensimPrice3",
+        "category": "economics",
+        "comment": "Model 'price3' from Vensim User Guide, Chapter 07. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/UserGuide/CHAP08/COMPLETE/RABBIT.MDL",
+        "className": "VensimRabbit",
+        "category": "ecology",
+        "comment": "Model 'RABBIT' from Vensim User Guide, Chapter 08. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/UserGuide/CHAP08/COMPLETE/RABBIT2.MDL",
+        "className": "VensimRabbit2",
+        "category": "ecology",
+        "comment": "Model 'RABBIT2' from Vensim User Guide, Chapter 08. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/UserGuide/CHAP08/COMPLETE/RABBIT3.MDL",
+        "className": "VensimRabbit3",
+        "category": "ecology",
+        "comment": "Model 'RABBIT3' from Vensim User Guide, Chapter 08. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/UserGuide/CHAP09/CAP1.MDL",
+        "className": "VensimCap1",
+        "category": "management",
+        "comment": "Model 'CAP1' from Vensim User Guide, Chapter 09. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/UserGuide/CHAP09/COMPLETE/CAP1.MDL",
+        "className": "VensimCap1",
+        "category": "management",
+        "comment": "Model 'CAP1' from Vensim User Guide, Chapter 09. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/UserGuide/CHAP09/COMPLETE/CUST1.MDL",
+        "className": "VensimCust1",
+        "category": "management",
+        "comment": "Model 'CUST1' from Vensim User Guide, Chapter 09. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/UserGuide/CHAP09/COMPLETE/CUST2.MDL",
+        "className": "VensimCust2",
+        "category": "management",
+        "comment": "Model 'CUST2' from Vensim User Guide, Chapter 09. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/UserGuide/CHAP09/COMPLETE/CUST3.MDL",
+        "className": "VensimCust3",
+        "category": "management",
+        "comment": "Model 'CUST3' from Vensim User Guide, Chapter 09. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/UserGuide/CHAP11/HOUSES.MDL",
+        "className": "VensimHouses",
+        "category": "economics",
+        "comment": "Model 'HOUSES' from Vensim User Guide, Chapter 11. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/UserGuide/CHAP11/COMPLETE/HOUSES.MDL",
+        "className": "VensimHouses",
+        "category": "economics",
+        "comment": "Model 'HOUSES' from Vensim User Guide, Chapter 11. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/UserGuide/CHAP12/WOM1.MDL",
+        "className": "VensimWom1",
+        "category": "marketing",
+        "comment": "Model 'WOM1' from Vensim User Guide, Chapter 12. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/UserGuide/CHAP12/COMPLETE/WOM1.MDL",
+        "className": "VensimWom1",
+        "category": "marketing",
+        "comment": "Model 'WOM1' from Vensim User Guide, Chapter 12. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/UserGuide/CHAP12/COMPLETE/WOM2.MDL",
+        "className": "VensimWom2",
+        "category": "marketing",
+        "comment": "Model 'WOM2' from Vensim User Guide, Chapter 12. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/UserGuide/CHAP12/COMPLETE/WOM3.MDL",
+        "className": "VensimWom3",
+        "category": "marketing",
+        "comment": "Model 'WOM3' from Vensim User Guide, Chapter 12. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/UserGuide/CHAP12/COMPLETE/WOM4.MDL",
+        "className": "VensimWom4",
+        "category": "marketing",
+        "comment": "Model 'WOM4' from Vensim User Guide, Chapter 12. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/UserGuide/CHAP13/arms1.mdl",
+        "className": "VensimArms1",
+        "category": "policy",
+        "comment": "Model 'arms1' from Vensim User Guide, Chapter 13. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/UserGuide/CHAP13/complete/arms1.mdl",
+        "className": "VensimArms1",
+        "category": "policy",
+        "comment": "Model 'arms1' from Vensim User Guide, Chapter 13. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/UserGuide/CHAP13/complete/arms2.mdl",
+        "className": "VensimArms2",
+        "category": "policy",
+        "comment": "Model 'arms2' from Vensim User Guide, Chapter 13. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/UserGuide/CHAP13/complete/arms3.mdl",
+        "className": "VensimArms3",
+        "category": "policy",
+        "comment": "Model 'arms3' from Vensim User Guide, Chapter 13. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/UserGuide/CHAP13/complete/arms4.mdl",
+        "className": "VensimArms4",
+        "category": "policy",
+        "comment": "Model 'arms4' from Vensim User Guide, Chapter 13. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/UserGuide/CHAP14/YEAST1.MDL",
+        "className": "VensimYeast1",
+        "category": "ecology",
+        "comment": "Model 'YEAST1' from Vensim User Guide, Chapter 14. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/UserGuide/CHAP14/YEAST2.MDL",
+        "className": "VensimYeast2",
+        "category": "ecology",
+        "comment": "Model 'YEAST2' from Vensim User Guide, Chapter 14. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/UserGuide/CHAP14/YEAST3.MDL",
+        "className": "VensimYeast3",
+        "category": "ecology",
+        "comment": "Model 'YEAST3' from Vensim User Guide, Chapter 14. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/UserGuide/CHAP14/YEAST4.MDL",
+        "className": "VensimYeast4",
+        "category": "ecology",
+        "comment": "Model 'YEAST4' from Vensim User Guide, Chapter 14. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/UserGuide/CHAP15/SALES.MDL",
+        "className": "VensimSales",
+        "category": "marketing",
+        "comment": "Model 'SALES' from Vensim User Guide, Chapter 15. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/UserGuide/CHAP15/COMPLETE/SALES.MDL",
+        "className": "VensimSales",
+        "category": "marketing",
+        "comment": "Model 'SALES' from Vensim User Guide, Chapter 15. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/UserGuide/CHAP16/CFC.MDL",
+        "className": "VensimCfc",
+        "category": "environment",
+        "comment": "Model 'CFC' from Vensim User Guide, Chapter 16. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/UserGuide/CHAP16/COMPLETE/CFC.MDL",
+        "className": "VensimCfc",
+        "category": "environment",
+        "comment": "Model 'CFC' from Vensim User Guide, Chapter 16. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/UserGuide/CHAP16/COMPLETE/CFC2.MDL",
+        "className": "VensimCfc2",
+        "category": "environment",
+        "comment": "Model 'CFC2' from Vensim User Guide, Chapter 16. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/UserGuide/CHAP17/PROJ1.MDL",
+        "className": "VensimProj1",
+        "category": "management",
+        "comment": "Model 'PROJ1' from Vensim User Guide, Chapter 17. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/UserGuide/CHAP17/COMPLETE/PROJ1.MDL",
+        "className": "VensimProj1",
+        "category": "management",
+        "comment": "Model 'PROJ1' from Vensim User Guide, Chapter 17. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/UserGuide/CHAP17/COMPLETE/PROJ2.MDL",
+        "className": "VensimProj2",
+        "category": "management",
+        "comment": "Model 'PROJ2' from Vensim User Guide, Chapter 17. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/UserGuide/CHAP17/COMPLETE/PROJ3.MDL",
+        "className": "VensimProj3",
+        "category": "management",
+        "comment": "Model 'PROJ3' from Vensim User Guide, Chapter 17. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/UserGuide/CHAP18/CALIBRAT/ELECTRIC.MDL",
+        "className": "VensimElectric",
+        "category": "technology",
+        "comment": "Model 'ELECTRIC' from Vensim User Guide, Chapter 18. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/UserGuide/CHAP18/CALIBRAT/COMPLETE/ELECTRIC.MDL",
+        "className": "VensimElectric",
+        "category": "technology",
+        "comment": "Model 'ELECTRIC' from Vensim User Guide, Chapter 18. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/UserGuide/CHAP18/POLICY/STOCK.MDL",
+        "className": "VensimStock",
+        "category": "supply-chain",
+        "comment": "Model 'STOCK' from Vensim User Guide, Chapter 18. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/UserGuide/CHAP18/POLICY/COMPLETE/STOCK.MDL",
+        "className": "VensimStock",
+        "category": "supply-chain",
+        "comment": "Model 'STOCK' from Vensim User Guide, Chapter 18. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/UserGuide/chap20/complete/MentalSimulation01.mdl",
+        "className": "VensimMentalsimulation01",
+        "category": "introductory",
+        "comment": "Model 'MentalSimulation01' from Vensim User Guide, Chapter 20. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/UserGuide/chap20/complete/MentalSimulation02.mdl",
+        "className": "VensimMentalsimulation02",
+        "category": "introductory",
+        "comment": "Model 'MentalSimulation02' from Vensim User Guide, Chapter 20. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/UserGuide/chap20/complete/repair01.mdl",
+        "className": "VensimRepair01",
+        "category": "control",
+        "comment": "Model 'repair01' from Vensim User Guide, Chapter 20. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/models.html"
+        }
+    },
+    {
+        "url": "models/Vensim/UserGuide/chap20/complete/repair02.mdl",
+        "className": "VensimRepair02",
+        "category": "control",
+        "comment": "Model 'repair02' from Vensim User Guide, Chapter 20. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
+        "metadata": {
+            "author": "Ventana Systems, Inc.",
+            "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
+            "license": "MIT",
+            "url": "https://www.vensim.com/documentation/models.html"
+        }
     }
-  },
-  {
-    "url": "models/Vensim/Sample/BPR/BPR0.mdl",
-    "className": "VensimBpr0",
-    "category": "sample/bpr",
-    "comment": "Model 'BPR0' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/sample_models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/Sample/BPR/BPR1.mdl",
-    "className": "VensimBpr1",
-    "category": "sample/bpr",
-    "comment": "Model 'BPR1' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/sample_models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/Sample/BPR/BPR2.mdl",
-    "className": "VensimBpr2",
-    "category": "sample/bpr",
-    "comment": "Model 'BPR2' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/sample_models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/Sample/BPR/BPR3.mdl",
-    "className": "VensimBpr3",
-    "category": "sample/bpr",
-    "comment": "Model 'BPR3' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/sample_models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/Sample/EXTRA/AGE.MDL",
-    "className": "VensimAge",
-    "category": "sample/extra",
-    "comment": "Model 'AGE' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/sample_models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/Sample/EXTRA/AGECHAIN.MDL",
-    "className": "VensimAgechain",
-    "category": "sample/extra",
-    "comment": "Model 'AGECHAIN' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/sample_models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/Sample/EXTRA/AGEMODEL.MDL",
-    "className": "VensimAgemodel",
-    "category": "sample/extra",
-    "comment": "Model 'AGEMODEL' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/sample_models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/Sample/EXTRA/BALL.MDL",
-    "className": "VensimBall",
-    "category": "sample/extra",
-    "comment": "Model 'BALL' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/sample_models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/Sample/EXTRA/BALLMODEL.MDL",
-    "className": "VensimBallmodel",
-    "category": "sample/extra",
-    "comment": "Model 'BALLMODEL' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/sample_models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/Sample/EXTRA/BURNOUT.MDL",
-    "className": "VensimBurnout",
-    "category": "sample/extra",
-    "comment": "Model 'BURNOUT' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/sample_models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/Sample/EXTRA/BURNOUTMODEL.MDL",
-    "className": "VensimBurnoutmodel",
-    "category": "sample/extra",
-    "comment": "Model 'BURNOUTMODEL' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/sample_models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/Sample/EXTRA/CAFFEINE.MDL",
-    "className": "VensimCaffeine",
-    "category": "sample/extra",
-    "comment": "Model 'CAFFEINE' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/sample_models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/Sample/EXTRA/COMMOD.MDL",
-    "className": "VensimCommod",
-    "category": "sample/extra",
-    "comment": "Model 'COMMOD' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/sample_models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/Sample/EXTRA/COMPETE1.MDL",
-    "className": "VensimCompete1",
-    "category": "sample/extra",
-    "comment": "Model 'COMPETE1' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/sample_models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/Sample/EXTRA/COMPETE1MODEL.MDL",
-    "className": "VensimCompete1model",
-    "category": "sample/extra",
-    "comment": "Model 'COMPETE1MODEL' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/sample_models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/Sample/EXTRA/COOL.MDL",
-    "className": "VensimCool",
-    "category": "sample/extra",
-    "comment": "Model 'COOL' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/sample_models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/Sample/EXTRA/CORPGRTH.MDL",
-    "className": "VensimCorpgrth",
-    "category": "sample/extra",
-    "comment": "Model 'CORPGRTH' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/sample_models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/Sample/EXTRA/CORPGRTHE.MDL",
-    "className": "VensimCorpgrthe",
-    "category": "sample/extra",
-    "comment": "Model 'CORPGRTHE' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/sample_models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/Sample/EXTRA/DELIV.MDL",
-    "className": "VensimDeliv",
-    "category": "sample/extra",
-    "comment": "Model 'DELIV' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/sample_models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/Sample/EXTRA/EIT.MDL",
-    "className": "VensimEit",
-    "category": "sample/extra",
-    "comment": "Model 'EIT' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/sample_models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/Sample/EXTRA/EPIDEMIC.MDL",
-    "className": "VensimEpidemic",
-    "category": "sample/extra",
-    "comment": "Model 'EPIDEMIC' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/sample_models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/Sample/EXTRA/GRAVITY.MDL",
-    "className": "VensimGravity",
-    "category": "sample/extra",
-    "comment": "Model 'GRAVITY' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/sample_models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/Sample/EXTRA/NEP4SIMU.MDL",
-    "className": "VensimNep4simu",
-    "category": "sample/extra",
-    "comment": "Model 'NEP4SIMU' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/sample_models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/Sample/EXTRA/NEPHRON5.MDL",
-    "className": "VensimNephron5",
-    "category": "sample/extra",
-    "comment": "Model 'NEPHRON5' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/sample_models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/Sample/EXTRA/POPGAME.MDL",
-    "className": "VensimPopgame",
-    "category": "sample/extra",
-    "comment": "Model 'POPGAME' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/sample_models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/Sample/EXTRA/POPPYR.MDL",
-    "className": "VensimPoppyr",
-    "category": "sample/extra",
-    "comment": "Model 'POPPYR' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/sample_models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/Sample/EXTRA/PROCRAST.MDL",
-    "className": "VensimProcrast",
-    "category": "sample/extra",
-    "comment": "Model 'PROCRAST' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/sample_models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/Sample/EXTRA/PROJ.MDL",
-    "className": "VensimProj",
-    "category": "sample/extra",
-    "comment": "Model 'PROJ' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/sample_models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/Sample/EXTRA/RABFOX.MDL",
-    "className": "VensimRabfox",
-    "category": "sample/extra",
-    "comment": "Model 'RABFOX' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/sample_models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/Sample/EXTRA/SNOWBALL.MDL",
-    "className": "VensimSnowball",
-    "category": "sample/extra",
-    "comment": "Model 'SNOWBALL' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/sample_models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/Sample/EXTRA/SPEED.MDL",
-    "className": "VensimSpeed",
-    "category": "sample/extra",
-    "comment": "Model 'SPEED' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/sample_models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/Sample/EXTRA/TUBS.MDL",
-    "className": "VensimTubs",
-    "category": "sample/extra",
-    "comment": "Model 'TUBS' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/sample_models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/Sample/EXTRA/WORLD.MDL",
-    "className": "VensimWorld",
-    "category": "sample/extra",
-    "comment": "Model 'WORLD' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/sample_models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/Sample/EXTRA/venread.mdl",
-    "className": "VensimVenread",
-    "category": "sample/extra",
-    "comment": "Model 'venread' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/sample_models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/Sample/FINANCE/FINANCE.mdl",
-    "className": "VensimFinance",
-    "category": "sample/finance",
-    "comment": "Model 'FINANCE' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/sample_models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/Sample/KALMAN/WFKAL.MDL",
-    "className": "VensimWfkal",
-    "category": "sample/kalman",
-    "comment": "Model 'WFKAL' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/sample_models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/Sample/KALMAN/COMPLETE/WFKAL.MDL",
-    "className": "VensimWfkal",
-    "category": "sample/kalman/complete",
-    "comment": "Model 'WFKAL' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/sample_models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/Sample/MAINT1/MAINT1.mdl",
-    "className": "VensimMaint1",
-    "category": "sample/maint1",
-    "comment": "Model 'MAINT1' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/sample_models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/Sample/MARKET/MARKET.mdl",
-    "className": "VensimMarket",
-    "category": "sample/market",
-    "comment": "Model 'MARKET' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/sample_models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/Sample/MARKET/MARKET2.mdl",
-    "className": "VensimMarket2",
-    "category": "sample/market",
-    "comment": "Model 'MARKET2' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/sample_models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/Sample/MPROJ3/MPROJ3.mdl",
-    "className": "VensimMproj3",
-    "category": "sample/mproj3",
-    "comment": "Model 'MPROJ3' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/sample_models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/Sample/MPROJECT/MPROJ3.mdl",
-    "className": "VensimMproj3",
-    "category": "sample/mproject",
-    "comment": "Model 'MPROJ3' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/sample_models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/Sample/Sub-Model/Market_model.mdl",
-    "className": "VensimMarketModel",
-    "category": "sample/sub-model",
-    "comment": "Model 'Market_model' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/sample_models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/Sample/Sub-Model/Products.mdl",
-    "className": "VensimProducts",
-    "category": "sample/sub-model",
-    "comment": "Model 'Products' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/sample_models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/Sample/Sub-Model/advertising.mdl",
-    "className": "VensimAdvertising",
-    "category": "sample/sub-model",
-    "comment": "Model 'advertising' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/sample_models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/Sample/Sub-Model/market_model_original.mdl",
-    "className": "VensimMarketModelOriginal",
-    "category": "sample/sub-model",
-    "comment": "Model 'market_model_original' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/sample_models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/Sample/URBAN/URBAN.mdl",
-    "className": "VensimUrban",
-    "category": "sample/urban",
-    "comment": "Model 'URBAN' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/sample_models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/Sample/VENAPP/INTRO.mdl",
-    "className": "VensimIntro",
-    "category": "sample/venapp",
-    "comment": "Model 'INTRO' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/sample_models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/Sample/VENAPP/WORLDAPP.mdl",
-    "className": "VensimWorldapp",
-    "category": "sample/venapp",
-    "comment": "Model 'WORLDAPP' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/sample_models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/Sample/VENAPP/WORLDAPPEDITED.mdl",
-    "className": "VensimWorldappedited",
-    "category": "sample/venapp",
-    "comment": "Model 'WORLDAPPEDITED' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/sample_models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/Sample/VENAPP/change.mdl",
-    "className": "VensimChange",
-    "category": "sample/venapp",
-    "comment": "Model 'change' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/sample_models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/Sample/VENAPP/flicker.mdl",
-    "className": "VensimFlicker",
-    "category": "sample/venapp",
-    "comment": "Model 'flicker' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/sample_models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/Sample/VENAPP/mplayer.mdl",
-    "className": "VensimMplayer",
-    "category": "sample/venapp",
-    "comment": "Model 'mplayer' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/sample_models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/Sample/VENAPP/change/change.mdl",
-    "className": "VensimChange",
-    "category": "sample/venapp/change",
-    "comment": "Model 'change' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/sample_models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/Sample/VENAPP/flicker/flicker.mdl",
-    "className": "VensimFlicker",
-    "category": "sample/venapp/flicker",
-    "comment": "Model 'flicker' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/sample_models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/Sample/VENAPP/template/WORLDAPP.mdl",
-    "className": "VensimWorldapp",
-    "category": "sample/venapp/template",
-    "comment": "Model 'WORLDAPP' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/sample_models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/Sample/WRLD3-03/World3_03_Scenarios.mdl",
-    "className": "VensimWorld303Scenarios",
-    "category": "sample/wrld3-03",
-    "comment": "Model 'World3_03_Scenarios' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/sample_models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/Sample/WRLD3-03/wrld3-03.mdl",
-    "className": "VensimWrld303",
-    "category": "sample/wrld3-03",
-    "comment": "Model 'wrld3-03' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim Sample Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/sample_models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/UserGuide/CHAP03/WFINV.MDL",
-    "className": "VensimWfinv",
-    "category": "userguide/chap03",
-    "comment": "Model 'WFINV' from Vensim User Guide, Chapter 03. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/UserGuide/CHAP04/COMPLETE/PROJECT.MDL",
-    "className": "VensimProject",
-    "category": "userguide/chap04/complete",
-    "comment": "Model 'PROJECT' from Vensim User Guide, Chapter 04. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/UserGuide/CHAP05/COMPLETE/CUSTOMER.MDL",
-    "className": "VensimCustomer",
-    "category": "userguide/chap05/complete",
-    "comment": "Model 'CUSTOMER' from Vensim User Guide, Chapter 05. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/UserGuide/CHAP06/COMPLETE/POP.MDL",
-    "className": "VensimPop",
-    "category": "userguide/chap06/complete",
-    "comment": "Model 'POP' from Vensim User Guide, Chapter 06. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/UserGuide/CHAP07/Complete/price1.mdl",
-    "className": "VensimPrice1",
-    "category": "userguide/chap07/complete",
-    "comment": "Model 'price1' from Vensim User Guide, Chapter 07. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/UserGuide/CHAP07/Complete/price2.mdl",
-    "className": "VensimPrice2",
-    "category": "userguide/chap07/complete",
-    "comment": "Model 'price2' from Vensim User Guide, Chapter 07. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/UserGuide/CHAP07/Complete/price3.mdl",
-    "className": "VensimPrice3",
-    "category": "userguide/chap07/complete",
-    "comment": "Model 'price3' from Vensim User Guide, Chapter 07. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/UserGuide/CHAP08/COMPLETE/RABBIT.MDL",
-    "className": "VensimRabbit",
-    "category": "userguide/chap08/complete",
-    "comment": "Model 'RABBIT' from Vensim User Guide, Chapter 08. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/UserGuide/CHAP08/COMPLETE/RABBIT2.MDL",
-    "className": "VensimRabbit2",
-    "category": "userguide/chap08/complete",
-    "comment": "Model 'RABBIT2' from Vensim User Guide, Chapter 08. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/UserGuide/CHAP08/COMPLETE/RABBIT3.MDL",
-    "className": "VensimRabbit3",
-    "category": "userguide/chap08/complete",
-    "comment": "Model 'RABBIT3' from Vensim User Guide, Chapter 08. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/UserGuide/CHAP09/CAP1.MDL",
-    "className": "VensimCap1",
-    "category": "userguide/chap09",
-    "comment": "Model 'CAP1' from Vensim User Guide, Chapter 09. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/UserGuide/CHAP09/COMPLETE/CAP1.MDL",
-    "className": "VensimCap1",
-    "category": "userguide/chap09/complete",
-    "comment": "Model 'CAP1' from Vensim User Guide, Chapter 09. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/UserGuide/CHAP09/COMPLETE/CUST1.MDL",
-    "className": "VensimCust1",
-    "category": "userguide/chap09/complete",
-    "comment": "Model 'CUST1' from Vensim User Guide, Chapter 09. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/UserGuide/CHAP09/COMPLETE/CUST2.MDL",
-    "className": "VensimCust2",
-    "category": "userguide/chap09/complete",
-    "comment": "Model 'CUST2' from Vensim User Guide, Chapter 09. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/UserGuide/CHAP09/COMPLETE/CUST3.MDL",
-    "className": "VensimCust3",
-    "category": "userguide/chap09/complete",
-    "comment": "Model 'CUST3' from Vensim User Guide, Chapter 09. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/UserGuide/CHAP11/HOUSES.MDL",
-    "className": "VensimHouses",
-    "category": "userguide/chap11",
-    "comment": "Model 'HOUSES' from Vensim User Guide, Chapter 11. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/UserGuide/CHAP11/COMPLETE/HOUSES.MDL",
-    "className": "VensimHouses",
-    "category": "userguide/chap11/complete",
-    "comment": "Model 'HOUSES' from Vensim User Guide, Chapter 11. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/UserGuide/CHAP12/WOM1.MDL",
-    "className": "VensimWom1",
-    "category": "userguide/chap12",
-    "comment": "Model 'WOM1' from Vensim User Guide, Chapter 12. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/UserGuide/CHAP12/COMPLETE/WOM1.MDL",
-    "className": "VensimWom1",
-    "category": "userguide/chap12/complete",
-    "comment": "Model 'WOM1' from Vensim User Guide, Chapter 12. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/UserGuide/CHAP12/COMPLETE/WOM2.MDL",
-    "className": "VensimWom2",
-    "category": "userguide/chap12/complete",
-    "comment": "Model 'WOM2' from Vensim User Guide, Chapter 12. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/UserGuide/CHAP12/COMPLETE/WOM3.MDL",
-    "className": "VensimWom3",
-    "category": "userguide/chap12/complete",
-    "comment": "Model 'WOM3' from Vensim User Guide, Chapter 12. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/UserGuide/CHAP12/COMPLETE/WOM4.MDL",
-    "className": "VensimWom4",
-    "category": "userguide/chap12/complete",
-    "comment": "Model 'WOM4' from Vensim User Guide, Chapter 12. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/UserGuide/CHAP13/arms1.mdl",
-    "className": "VensimArms1",
-    "category": "userguide/chap13",
-    "comment": "Model 'arms1' from Vensim User Guide, Chapter 13. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/UserGuide/CHAP13/complete/arms1.mdl",
-    "className": "VensimArms1",
-    "category": "userguide/chap13/complete",
-    "comment": "Model 'arms1' from Vensim User Guide, Chapter 13. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/UserGuide/CHAP13/complete/arms2.mdl",
-    "className": "VensimArms2",
-    "category": "userguide/chap13/complete",
-    "comment": "Model 'arms2' from Vensim User Guide, Chapter 13. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/UserGuide/CHAP13/complete/arms3.mdl",
-    "className": "VensimArms3",
-    "category": "userguide/chap13/complete",
-    "comment": "Model 'arms3' from Vensim User Guide, Chapter 13. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/UserGuide/CHAP13/complete/arms4.mdl",
-    "className": "VensimArms4",
-    "category": "userguide/chap13/complete",
-    "comment": "Model 'arms4' from Vensim User Guide, Chapter 13. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/UserGuide/CHAP14/YEAST1.MDL",
-    "className": "VensimYeast1",
-    "category": "userguide/chap14",
-    "comment": "Model 'YEAST1' from Vensim User Guide, Chapter 14. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/UserGuide/CHAP14/YEAST2.MDL",
-    "className": "VensimYeast2",
-    "category": "userguide/chap14",
-    "comment": "Model 'YEAST2' from Vensim User Guide, Chapter 14. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/UserGuide/CHAP14/YEAST3.MDL",
-    "className": "VensimYeast3",
-    "category": "userguide/chap14",
-    "comment": "Model 'YEAST3' from Vensim User Guide, Chapter 14. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/UserGuide/CHAP14/YEAST4.MDL",
-    "className": "VensimYeast4",
-    "category": "userguide/chap14",
-    "comment": "Model 'YEAST4' from Vensim User Guide, Chapter 14. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/UserGuide/CHAP15/SALES.MDL",
-    "className": "VensimSales",
-    "category": "userguide/chap15",
-    "comment": "Model 'SALES' from Vensim User Guide, Chapter 15. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/UserGuide/CHAP15/COMPLETE/SALES.MDL",
-    "className": "VensimSales",
-    "category": "userguide/chap15/complete",
-    "comment": "Model 'SALES' from Vensim User Guide, Chapter 15. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/UserGuide/CHAP16/CFC.MDL",
-    "className": "VensimCfc",
-    "category": "userguide/chap16",
-    "comment": "Model 'CFC' from Vensim User Guide, Chapter 16. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/UserGuide/CHAP16/COMPLETE/CFC.MDL",
-    "className": "VensimCfc",
-    "category": "userguide/chap16/complete",
-    "comment": "Model 'CFC' from Vensim User Guide, Chapter 16. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/UserGuide/CHAP16/COMPLETE/CFC2.MDL",
-    "className": "VensimCfc2",
-    "category": "userguide/chap16/complete",
-    "comment": "Model 'CFC2' from Vensim User Guide, Chapter 16. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/UserGuide/CHAP17/PROJ1.MDL",
-    "className": "VensimProj1",
-    "category": "userguide/chap17",
-    "comment": "Model 'PROJ1' from Vensim User Guide, Chapter 17. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/UserGuide/CHAP17/COMPLETE/PROJ1.MDL",
-    "className": "VensimProj1",
-    "category": "userguide/chap17/complete",
-    "comment": "Model 'PROJ1' from Vensim User Guide, Chapter 17. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/UserGuide/CHAP17/COMPLETE/PROJ2.MDL",
-    "className": "VensimProj2",
-    "category": "userguide/chap17/complete",
-    "comment": "Model 'PROJ2' from Vensim User Guide, Chapter 17. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/UserGuide/CHAP17/COMPLETE/PROJ3.MDL",
-    "className": "VensimProj3",
-    "category": "userguide/chap17/complete",
-    "comment": "Model 'PROJ3' from Vensim User Guide, Chapter 17. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/UserGuide/CHAP18/CALIBRAT/ELECTRIC.MDL",
-    "className": "VensimElectric",
-    "category": "userguide/chap18/calibrat",
-    "comment": "Model 'ELECTRIC' from Vensim User Guide, Chapter 18. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/UserGuide/CHAP18/CALIBRAT/COMPLETE/ELECTRIC.MDL",
-    "className": "VensimElectric",
-    "category": "userguide/chap18/calibrat/complete",
-    "comment": "Model 'ELECTRIC' from Vensim User Guide, Chapter 18. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/UserGuide/CHAP18/POLICY/STOCK.MDL",
-    "className": "VensimStock",
-    "category": "userguide/chap18/policy",
-    "comment": "Model 'STOCK' from Vensim User Guide, Chapter 18. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/UserGuide/CHAP18/POLICY/COMPLETE/STOCK.MDL",
-    "className": "VensimStock",
-    "category": "userguide/chap18/policy/complete",
-    "comment": "Model 'STOCK' from Vensim User Guide, Chapter 18. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/UserGuide/chap20/complete/MentalSimulation01.mdl",
-    "className": "VensimMentalsimulation01",
-    "category": "userguide/chap20/complete",
-    "comment": "Model 'MentalSimulation01' from Vensim User Guide, Chapter 20. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/UserGuide/chap20/complete/MentalSimulation02.mdl",
-    "className": "VensimMentalsimulation02",
-    "category": "userguide/chap20/complete",
-    "comment": "Model 'MentalSimulation02' from Vensim User Guide, Chapter 20. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/UserGuide/chap20/complete/repair01.mdl",
-    "className": "VensimRepair01",
-    "category": "userguide/chap20/complete",
-    "comment": "Model 'repair01' from Vensim User Guide, Chapter 20. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/models.html"
-    }
-  },
-  {
-    "url": "models/Vensim/UserGuide/chap20/complete/repair02.mdl",
-    "className": "VensimRepair02",
-    "category": "userguide/chap20/complete",
-    "comment": "Model 'repair02' from Vensim User Guide, Chapter 20. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-    "metadata": {
-      "author": "Ventana Systems, Inc.",
-      "source": "Vensim User Guide Models, bundled with Vensim (https://vensim.com). See LICENSING.md for project license details.",
-      "license": "MIT",
-      "url": "https://www.vensim.com/documentation/models.html"
-    }
-  }
 ]
