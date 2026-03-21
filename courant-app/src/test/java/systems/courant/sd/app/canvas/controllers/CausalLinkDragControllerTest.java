@@ -23,6 +23,7 @@ class CausalLinkDragControllerTest {
     private CausalLinkDragController controller;
     private List<CausalLinkDef> links;
     private ConnectionId connection;
+    private CausalLinkGeometry.LoopContext loopCtx;
 
     @BeforeEach
     void setUp() {
@@ -32,6 +33,7 @@ class CausalLinkDragControllerTest {
         controller = new CausalLinkDragController();
         links = List.of(new CausalLinkDef("A", "B"));
         connection = new ConnectionId("A", "B");
+        loopCtx = CausalLinkGeometry.loopContext(state);
     }
 
     @Nested
@@ -50,13 +52,10 @@ class CausalLinkDragControllerTest {
 
         @Test
         void shouldReturnMidpointOfCurve() {
-            CausalLinkGeometry.LoopContext loopCtx = CausalLinkGeometry.loopContext(state);
             double[] pos = CausalLinkDragController.handlePosition(
                     connection, state, links, loopCtx);
 
             assertThat(pos).isNotNull();
-            // Handle at t=0.5 on the Bézier curve should be near the midpoint
-            // but offset perpendicular due to curvature
             assertThat(pos[0]).isCloseTo(250, within(50.0));
         }
 
@@ -64,7 +63,6 @@ class CausalLinkDragControllerTest {
         void shouldReturnNullForSelfLoop() {
             ConnectionId selfLoop = new ConnectionId("A", "A");
             List<CausalLinkDef> selfLinks = List.of(new CausalLinkDef("A", "A"));
-            CausalLinkGeometry.LoopContext loopCtx = CausalLinkGeometry.loopContext(state);
 
             double[] pos = CausalLinkDragController.handlePosition(
                     selfLoop, state, selfLinks, loopCtx);
@@ -75,7 +73,6 @@ class CausalLinkDragControllerTest {
         @Test
         void shouldReturnNullForMissingElement() {
             ConnectionId missing = new ConnectionId("A", "Z");
-            CausalLinkGeometry.LoopContext loopCtx = CausalLinkGeometry.loopContext(state);
 
             double[] pos = CausalLinkDragController.handlePosition(
                     missing, state, links, loopCtx);
@@ -90,7 +87,6 @@ class CausalLinkDragControllerTest {
 
         @Test
         void shouldDetectHitOnHandle() {
-            CausalLinkGeometry.LoopContext loopCtx = CausalLinkGeometry.loopContext(state);
             double[] pos = CausalLinkDragController.handlePosition(
                     connection, state, links, loopCtx);
 
@@ -102,8 +98,6 @@ class CausalLinkDragControllerTest {
 
         @Test
         void shouldMissHandleFarAway() {
-            CausalLinkGeometry.LoopContext loopCtx = CausalLinkGeometry.loopContext(state);
-
             boolean hit = CausalLinkDragController.hitTestHandle(
                     0, 0, connection, state, links, loopCtx);
 
@@ -117,7 +111,7 @@ class CausalLinkDragControllerTest {
 
         @Test
         void shouldBeActiveAfterStart() {
-            controller.start(connection, state, links);
+            controller.start(connection, state, links, loopCtx);
 
             assertThat(controller.isActive()).isTrue();
             assertThat(controller.getFromName()).isEqualTo("A");
@@ -125,30 +119,48 @@ class CausalLinkDragControllerTest {
         }
 
         @Test
-        void shouldComputePositiveStrengthForPerpendicularDrag() {
-            controller.start(connection, state, links);
+        void shouldComputePositiveStrengthDraggingAwayFromChord() {
+            controller.start(connection, state, links, loopCtx);
 
-            // Chord is horizontal (A at 100,200, B at 400,200)
-            // Canonical perpendicular for A<B points downward (+Y)
-            // Direction=+1 (no reciprocal), so dragging below midpoint is positive
-            double strength = controller.drag(250, 260);
+            // Find the handle position to know which direction is "away"
+            double[] pos = CausalLinkDragController.handlePosition(
+                    connection, state, links, loopCtx);
+            // Drag further away from chord midpoint (250,200) in the same
+            // direction as the handle offset
+            double dragX = pos[0] + (pos[0] - 250) * 2;
+            double dragY = pos[1] + (pos[1] - 200) * 2;
+            double strength = controller.drag(dragX, dragY);
 
             assertThat(strength).isGreaterThan(0);
         }
 
         @Test
-        void shouldReturnZeroStrengthForReverseDrag() {
-            controller.start(connection, state, links);
+        void shouldAllowNegativeStrengthForReverseCurvature() {
+            controller.start(connection, state, links, loopCtx);
 
-            // Drag above midpoint (opposite to perpendicular*direction)
-            double strength = controller.drag(250, 140);
+            // Drag in the opposite direction from the handle
+            double[] pos = CausalLinkDragController.handlePosition(
+                    connection, state, links, loopCtx);
+            double dragX = 250 - (pos[0] - 250) * 2;
+            double dragY = 200 - (pos[1] - 200) * 2;
+            double strength = controller.drag(dragX, dragY);
 
-            assertThat(strength).isEqualTo(0.0);
+            assertThat(strength).isLessThan(0);
+        }
+
+        @Test
+        void shouldReturnZeroAtChordMidpoint() {
+            controller.start(connection, state, links, loopCtx);
+
+            // Drag to chord midpoint
+            double strength = controller.drag(250, 200);
+
+            assertThat(strength).isCloseTo(0, within(0.01));
         }
 
         @Test
         void shouldBeInactiveAfterCancel() {
-            controller.start(connection, state, links);
+            controller.start(connection, state, links, loopCtx);
             controller.cancel();
 
             assertThat(controller.isActive()).isFalse();
@@ -170,13 +182,29 @@ class CausalLinkDragControllerTest {
             CausalLinkGeometry.ControlPoint cpAuto = CausalLinkGeometry.controlPoint(
                     100, 200, 400, 200, "A", "B", links);
 
-            // Custom strength=80 should produce a different control point than auto
             assertThat(cpCustom.y()).isNotCloseTo(cpAuto.y(), within(1.0));
         }
 
         @Test
+        void shouldReverseCurveWithNegativeStrength() {
+            CausalLinkGeometry.ControlPoint cpAuto = CausalLinkGeometry.controlPoint(
+                    100, 200, 400, 200, "A", "B", links);
+
+            List<CausalLinkDef> linksNeg = List.of(
+                    new CausalLinkDef("A", "B", CausalLinkDef.Polarity.UNKNOWN,
+                            null, -40.0));
+            CausalLinkGeometry.ControlPoint cpNeg = CausalLinkGeometry.controlPoint(
+                    100, 200, 400, 200, "A", "B", linksNeg);
+
+            // Negative strength should curve in the opposite direction
+            // The Y offset from midpoint (200) should be on opposite sides
+            double autoOffset = cpAuto.y() - 200;
+            double negOffset = cpNeg.y() - 200;
+            assertThat(autoOffset * negOffset).isLessThan(0);
+        }
+
+        @Test
         void shouldUseAutoWhenStrengthIsNaN() {
-            // Default strength is NaN
             CausalLinkGeometry.ControlPoint cp1 = CausalLinkGeometry.controlPoint(
                     100, 200, 400, 200, "A", "B", links);
 

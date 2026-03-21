@@ -349,7 +349,7 @@ final class InputDispatcher {
                         worldX, worldY, selectedConnection, canvasState,
                         editor.getCausalLinks(), loopCtx)) {
                     causalLinkDrag.start(selectedConnection, canvasState,
-                            editor.getCausalLinks());
+                            editor.getCausalLinks(), loopCtx);
                     updateCursor(canvas);
                     event.consume();
                     return true;

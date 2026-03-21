@@ -4,7 +4,6 @@ import systems.courant.sd.app.canvas.CanvasState;
 import systems.courant.sd.app.canvas.CausalLinkGeometry;
 import systems.courant.sd.app.canvas.ConnectionId;
 import systems.courant.sd.app.canvas.FlowGeometry;
-import systems.courant.sd.app.canvas.LayoutMetrics;
 import systems.courant.sd.model.def.CausalLinkDef;
 
 import java.util.List;
@@ -12,7 +11,8 @@ import java.util.List;
 /**
  * Controller for dragging the curvature handle on a selected causal link.
  * The handle appears at the midpoint (t=0.5) of the quadratic Bézier curve.
- * Dragging it perpendicular to the chord adjusts the link's strength value.
+ * Dragging it adjusts the link's strength value by projecting the drag
+ * position onto the same direction axis the renderer uses.
  */
 public final class CausalLinkDragController {
 
@@ -26,12 +26,11 @@ public final class CausalLinkDragController {
     private String fromName;
     private String toName;
 
-    // Perpendicular unit vector and chord midpoint, captured at drag start
-    private double perpX;
-    private double perpY;
+    // Direction unit vector and chord midpoint, captured at drag start
+    private double dirX;
+    private double dirY;
     private double midX;
     private double midY;
-    private int direction;
 
     /**
      * Computes the position of the drag handle for a selected causal link.
@@ -86,10 +85,13 @@ public final class CausalLinkDragController {
 
     /**
      * Begins a handle drag for the given causal link.
-     * Captures the chord geometry for projecting drag positions.
+     * Derives the projection axis from the auto-computed control point
+     * (the same algorithm the renderer uses), so the drag direction
+     * matches what the user sees on screen.
      */
     public void start(ConnectionId connection, CanvasState state,
-                      List<CausalLinkDef> allLinks) {
+                      List<CausalLinkDef> allLinks,
+                      CausalLinkGeometry.LoopContext loopCtx) {
         this.fromName = connection.from();
         this.toName = connection.to();
         this.active = true;
@@ -99,38 +101,49 @@ public final class CausalLinkDragController {
         double toX = state.getX(toName);
         double toY = state.getY(toName);
 
-        double dx = toX - fromX;
-        double dy = toY - fromY;
-        double dist = Math.sqrt(dx * dx + dy * dy);
-
         this.midX = (fromX + toX) / 2;
         this.midY = (fromY + toY) / 2;
 
-        if (dist < 1) {
-            this.perpX = 0;
-            this.perpY = -1;
-        } else {
-            boolean canonical = fromName.compareTo(toName) < 0;
-            double cdx = canonical ? dx : -dx;
-            double cdy = canonical ? dy : -dy;
-            this.perpX = -cdy / dist;
-            this.perpY = cdx / dist;
-        }
+        // Compute the auto control point using the same algorithm as the renderer,
+        // temporarily ignoring any existing strength override so we get the
+        // natural direction vector.
+        List<CausalLinkDef> autoLinks = stripStrength(fromName, toName, allLinks);
+        CausalLinkGeometry.ControlPoint autoCP = CausalLinkGeometry.controlPoint(
+                fromX, fromY, toX, toY, fromName, toName, autoLinks, loopCtx);
 
-        this.direction = curveDirection(fromName, toName, allLinks);
+        double ax = autoCP.x() - midX;
+        double ay = autoCP.y() - midY;
+        double aDist = Math.sqrt(ax * ax + ay * ay);
+
+        if (aDist < 0.001) {
+            // Degenerate — fall back to simple perpendicular
+            double dx = toX - fromX;
+            double dy = toY - fromY;
+            double dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < 1) {
+                this.dirX = 0;
+                this.dirY = -1;
+            } else {
+                this.dirX = -dy / dist;
+                this.dirY = dx / dist;
+            }
+        } else {
+            this.dirX = ax / aDist;
+            this.dirY = ay / aDist;
+        }
     }
 
     /**
      * Updates the strength based on the current drag position.
-     * Projects the drag point onto the perpendicular axis to compute strength.
+     * Projects the drag point onto the direction axis derived at start.
+     * Negative values reverse the curve direction.
      *
      * @return the computed strength value
      */
     public double drag(double worldX, double worldY) {
         double dx = worldX - midX;
         double dy = worldY - midY;
-        double projection = (dx * perpX + dy * perpY) * direction;
-        return Math.max(0, projection);
+        return dx * dirX + dy * dirY;
     }
 
     /**
@@ -154,18 +167,21 @@ public final class CausalLinkDragController {
         return toName;
     }
 
-    private static int curveDirection(String fromName, String toName,
-                                       List<CausalLinkDef> allLinks) {
-        boolean hasReciprocal = false;
-        for (CausalLinkDef link : allLinks) {
-            if (link.from().equals(toName) && link.to().equals(fromName)) {
-                hasReciprocal = true;
-                break;
-            }
-        }
-        if (!hasReciprocal) {
-            return 1;
-        }
-        return fromName.compareTo(toName) < 0 ? 1 : -1;
+    /**
+     * Returns a copy of the link list with the strength stripped from the
+     * specific link, so we can compute the auto control point direction.
+     */
+    private static List<CausalLinkDef> stripStrength(String from, String to,
+                                                      List<CausalLinkDef> allLinks) {
+        return allLinks.stream()
+                .map(link -> {
+                    if (link.from().equals(from) && link.to().equals(to)
+                            && link.hasStrength()) {
+                        return new CausalLinkDef(link.from(), link.to(),
+                                link.polarity(), link.comment());
+                    }
+                    return link;
+                })
+                .toList();
     }
 }
