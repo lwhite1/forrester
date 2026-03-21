@@ -1,345 +1,392 @@
 {
-  "name": "0210ConflictInMiddleEast",
-  "cldVariables": [
-    {
-      "name": "successful suicide attacks",
-      "comment": "\"'successful' suicide attacks\""
-    },
-    {
-      "name": "autonomy Palestinians",
-      "comment": "autonomy Palestinians"
-    },
-    {
-      "name": "preparedness to dialogue",
-      "comment": "preparedness to dialogue"
-    },
-    {
-      "name": "willingness suicide attacks",
-      "comment": "willingness suicide attacks"
-    },
-    {
-      "name": "security by shielding wall",
-      "comment": "\"security by shielding (wall)\""
-    },
-    {
-      "name": "degree of equality in negotiations",
-      "comment": "degree of equality in negotiations"
-    },
-    {
-      "name": "living conditions Palestinians",
-      "comment": "living conditions Palestinians"
-    },
-    {
-      "name": "mijn visie op europees beleid",
-      "comment": "mijn visie op europees beleid"
-    },
-    {
-      "name": "restrictions on Palestinians",
-      "comment": "restrictions on Palestinians"
-    },
-    {
-      "name": "reprisal Isi on Paln",
-      "comment": "reprisal Isi on Paln"
-    },
-    {
-      "name": "trust Isi in Paln",
-      "comment": "trust Isi in Paln"
-    },
-    {
-      "name": "trust Paln in Isi",
-      "comment": "trust Paln in Isi"
-    },
-    {
-      "name": "progress peace process",
-      "comment": "progress peace process"
-    },
-    {
-      "name": "chance of success of peace process",
-      "comment": "chance of success of peace process"
-    }
-  ],
-  "causalLinks": [
-    {
-      "from": "trust Isi in Paln",
-      "to": "restrictions on Palestinians",
-      "polarity": "NEGATIVE"
-    },
-    {
-      "from": "restrictions on Palestinians",
-      "to": "living conditions Palestinians",
-      "polarity": "NEGATIVE"
-    },
-    {
-      "from": "successful suicide attacks",
-      "to": "trust Isi in Paln",
-      "polarity": "NEGATIVE"
-    },
-    {
-      "from": "successful suicide attacks",
-      "to": "reprisal Isi on Paln",
-      "polarity": "POSITIVE"
-    },
-    {
-      "from": "reprisal Isi on Paln",
-      "to": "living conditions Palestinians",
-      "polarity": "NEGATIVE"
-    },
-    {
-      "from": "trust Isi in Paln",
-      "to": "security by shielding wall",
-      "polarity": "NEGATIVE"
-    },
-    {
-      "from": "security by shielding wall",
-      "to": "successful suicide attacks",
-      "polarity": "NEGATIVE"
-    },
-    {
-      "from": "security by shielding wall",
-      "to": "living conditions Palestinians",
-      "polarity": "NEGATIVE"
-    },
-    {
-      "from": "living conditions Palestinians",
-      "to": "willingness suicide attacks",
-      "polarity": "NEGATIVE"
-    },
-    {
-      "from": "willingness suicide attacks",
-      "to": "successful suicide attacks",
-      "polarity": "POSITIVE"
-    },
-    {
-      "from": "living conditions Palestinians",
-      "to": "preparedness to dialogue",
-      "polarity": "POSITIVE"
-    },
-    {
-      "from": "trust Paln in Isi",
-      "to": "preparedness to dialogue",
-      "polarity": "POSITIVE"
-    },
-    {
-      "from": "trust Isi in Paln",
-      "to": "preparedness to dialogue",
-      "polarity": "POSITIVE"
-    },
-    {
-      "from": "preparedness to dialogue",
-      "to": "progress peace process",
-      "polarity": "POSITIVE"
-    },
-    {
-      "from": "reprisal Isi on Paln",
-      "to": "trust Paln in Isi",
-      "polarity": "NEGATIVE"
-    },
-    {
-      "from": "living conditions Palestinians",
-      "to": "degree of equality in negotiations",
-      "polarity": "POSITIVE"
-    },
-    {
-      "from": "degree of equality in negotiations",
-      "to": "chance of success of peace process",
-      "polarity": "POSITIVE"
-    },
-    {
-      "from": "chance of success of peace process",
-      "to": "progress peace process",
-      "polarity": "POSITIVE"
-    },
-    {
-      "from": "progress peace process",
-      "to": "autonomy Palestinians",
-      "polarity": "POSITIVE"
-    },
-    {
-      "from": "autonomy Palestinians",
-      "to": "living conditions Palestinians",
-      "polarity": "POSITIVE"
-    },
-    {
-      "from": "autonomy Palestinians",
-      "to": "successful suicide attacks",
-      "polarity": "POSITIVE"
-    },
-    {
-      "from": "progress peace process",
-      "to": "trust Paln in Isi",
-      "polarity": "UNKNOWN"
-    },
-    {
-      "from": "progress peace process",
-      "to": "trust Isi in Paln",
-      "polarity": "UNKNOWN"
-    }
-  ],
-  "comments": [
-    {
-      "name": "Comment 1",
-      "text": "-"
-    },
-    {
-      "name": "Comment 2",
-      "text": "+"
-    },
-    {
-      "name": "Comment 3",
-      "text": "+"
-    },
-    {
-      "name": "Comment 4",
-      "text": "+"
-    },
-    {
-      "name": "Comment 5",
-      "text": "+"
-    },
-    {
-      "name": "Comment 6",
-      "text": "+"
-    },
-    {
-      "name": "Comment 7",
-      "text": "+"
-    },
-    {
-      "name": "Comment 8",
-      "text": "+"
-    }
-  ],
-  "views": [
-    {
-      "name": "View 1",
-      "elements": [],
-      "connectors": [
-        {
-          "from": "trust Isi in Paln",
-          "to": "restrictions on Palestinians",
-          "polarity": "-"
-        },
-        {
-          "from": "restrictions on Palestinians",
-          "to": "living conditions Palestinians",
-          "polarity": "-"
-        },
-        {
-          "from": "successful suicide attacks",
-          "to": "trust Isi in Paln",
-          "polarity": "-"
-        },
-        {
-          "from": "successful suicide attacks",
-          "to": "reprisal Isi on Paln",
-          "polarity": "+"
-        },
-        {
-          "from": "reprisal Isi on Paln",
-          "to": "living conditions Palestinians",
-          "polarity": "-"
-        },
-        {
-          "from": "trust Isi in Paln",
-          "to": "security by shielding wall",
-          "polarity": "-"
-        },
-        {
-          "from": "security by shielding wall",
-          "to": "successful suicide attacks",
-          "polarity": "-"
-        },
-        {
-          "from": "security by shielding wall",
-          "to": "living conditions Palestinians",
-          "polarity": "-"
-        },
-        {
-          "from": "living conditions Palestinians",
-          "to": "willingness suicide attacks",
-          "polarity": "-"
-        },
-        {
-          "from": "willingness suicide attacks",
-          "to": "successful suicide attacks",
-          "polarity": "+"
-        },
-        {
-          "from": "living conditions Palestinians",
-          "to": "preparedness to dialogue",
-          "polarity": "+"
-        },
-        {
-          "from": "trust Paln in Isi",
-          "to": "preparedness to dialogue",
-          "polarity": "+"
-        },
-        {
-          "from": "trust Isi in Paln",
-          "to": "preparedness to dialogue",
-          "polarity": "+"
-        },
-        {
-          "from": "preparedness to dialogue",
-          "to": "progress peace process",
-          "polarity": "+"
-        },
-        {
-          "from": "reprisal Isi on Paln",
-          "to": "trust Paln in Isi",
-          "polarity": "-"
-        },
-        {
-          "from": "living conditions Palestinians",
-          "to": "degree of equality in negotiations",
-          "polarity": "+"
-        },
-        {
-          "from": "degree of equality in negotiations",
-          "to": "chance of success of peace process",
-          "polarity": "+"
-        },
-        {
-          "from": "chance of success of peace process",
-          "to": "progress peace process",
-          "polarity": "+"
-        },
-        {
-          "from": "progress peace process",
-          "to": "autonomy Palestinians",
-          "polarity": "+"
-        },
-        {
-          "from": "autonomy Palestinians",
-          "to": "living conditions Palestinians",
-          "polarity": "+"
-        },
-        {
-          "from": "autonomy Palestinians",
-          "to": "successful suicide attacks",
-          "polarity": "+"
-        },
-        {
-          "from": "progress peace process",
-          "to": "trust Paln in Isi"
-        },
-        {
-          "from": "progress peace process",
-          "to": "trust Isi in Paln"
-        }
-      ]
-    }
-  ],
-  "defaultSimulation": {
-    "timeStep": "Year",
-    "duration": 120.0,
-    "durationUnit": "Year",
-    "initialTime": 1980.0
+  "name" : "0210ConflictInMiddleEast",
+  "cldVariables" : [ {
+    "name" : "successful suicide attacks",
+    "comment" : "\"'successful' suicide attacks\""
+  }, {
+    "name" : "autonomy Palestinians",
+    "comment" : "autonomy Palestinians"
+  }, {
+    "name" : "preparedness to dialogue",
+    "comment" : "preparedness to dialogue"
+  }, {
+    "name" : "willingness suicide attacks",
+    "comment" : "willingness suicide attacks"
+  }, {
+    "name" : "security by shielding wall",
+    "comment" : "\"security by shielding (wall)\""
+  }, {
+    "name" : "degree of equality in negotiations",
+    "comment" : "degree of equality in negotiations"
+  }, {
+    "name" : "living conditions Palestinians",
+    "comment" : "living conditions Palestinians"
+  }, {
+    "name" : "mijn visie op europees beleid",
+    "comment" : "mijn visie op europees beleid"
+  }, {
+    "name" : "restrictions on Palestinians",
+    "comment" : "restrictions on Palestinians"
+  }, {
+    "name" : "reprisal Isi on Paln",
+    "comment" : "reprisal Isi on Paln"
+  }, {
+    "name" : "trust Isi in Paln",
+    "comment" : "trust Isi in Paln"
+  }, {
+    "name" : "trust Paln in Isi",
+    "comment" : "trust Paln in Isi"
+  }, {
+    "name" : "progress peace process",
+    "comment" : "progress peace process"
+  }, {
+    "name" : "chance of success of peace process",
+    "comment" : "chance of success of peace process"
+  } ],
+  "causalLinks" : [ {
+    "from" : "trust Isi in Paln",
+    "to" : "restrictions on Palestinians",
+    "polarity" : "NEGATIVE"
+  }, {
+    "from" : "restrictions on Palestinians",
+    "to" : "living conditions Palestinians",
+    "polarity" : "NEGATIVE"
+  }, {
+    "from" : "successful suicide attacks",
+    "to" : "trust Isi in Paln",
+    "polarity" : "NEGATIVE"
+  }, {
+    "from" : "successful suicide attacks",
+    "to" : "reprisal Isi on Paln",
+    "polarity" : "POSITIVE"
+  }, {
+    "from" : "reprisal Isi on Paln",
+    "to" : "living conditions Palestinians",
+    "polarity" : "NEGATIVE"
+  }, {
+    "from" : "trust Isi in Paln",
+    "to" : "security by shielding wall",
+    "polarity" : "NEGATIVE"
+  }, {
+    "from" : "security by shielding wall",
+    "to" : "successful suicide attacks",
+    "polarity" : "NEGATIVE"
+  }, {
+    "from" : "security by shielding wall",
+    "to" : "living conditions Palestinians",
+    "polarity" : "NEGATIVE"
+  }, {
+    "from" : "living conditions Palestinians",
+    "to" : "willingness suicide attacks",
+    "polarity" : "NEGATIVE"
+  }, {
+    "from" : "willingness suicide attacks",
+    "to" : "successful suicide attacks",
+    "polarity" : "POSITIVE"
+  }, {
+    "from" : "living conditions Palestinians",
+    "to" : "preparedness to dialogue",
+    "polarity" : "POSITIVE"
+  }, {
+    "from" : "trust Paln in Isi",
+    "to" : "preparedness to dialogue",
+    "polarity" : "POSITIVE"
+  }, {
+    "from" : "trust Isi in Paln",
+    "to" : "preparedness to dialogue",
+    "polarity" : "POSITIVE"
+  }, {
+    "from" : "preparedness to dialogue",
+    "to" : "progress peace process",
+    "polarity" : "POSITIVE"
+  }, {
+    "from" : "reprisal Isi on Paln",
+    "to" : "trust Paln in Isi",
+    "polarity" : "NEGATIVE"
+  }, {
+    "from" : "living conditions Palestinians",
+    "to" : "degree of equality in negotiations",
+    "polarity" : "POSITIVE"
+  }, {
+    "from" : "degree of equality in negotiations",
+    "to" : "chance of success of peace process",
+    "polarity" : "POSITIVE"
+  }, {
+    "from" : "chance of success of peace process",
+    "to" : "progress peace process",
+    "polarity" : "POSITIVE"
+  }, {
+    "from" : "progress peace process",
+    "to" : "autonomy Palestinians",
+    "polarity" : "POSITIVE"
+  }, {
+    "from" : "autonomy Palestinians",
+    "to" : "living conditions Palestinians",
+    "polarity" : "POSITIVE"
+  }, {
+    "from" : "autonomy Palestinians",
+    "to" : "successful suicide attacks",
+    "polarity" : "POSITIVE"
+  }, {
+    "from" : "progress peace process",
+    "to" : "trust Paln in Isi",
+    "polarity" : "UNKNOWN"
+  }, {
+    "from" : "progress peace process",
+    "to" : "trust Isi in Paln",
+    "polarity" : "UNKNOWN"
+  } ],
+  "comments" : [ {
+    "name" : "Comment 1",
+    "text" : "-"
+  }, {
+    "name" : "Comment 2",
+    "text" : "+"
+  }, {
+    "name" : "Comment 3",
+    "text" : "+"
+  }, {
+    "name" : "Comment 4",
+    "text" : "+"
+  }, {
+    "name" : "Comment 5",
+    "text" : "+"
+  }, {
+    "name" : "Comment 6",
+    "text" : "+"
+  }, {
+    "name" : "Comment 7",
+    "text" : "+"
+  }, {
+    "name" : "Comment 8",
+    "text" : "+"
+  } ],
+  "views" : [ {
+    "name" : "View 1",
+    "elements" : [ {
+      "name" : "trust Isi in Paln",
+      "type" : "cld_variable",
+      "x" : 405.0,
+      "y" : 470.0
+    }, {
+      "name" : "trust Paln in Isi",
+      "type" : "cld_variable",
+      "x" : 444.0,
+      "y" : 59.0
+    }, {
+      "name" : "successful suicide attacks",
+      "type" : "cld_variable",
+      "x" : 290.0,
+      "y" : 410.0
+    }, {
+      "name" : "living conditions Palestinians",
+      "type" : "cld_variable",
+      "x" : 431.0,
+      "y" : 276.0
+    }, {
+      "name" : "restrictions on Palestinians",
+      "type" : "cld_variable",
+      "x" : 531.0,
+      "y" : 369.0
+    }, {
+      "name" : "reprisal Isi on Paln",
+      "type" : "cld_variable",
+      "x" : 225.0,
+      "y" : 218.0
+    }, {
+      "name" : "security by shielding wall",
+      "type" : "cld_variable",
+      "x" : 431.0,
+      "y" : 370.0
+    }, {
+      "name" : "willingness suicide attacks",
+      "type" : "cld_variable",
+      "x" : 286.0,
+      "y" : 313.0
+    }, {
+      "name" : "progress peace process",
+      "type" : "cld_variable",
+      "x" : 581.0,
+      "y" : 156.0
+    }, {
+      "name" : "preparedness to dialogue",
+      "type" : "cld_variable",
+      "x" : 651.0,
+      "y" : 312.0
+    }, {
+      "name" : "Comment 1",
+      "type" : "comment",
+      "x" : 373.0,
+      "y" : 406.0,
+      "width" : 32.0,
+      "height" : 32.0
+    }, {
+      "name" : "Comment 2",
+      "type" : "comment",
+      "x" : 482.0,
+      "y" : 416.0,
+      "width" : 28.0,
+      "height" : 28.0
+    }, {
+      "name" : "Comment 3",
+      "type" : "comment",
+      "x" : 366.0,
+      "y" : 307.0,
+      "width" : 28.0,
+      "height" : 28.0
+    }, {
+      "name" : "Comment 4",
+      "type" : "comment",
+      "x" : 590.0,
+      "y" : 345.0,
+      "width" : 28.0,
+      "height" : 28.0
+    }, {
+      "name" : "Comment 5",
+      "type" : "comment",
+      "x" : 342.0,
+      "y" : 127.0,
+      "width" : 32.0,
+      "height" : 32.0
+    }, {
+      "name" : "Comment 6",
+      "type" : "comment",
+      "x" : 264.0,
+      "y" : 274.0,
+      "width" : 28.0,
+      "height" : 28.0
+    }, {
+      "name" : "Comment 7",
+      "type" : "comment",
+      "x" : 573.0,
+      "y" : 266.0,
+      "width" : 30.0,
+      "height" : 30.0
+    }, {
+      "name" : "autonomy Palestinians",
+      "type" : "cld_variable",
+      "x" : 533.0,
+      "y" : 221.0
+    }, {
+      "name" : "chance of success of peace process",
+      "type" : "cld_variable",
+      "x" : 488.0,
+      "y" : 109.0
+    }, {
+      "name" : "degree of equality in negotiations",
+      "type" : "cld_variable",
+      "x" : 400.0,
+      "y" : 169.0
+    }, {
+      "name" : "Comment 8",
+      "type" : "comment",
+      "x" : 492.0,
+      "y" : 178.0,
+      "width" : 30.0,
+      "height" : 30.0
+    } ],
+    "connectors" : [ {
+      "from" : "trust Isi in Paln",
+      "to" : "restrictions on Palestinians",
+      "polarity" : "-"
+    }, {
+      "from" : "restrictions on Palestinians",
+      "to" : "living conditions Palestinians",
+      "polarity" : "-"
+    }, {
+      "from" : "successful suicide attacks",
+      "to" : "trust Isi in Paln",
+      "polarity" : "-"
+    }, {
+      "from" : "successful suicide attacks",
+      "to" : "reprisal Isi on Paln",
+      "polarity" : "+"
+    }, {
+      "from" : "reprisal Isi on Paln",
+      "to" : "living conditions Palestinians",
+      "polarity" : "-"
+    }, {
+      "from" : "trust Isi in Paln",
+      "to" : "security by shielding wall",
+      "polarity" : "-"
+    }, {
+      "from" : "security by shielding wall",
+      "to" : "successful suicide attacks",
+      "polarity" : "-"
+    }, {
+      "from" : "security by shielding wall",
+      "to" : "living conditions Palestinians",
+      "polarity" : "-"
+    }, {
+      "from" : "living conditions Palestinians",
+      "to" : "willingness suicide attacks",
+      "polarity" : "-"
+    }, {
+      "from" : "willingness suicide attacks",
+      "to" : "successful suicide attacks",
+      "polarity" : "+"
+    }, {
+      "from" : "living conditions Palestinians",
+      "to" : "preparedness to dialogue",
+      "polarity" : "+"
+    }, {
+      "from" : "trust Paln in Isi",
+      "to" : "preparedness to dialogue",
+      "polarity" : "+"
+    }, {
+      "from" : "trust Isi in Paln",
+      "to" : "preparedness to dialogue",
+      "polarity" : "+"
+    }, {
+      "from" : "preparedness to dialogue",
+      "to" : "progress peace process",
+      "polarity" : "+"
+    }, {
+      "from" : "reprisal Isi on Paln",
+      "to" : "trust Paln in Isi",
+      "polarity" : "-"
+    }, {
+      "from" : "living conditions Palestinians",
+      "to" : "degree of equality in negotiations",
+      "polarity" : "+"
+    }, {
+      "from" : "degree of equality in negotiations",
+      "to" : "chance of success of peace process",
+      "polarity" : "+"
+    }, {
+      "from" : "chance of success of peace process",
+      "to" : "progress peace process",
+      "polarity" : "+"
+    }, {
+      "from" : "progress peace process",
+      "to" : "autonomy Palestinians",
+      "polarity" : "+"
+    }, {
+      "from" : "autonomy Palestinians",
+      "to" : "living conditions Palestinians",
+      "polarity" : "+"
+    }, {
+      "from" : "autonomy Palestinians",
+      "to" : "successful suicide attacks",
+      "polarity" : "+"
+    }, {
+      "from" : "progress peace process",
+      "to" : "trust Paln in Isi"
+    }, {
+      "from" : "progress peace process",
+      "to" : "trust Isi in Paln"
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Year",
+    "duration" : 120.0,
+    "durationUnit" : "Year",
+    "initialTime" : 1980.0
   },
-  "metadata": {
-    "author": "Dr. Erik Pruyt",
-    "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
-    "license": "CC-BY-NC-SA-4.0",
-    "url": "https://simulation.tudelft.nl/SD/model_files_nested/02_10"
+  "metadata" : {
+    "author" : "Dr. Erik Pruyt",
+    "source" : "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
+    "license" : "CC-BY-NC-SA-4.0",
+    "url" : "https://simulation.tudelft.nl/SD/model_files_nested/02_10"
   }
 }

@@ -1,110 +1,117 @@
 {
-  "name": "repair01",
-  "cldVariables": [
-    {
-      "name": "average machine reliability",
-      "comment": "average machine reliability"
-    },
-    {
-      "name": "number of repairs required",
-      "comment": "number of repairs required"
-    },
-    {
-      "name": "routine maintenance work done",
-      "comment": "routine maintenance work done"
-    },
-    {
-      "name": "total maintenance workforce",
-      "comment": "total maintenance workforce"
-    },
-    {
-      "name": "workers available for routine maintenance",
-      "comment": "workers available for routine maintenance"
-    },
-    {
-      "name": "workers performing repairs",
-      "comment": "workers performing repairs"
-    }
-  ],
-  "causalLinks": [
-    {
-      "from": "workers available for routine maintenance",
-      "to": "routine maintenance work done",
-      "polarity": "POSITIVE"
-    },
-    {
-      "from": "routine maintenance work done",
-      "to": "average machine reliability",
-      "polarity": "POSITIVE"
-    },
-    {
-      "from": "average machine reliability",
-      "to": "number of repairs required",
-      "polarity": "NEGATIVE"
-    },
-    {
-      "from": "number of repairs required",
-      "to": "workers performing repairs",
-      "polarity": "POSITIVE"
-    },
-    {
-      "from": "workers performing repairs",
-      "to": "workers available for routine maintenance",
-      "polarity": "NEGATIVE"
-    },
-    {
-      "from": "total maintenance workforce",
-      "to": "workers available for routine maintenance",
-      "polarity": "POSITIVE"
-    }
-  ],
-  "views": [
-    {
-      "name": "View 1",
-      "elements": [],
-      "connectors": [
-        {
-          "from": "workers available for routine maintenance",
-          "to": "routine maintenance work done",
-          "polarity": "+"
-        },
-        {
-          "from": "routine maintenance work done",
-          "to": "average machine reliability",
-          "polarity": "+"
-        },
-        {
-          "from": "average machine reliability",
-          "to": "number of repairs required",
-          "polarity": "-"
-        },
-        {
-          "from": "number of repairs required",
-          "to": "workers performing repairs",
-          "polarity": "+"
-        },
-        {
-          "from": "workers performing repairs",
-          "to": "workers available for routine maintenance",
-          "polarity": "-"
-        },
-        {
-          "from": "total maintenance workforce",
-          "to": "workers available for routine maintenance",
-          "polarity": "+"
-        }
-      ]
-    }
-  ],
-  "defaultSimulation": {
-    "timeStep": "Month",
-    "duration": 100.0,
-    "durationUnit": "Month"
+  "name" : "repair01",
+  "cldVariables" : [ {
+    "name" : "average machine reliability",
+    "comment" : "average machine reliability"
+  }, {
+    "name" : "number of repairs required",
+    "comment" : "number of repairs required"
+  }, {
+    "name" : "routine maintenance work done",
+    "comment" : "routine maintenance work done"
+  }, {
+    "name" : "total maintenance workforce",
+    "comment" : "total maintenance workforce"
+  }, {
+    "name" : "workers available for routine maintenance",
+    "comment" : "workers available for routine maintenance"
+  }, {
+    "name" : "workers performing repairs",
+    "comment" : "workers performing repairs"
+  } ],
+  "causalLinks" : [ {
+    "from" : "workers available for routine maintenance",
+    "to" : "routine maintenance work done",
+    "polarity" : "POSITIVE"
+  }, {
+    "from" : "routine maintenance work done",
+    "to" : "average machine reliability",
+    "polarity" : "POSITIVE"
+  }, {
+    "from" : "average machine reliability",
+    "to" : "number of repairs required",
+    "polarity" : "NEGATIVE"
+  }, {
+    "from" : "number of repairs required",
+    "to" : "workers performing repairs",
+    "polarity" : "POSITIVE"
+  }, {
+    "from" : "workers performing repairs",
+    "to" : "workers available for routine maintenance",
+    "polarity" : "NEGATIVE"
+  }, {
+    "from" : "total maintenance workforce",
+    "to" : "workers available for routine maintenance",
+    "polarity" : "POSITIVE"
+  } ],
+  "views" : [ {
+    "name" : "View 1",
+    "elements" : [ {
+      "name" : "average machine reliability",
+      "type" : "cld_variable",
+      "x" : 559.0,
+      "y" : 168.0
+    }, {
+      "name" : "number of repairs required",
+      "type" : "cld_variable",
+      "x" : 688.0,
+      "y" : 304.0
+    }, {
+      "name" : "workers performing repairs",
+      "type" : "cld_variable",
+      "x" : 540.0,
+      "y" : 417.0
+    }, {
+      "name" : "total maintenance workforce",
+      "type" : "cld_variable",
+      "x" : 363.0,
+      "y" : 487.0
+    }, {
+      "name" : "workers available for routine maintenance",
+      "type" : "cld_variable",
+      "x" : 347.0,
+      "y" : 361.0
+    }, {
+      "name" : "routine maintenance work done",
+      "type" : "cld_variable",
+      "x" : 373.0,
+      "y" : 227.0
+    } ],
+    "connectors" : [ {
+      "from" : "workers available for routine maintenance",
+      "to" : "routine maintenance work done",
+      "polarity" : "+"
+    }, {
+      "from" : "routine maintenance work done",
+      "to" : "average machine reliability",
+      "polarity" : "+"
+    }, {
+      "from" : "average machine reliability",
+      "to" : "number of repairs required",
+      "polarity" : "-"
+    }, {
+      "from" : "number of repairs required",
+      "to" : "workers performing repairs",
+      "polarity" : "+"
+    }, {
+      "from" : "workers performing repairs",
+      "to" : "workers available for routine maintenance",
+      "polarity" : "-"
+    }, {
+      "from" : "total maintenance workforce",
+      "to" : "workers available for routine maintenance",
+      "polarity" : "+"
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Month",
+    "duration" : 100.0,
+    "durationUnit" : "Month"
   },
-  "metadata": {
-    "author": "Ventana Systems, Inc.",
-    "source": "Vensim User's Guide, Chapter 20",
-    "license": "Proprietary \u00e2\u20ac\u201d bundled with Vensim distribution",
-    "url": "https://vensim.com/documentation/"
+  "metadata" : {
+    "author" : "Ventana Systems, Inc.",
+    "source" : "Vensim User's Guide, Chapter 20",
+    "license" : "Proprietary — bundled with Vensim distribution",
+    "url" : "https://vensim.com/documentation/"
   }
 }

@@ -1,166 +1,189 @@
 {
-  "name": "0204MunroLane",
-  "cldVariables": [
-    {
-      "name": "average caseload",
-      "comment": "average caseload"
-    },
-    {
-      "name": "prescription of practice",
-      "comment": "prescription of practice"
-    },
-    {
-      "name": "quality of outcomes for CYPs",
-      "comment": "quality of outcomes for CYPs"
-    },
-    {
-      "name": "quality of social worker relationship with CYP and family",
-      "comment": "quality of social worker relationship with CYP and family"
-    },
-    {
-      "name": "scope for dealing with variety of CYP needs with professional expertise",
-      "comment": "scope for dealing with variety of CYP needs with professional expertise"
-    },
-    {
-      "name": "sense of satisfaction selfesteem and personal responsibility",
-      "comment": "\"sense of satisfaction, self-esteem and personal responsibility\""
-    },
-    {
-      "name": "staff absence or sickness rate",
-      "comment": "staff absence or sickness rate"
-    },
-    {
-      "name": "staff turnover rate",
-      "comment": "staff turnover rate"
-    },
-    {
-      "name": "time spent working with CYPs and families",
-      "comment": "time spent working with CYPs and families"
-    },
-    {
-      "name": "variety of needs of CYPs",
-      "comment": "variety of needs of CYPs"
-    }
-  ],
-  "causalLinks": [
-    {
-      "from": "variety of needs of CYPs",
-      "to": "quality of outcomes for CYPs",
-      "polarity": "NEGATIVE"
-    },
-    {
-      "from": "prescription of practice",
-      "to": "scope for dealing with variety of CYP needs with professional expertise",
-      "polarity": "NEGATIVE"
-    },
-    {
-      "from": "scope for dealing with variety of CYP needs with professional expertise",
-      "to": "quality of outcomes for CYPs",
-      "polarity": "POSITIVE"
-    },
-    {
-      "from": "staff absence or sickness rate",
-      "to": "average caseload",
-      "polarity": "POSITIVE"
-    },
-    {
-      "from": "average caseload",
-      "to": "time spent working with CYPs and families",
-      "polarity": "NEGATIVE"
-    },
-    {
-      "from": "time spent working with CYPs and families",
-      "to": "quality of social worker relationship with CYP and family",
-      "polarity": "POSITIVE"
-    },
-    {
-      "from": "quality of social worker relationship with CYP and family",
-      "to": "quality of outcomes for CYPs",
-      "polarity": "POSITIVE"
-    },
-    {
-      "from": "staff turnover rate",
-      "to": "average caseload",
-      "polarity": "POSITIVE"
-    },
-    {
-      "from": "prescription of practice",
-      "to": "time spent working with CYPs and families",
-      "polarity": "NEGATIVE"
-    }
-  ],
-  "comments": [
-    {
-      "name": "Comment 1",
-      "text": "1"
-    },
-    {
-      "name": "Comment 2",
-      "text": "2"
-    }
-  ],
-  "views": [
-    {
-      "name": "View 1",
-      "elements": [],
-      "connectors": [
-        {
-          "from": "variety of needs of CYPs",
-          "to": "quality of outcomes for CYPs",
-          "polarity": "-"
-        },
-        {
-          "from": "prescription of practice",
-          "to": "scope for dealing with variety of CYP needs with professional expertise",
-          "polarity": "-"
-        },
-        {
-          "from": "scope for dealing with variety of CYP needs with professional expertise",
-          "to": "quality of outcomes for CYPs",
-          "polarity": "+"
-        },
-        {
-          "from": "staff absence or sickness rate",
-          "to": "average caseload",
-          "polarity": "+"
-        },
-        {
-          "from": "average caseload",
-          "to": "time spent working with CYPs and families",
-          "polarity": "-"
-        },
-        {
-          "from": "time spent working with CYPs and families",
-          "to": "quality of social worker relationship with CYP and family",
-          "polarity": "+"
-        },
-        {
-          "from": "quality of social worker relationship with CYP and family",
-          "to": "quality of outcomes for CYPs",
-          "polarity": "+"
-        },
-        {
-          "from": "staff turnover rate",
-          "to": "average caseload",
-          "polarity": "+"
-        },
-        {
-          "from": "prescription of practice",
-          "to": "time spent working with CYPs and families",
-          "polarity": "-"
-        }
-      ]
-    }
-  ],
-  "defaultSimulation": {
-    "timeStep": "Month",
-    "duration": 100.0,
-    "durationUnit": "Month"
+  "name" : "0204MunroLane",
+  "cldVariables" : [ {
+    "name" : "average caseload",
+    "comment" : "average caseload"
+  }, {
+    "name" : "prescription of practice",
+    "comment" : "prescription of practice"
+  }, {
+    "name" : "quality of outcomes for CYPs",
+    "comment" : "quality of outcomes for CYPs"
+  }, {
+    "name" : "quality of social worker relationship with CYP and family",
+    "comment" : "quality of social worker relationship with CYP and family"
+  }, {
+    "name" : "scope for dealing with variety of CYP needs with professional expertise",
+    "comment" : "scope for dealing with variety of CYP needs with professional expertise"
+  }, {
+    "name" : "sense of satisfaction selfesteem and personal responsibility",
+    "comment" : "\"sense of satisfaction, self-esteem and personal responsibility\""
+  }, {
+    "name" : "staff absence or sickness rate",
+    "comment" : "staff absence or sickness rate"
+  }, {
+    "name" : "staff turnover rate",
+    "comment" : "staff turnover rate"
+  }, {
+    "name" : "time spent working with CYPs and families",
+    "comment" : "time spent working with CYPs and families"
+  }, {
+    "name" : "variety of needs of CYPs",
+    "comment" : "variety of needs of CYPs"
+  } ],
+  "causalLinks" : [ {
+    "from" : "variety of needs of CYPs",
+    "to" : "quality of outcomes for CYPs",
+    "polarity" : "NEGATIVE"
+  }, {
+    "from" : "prescription of practice",
+    "to" : "scope for dealing with variety of CYP needs with professional expertise",
+    "polarity" : "NEGATIVE"
+  }, {
+    "from" : "scope for dealing with variety of CYP needs with professional expertise",
+    "to" : "quality of outcomes for CYPs",
+    "polarity" : "POSITIVE"
+  }, {
+    "from" : "staff absence or sickness rate",
+    "to" : "average caseload",
+    "polarity" : "POSITIVE"
+  }, {
+    "from" : "average caseload",
+    "to" : "time spent working with CYPs and families",
+    "polarity" : "NEGATIVE"
+  }, {
+    "from" : "time spent working with CYPs and families",
+    "to" : "quality of social worker relationship with CYP and family",
+    "polarity" : "POSITIVE"
+  }, {
+    "from" : "quality of social worker relationship with CYP and family",
+    "to" : "quality of outcomes for CYPs",
+    "polarity" : "POSITIVE"
+  }, {
+    "from" : "staff turnover rate",
+    "to" : "average caseload",
+    "polarity" : "POSITIVE"
+  }, {
+    "from" : "prescription of practice",
+    "to" : "time spent working with CYPs and families",
+    "polarity" : "NEGATIVE"
+  } ],
+  "comments" : [ {
+    "name" : "Comment 1",
+    "text" : "1"
+  }, {
+    "name" : "Comment 2",
+    "text" : "2"
+  } ],
+  "views" : [ {
+    "name" : "View 1",
+    "elements" : [ {
+      "name" : "prescription of practice",
+      "type" : "cld_variable",
+      "x" : 555.0,
+      "y" : 203.0
+    }, {
+      "name" : "scope for dealing with variety of CYP needs with professional expertise",
+      "type" : "cld_variable",
+      "x" : 232.0,
+      "y" : 415.0
+    }, {
+      "name" : "quality of outcomes for CYPs",
+      "type" : "cld_variable",
+      "x" : 437.0,
+      "y" : 420.0
+    }, {
+      "name" : "staff absence or sickness rate",
+      "type" : "cld_variable",
+      "x" : 660.0,
+      "y" : 569.0
+    }, {
+      "name" : "staff turnover rate",
+      "type" : "cld_variable",
+      "x" : 637.0,
+      "y" : 649.0
+    }, {
+      "name" : "average caseload",
+      "type" : "cld_variable",
+      "x" : 805.0,
+      "y" : 506.0
+    }, {
+      "name" : "time spent working with CYPs and families",
+      "type" : "cld_variable",
+      "x" : 811.0,
+      "y" : 412.0
+    }, {
+      "name" : "quality of social worker relationship with CYP and family",
+      "type" : "cld_variable",
+      "x" : 617.0,
+      "y" : 319.0
+    }, {
+      "name" : "variety of needs of CYPs",
+      "type" : "cld_variable",
+      "x" : 436.0,
+      "y" : 328.0
+    }, {
+      "name" : "Comment 1",
+      "type" : "comment",
+      "x" : 618.0,
+      "y" : 433.0,
+      "width" : 10.0,
+      "height" : 14.0
+    }, {
+      "name" : "Comment 2",
+      "type" : "comment",
+      "x" : 659.0,
+      "y" : 600.0,
+      "width" : 10.0,
+      "height" : 14.0
+    } ],
+    "connectors" : [ {
+      "from" : "variety of needs of CYPs",
+      "to" : "quality of outcomes for CYPs",
+      "polarity" : "-"
+    }, {
+      "from" : "prescription of practice",
+      "to" : "scope for dealing with variety of CYP needs with professional expertise",
+      "polarity" : "-"
+    }, {
+      "from" : "scope for dealing with variety of CYP needs with professional expertise",
+      "to" : "quality of outcomes for CYPs",
+      "polarity" : "+"
+    }, {
+      "from" : "staff absence or sickness rate",
+      "to" : "average caseload",
+      "polarity" : "+"
+    }, {
+      "from" : "average caseload",
+      "to" : "time spent working with CYPs and families",
+      "polarity" : "-"
+    }, {
+      "from" : "time spent working with CYPs and families",
+      "to" : "quality of social worker relationship with CYP and family",
+      "polarity" : "+"
+    }, {
+      "from" : "quality of social worker relationship with CYP and family",
+      "to" : "quality of outcomes for CYPs",
+      "polarity" : "+"
+    }, {
+      "from" : "staff turnover rate",
+      "to" : "average caseload",
+      "polarity" : "+"
+    }, {
+      "from" : "prescription of practice",
+      "to" : "time spent working with CYPs and families",
+      "polarity" : "-"
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Month",
+    "duration" : 100.0,
+    "durationUnit" : "Month"
   },
-  "metadata": {
-    "author": "Dr. Erik Pruyt",
-    "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
-    "license": "CC-BY-NC-SA-4.0",
-    "url": "https://simulation.tudelft.nl/SD/model_files_nested/02_04"
+  "metadata" : {
+    "author" : "Dr. Erik Pruyt",
+    "source" : "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
+    "license" : "CC-BY-NC-SA-4.0",
+    "url" : "https://simulation.tudelft.nl/SD/model_files_nested/02_04"
   }
 }
