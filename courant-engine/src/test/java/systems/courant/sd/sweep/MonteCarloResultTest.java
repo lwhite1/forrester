@@ -124,6 +124,43 @@ class MonteCarloResultTest {
         }
     }
 
+    @Nested
+    @DisplayName("ParameterSpec support")
+    class ParameterSpecSupport {
+
+        @Test
+        @DisplayName("should return empty specs when constructed without them")
+        void shouldReturnEmptySpecsByDefault() {
+            assertThat(result.getParameterSpecs()).isEmpty();
+        }
+
+        @Test
+        @DisplayName("should return specs when constructed with them")
+        void shouldReturnProvidedSpecs() {
+            List<ParameterSpec> specs = List.of(
+                    new ParameterSpec("rate", "Normal", 8.0, 2.0, "Mean", "Std Dev"),
+                    new ParameterSpec("capacity", "Uniform", 50.0, 150.0, "Min", "Max"));
+            MonteCarloResult mcWithSpecs = new MonteCarloResult(result.getResults(), specs);
+
+            assertThat(mcWithSpecs.getParameterSpecs()).hasSize(2);
+            assertThat(mcWithSpecs.getParameterSpecs().get(0).name()).isEqualTo("rate");
+            assertThat(mcWithSpecs.getParameterSpecs().get(0).distributionType()).isEqualTo("Normal");
+            assertThat(mcWithSpecs.getParameterSpecs().get(1).name()).isEqualTo("capacity");
+            assertThat(mcWithSpecs.getParameterSpecs().get(1).distributionType()).isEqualTo("Uniform");
+        }
+
+        @Test
+        @DisplayName("should defensively copy parameter specs list")
+        void shouldDefensivelyCopySpecs() {
+            List<ParameterSpec> mutableSpecs = new ArrayList<>(List.of(
+                    new ParameterSpec("rate", "Normal", 8.0, 2.0, "Mean", "Std Dev")));
+            MonteCarloResult mcWithSpecs = new MonteCarloResult(result.getResults(), mutableSpecs);
+
+            mutableSpecs.clear();
+            assertThat(mcWithSpecs.getParameterSpecs()).hasSize(1);
+        }
+    }
+
     @Test
     @DisplayName("constructor should defensively copy the results list (#302)")
     void constructorShouldDefensivelyCopyResults() {

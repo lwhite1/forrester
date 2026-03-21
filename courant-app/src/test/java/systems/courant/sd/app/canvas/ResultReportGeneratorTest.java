@@ -11,6 +11,7 @@ import systems.courant.sd.model.graph.FeedbackAnalysis;
 import systems.courant.sd.model.graph.LoopDominanceAnalysis;
 import systems.courant.sd.sweep.MonteCarloResult;
 import systems.courant.sd.sweep.OptimizationResult;
+import systems.courant.sd.sweep.ParameterSpec;
 import systems.courant.sd.sweep.RunResult;
 import systems.courant.sd.sweep.SensitivitySummary.ParameterImpact;
 import systems.courant.sd.sweep.SweepResult;
@@ -343,6 +344,49 @@ class ResultReportGeneratorTest {
 
             assertThat(html.toString()).contains("<details>");
             assertThat(html.toString()).contains("<summary>");
+        }
+
+        @Test
+        @DisplayName("should contain varied parameters table when specs are present")
+        void shouldContainVariedParametersTable() {
+            MonteCarloResult mc = buildMonteCarloResultWithSpecs();
+            StringBuilder html = new StringBuilder();
+            ResultReportGenerator.writeMonteCarloSection(html, mc);
+            String output = html.toString();
+
+            assertThat(output).contains("Varied Parameters");
+            assertThat(output).contains("drainRate");
+            assertThat(output).contains("Normal");
+            assertThat(output).contains("Mean = 10");
+            assertThat(output).contains("Std Dev = 2");
+        }
+
+        @Test
+        @DisplayName("should handle mixed distribution types in varied parameters table")
+        void shouldHandleMixedDistributions() {
+            List<ParameterSpec> specs = List.of(
+                    new ParameterSpec("rate", "Normal", 8.0, 2.0, "Mean", "Std Dev"),
+                    new ParameterSpec("capacity", "Uniform", 50.0, 150.0, "Min", "Max"));
+            MonteCarloResult mc = new MonteCarloResult(buildRunResults(), specs);
+            StringBuilder html = new StringBuilder();
+            ResultReportGenerator.writeMonteCarloSection(html, mc);
+            String output = html.toString();
+
+            assertThat(output).contains("Normal");
+            assertThat(output).contains("Uniform");
+            assertThat(output).contains("Mean = 8");
+            assertThat(output).contains("Min = 50");
+            assertThat(output).contains("Max = 150");
+        }
+
+        @Test
+        @DisplayName("should omit varied parameters table when specs are empty")
+        void shouldOmitTableWhenNoSpecs() {
+            MonteCarloResult mc = buildMonteCarloResult();
+            StringBuilder html = new StringBuilder();
+            ResultReportGenerator.writeMonteCarloSection(html, mc);
+
+            assertThat(html.toString()).doesNotContain("Varied Parameters");
         }
     }
 
@@ -888,12 +932,22 @@ class ResultReportGeneratorTest {
         return new SweepResult("drainRate", runs);
     }
 
-    private static MonteCarloResult buildMonteCarloResult() {
+    private static List<RunResult> buildRunResults() {
         List<RunResult> runs = new ArrayList<>();
         for (double rate : new double[]{5.0, 7.0, 10.0, 12.0, 15.0}) {
             runs.add(buildSingleRun(rate));
         }
-        return new MonteCarloResult(runs);
+        return runs;
+    }
+
+    private static MonteCarloResult buildMonteCarloResult() {
+        return new MonteCarloResult(buildRunResults());
+    }
+
+    private static MonteCarloResult buildMonteCarloResultWithSpecs() {
+        List<ParameterSpec> specs = List.of(
+                new ParameterSpec("drainRate", "Normal", 10.0, 2.0, "Mean", "Std Dev"));
+        return new MonteCarloResult(buildRunResults(), specs);
     }
 
     private static List<ParameterImpact> buildImpacts() {

@@ -5,7 +5,9 @@ import systems.courant.sd.measure.TimeUnit;
 import systems.courant.sd.model.Model;
 import systems.courant.sd.model.compile.CompiledModel;
 
+import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.distribution.RealDistribution;
+import org.apache.commons.math3.distribution.UniformRealDistribution;
 import org.apache.commons.math3.random.MersenneTwister;
 
 import java.util.ArrayList;
@@ -81,7 +83,28 @@ public class MonteCarlo {
                     paramMap, timeStep, duration));
         }
 
-        return new MonteCarloResult(results);
+        return new MonteCarloResult(results, buildParameterSpecs());
+    }
+
+    private List<ParameterSpec> buildParameterSpecs() {
+        List<ParameterSpec> specs = new ArrayList<>();
+        for (Map.Entry<String, RealDistribution> entry : parameters.entrySet()) {
+            specs.add(toParameterSpec(entry.getKey(), entry.getValue()));
+        }
+        return specs;
+    }
+
+    private static ParameterSpec toParameterSpec(String name, RealDistribution dist) {
+        if (dist instanceof NormalDistribution nd) {
+            return new ParameterSpec(name, "Normal",
+                    nd.getMean(), nd.getStandardDeviation(), "Mean", "Std Dev");
+        } else if (dist instanceof UniformRealDistribution) {
+            return new ParameterSpec(name, "Uniform",
+                    dist.getSupportLowerBound(), dist.getSupportUpperBound(), "Min", "Max");
+        } else {
+            return new ParameterSpec(name, dist.getClass().getSimpleName(),
+                    dist.getNumericalMean(), dist.getNumericalVariance(), "Mean", "Variance");
+        }
     }
 
     /**

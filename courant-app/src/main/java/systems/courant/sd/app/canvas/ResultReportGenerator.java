@@ -6,6 +6,7 @@ import systems.courant.sd.model.graph.FeedbackAnalysis;
 import systems.courant.sd.model.graph.LoopDominanceAnalysis;
 import systems.courant.sd.sweep.MonteCarloResult;
 import systems.courant.sd.sweep.OptimizationResult;
+import systems.courant.sd.sweep.ParameterSpec;
 import systems.courant.sd.sweep.RunResult;
 import systems.courant.sd.sweep.SensitivitySummary;
 import systems.courant.sd.sweep.SensitivitySummary.ParameterImpact;
@@ -329,6 +330,11 @@ public final class ResultReportGenerator {
         html.append("<section>\n<h2>Monte Carlo Analysis (")
                 .append(mc.getRunCount()).append(" runs)</h2>\n");
 
+        List<ParameterSpec> specs = mc.getParameterSpecs();
+        if (!specs.isEmpty()) {
+            writeVariedParametersTable(html, specs);
+        }
+
         List<String> allNames = new ArrayList<>(mc.getStockNames());
         allNames.addAll(mc.getVariableNames());
 
@@ -338,6 +344,26 @@ public final class ResultReportGenerator {
         }
 
         html.append("</section>\n\n");
+    }
+
+    static void writeVariedParametersTable(StringBuilder html, List<ParameterSpec> specs) {
+        html.append("<h3>Varied Parameters</h3>\n");
+        html.append("<table class=\"element-table\">\n");
+        html.append("<thead><tr><th>Parameter</th><th>Distribution</th>");
+        html.append("<th>Parameters</th></tr></thead>\n<tbody>\n");
+
+        for (ParameterSpec spec : specs) {
+            html.append("<tr>");
+            html.append("<td class=\"name\">").append(esc(spec.name())).append("</td>");
+            html.append("<td>").append(esc(spec.distributionType())).append("</td>");
+            html.append("<td class=\"code\">").append(esc(spec.param1Label())).append(" = ")
+                    .append(fmt(spec.param1())).append(", ")
+                    .append(esc(spec.param2Label())).append(" = ")
+                    .append(fmt(spec.param2())).append("</td>");
+            html.append("</tr>\n");
+        }
+
+        html.append("</tbody></table>\n");
     }
 
     static void writePercentileTable(StringBuilder html, MonteCarloResult mc, String variableName) {
