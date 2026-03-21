@@ -350,6 +350,45 @@ class CldLoopDetectionTest {
     }
 
     @Nested
+    @DisplayName("CompetitionFaculty model (#1208)")
+    class CompetitionFacultyModel {
+
+        @Test
+        void shouldDetectLoopsInCompetitionFacultyGraph() {
+            // Reproduces the CompetitionFaculty CLD model graph structure
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("CompetitionFaculty")
+                    .cldVariable("scientific papers section A")
+                    .cldVariable("scientific papers section B")
+                    .cldVariable("fraction of total budget to section A")
+                    .cldVariable("budget section A")
+                    .cldVariable("budget section B")
+                    .cldVariable("scientific personnel section A")
+                    .cldVariable("scientific personnel section B")
+                    .cldVariable("total TPM budget")
+                    .causalLink("scientific papers section A", "fraction of total budget to section A", CausalLinkDef.Polarity.POSITIVE)
+                    .causalLink("scientific papers section B", "fraction of total budget to section A", CausalLinkDef.Polarity.NEGATIVE)
+                    .causalLink("scientific personnel section A", "scientific papers section A", CausalLinkDef.Polarity.POSITIVE)
+                    .causalLink("scientific personnel section B", "scientific papers section B", CausalLinkDef.Polarity.POSITIVE)
+                    .causalLink("fraction of total budget to section A", "budget section B", CausalLinkDef.Polarity.NEGATIVE)
+                    .causalLink("fraction of total budget to section A", "budget section A", CausalLinkDef.Polarity.POSITIVE)
+                    .causalLink("budget section A", "scientific personnel section A", CausalLinkDef.Polarity.POSITIVE)
+                    .causalLink("total TPM budget", "budget section A", CausalLinkDef.Polarity.POSITIVE)
+                    .causalLink("total TPM budget", "budget section B", CausalLinkDef.Polarity.POSITIVE)
+                    .causalLink("budget section B", "scientific personnel section B", CausalLinkDef.Polarity.POSITIVE)
+                    .build();
+
+            FeedbackAnalysis analysis = FeedbackAnalysis.analyze(def);
+
+            assertThat(analysis.loopCount()).as("should detect feedback loops").isGreaterThan(0);
+            assertThat(analysis.causalLoops()).isNotEmpty();
+            // Both loops should be reinforcing (even number of negative links)
+            assertThat(analysis.causalLoops()).allSatisfy(loop ->
+                    assertThat(loop.type()).isEqualTo(LoopType.REINFORCING));
+        }
+    }
+
+    @Nested
     @DisplayName("loop labels")
     class LoopLabels {
 
