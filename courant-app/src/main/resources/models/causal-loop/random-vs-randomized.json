@@ -1,100 +1,113 @@
 {
-  "name": "1009_RANDOMvsRANDOMIZED",
-  "cldVariables": [
-    {
-      "name": "difference between random variables",
-      "comment": "difference between random variables"
-    },
-    {
-      "name": "difference between randomly sampled variables",
-      "comment": "difference between randomly sampled variables"
-    },
-    {
-      "name": "random variable 1",
-      "comment": "random variable 1"
-    },
-    {
-      "name": "random variable 2",
-      "comment": "random variable 2"
-    },
-    {
-      "name": "randomly sampled variable 1",
-      "comment": "randomly sampled variable 1"
-    },
-    {
-      "name": "randomly sampled variable 2",
-      "comment": "randomly sampled variable 2"
-    },
-    {
-      "name": "seed",
-      "comment": "seed"
-    }
-  ],
-  "causalLinks": [
-    {
-      "from": "random variable 1",
-      "to": "difference between random variables",
-      "polarity": "UNKNOWN"
-    },
-    {
-      "from": "random variable 2",
-      "to": "difference between random variables",
-      "polarity": "UNKNOWN"
-    },
-    {
-      "from": "randomly sampled variable 1",
-      "to": "difference between randomly sampled variables",
-      "polarity": "UNKNOWN"
-    },
-    {
-      "from": "randomly sampled variable 2",
-      "to": "difference between randomly sampled variables",
-      "polarity": "UNKNOWN"
-    },
-    {
-      "from": "seed",
-      "to": "random variable 1",
-      "polarity": "UNKNOWN"
-    }
-  ],
-  "views": [
-    {
-      "name": "View 1",
-      "elements": [],
-      "connectors": [
-        {
-          "from": "random variable 1",
-          "to": "difference between random variables"
-        },
-        {
-          "from": "random variable 2",
-          "to": "difference between random variables"
-        },
-        {
-          "from": "randomly sampled variable 1",
-          "to": "difference between randomly sampled variables"
-        },
-        {
-          "from": "randomly sampled variable 2",
-          "to": "difference between randomly sampled variables"
-        },
-        {
-          "from": "seed",
-          "to": "random variable 1"
-        }
-      ]
-    }
-  ],
-  "defaultSimulation": {
-    "timeStep": "Month",
-    "duration": 10.0,
-    "durationUnit": "Month",
-    "dt": 0.25
+  "name" : "1009_RANDOMvsRANDOMIZED",
+  "cldVariables" : [ {
+    "name" : "difference between random variables",
+    "comment" : "difference between random variables"
+  }, {
+    "name" : "difference between randomly sampled variables",
+    "comment" : "difference between randomly sampled variables"
+  }, {
+    "name" : "random variable 1",
+    "comment" : "random variable 1"
+  }, {
+    "name" : "random variable 2",
+    "comment" : "random variable 2"
+  }, {
+    "name" : "randomly sampled variable 1",
+    "comment" : "randomly sampled variable 1"
+  }, {
+    "name" : "randomly sampled variable 2",
+    "comment" : "randomly sampled variable 2"
+  }, {
+    "name" : "seed",
+    "comment" : "seed"
+  } ],
+  "causalLinks" : [ {
+    "from" : "random variable 1",
+    "to" : "difference between random variables",
+    "polarity" : "UNKNOWN"
+  }, {
+    "from" : "random variable 2",
+    "to" : "difference between random variables",
+    "polarity" : "UNKNOWN"
+  }, {
+    "from" : "randomly sampled variable 1",
+    "to" : "difference between randomly sampled variables",
+    "polarity" : "UNKNOWN"
+  }, {
+    "from" : "randomly sampled variable 2",
+    "to" : "difference between randomly sampled variables",
+    "polarity" : "UNKNOWN"
+  }, {
+    "from" : "seed",
+    "to" : "random variable 1",
+    "polarity" : "UNKNOWN"
+  } ],
+  "views" : [ {
+    "name" : "View 1",
+    "elements" : [ {
+      "name" : "random variable 1",
+      "type" : "cld_variable",
+      "x" : 216.0,
+      "y" : 190.0
+    }, {
+      "name" : "random variable 2",
+      "type" : "cld_variable",
+      "x" : 398.0,
+      "y" : 189.0
+    }, {
+      "name" : "difference between random variables",
+      "type" : "cld_variable",
+      "x" : 307.0,
+      "y" : 123.0
+    }, {
+      "name" : "randomly sampled variable 1",
+      "type" : "cld_variable",
+      "x" : 215.0,
+      "y" : 261.0
+    }, {
+      "name" : "randomly sampled variable 2",
+      "type" : "cld_variable",
+      "x" : 397.0,
+      "y" : 264.0
+    }, {
+      "name" : "difference between randomly sampled variables",
+      "type" : "cld_variable",
+      "x" : 316.0,
+      "y" : 336.0
+    }, {
+      "name" : "seed",
+      "type" : "cld_variable",
+      "x" : 312.0,
+      "y" : 225.0
+    } ],
+    "connectors" : [ {
+      "from" : "random variable 1",
+      "to" : "difference between random variables"
+    }, {
+      "from" : "random variable 2",
+      "to" : "difference between random variables"
+    }, {
+      "from" : "randomly sampled variable 1",
+      "to" : "difference between randomly sampled variables"
+    }, {
+      "from" : "randomly sampled variable 2",
+      "to" : "difference between randomly sampled variables"
+    }, {
+      "from" : "seed",
+      "to" : "random variable 1"
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Month",
+    "duration" : 10.0,
+    "durationUnit" : "Month",
+    "dt" : 0.25
   },
-  "metadata": {
-    "author": "Dr. Erik Pruyt",
-    "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
-    "license": "CC-BY-NC-SA-4.0",
-    "url": "https://simulation.tudelft.nl/SD/model_files_nested/10_09"
+  "metadata" : {
+    "author" : "Dr. Erik Pruyt",
+    "source" : "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
+    "license" : "CC-BY-NC-SA-4.0",
+    "url" : "https://simulation.tudelft.nl/SD/model_files_nested/10_09"
   }
 }

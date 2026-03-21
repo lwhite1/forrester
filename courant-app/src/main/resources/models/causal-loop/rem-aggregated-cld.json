@@ -1,86 +1,93 @@
 {
-  "name": "0203REMaggregatedCLDen1",
-  "cldVariables": [
-    {
-      "name": "average lifetime of goods containing REM",
-      "comment": "average lifetime of goods containing REM"
-    },
-    {
-      "name": "demand for REM in goods",
-      "comment": "demand for REM in goods"
-    },
-    {
-      "name": "loss of REM in goods",
-      "comment": "loss of REM in goods"
-    },
-    {
-      "name": "processing of REM",
-      "comment": "processing of REM"
-    },
-    {
-      "name": "use of REM in production of goods",
-      "comment": "use of REM in production of goods"
-    }
-  ],
-  "causalLinks": [
-    {
-      "from": "average lifetime of goods containing REM",
-      "to": "loss of REM in goods",
-      "polarity": "NEGATIVE"
-    },
-    {
-      "from": "demand for REM in goods",
-      "to": "use of REM in production of goods",
-      "polarity": "POSITIVE"
-    },
-    {
-      "from": "processing of REM",
-      "to": "use of REM in production of goods",
-      "polarity": "POSITIVE"
-    },
-    {
-      "from": "use of REM in production of goods",
-      "to": "loss of REM in goods",
-      "polarity": "POSITIVE"
-    }
-  ],
-  "views": [
-    {
-      "name": "View 1",
-      "elements": [],
-      "connectors": [
-        {
-          "from": "average lifetime of goods containing REM",
-          "to": "loss of REM in goods",
-          "polarity": "-"
-        },
-        {
-          "from": "demand for REM in goods",
-          "to": "use of REM in production of goods",
-          "polarity": "+"
-        },
-        {
-          "from": "processing of REM",
-          "to": "use of REM in production of goods",
-          "polarity": "+"
-        },
-        {
-          "from": "use of REM in production of goods",
-          "to": "loss of REM in goods",
-          "polarity": "+"
-        }
-      ]
-    }
-  ],
-  "defaultSimulation": {
-    "timeStep": "Month",
-    "duration": 100.0,
-    "durationUnit": "Month"
+  "name" : "0203REMaggregatedCLDen1",
+  "cldVariables" : [ {
+    "name" : "average lifetime of goods containing REM",
+    "comment" : "average lifetime of goods containing REM"
+  }, {
+    "name" : "demand for REM in goods",
+    "comment" : "demand for REM in goods"
+  }, {
+    "name" : "loss of REM in goods",
+    "comment" : "loss of REM in goods"
+  }, {
+    "name" : "processing of REM",
+    "comment" : "processing of REM"
+  }, {
+    "name" : "use of REM in production of goods",
+    "comment" : "use of REM in production of goods"
+  } ],
+  "causalLinks" : [ {
+    "from" : "average lifetime of goods containing REM",
+    "to" : "loss of REM in goods",
+    "polarity" : "NEGATIVE"
+  }, {
+    "from" : "demand for REM in goods",
+    "to" : "use of REM in production of goods",
+    "polarity" : "POSITIVE"
+  }, {
+    "from" : "processing of REM",
+    "to" : "use of REM in production of goods",
+    "polarity" : "POSITIVE"
+  }, {
+    "from" : "use of REM in production of goods",
+    "to" : "loss of REM in goods",
+    "polarity" : "POSITIVE"
+  } ],
+  "views" : [ {
+    "name" : "View 1",
+    "elements" : [ {
+      "name" : "processing of REM",
+      "type" : "cld_variable",
+      "x" : 303.0,
+      "y" : 440.0
+    }, {
+      "name" : "use of REM in production of goods",
+      "type" : "cld_variable",
+      "x" : 305.0,
+      "y" : 306.0
+    }, {
+      "name" : "loss of REM in goods",
+      "type" : "cld_variable",
+      "x" : 305.0,
+      "y" : 186.0
+    }, {
+      "name" : "average lifetime of goods containing REM",
+      "type" : "cld_variable",
+      "x" : 304.0,
+      "y" : 115.0
+    }, {
+      "name" : "demand for REM in goods",
+      "type" : "cld_variable",
+      "x" : 225.0,
+      "y" : 271.0
+    } ],
+    "connectors" : [ {
+      "from" : "average lifetime of goods containing REM",
+      "to" : "loss of REM in goods",
+      "polarity" : "-"
+    }, {
+      "from" : "demand for REM in goods",
+      "to" : "use of REM in production of goods",
+      "polarity" : "+"
+    }, {
+      "from" : "processing of REM",
+      "to" : "use of REM in production of goods",
+      "polarity" : "+"
+    }, {
+      "from" : "use of REM in production of goods",
+      "to" : "loss of REM in goods",
+      "polarity" : "+"
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Month",
+    "duration" : 100.0,
+    "durationUnit" : "Month"
   },
-  "metadata": {
-    "author": "Dr. Erik Pruyt",
-    "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
-    "license": "CC-BY-NC-SA-4.0",
-    "url": "https://simulation.tudelft.nl/SD/model_files_nested/02_03"
+  "metadata" : {
+    "author" : "Dr. Erik Pruyt",
+    "source" : "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
+    "license" : "CC-BY-NC-SA-4.0",
+    "url" : "https://simulation.tudelft.nl/SD/model_files_nested/02_03"
   }
 }
