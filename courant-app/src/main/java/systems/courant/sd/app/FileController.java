@@ -57,6 +57,8 @@ final class FileController {
     private final ModelCanvas canvas;
 
     private Path currentFile;
+    /** Display-only file name for bundled examples (loaded from resources, not disk). */
+    private String resourceFileName;
     private boolean dirty;
 
     FileController(Stage stage,
@@ -82,6 +84,7 @@ final class FileController {
                 .build();
         loadDefinition.accept(empty, null);
         currentFile = null;
+        resourceFileName = null;
         updateTitle.run();
     }
 
@@ -128,6 +131,7 @@ final class FileController {
 
             // For native JSON files, track the file for Save; for imports, force Save As
             currentFile = ".json".equals(ext) ? file.toPath() : null;
+            resourceFileName = null;
             updateTitle.run();
         } catch (IOException ex) {
             showError.accept("Failed to open file: " + ex.getMessage());
@@ -303,6 +307,18 @@ final class FileController {
         return currentFile;
     }
 
+    /**
+     * Returns a display file name: the on-disk file name if saved,
+     * the resource file name for bundled examples, or null for new models.
+     */
+    String getDisplayFileName() {
+        if (currentFile != null) {
+            Path fn = currentFile.getFileName();
+            return fn != null ? fn.toString() : currentFile.toString();
+        }
+        return resourceFileName;
+    }
+
     void setCurrentFile(Path path) {
         this.currentFile = path;
         updateTitle.run();
@@ -320,8 +336,17 @@ final class FileController {
             String json = new String(in.readAllBytes(), StandardCharsets.UTF_8);
             ModelDefinition def = serializer.fromJson(json);
 
+            // Use catalog display name as the model name instead of the
+            // internal Vensim identifier stored in the JSON file
+            if (name != null && !name.isBlank()) {
+                def = def.toBuilder().name(name).build();
+            }
+
             loadDefinition.accept(def, name);
             currentFile = null;
+            // Extract file name from resource path (e.g. "ecology/kaibab-deer.json" → "kaibab-deer.json")
+            int slash = resourcePath.lastIndexOf('/');
+            resourceFileName = slash >= 0 ? resourcePath.substring(slash + 1) : resourcePath;
             updateTitle.run();
         } catch (IOException ex) {
             showError.accept("Failed to load example: " + ex.getMessage());
