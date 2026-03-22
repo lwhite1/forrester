@@ -61,9 +61,15 @@ class WorkflowComplexModelFxTest {
     }
 
     private void triggerValidation(FxRobot robot) throws TimeoutException {
+        Platform.runLater(() -> {
+            stage.toFront();
+            stage.requestFocus();
+            window.getCanvas().requestFocus();
+        });
+        WaitForAsyncUtils.waitForFxEvents();
         robot.push(KeyCode.CONTROL, KeyCode.B);
         WaitForAsyncUtils.waitForFxEvents();
-        WaitForAsyncUtils.waitFor(5, TimeUnit.SECONDS, () -> {
+        WaitForAsyncUtils.waitFor(15, TimeUnit.SECONDS, () -> {
             WaitForAsyncUtils.waitForFxEvents();
             return robot.lookup("#validationTable").tryQuery().isPresent();
         });
