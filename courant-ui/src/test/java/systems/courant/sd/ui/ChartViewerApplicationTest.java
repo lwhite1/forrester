@@ -277,6 +277,20 @@ class ChartViewerApplicationTest {
     }
 
     @Test
+    @DisplayName("showChart atomically snapshots and resets state (#1272)")
+    void shouldAtomicallySnapshotAndResetOnShowChart() {
+        ChartViewerApplication.setSeries(List.of("Stock"), List.of());
+        ChartViewerApplication.addValues(List.of(42.0), List.of(), 0);
+
+        ChartViewerApplication.showChart();
+
+        // After showChart, static state should be reset
+        ChartViewerApplication.ChartData snapAfter = ChartViewerApplication.snapshot();
+        assertThat(snapAfter.series()).isEmpty();
+        assertThat(snapAfter.title()).isEmpty();
+    }
+
+    @Test
     @DisplayName("reader thread sees size set by writer thread via synchronized snapshot")
     void shouldReadSizeUnderLockFromAnotherThread() throws InterruptedException {
         // Set size on this thread

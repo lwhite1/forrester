@@ -105,10 +105,7 @@ public class ChartViewerApplication extends Application {
      * concurrent callers cannot corrupt each other's chart windows.
      */
     public static void showChart() {
-        ChartData snapshot = snapshot();
-        synchronized (LOCK) {
-            resetInternal();
-        }
+        ChartData snapshot = snapshotAndReset();
         ensureFxRunning();
         Platform.runLater(() -> {
             ChartViewerApplication app = new ChartViewerApplication();
@@ -134,6 +131,28 @@ public class ChartViewerApplication extends Application {
                 deepCopy.add(copy);
             }
             return new ChartData(deepCopy, width, height, title, xAxisLabel, formatter);
+        }
+    }
+
+    /**
+     * Atomically snapshots and resets the static state in a single lock acquisition,
+     * preventing data loss from concurrent {@code addValues} calls between snapshot
+     * and reset.
+     */
+    private static ChartData snapshotAndReset() {
+        synchronized (LOCK) {
+            List<Series<String, Number>> deepCopy = new ArrayList<>(series.size());
+            for (Series<String, Number> original : series) {
+                Series<String, Number> copy = new Series<>();
+                copy.setName(original.getName());
+                for (XYChart.Data<String, Number> d : original.getData()) {
+                    copy.getData().add(new XYChart.Data<>(d.getXValue(), d.getYValue()));
+                }
+                deepCopy.add(copy);
+            }
+            ChartData result = new ChartData(deepCopy, width, height, title, xAxisLabel, formatter);
+            resetInternal();
+            return result;
         }
     }
 
