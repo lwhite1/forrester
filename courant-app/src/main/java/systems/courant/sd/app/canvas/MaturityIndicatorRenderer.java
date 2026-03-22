@@ -17,7 +17,8 @@ import javafx.scene.text.TextAlignment;
  * </ul>
  *
  * <p>Unit-mismatch indicators on connection lines are drawn by
- * {@link ConnectionRenderer} using the color from {@link ColorPalette#UNIT_MISMATCH}.
+ * {@link systems.courant.sd.app.canvas.renderers.ConnectionRenderer ConnectionRenderer}
+ * using the color from {@link ColorPalette#UNIT_MISMATCH}.
  */
 public final class MaturityIndicatorRenderer {
 

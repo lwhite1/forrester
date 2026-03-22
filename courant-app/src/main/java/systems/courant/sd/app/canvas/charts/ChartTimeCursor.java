@@ -20,7 +20,7 @@ import systems.courant.sd.app.canvas.ChartUtils;
  * mouse position and exposes the current time step as a {@link DoubleProperty},
  * allowing multiple charts to share a synchronized cursor.
  *
- * <p>Usage: wrap the chart with {@link #install(XYChart)} which returns a
+ * <p>Usage: wrap the chart with {@link #install(XYChart, ChartTimeCursor[])} which returns a
  * {@code StackPane} containing the chart and the cursor overlay. Bind or
  * listen to {@link #cursorTimeStepProperty()} to synchronize across charts.
  */
