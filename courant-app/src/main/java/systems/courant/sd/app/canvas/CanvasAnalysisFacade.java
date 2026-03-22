@@ -9,6 +9,8 @@ import systems.courant.sd.model.graph.CausalTraceAnalysis;
 import systems.courant.sd.model.graph.DependencyGraph;
 import systems.courant.sd.model.graph.FeedbackAnalysis;
 
+import javafx.application.Platform;
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -53,6 +55,10 @@ public final class CanvasAnalysisFacade {
 
     // Callback when validation counts change
     private Consumer<ValidationResult> onValidationChanged;
+
+    // Coalescing flag for debounced validation (mirrors scheduleResizeRedraw pattern)
+    private boolean validationScheduled;
+    private ModelDefinition pendingValidationDef;
 
     CanvasAnalysisFacade(CanvasState canvasState,
                          Supplier<ModelDefinition> modelDefSupplier,
@@ -227,7 +233,20 @@ public final class CanvasAnalysisFacade {
         ModelDefinition def = modelDefSupplier.get();
         loopController.invalidate(def);
         traceController.invalidate(def);
-        recomputeValidation(def);
+        scheduleValidation(def);
+    }
+
+    private void scheduleValidation(ModelDefinition def) {
+        pendingValidationDef = def;
+        if (!validationScheduled) {
+            validationScheduled = true;
+            Platform.runLater(() -> {
+                validationScheduled = false;
+                ModelDefinition toValidate = pendingValidationDef;
+                pendingValidationDef = null;
+                recomputeValidation(toValidate);
+            });
+        }
     }
 
     private void recomputeValidation(ModelDefinition def) {
