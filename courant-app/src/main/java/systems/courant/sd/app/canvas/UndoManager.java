@@ -350,6 +350,8 @@ public class UndoManager implements AutoCloseable {
             data = entry.future().get(100, TimeUnit.MILLISECONDS);
         } catch (ExecutionException e) {
             throw new IllegalStateException("Undo compression failed", e.getCause());
+        } catch (java.util.concurrent.CancellationException e) {
+            throw new IllegalStateException("Undo entry was cancelled", e);
         } catch (TimeoutException e) {
             throw new IllegalStateException(
                     "Undo decompression timed out — compression did not complete within 100 ms");
