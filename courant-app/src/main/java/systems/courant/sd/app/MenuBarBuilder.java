@@ -29,6 +29,7 @@ final class MenuBarBuilder {
             MenuBar menuBar,
             MenuItem undoItem,
             MenuItem redoItem,
+            MenuItem undoHistoryItem,
             MenuItem popOutDashboardItem,
             MenuItem validationIssuesItem,
             List<MenuItem> editorOnlyItems
@@ -44,6 +45,7 @@ final class MenuBarBuilder {
     private final List<MenuItem> editorOnlyItems = new ArrayList<>();
     private MenuItem undoItem;
     private MenuItem redoItem;
+    private MenuItem undoHistoryItem;
     private MenuItem popOutDashboardItem;
     private MenuItem validationIssuesItem;
 
@@ -70,8 +72,9 @@ final class MenuBarBuilder {
 
         MenuBar menuBar = new MenuBar(fileMenu, editMenu, viewMenu,
                 layoutMenu, simulateMenu, helpMenu);
-        return new Result(menuBar, undoItem, redoItem, popOutDashboardItem,
-                validationIssuesItem, List.copyOf(editorOnlyItems));
+        return new Result(menuBar, undoItem, redoItem, undoHistoryItem,
+                popOutDashboardItem, validationIssuesItem,
+                List.copyOf(editorOnlyItems));
     }
 
     private Menu buildFileMenu() {
@@ -122,8 +125,9 @@ final class MenuBarBuilder {
         undoItem.setDisable(true);
         redoItem = registry.toMenuItem("Redo");
         redoItem.setDisable(true);
-        MenuItem undoHistoryItem = registry.toMenuItem("Undo History",
+        undoHistoryItem = registry.toMenuItem("Undo History",
                 "Undo History\u2026");
+        undoHistoryItem.setDisable(true);
         MenuItem cutItem = registry.toMenuItem("Cut");
         MenuItem copyItem = registry.toMenuItem("Copy");
         MenuItem pasteItem = registry.toMenuItem("Paste");
