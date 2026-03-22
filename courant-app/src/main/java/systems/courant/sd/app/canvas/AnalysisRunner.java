@@ -52,6 +52,7 @@ public class AnalysisRunner {
         cancelCurrentTask();
         statusBar.showProgress(progressMessage);
         currentTask = executor.submit(() -> {
+            Thread.interrupted(); // clear interrupt flag leaked by prior cancel
             try {
                 T result = task.call();
                 if (!shutdownRequested) {
@@ -79,6 +80,7 @@ public class AnalysisRunner {
     public <T> void run(Callable<T> task, Consumer<T> onSuccess, String errorTitle) {
         cancelCurrentTask();
         currentTask = executor.submit(() -> {
+            Thread.interrupted(); // clear interrupt flag leaked by prior cancel
             try {
                 T result = task.call();
                 if (!shutdownRequested) {
