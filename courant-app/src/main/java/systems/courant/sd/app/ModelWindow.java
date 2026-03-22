@@ -899,11 +899,8 @@ public class ModelWindow {
             return;
         }
         String name;
-        if (editor != null && !"Untitled".equals(editor.getModelName())) {
+        if (editor != null && editor.getModelName() != null && !editor.getModelName().isBlank()) {
             name = editor.getModelName();
-        } else if (fileController != null && fileController.getCurrentFile() != null) {
-            Path fn = fileController.getCurrentFile().getFileName();
-            name = fn != null ? fn.toString() : fileController.getCurrentFile().toString();
         } else {
             name = "Untitled";
         }
