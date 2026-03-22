@@ -210,10 +210,11 @@ public class MonteCarloResult {
     public void writePercentileCsv(String filePath, String name, double... percentiles) {
         ensureParentDir(filePath);
 
-        // Pre-compute all percentile series
+        // Pre-compute all percentile series in a single pass
+        Map<Double, double[]> seriesMap = getPercentileSeries(name, percentiles);
         double[][] seriesData = new double[percentiles.length][];
         for (int p = 0; p < percentiles.length; p++) {
-            seriesData[p] = getPercentileSeries(name, percentiles[p]);
+            seriesData[p] = seriesMap.get(percentiles[p]);
         }
 
         try (CSVWriter writer = new CSVWriter(new FileWriter(filePath, java.nio.charset.StandardCharsets.UTF_8))) {
