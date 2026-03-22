@@ -15,7 +15,12 @@ import systems.courant.sd.model.def.ViewDef;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
@@ -534,6 +539,36 @@ class ModelDefinitionSerializerTest {
             assertThatThrownBy(() -> serializer.toJson(deepModel))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("nesting depth");
+        }
+    }
+
+    @Nested
+    @DisplayName("File charset")
+    class FileCharset {
+
+        @TempDir
+        Path tempDir;
+
+        @Test
+        void shouldWriteUtf8SoRoundTripPreservesNonAscii() throws IOException {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Caf\u00e9 Model")
+                    .stock("Temp\u00e9rature", 100, "\u00b0C")
+                    .defaultSimulation("Day", 10, "Day")
+                    .build();
+
+            Path file = tempDir.resolve("test.courant.json");
+            serializer.toFile(def, file);
+
+            // Verify the file is valid UTF-8
+            String raw = Files.readString(file, StandardCharsets.UTF_8);
+            assertThat(raw).contains("Caf\u00e9 Model");
+            assertThat(raw).contains("Temp\u00e9rature");
+
+            // Round-trip
+            ModelDefinition loaded = serializer.fromFile(file);
+            assertThat(loaded.name()).isEqualTo("Caf\u00e9 Model");
+            assertThat(loaded.stocks().get(0).name()).isEqualTo("Temp\u00e9rature");
         }
     }
 
