@@ -810,8 +810,7 @@ public class ModelWindow {
             canvas.requestFocus();
             updateStatusBar();
         });
-        Platform.runLater(() ->
-                popup.showBelow(stage, stage.getX() + 60, stage.getY() + 80));
+        popup.showBelow(stage, stage.getX() + 60, stage.getY() + 80);
     }
 
     private void showError(String title, String message) {
