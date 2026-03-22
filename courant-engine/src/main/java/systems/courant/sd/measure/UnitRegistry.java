@@ -150,10 +150,11 @@ public class UnitRegistry {
      */
     public void register(Unit unit) {
         synchronized (this) {
+            String lowerName = unit.getName().toLowerCase();
             if (byName.containsKey(unit.getName())) {
                 // Replacing existing unit — no count change
                 byName.put(unit.getName(), unit);
-                byNameLower.put(unit.getName().toLowerCase(), unit);
+                byNameLower.put(lowerName, unit);
                 return;
             }
             if (customUnitCount >= MAX_CUSTOM_UNITS) {
@@ -161,9 +162,12 @@ public class UnitRegistry {
                         "Unit registry exceeded " + MAX_CUSTOM_UNITS
                                 + " custom units — possible unbounded auto-creation");
             }
+            boolean isNewCaseInsensitive = !byNameLower.containsKey(lowerName);
             byName.put(unit.getName(), unit);
-            byNameLower.putIfAbsent(unit.getName().toLowerCase(), unit);
-            customUnitCount++;
+            byNameLower.putIfAbsent(lowerName, unit);
+            if (isNewCaseInsensitive) {
+                customUnitCount++;
+            }
         }
     }
 
