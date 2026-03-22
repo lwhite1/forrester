@@ -160,7 +160,7 @@ public class UnitRegistry {
                                 + " custom units — possible unbounded auto-creation");
             }
             byName.put(unit.getName(), unit);
-            byNameLower.put(unit.getName().toLowerCase(), unit);
+            byNameLower.putIfAbsent(unit.getName().toLowerCase(), unit);
             customUnitCount++;
         }
     }
