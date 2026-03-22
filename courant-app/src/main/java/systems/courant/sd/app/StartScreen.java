@@ -314,14 +314,14 @@ final class StartScreen extends VBox {
         card.setOnMouseExited(e -> card.setStyle(baseStyle));
         card.setOnMouseClicked(e -> {
             if (onOpenExample != null) {
-                onOpenExample.accept(example.name, example.path);
+                onOpenExample.accept(example.displayName, example.path);
             }
         });
 
         Label nameLabel = new Label(example.displayName);
         nameLabel.setStyle("-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #2C3E50;");
 
-        Tooltip.install(card, new Tooltip(example.name));
+        Tooltip.install(card, new Tooltip(example.fileName));
 
         Label descLabel = new Label(example.description);
         descLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: #7F8C8D;");
@@ -358,14 +358,14 @@ final class StartScreen extends VBox {
                 return entries;
             }
             for (JsonNode model : models) {
-                String name = model.path("name").asText(null);
-                String displayName = model.path("displayName").asText(name);
+                String fileName = model.path("fileName").asText(null);
+                String displayName = model.path("displayName").asText(fileName);
                 String description = model.path("description").asText("");
                 String category = model.path("category").asText("");
                 String difficulty = model.path("difficulty").asText("");
                 String path = model.path("path").asText(null);
-                if (name != null && path != null) {
-                    entries.add(new ExampleEntry(name, displayName, description, category, difficulty, path));
+                if (fileName != null && path != null) {
+                    entries.add(new ExampleEntry(fileName, displayName, description, category, difficulty, path));
                 }
             }
         } catch (IOException ex) {
@@ -422,7 +422,7 @@ final class StartScreen extends VBox {
         this.onOpenExample = handler;
     }
 
-    private record ExampleEntry(String name, String displayName, String description,
+    private record ExampleEntry(String fileName, String displayName, String description,
                                 String category, String difficulty, String path) {
     }
 }

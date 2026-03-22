@@ -2,7 +2,7 @@
   "models": [
     {
       "id": "bathtub",
-      "name": "Bathtub",
+      "fileName": "Bathtub",
       "displayName": "Bathtub",
       "description": "Water drains at a fixed rate; inflow begins after a delay",
       "category": "introductory",
@@ -21,7 +21,7 @@
     },
     {
       "id": "coffee-cooling",
-      "name": "Coffee Cooling",
+      "fileName": "Coffee Cooling",
       "displayName": "Coffee Cooling",
       "description": "Coffee temperature decays toward room temperature",
       "category": "introductory",
@@ -40,7 +40,7 @@
     },
     {
       "id": "exponential-growth",
-      "name": "Exponential Growth",
+      "fileName": "Exponential Growth",
       "displayName": "Exponential Growth",
       "description": "Population growing with constant birth and death rates",
       "category": "introductory",
@@ -59,7 +59,7 @@
     },
     {
       "id": "goal-seeking",
-      "name": "Goal Seeking",
+      "fileName": "Goal Seeking",
       "displayName": "Goal Seeking",
       "description": "Inventory adjusts toward a goal via negative feedback",
       "category": "introductory",
@@ -78,12 +78,12 @@
     },
     {
       "id": "cocaine-flow",
-      "name": "Cocaine Flow",
+      "fileName": "0601Cocaine_model",
       "displayName": "Cocaine Flow",
       "description": "Simple stock-flow model of cocaine usage dynamics with one stock representing users",
       "category": "introductory",
       "difficulty": "introductory",
-      "path": "introductory/cocaine-flow.json",
+      "path": "introductory/0601Cocaine_model.json",
       "tags": [
         "stock-and-flow",
         "balancing-feedback"
@@ -97,7 +97,7 @@
     },
     {
       "id": "inventory-oscillation",
-      "name": "Inventory Oscillation",
+      "fileName": "Inventory Oscillation",
       "displayName": "Inventory Oscillation",
       "description": "Car dealership inventory with perception and delivery delays",
       "category": "supply-chain",
@@ -117,7 +117,7 @@
     },
     {
       "id": "predator-prey",
-      "name": "Predator Prey",
+      "fileName": "Predator Prey",
       "displayName": "Predator Prey",
       "description": "Lotka-Volterra model of predator-prey oscillation",
       "category": "ecology",
@@ -136,12 +136,12 @@
     },
     {
       "id": "muskrat-plague",
-      "name": "Muskrat Plague",
+      "fileName": "0602Muskrats1",
       "displayName": "Muskrat Plague",
       "description": "Models muskrat population growth and plague-driven collapse in the Netherlands",
       "category": "ecology",
       "difficulty": "introductory",
-      "path": "ecology/muskrat-plague.json",
+      "path": "ecology/0602Muskrats1.json",
       "tags": [
         "population-dynamics",
         "negative-feedback"
@@ -155,12 +155,12 @@
     },
     {
       "id": "kaibab-deer",
-      "name": "Kaibab Deer",
+      "fileName": "1804_Kaibab1",
       "displayName": "Kaibab Deer",
       "description": "Deer population on the Kaibab Plateau (1900-1950) limited by predation, using a lookup table for kill rate",
       "category": "ecology",
       "difficulty": "intermediate",
-      "path": "ecology/kaibab-deer.json",
+      "path": "ecology/1804_Kaibab1.json",
       "tags": [
         "population-dynamics",
         "lookup-table"
@@ -174,12 +174,12 @@
     },
     {
       "id": "bluefin-tuna-overfishing",
-      "name": "Bluefin Tuna Overfishing",
+      "fileName": "1412_OverfishingOfNBFTunaEN",
       "displayName": "Bluefin Tuna Overfishing",
       "description": "Two-stock model of North Atlantic bluefin tuna population collapse from commercial overfishing",
       "category": "ecology",
       "difficulty": "advanced",
-      "path": "ecology/bluefin-tuna-overfishing.json",
+      "path": "ecology/1412_OverfishingOfNBFTunaEN.json",
       "tags": [
         "overshoot",
         "collapse",
@@ -194,12 +194,12 @@
     },
     {
       "id": "ecological-overshoot",
-      "name": "Ecological Overshoot",
+      "fileName": "0603EcOvershootCollapseBasedOnEZ416Bossel",
       "displayName": "Ecological Overshoot",
       "description": "Two-stock ecological overshoot and collapse model based on Bossel's formulation",
       "category": "ecology",
       "difficulty": "intermediate",
-      "path": "ecology/ecological-overshoot.json",
+      "path": "ecology/0603EcOvershootCollapseBasedOnEZ416Bossel.json",
       "tags": [
         "overshoot",
         "collapse",
@@ -214,7 +214,7 @@
     },
     {
       "id": "s-shaped-growth",
-      "name": "S-Shaped Growth",
+      "fileName": "S-Shaped Growth",
       "displayName": "S-Shaped Growth",
       "description": "Logistic population growth limited by carrying capacity",
       "category": "population",
@@ -233,7 +233,7 @@
     },
     {
       "id": "sir-epidemic",
-      "name": "SIR Epidemic",
+      "fileName": "SIR Epidemic",
       "displayName": "SIR Epidemic",
       "description": "Classic Susceptible-Infectious-Recovered compartmental model",
       "category": "epidemiology",
@@ -252,12 +252,12 @@
     },
     {
       "id": "cld-bankrun",
-      "name": "0211CLDbankrun",
+      "fileName": "0211CLDbankrun",
       "displayName": "Bank Run",
       "description": "Causal loop diagram of positive feedback loops driving bank run dynamics",
       "category": "causal-loop",
       "difficulty": "introductory",
-      "path": "causal-loop/cld-bankrun.json",
+      "path": "causal-loop/0211CLDbankrun.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -268,12 +268,12 @@
     },
     {
       "id": "cocaine-cld",
-      "name": "0601Cocaine_CLD",
+      "fileName": "0601Cocaine_CLD",
       "displayName": "Cocaine CLD",
       "description": "Causal loop diagram of feedback loops in cocaine use and addiction dynamics",
       "category": "causal-loop",
       "difficulty": "introductory",
-      "path": "causal-loop/cocaine-cld.json",
+      "path": "causal-loop/0601Cocaine_CLD.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -284,12 +284,12 @@
     },
     {
       "id": "competition-faculty",
-      "name": "0201CompetitionFaculty",
+      "fileName": "0201CompetitionFaculty",
       "displayName": "Competition Among Faculty",
       "description": "Causal loop diagram of competitive dynamics among faculty members",
       "category": "causal-loop",
       "difficulty": "introductory",
-      "path": "causal-loop/competition-faculty.json",
+      "path": "causal-loop/0201CompetitionFaculty.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -300,12 +300,12 @@
     },
     {
       "id": "conflict-middle-east",
-      "name": "0210ConflictInMiddleEast",
+      "fileName": "0210ConflictInMiddleEast",
       "displayName": "Conflict in the Middle East",
       "description": "Causal loop diagram of escalation and de-escalation dynamics in Middle East conflicts",
       "category": "causal-loop",
       "difficulty": "introductory",
-      "path": "causal-loop/conflict-middle-east.json",
+      "path": "causal-loop/0210ConflictInMiddleEast.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -316,12 +316,12 @@
     },
     {
       "id": "munro-lane",
-      "name": "0204MunroLane",
+      "fileName": "0204MunroLane",
       "displayName": "Munro Lane",
       "description": "Causal loop diagram illustrating neighborhood dynamics and tipping points",
       "category": "causal-loop",
       "difficulty": "introductory",
-      "path": "causal-loop/munro-lane.json",
+      "path": "causal-loop/0204MunroLane.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -332,12 +332,12 @@
     },
     {
       "id": "random-vs-randomized",
-      "name": "1009_RANDOMvsRANDOMIZED",
+      "fileName": "1009_RANDOMvsRANDOMIZED",
       "displayName": "RANDOM vs RANDOMIZED",
       "description": "Demonstrates the difference between RANDOM and RANDOMIZED functions in Vensim",
       "category": "causal-loop",
       "difficulty": "introductory",
-      "path": "causal-loop/random-vs-randomized.json",
+      "path": "causal-loop/1009_RANDOMvsRANDOMIZED.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -348,12 +348,12 @@
     },
     {
       "id": "rem-aggregated-cld",
-      "name": "0203REMaggregatedCLDen1",
+      "fileName": "0203REMaggregatedCLDen1",
       "displayName": "Real Estate Market (Aggregated CLD)",
       "description": "Aggregated causal loop diagram of real estate market feedback structure",
       "category": "causal-loop",
       "difficulty": "introductory",
-      "path": "causal-loop/rem-aggregated-cld.json",
+      "path": "causal-loop/0203REMaggregatedCLDen1.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -364,7 +364,7 @@
     },
     {
       "id": "repair01",
-      "name": "repair01",
+      "fileName": "repair01",
       "displayName": "Repair",
       "description": "Causal loop diagram of equipment repair feedback showing failure rates and maintenance capacity",
       "category": "causal-loop",
@@ -380,7 +380,7 @@
     },
     {
       "id": "repair02",
-      "name": "repair02",
+      "fileName": "repair02",
       "displayName": "Repair02",
       "description": "Stock-flow equipment repair model with maintenance workforce, failure rates, and repair throughput.",
       "category": "control",
@@ -396,12 +396,12 @@
     },
     {
       "id": "market",
-      "name": "MARKET",
+      "fileName": "MARKET",
       "displayName": "Market",
       "description": "Market dynamics model with product adoption, competitive pricing, and capacity expansion feedbacks.",
       "category": "economics",
       "difficulty": "advanced",
-      "path": "economics/market.json",
+      "path": "economics/MARKET.json",
       "tags": [],
       "elements": {
         "stocks": 8,
@@ -412,7 +412,7 @@
     },
     {
       "id": "advertising",
-      "name": "advertising",
+      "fileName": "advertising",
       "displayName": "Advertising",
       "description": "Advertising effectiveness model showing how ad spending drives customer awareness and sales.",
       "category": "marketing",
@@ -428,12 +428,12 @@
     },
     {
       "id": "bpr0",
-      "name": "BPR0",
+      "fileName": "BPR0",
       "displayName": "Business Process Reengineering",
       "description": "Causal loop diagram of a business process reengineering problem with no stock-flow structure",
       "category": "causal-loop",
       "difficulty": "introductory",
-      "path": "causal-loop/bpr0.json",
+      "path": "causal-loop/BPR0.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -444,12 +444,12 @@
     },
     {
       "id": "oostvaardersplassen",
-      "name": "1013Mass starvation Oostvaardersplassen",
+      "fileName": "1013Mass starvation Oostvaardersplassen",
       "displayName": "Oostvaardersplassen",
       "description": "Models large herbivore population and mass starvation events in the Oostvaardersplassen nature reserve",
       "category": "ecology",
       "difficulty": "intermediate",
-      "path": "ecology/Oostvaardersplassen.json",
+      "path": "ecology/1013Mass starvation Oostvaardersplassen.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -460,12 +460,12 @@
     },
     {
       "id": "cholera",
-      "name": "1409_CholeraZBwoUnits",
+      "fileName": "1409_CholeraZBwoUnits",
       "displayName": "Cholera",
       "description": "Seven-stock cholera transmission model incorporating waterborne pathogen dynamics",
       "category": "epidemiology",
       "difficulty": "advanced",
-      "path": "epidemiology/Cholera.json",
+      "path": "epidemiology/1409_CholeraZBwoUnits.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -476,12 +476,12 @@
     },
     {
       "id": "deradicalization",
-      "name": "1416_deradicalisationI_EN",
+      "fileName": "1416_deradicalisationI_EN",
       "displayName": "Deradicalization",
       "description": "Four-stock model of radicalization pathways and deradicalization policy interventions",
       "category": "policy",
       "difficulty": "advanced",
-      "path": "policy/Deradicalization.json",
+      "path": "policy/1416_deradicalisationI_EN.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -492,12 +492,12 @@
     },
     {
       "id": "unemployment",
-      "name": "1802_UnemploymentBasedOnEZ511",
+      "fileName": "1802_UnemploymentBasedOnEZ511",
       "displayName": "Unemployment",
       "description": "Five-stock model of unemployment dynamics with labor market feedback and skill deterioration",
       "category": "social",
       "difficulty": "advanced",
-      "path": "social/Unemployment.json",
+      "path": "social/1802_UnemploymentBasedOnEZ511.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -508,12 +508,12 @@
     },
     {
       "id": "globalization",
-      "name": "1819_GlobalizationEZ608fromZOO",
+      "fileName": "1819_GlobalizationEZ608fromZOO",
       "displayName": "Globalization",
       "description": "Four-stock model of globalization dynamics with trade, capital flows, and institutional feedback",
       "category": "economics",
       "difficulty": "advanced",
-      "path": "economics/Globalization.json",
+      "path": "economics/1819_GlobalizationEZ608fromZOO.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -524,12 +524,12 @@
     },
     {
       "id": "aging-chain",
-      "name": "0604Aging",
+      "fileName": "0604Aging",
       "displayName": "Aging Chain",
       "description": "Three-stock aging chain model demonstrating demographic cohort transitions",
       "category": "demographics",
       "difficulty": "intermediate",
-      "path": "demographics/aging-chain.json",
+      "path": "demographics/0604Aging.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -540,12 +540,12 @@
     },
     {
       "id": "feral-pigs",
-      "name": "0605Feral Pigs SFD EN",
+      "fileName": "0605Feral Pigs SFD EN",
       "displayName": "Feral Pigs",
       "description": "Models feral pig population dynamics with density-dependent birth and death rates",
       "category": "ecology",
       "difficulty": "intermediate",
-      "path": "ecology/feral-pigs.json",
+      "path": "ecology/0605Feral Pigs SFD EN.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -556,12 +556,12 @@
     },
     {
       "id": "family-planning",
-      "name": "0607UnintendedFamilyPlanningBenefits",
+      "fileName": "0607UnintendedFamilyPlanningBenefits",
       "displayName": "Family Planning",
       "description": "Five-stock model exploring unintended consequences of family planning programs on population dynamics",
       "category": "demographics",
       "difficulty": "advanced",
-      "path": "demographics/family-planning.json",
+      "path": "demographics/0607UnintendedFamilyPlanningBenefits.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -572,12 +572,12 @@
     },
     {
       "id": "pneumonic-plague",
-      "name": "0608PneumonicPlagueChinaA",
+      "fileName": "0608PneumonicPlagueChinaA",
       "displayName": "Pneumonic Plague",
       "description": "Four-stock SIR-based model of pneumonic plague transmission in China",
       "category": "epidemiology",
       "difficulty": "intermediate",
-      "path": "epidemiology/pneumonic-plague.json",
+      "path": "epidemiology/0608PneumonicPlagueChinaA.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -588,12 +588,12 @@
     },
     {
       "id": "sd-education",
-      "name": "0609SDEducationVersion1",
+      "fileName": "0609SDEducationVersion1",
       "displayName": "Sd Education",
       "description": "Models student flow through a system dynamics education program with enrollment and graduation",
       "category": "education",
       "difficulty": "introductory",
-      "path": "education/sd-education.json",
+      "path": "education/0609SDEducationVersion1.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -604,12 +604,12 @@
     },
     {
       "id": "micro-chp-diffusion",
-      "name": "0610Diffusion and Adoption of Micro-CHP",
+      "fileName": "0610Diffusion and Adoption of Micro-CHP",
       "displayName": "Micro Chp Diffusion",
       "description": "Bass diffusion model applied to adoption of micro combined heat and power technology",
       "category": "technology",
       "difficulty": "intermediate",
-      "path": "technology/micro-chp-diffusion.json",
+      "path": "technology/0610Diffusion and Adoption of Micro-CHP.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -620,12 +620,12 @@
     },
     {
       "id": "housing-stock",
-      "name": "0611HousingStockDynamicsA",
+      "fileName": "0611HousingStockDynamicsA",
       "displayName": "Housing Stock",
       "description": "Three-stock model of housing construction, aging, and demolition dynamics",
       "category": "economics",
       "difficulty": "intermediate",
-      "path": "economics/housing-stock.json",
+      "path": "economics/0611HousingStockDynamicsA.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -636,12 +636,12 @@
     },
     {
       "id": "pulse-and-pulse-train",
-      "name": "1008_PULSEandPULSETRAIN",
+      "fileName": "1008_PULSEandPULSETRAIN",
       "displayName": "Pulse And Pulse Train",
       "description": "Demonstrates PULSE and PULSE TRAIN built-in functions with a simple accumulator",
       "category": "introductory",
       "difficulty": "introductory",
-      "path": "introductory/pulse-and-pulse-train.json",
+      "path": "introductory/1008_PULSEandPULSETRAIN.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -652,12 +652,12 @@
     },
     {
       "id": "white-pink-noise",
-      "name": "1010_whitepinknoise",
+      "fileName": "1010_whitepinknoise",
       "displayName": "White Pink Noise",
       "description": "Seven-stock reference model comparing white noise and pink noise generation techniques",
       "category": "introductory",
       "difficulty": "intermediate",
-      "path": "introductory/white-pink-noise.json",
+      "path": "introductory/1010_whitepinknoise.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -668,12 +668,12 @@
     },
     {
       "id": "shale-gas",
-      "name": "1012_ShaleGASwoUnits",
+      "fileName": "1012_ShaleGASwoUnits",
       "displayName": "Shale Gas",
       "description": "Models shale gas extraction dynamics including well depletion and drilling rates",
       "category": "technology",
       "difficulty": "intermediate",
-      "path": "technology/shale-gas.json",
+      "path": "technology/1012_ShaleGASwoUnits.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -684,12 +684,12 @@
     },
     {
       "id": "burnout-homer",
-      "name": "1016_BurnoutHomer1",
+      "fileName": "1016_BurnoutHomer1",
       "displayName": "Burnout Homer",
       "description": "Five-stock model of workplace burnout dynamics based on Homer's formulation",
       "category": "management",
       "difficulty": "intermediate",
-      "path": "management/burnout-homer.json",
+      "path": "management/1016_BurnoutHomer1.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -700,12 +700,12 @@
     },
     {
       "id": "managing-faculty",
-      "name": "1401_ManagingFaculty",
+      "fileName": "1401_ManagingFaculty",
       "displayName": "Managing Faculty",
       "description": "Two-stock model of university faculty hiring, tenure, and retirement dynamics",
       "category": "management",
       "difficulty": "intermediate",
-      "path": "management/managing-faculty.json",
+      "path": "management/1401_ManagingFaculty.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -716,12 +716,12 @@
     },
     {
       "id": "debt-crisis",
-      "name": "1403_DebtCrisisBasedOnZ605",
+      "fileName": "1403_DebtCrisisBasedOnZ605",
       "displayName": "Debt Crisis",
       "description": "Four-stock model of sovereign debt accumulation, interest rate spirals, and fiscal crisis",
       "category": "economics",
       "difficulty": "advanced",
-      "path": "economics/debt-crisis.json",
+      "path": "economics/1403_DebtCrisisBasedOnZ605.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -732,12 +732,12 @@
     },
     {
       "id": "environmental-management",
-      "name": "1404_EnvManagementInMiniworldWOcorrectunits",
+      "fileName": "1404_EnvManagementInMiniworldWOcorrectunits",
       "displayName": "Environmental Management",
       "description": "Three-stock model of environmental management trade-offs between economic growth and ecological degradation",
       "category": "environment",
       "difficulty": "advanced",
-      "path": "environment/environmental-management.json",
+      "path": "environment/1404_EnvManagementInMiniworldWOcorrectunits.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -748,12 +748,12 @@
     },
     {
       "id": "flu-two-regions",
-      "name": "1405_Flu2regionsV2cIFTHENELSE",
+      "fileName": "1405_Flu2regionsV2cIFTHENELSE",
       "displayName": "Flu Two Regions",
       "description": "Eight-stock SIR model of influenza spreading between two connected regions",
       "category": "epidemiology",
       "difficulty": "advanced",
-      "path": "epidemiology/flu-two-regions.json",
+      "path": "epidemiology/1405_Flu2regionsV2cIFTHENELSE.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -764,12 +764,12 @@
     },
     {
       "id": "new-towns",
-      "name": "1406_NewTownsNL_v2",
+      "fileName": "1406_NewTownsNL_v2",
       "displayName": "New Towns",
       "description": "Three-stock model of Dutch new town development with population aging and infrastructure dynamics",
       "category": "demographics",
       "difficulty": "advanced",
-      "path": "demographics/new-towns.json",
+      "path": "demographics/1406_NewTownsNL_v2.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -780,12 +780,12 @@
     },
     {
       "id": "tolerance-hate-aggression",
-      "name": "1407_ToleranceHateAggressionEZ509versionEP",
+      "fileName": "1407_ToleranceHateAggressionEZ509versionEP",
       "displayName": "Tolerance Hate Aggression",
       "description": "Four-stock model of tolerance erosion, hate accumulation, and aggression feedback dynamics",
       "category": "social",
       "difficulty": "advanced",
-      "path": "social/tolerance-hate-aggression.json",
+      "path": "social/1407_ToleranceHateAggressionEZ509versionEP.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -796,12 +796,12 @@
     },
     {
       "id": "evs-lithium-scarcity",
-      "name": "1408_EVsLithiumScarcity_EN",
+      "fileName": "1408_EVsLithiumScarcity_EN",
       "displayName": "Evs Lithium Scarcity",
       "description": "Seven-stock model of electric vehicle adoption constrained by lithium resource scarcity",
       "category": "technology",
       "difficulty": "advanced",
-      "path": "technology/evs-lithium-scarcity.json",
+      "path": "technology/1408_EVsLithiumScarcity_EN.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -812,12 +812,12 @@
     },
     {
       "id": "signalled-bank-run",
-      "name": "1410_SignalledBankRun",
+      "fileName": "1410_SignalledBankRun",
       "displayName": "Signalled Bank Run",
       "description": "Two-stock model of bank runs triggered by signals of institutional weakness and depositor panic",
       "category": "economics",
       "difficulty": "advanced",
-      "path": "economics/signalled-bank-run.json",
+      "path": "economics/1410_SignalledBankRun.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -828,12 +828,12 @@
     },
     {
       "id": "production-management",
-      "name": "1413_ProductionManagement",
+      "fileName": "1413_ProductionManagement",
       "displayName": "Production Management",
       "description": "Six-stock production and inventory management model with workforce and backlog dynamics",
       "category": "management",
       "difficulty": "advanced",
-      "path": "management/production-management.json",
+      "path": "management/1413_ProductionManagement.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -844,12 +844,12 @@
     },
     {
       "id": "district-housing",
-      "name": "1414_DistrictHousingWOunits",
+      "fileName": "1414_DistrictHousingWOunits",
       "displayName": "District Housing",
       "description": "Two-stock model of housing supply and demand dynamics within a district",
       "category": "economics",
       "difficulty": "intermediate",
-      "path": "economics/district-housing.json",
+      "path": "economics/1414_DistrictHousingWOunits.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -860,12 +860,12 @@
     },
     {
       "id": "mineral-metal-scarcity",
-      "name": "1415_MineralMetalScarcityI_EN",
+      "fileName": "1415_MineralMetalScarcityI_EN",
       "displayName": "Mineral Metal Scarcity",
       "description": "Seven-stock model of mineral and metal resource depletion driven by demand growth and recycling limits",
       "category": "economics",
       "difficulty": "advanced",
-      "path": "economics/mineral-metal-scarcity.json",
+      "path": "economics/1415_MineralMetalScarcityI_EN.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -876,12 +876,12 @@
     },
     {
       "id": "hospital-management",
-      "name": "1803_HospitalManagement",
+      "fileName": "1803_HospitalManagement",
       "displayName": "Hospital Management",
       "description": "Four-stock model of hospital patient flow, staffing, and capacity management",
       "category": "social",
       "difficulty": "advanced",
-      "path": "social/hospital-management.json",
+      "path": "social/1803_HospitalManagement.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -892,12 +892,12 @@
     },
     {
       "id": "prostitution-trafficking",
-      "name": "1805_ProstitutionHumanTraffickingEN_withoutSolvingUnitErrors",
+      "fileName": "1805_ProstitutionHumanTraffickingEN_withoutSolvingUnitErrors",
       "displayName": "Prostitution Trafficking",
       "description": "Three-stock model of human trafficking supply chains and policy intervention effectiveness",
       "category": "social",
       "difficulty": "advanced",
-      "path": "social/prostitution-trafficking.json",
+      "path": "social/1805_ProstitutionHumanTraffickingEN_withoutSolvingUnitErrors.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -908,12 +908,12 @@
     },
     {
       "id": "real-estate-boom",
-      "name": "1807_RealEstateBoomAndBust_EN",
+      "fileName": "1807_RealEstateBoomAndBust_EN",
       "displayName": "Real Estate Boom",
       "description": "Four-stock model of speculative real estate boom-bust cycles with credit feedback",
       "category": "economics",
       "difficulty": "advanced",
-      "path": "economics/real-estate-boom.json",
+      "path": "economics/1807_RealEstateBoomAndBust_EN.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -924,12 +924,12 @@
     },
     {
       "id": "orchestrated-bank-run",
-      "name": "1812_OrchestratedBankRun",
+      "fileName": "1812_OrchestratedBankRun",
       "displayName": "Orchestrated Bank Run",
       "description": "Five-stock model of deliberately orchestrated bank runs through coordinated depositor withdrawal",
       "category": "economics",
       "difficulty": "advanced",
-      "path": "economics/orchestrated-bank-run.json",
+      "path": "economics/1812_OrchestratedBankRun.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -940,12 +940,12 @@
     },
     {
       "id": "deradicalization-ii",
-      "name": "1813_deradicalizationII_EN_ReadNoteOnUnitErrors",
+      "fileName": "1813_deradicalizationII_EN_ReadNoteOnUnitErrors",
       "displayName": "Deradicalization Ii",
       "description": "Extended five-stock deradicalization model with additional intervention mechanisms and social network effects",
       "category": "policy",
       "difficulty": "advanced",
-      "path": "policy/deradicalization-ii.json",
+      "path": "policy/1813_deradicalizationII_EN_ReadNoteOnUnitErrors.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -956,12 +956,12 @@
     },
     {
       "id": "project-management",
-      "name": "1814_ProjectManagement_EN",
+      "fileName": "1814_ProjectManagement_EN",
       "displayName": "Project Management",
       "description": "Five-stock model of project schedule and effort dynamics with rework and Brooks's Law effects",
       "category": "management",
       "difficulty": "advanced",
-      "path": "management/project-management.json",
+      "path": "management/1814_ProjectManagement_EN.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -972,12 +972,12 @@
     },
     {
       "id": "energy-transition",
-      "name": "1816_EnergyTransitionManagement_Q2b_EN",
+      "fileName": "1816_EnergyTransitionManagement_Q2b_EN",
       "displayName": "Energy Transition",
       "description": "Twelve-stock model of energy system transition from fossil fuels to renewables with policy levers",
       "category": "technology",
       "difficulty": "advanced",
-      "path": "technology/energy-transition.json",
+      "path": "technology/1816_EnergyTransitionManagement_Q2b_EN.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -988,12 +988,12 @@
     },
     {
       "id": "higher-education-stimuli",
-      "name": "1820_HigherEducationStimuli_NL_woUnits",
+      "fileName": "1820_HigherEducationStimuli_NL_woUnits",
       "displayName": "Higher Education Stimuli",
       "description": "Four-stock model of higher education policy stimuli and their effects on enrollment and graduation",
       "category": "demographics",
       "difficulty": "advanced",
-      "path": "demographics/higher-education-stimuli.json",
+      "path": "demographics/1820_HigherEducationStimuli_NL_woUnits.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -1004,12 +1004,12 @@
     },
     {
       "id": "collapse-civilisations",
-      "name": "1822_CollapseOfCivilisations",
+      "fileName": "1822_CollapseOfCivilisations",
       "displayName": "Collapse Civilisations",
       "description": "Four-stock model of civilizational collapse through resource depletion and institutional decay",
       "category": "social",
       "difficulty": "advanced",
-      "path": "social/collapse-civilisations.json",
+      "path": "social/1822_CollapseOfCivilisations.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -1020,7 +1020,7 @@
     },
     {
       "id": "vensim-intro",
-      "name": "INTRO",
+      "fileName": "INTRO",
       "displayName": "Vensim Intro",
       "description": "Model 'INTRO' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "management",
@@ -1036,7 +1036,7 @@
     },
     {
       "id": "vensim-bpr3",
-      "name": "BPR3",
+      "fileName": "BPR3",
       "displayName": "Vensim Bpr3",
       "description": "Model 'BPR3' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "management",
@@ -1052,7 +1052,7 @@
     },
     {
       "id": "vensim-age",
-      "name": "AGE",
+      "fileName": "AGE",
       "displayName": "Vensim Age",
       "description": "Model 'AGE' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "demographics",
@@ -1068,7 +1068,7 @@
     },
     {
       "id": "vensim-agechain",
-      "name": "AGECHAIN",
+      "fileName": "AGECHAIN",
       "displayName": "Vensim Agechain",
       "description": "Model 'AGECHAIN' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "demographics",
@@ -1084,7 +1084,7 @@
     },
     {
       "id": "vensim-agemodel",
-      "name": "AGEMODEL",
+      "fileName": "AGEMODEL",
       "displayName": "Vensim Agemodel",
       "description": "Model 'AGEMODEL' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "demographics",
@@ -1100,7 +1100,7 @@
     },
     {
       "id": "vensim-ball",
-      "name": "BALL",
+      "fileName": "BALL",
       "displayName": "Vensim Ball",
       "description": "Model 'BALL' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "physics",
@@ -1116,7 +1116,7 @@
     },
     {
       "id": "vensim-ballmodel",
-      "name": "BALLMODEL",
+      "fileName": "BALLMODEL",
       "displayName": "Vensim Ballmodel",
       "description": "Model 'BALLMODEL' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "physics",
@@ -1132,7 +1132,7 @@
     },
     {
       "id": "vensim-burnout",
-      "name": "BURNOUT",
+      "fileName": "BURNOUT",
       "displayName": "Vensim Burnout",
       "description": "Model 'BURNOUT' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "management",
@@ -1148,7 +1148,7 @@
     },
     {
       "id": "vensim-burnoutmodel",
-      "name": "BURNOUTMODEL",
+      "fileName": "BURNOUTMODEL",
       "displayName": "Vensim Burnoutmodel",
       "description": "Model 'BURNOUTMODEL' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "management",
@@ -1164,7 +1164,7 @@
     },
     {
       "id": "vensim-caffeine",
-      "name": "CAFFEINE",
+      "fileName": "CAFFEINE",
       "displayName": "Vensim Caffeine",
       "description": "Model 'CAFFEINE' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "introductory",
@@ -1180,7 +1180,7 @@
     },
     {
       "id": "vensim-commod",
-      "name": "COMMOD",
+      "fileName": "COMMOD",
       "displayName": "Vensim Commod",
       "description": "Model 'COMMOD' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "economics",
@@ -1196,7 +1196,7 @@
     },
     {
       "id": "vensim-compete1",
-      "name": "COMPETE1",
+      "fileName": "COMPETE1",
       "displayName": "Vensim Compete1",
       "description": "Model 'COMPETE1' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "economics",
@@ -1212,7 +1212,7 @@
     },
     {
       "id": "vensim-compete1model",
-      "name": "COMPETE1MODEL",
+      "fileName": "COMPETE1MODEL",
       "displayName": "Vensim Compete1model",
       "description": "Model 'COMPETE1MODEL' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "economics",
@@ -1228,7 +1228,7 @@
     },
     {
       "id": "vensim-cool",
-      "name": "COOL",
+      "fileName": "COOL",
       "displayName": "Vensim Cool",
       "description": "Model 'COOL' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "introductory",
@@ -1244,7 +1244,7 @@
     },
     {
       "id": "vensim-corpgrth",
-      "name": "CORPGRTH",
+      "fileName": "CORPGRTH",
       "displayName": "Vensim Corpgrth",
       "description": "Model 'CORPGRTH' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "economics",
@@ -1260,7 +1260,7 @@
     },
     {
       "id": "vensim-corpgrthe",
-      "name": "CORPGRTHE",
+      "fileName": "CORPGRTHE",
       "displayName": "Vensim Corpgrthe",
       "description": "Model 'CORPGRTHE' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "economics",
@@ -1276,7 +1276,7 @@
     },
     {
       "id": "vensim-deliv",
-      "name": "DELIV",
+      "fileName": "DELIV",
       "displayName": "Vensim Deliv",
       "description": "Model 'DELIV' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "marketing",
@@ -1292,7 +1292,7 @@
     },
     {
       "id": "vensim-eit",
-      "name": "EIT",
+      "fileName": "EIT",
       "displayName": "Vensim Eit",
       "description": "Model 'EIT' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "ecology",
@@ -1308,7 +1308,7 @@
     },
     {
       "id": "vensim-epidemic",
-      "name": "EPIDEMIC",
+      "fileName": "EPIDEMIC",
       "displayName": "Vensim Epidemic",
       "description": "Model 'EPIDEMIC' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "epidemiology",
@@ -1324,7 +1324,7 @@
     },
     {
       "id": "vensim-gravity",
-      "name": "GRAVITY",
+      "fileName": "GRAVITY",
       "displayName": "Vensim Gravity",
       "description": "Model 'GRAVITY' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "physics",
@@ -1340,7 +1340,7 @@
     },
     {
       "id": "vensim-popgame",
-      "name": "POPGAME",
+      "fileName": "POPGAME",
       "displayName": "Vensim Popgame",
       "description": "Model 'POPGAME' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "demographics",
@@ -1356,7 +1356,7 @@
     },
     {
       "id": "vensim-procrast",
-      "name": "PROCRAST",
+      "fileName": "PROCRAST",
       "displayName": "Vensim Procrast",
       "description": "Model 'PROCRAST' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "management",
@@ -1372,7 +1372,7 @@
     },
     {
       "id": "vensim-proj",
-      "name": "PROJ",
+      "fileName": "PROJ",
       "displayName": "Vensim Proj",
       "description": "Model 'PROJ' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "management",
@@ -1388,7 +1388,7 @@
     },
     {
       "id": "vensim-rabfox",
-      "name": "RABFOX",
+      "fileName": "RABFOX",
       "displayName": "Vensim Rabfox",
       "description": "Model 'RABFOX' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "ecology",
@@ -1404,7 +1404,7 @@
     },
     {
       "id": "vensim-snowball",
-      "name": "SNOWBALL",
+      "fileName": "SNOWBALL",
       "displayName": "Vensim Snowball",
       "description": "Model 'SNOWBALL' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "introductory",
@@ -1420,7 +1420,7 @@
     },
     {
       "id": "vensim-speed",
-      "name": "SPEED",
+      "fileName": "SPEED",
       "displayName": "Vensim Speed",
       "description": "Model 'SPEED' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "introductory",
@@ -1436,7 +1436,7 @@
     },
     {
       "id": "vensim-tubs",
-      "name": "TUBS",
+      "fileName": "TUBS",
       "displayName": "Vensim Tubs",
       "description": "Model 'TUBS' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "introductory",
@@ -1452,7 +1452,7 @@
     },
     {
       "id": "vensim-world",
-      "name": "WORLD",
+      "fileName": "WORLD",
       "displayName": "Vensim World",
       "description": "Model 'WORLD' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "environment",
@@ -1468,7 +1468,7 @@
     },
     {
       "id": "vensim-venread",
-      "name": "venread",
+      "fileName": "venread",
       "displayName": "Vensim Venread",
       "description": "Model 'venread' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "marketing",
@@ -1484,7 +1484,7 @@
     },
     {
       "id": "vensim-finance",
-      "name": "FINANCE",
+      "fileName": "FINANCE",
       "displayName": "Vensim Finance",
       "description": "Model 'FINANCE' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "economics",
@@ -1500,7 +1500,7 @@
     },
     {
       "id": "vensim-market2",
-      "name": "MARKET2",
+      "fileName": "MARKET2",
       "displayName": "Vensim Market2",
       "description": "Model 'MARKET2' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "economics",
@@ -1516,7 +1516,7 @@
     },
     {
       "id": "vensim-products",
-      "name": "Products",
+      "fileName": "Products",
       "displayName": "Vensim Products",
       "description": "Model 'Products' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "marketing",
@@ -1532,7 +1532,7 @@
     },
     {
       "id": "vensim-advertising",
-      "name": "advertising",
+      "fileName": "advertising",
       "displayName": "Vensim Advertising",
       "description": "Model 'advertising' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "marketing",
@@ -1548,7 +1548,7 @@
     },
     {
       "id": "vensim-market-model-original",
-      "name": "market_model_original",
+      "fileName": "market_model_original",
       "displayName": "Vensim Market Model Original",
       "description": "Model 'market_model_original' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "economics",
@@ -1564,7 +1564,7 @@
     },
     {
       "id": "vensim-urban",
-      "name": "URBAN",
+      "fileName": "URBAN",
       "displayName": "Vensim Urban",
       "description": "Model 'URBAN' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "social",
@@ -1580,7 +1580,7 @@
     },
     {
       "id": "vensim-worldapp",
-      "name": "WORLDAPP",
+      "fileName": "WORLDAPP",
       "displayName": "Vensim Worldapp",
       "description": "Model 'WORLDAPP' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "environment",
@@ -1596,7 +1596,7 @@
     },
     {
       "id": "vensim-worldappedited",
-      "name": "WORLDAPPEDITED",
+      "fileName": "WORLDAPPEDITED",
       "displayName": "Vensim Worldappedited",
       "description": "Model 'WORLDAPPEDITED' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "environment",
@@ -1612,7 +1612,7 @@
     },
     {
       "id": "vensim-change",
-      "name": "change",
+      "fileName": "change",
       "displayName": "Vensim Change",
       "description": "Model 'change' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "introductory",
@@ -1628,7 +1628,7 @@
     },
     {
       "id": "vensim-flicker",
-      "name": "flicker",
+      "fileName": "flicker",
       "displayName": "Vensim Flicker",
       "description": "Model 'flicker' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "introductory",
@@ -1644,7 +1644,7 @@
     },
     {
       "id": "vensim-mplayer",
-      "name": "mplayer",
+      "fileName": "mplayer",
       "displayName": "Vensim Mplayer",
       "description": "Model 'mplayer' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "demographics",
@@ -1660,7 +1660,7 @@
     },
     {
       "id": "vensim-world303scenarios",
-      "name": "World3_03_Scenarios",
+      "fileName": "World3_03_Scenarios",
       "displayName": "Vensim World303scenarios",
       "description": "Model 'World3_03_Scenarios' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "environment",
@@ -1676,7 +1676,7 @@
     },
     {
       "id": "vensim-wfinv",
-      "name": "WFINV",
+      "fileName": "WFINV",
       "displayName": "Vensim Wfinv",
       "description": "Model 'WFINV' from Vensim User Guide, Chapter 03. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "management",
@@ -1692,7 +1692,7 @@
     },
     {
       "id": "vensim-pop",
-      "name": "POP",
+      "fileName": "POP",
       "displayName": "Vensim Pop",
       "description": "Model 'POP' from Vensim User Guide, Chapter 06. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "demographics",
@@ -1708,7 +1708,7 @@
     },
     {
       "id": "vensim-price3",
-      "name": "price3",
+      "fileName": "price3",
       "displayName": "Vensim Price3",
       "description": "Model 'price3' from Vensim User Guide, Chapter 07. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "economics",
@@ -1724,7 +1724,7 @@
     },
     {
       "id": "vensim-rabbit3",
-      "name": "RABBIT3",
+      "fileName": "RABBIT3",
       "displayName": "Vensim Rabbit3",
       "description": "Model 'RABBIT3' from Vensim User Guide, Chapter 08. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "ecology",
@@ -1740,7 +1740,7 @@
     },
     {
       "id": "vensim-cap1",
-      "name": "CAP1",
+      "fileName": "CAP1",
       "displayName": "Vensim Cap1",
       "description": "Model 'CAP1' from Vensim User Guide, Chapter 09. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "management",
@@ -1756,7 +1756,7 @@
     },
     {
       "id": "vensim-cust3",
-      "name": "CUST3",
+      "fileName": "CUST3",
       "displayName": "Vensim Cust3",
       "description": "Model 'CUST3' from Vensim User Guide, Chapter 09. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "management",
@@ -1772,7 +1772,7 @@
     },
     {
       "id": "vensim-wom1",
-      "name": "WOM1",
+      "fileName": "WOM1",
       "displayName": "Vensim Wom1",
       "description": "Model 'WOM1' from Vensim User Guide, Chapter 12. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "marketing",
@@ -1788,7 +1788,7 @@
     },
     {
       "id": "vensim-wom4",
-      "name": "WOM4",
+      "fileName": "WOM4",
       "displayName": "Vensim Wom4",
       "description": "Model 'WOM4' from Vensim User Guide, Chapter 12. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "marketing",
@@ -1804,7 +1804,7 @@
     },
     {
       "id": "vensim-arms1",
-      "name": "arms1",
+      "fileName": "arms1",
       "displayName": "Vensim Arms1",
       "description": "Model 'arms1' from Vensim User Guide, Chapter 13. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "policy",
@@ -1820,7 +1820,7 @@
     },
     {
       "id": "vensim-yeast4",
-      "name": "YEAST4",
+      "fileName": "YEAST4",
       "displayName": "Vensim Yeast4",
       "description": "Model 'YEAST4' from Vensim User Guide, Chapter 14. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "ecology",
@@ -1836,7 +1836,7 @@
     },
     {
       "id": "vensim-sales",
-      "name": "SALES",
+      "fileName": "SALES",
       "displayName": "Vensim Sales",
       "description": "Model 'SALES' from Vensim User Guide, Chapter 15. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "marketing",
@@ -1852,7 +1852,7 @@
     },
     {
       "id": "vensim-cfc2",
-      "name": "CFC2",
+      "fileName": "CFC2",
       "displayName": "Vensim Cfc2",
       "description": "Model 'CFC2' from Vensim User Guide, Chapter 16. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "environment",
@@ -1868,7 +1868,7 @@
     },
     {
       "id": "vensim-proj1",
-      "name": "PROJ1",
+      "fileName": "PROJ1",
       "displayName": "Vensim Proj1",
       "description": "Model 'PROJ1' from Vensim User Guide, Chapter 17. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "management",
@@ -1884,7 +1884,7 @@
     },
     {
       "id": "vensim-proj3",
-      "name": "PROJ3",
+      "fileName": "PROJ3",
       "displayName": "Vensim Proj3",
       "description": "Model 'PROJ3' from Vensim User Guide, Chapter 17. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "management",
@@ -1900,7 +1900,7 @@
     },
     {
       "id": "vensim-electric",
-      "name": "ELECTRIC",
+      "fileName": "ELECTRIC",
       "displayName": "Vensim Electric",
       "description": "Model 'ELECTRIC' from Vensim User Guide, Chapter 18. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "technology",
@@ -1916,7 +1916,7 @@
     },
     {
       "id": "vensim-mentalsimulation01",
-      "name": "MentalSimulation01",
+      "fileName": "MentalSimulation01",
       "displayName": "Vensim Mentalsimulation01",
       "description": "Model 'MentalSimulation01' from Vensim User Guide, Chapter 20. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "introductory",
@@ -1932,7 +1932,7 @@
     },
     {
       "id": "vensim-repair02",
-      "name": "repair02",
+      "fileName": "repair02",
       "displayName": "Vensim Repair02",
       "description": "Model 'repair02' from Vensim User Guide, Chapter 20. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "control",

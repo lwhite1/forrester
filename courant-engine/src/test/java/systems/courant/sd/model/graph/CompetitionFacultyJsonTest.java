@@ -19,7 +19,7 @@ class CompetitionFacultyJsonTest {
 
     @Test
     void shouldDetectLoopsInCompetitionFacultyJson() throws IOException {
-        Path jsonPath = Path.of("../courant-app/src/main/resources/models/causal-loop/competition-faculty.json");
+        Path jsonPath = Path.of("../courant-app/src/main/resources/models/causal-loop/0201CompetitionFaculty.json");
         String json = Files.readString(jsonPath);
 
         ModelDefinitionSerializer serializer = new ModelDefinitionSerializer();

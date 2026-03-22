@@ -161,18 +161,18 @@ final class FileController {
 
             Map<String, Menu> categoryMenus = new TreeMap<>();
             for (JsonNode model : models) {
-                String name = model.path("name").asText(null);
-                String displayName = model.path("displayName").asText(name);
+                String fileName = model.path("fileName").asText(null);
+                String displayName = model.path("displayName").asText(fileName);
                 String category = model.path("category").asText(null);
                 String path = model.path("path").asText(null);
-                if (name == null || category == null || path == null) {
+                if (fileName == null || category == null || path == null) {
                     log.warn("Skipping malformed example entry: {}", model);
                     continue;
                 }
 
                 Menu categoryMenu = categoryMenus.computeIfAbsent(category, c -> new Menu(c));
                 MenuItem item = new MenuItem(displayName);
-                item.setOnAction(e -> openExample(name, path));
+                item.setOnAction(e -> openExample(displayName, path));
                 categoryMenu.getItems().add(item);
             }
             menu.getItems().addAll(categoryMenus.values());
