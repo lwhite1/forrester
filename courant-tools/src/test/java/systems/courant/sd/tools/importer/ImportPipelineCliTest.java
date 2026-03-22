@@ -426,6 +426,30 @@ class ImportPipelineCliTest {
                 System.setIn(originalIn);
             }
         }
+
+        @Test
+        void shouldNotCloseSystemInWhenClosed() {
+            java.io.InputStream originalIn = System.in;
+            boolean[] closed = {false};
+            ByteArrayInputStream testStream = new ByteArrayInputStream(
+                    "line1\n".getBytes(StandardCharsets.UTF_8)) {
+                @Override
+                public void close() {
+                    closed[0] = true;
+                }
+            };
+            System.setIn(testStream);
+            try {
+                ImportPipelineCli cli = new ImportPipelineCli();
+                cli.prompt("Q: "); // forces scanner creation
+                cli.close();
+
+                // close() must NOT have closed the underlying stream
+                assertThat(closed[0]).isFalse();
+            } finally {
+                System.setIn(originalIn);
+            }
+        }
     }
 
     private static Path copyTestModel(Path targetDir) throws IOException {

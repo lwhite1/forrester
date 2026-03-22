@@ -43,12 +43,16 @@ public class ImportPipelineCli implements Closeable {
         }
     }
 
+    /**
+     * Releases the scanner reference without closing System.in.
+     *
+     * <p>Closing a {@link Scanner} that wraps {@code System.in} also closes
+     * the underlying stream, making stdin unusable for the rest of the JVM.
+     * We intentionally avoid that by only nulling the reference.
+     */
     @Override
     public void close() {
-        if (stdinScanner != null) {
-            stdinScanner.close();
-            stdinScanner = null;
-        }
+        stdinScanner = null;
     }
 
     int run(String[] args) throws IOException {
