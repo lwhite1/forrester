@@ -99,26 +99,30 @@ public final class SelectionRenderer {
 
     /**
      * Draws a cubic Bézier hover highlight for a self-loop causal link.
+     *
+     * @param loopPts 8-element array {startX, startY, cp1X, cp1Y, cp2X, cp2Y, endX, endY}
      */
-    public static void drawConnectionHoverCubic(GraphicsContext gc, double[] pts) {
+    public static void drawConnectionHoverCubic(GraphicsContext gc, double[] loopPts) {
         gc.setStroke(ColorPalette.HOVER);
         gc.setLineWidth(3.0);
         gc.setLineDashes();
         CausalLinkGeometry.strokeCubicCurve(gc,
-                pts[0], pts[1], pts[2], pts[3],
-                pts[4], pts[5], pts[6], pts[7], 1.0);
+                loopPts[0], loopPts[1], loopPts[2], loopPts[3],
+                loopPts[4], loopPts[5], loopPts[6], loopPts[7], 1.0);
     }
 
     /**
      * Draws a cubic Bézier selection highlight for a self-loop causal link.
+     *
+     * @param loopPts 8-element array {startX, startY, cp1X, cp1Y, cp2X, cp2Y, endX, endY}
      */
-    public static void drawConnectionSelectionCubic(GraphicsContext gc, double[] pts) {
+    public static void drawConnectionSelectionCubic(GraphicsContext gc, double[] loopPts) {
         gc.setStroke(SELECTION_COLOR);
         gc.setLineWidth(3.0);
         gc.setLineDashes(SELECTION_DASH_LENGTH, SELECTION_DASH_GAP);
         CausalLinkGeometry.strokeCubicCurve(gc,
-                pts[0], pts[1], pts[2], pts[3],
-                pts[4], pts[5], pts[6], pts[7], 1.0);
+                loopPts[0], loopPts[1], loopPts[2], loopPts[3],
+                loopPts[4], loopPts[5], loopPts[6], loopPts[7], 1.0);
         gc.setLineDashes();
     }
 
