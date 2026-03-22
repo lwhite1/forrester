@@ -62,8 +62,8 @@ class FlowTimeDemoTest {
         Flow demand = Flows.linearGrowth("New Orders", DAY, wip, newOrdersPerDay);
 
         Flow throughput = Flow.create("Delivered Reports", DAY, () -> {
-            int demandDelay = Math.max(0, (int) Math.round(tat.getValue()));
-            int stepToGet = Math.max(0, (int) sim.getCurrentStep() - demandDelay);
+            long demandDelay = Math.max(0, Math.round(tat.getValue()));
+            long stepToGet = Math.max(0, sim.getCurrentStep() - demandDelay);
             double demandPlusDelay = demand.getHistoryAtTimeStep(stepToGet);
             return new Quantity(Math.min(capacity, demandPlusDelay), ItemUnits.THING);
         });
@@ -105,8 +105,8 @@ class FlowTimeDemoTest {
         // Track throughput values
         double[] throughputSum = {0};
         Flow throughput = Flow.create("Delivered", DAY, () -> {
-            int demandDelay = Math.max(0, (int) Math.round(tat.getValue()));
-            int stepToGet = Math.max(0, (int) sim.getCurrentStep() - demandDelay);
+            long demandDelay = Math.max(0, Math.round(tat.getValue()));
+            long stepToGet = Math.max(0, sim.getCurrentStep() - demandDelay);
             double demandPlusDelay = demand.getHistoryAtTimeStep(stepToGet);
             double rate = Math.min(190, demandPlusDelay);
             throughputSum[0] += rate;
