@@ -74,6 +74,7 @@ public class VariableForm implements ElementForm {
         equationField.setText(v.equation());
         unitBox.setValue(v.unit() != null ? v.unit() : "");
         commentArea.setText(v.comment() != null ? v.comment() : "");
+        dimAnalysis.revalidate();
     }
 
     @Override

@@ -29,8 +29,24 @@ public class DimensionalAnalysisUI {
     /** Cached registry for dimensional analysis — avoids rebuilding on every keystroke. */
     private final UnitRegistry unitRegistry = new UnitRegistry();
 
+    /** Retained references for revalidation when the selected element changes. */
+    private EquationField attachedField;
+    private Label attachedErrorLabel;
+    private Label attachedDimensionLabel;
+
     public DimensionalAnalysisUI(FormContext ctx) {
         this.ctx = ctx;
+    }
+
+    /**
+     * Re-runs equation validation and dimensional analysis for the currently attached field.
+     * Call this after {@code updateValues()} to refresh the dimension label when the selected
+     * element changes on the fast path (same form type reused).
+     */
+    public void revalidate() {
+        if (attachedField != null && attachedErrorLabel != null && attachedDimensionLabel != null) {
+            validateEquation(attachedField, attachedErrorLabel, attachedDimensionLabel);
+        }
     }
 
     /**
@@ -77,6 +93,11 @@ public class DimensionalAnalysisUI {
                 validateEquation(field, errorLabel, dimensionLabel);
             }
         });
+
+        // Retain references for revalidation on element switch
+        this.attachedField = field;
+        this.attachedErrorLabel = errorLabel;
+        this.attachedDimensionLabel = dimensionLabel;
 
         // Initial validation
         validateEquation(field, errorLabel, dimensionLabel);
