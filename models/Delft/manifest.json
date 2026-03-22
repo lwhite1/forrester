@@ -28,6 +28,18 @@
         }
     },
     {
+        "url": "models/Delft/02_02/0202Managing a Fitness Club CLD NL.mdl",
+        "className": "ManagingAFitnessClubCldNl",
+        "category": "02_02",
+        "comment": "Managing a Fitness Club CLD (Dutch)",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/02_02/0202Managing%20a%20Fitness%20Club%20CLD%20NL.mdl"
+        }
+    },
+    {
         "url": "models/Delft/02_03/0203REMaggregatedCLDen1.mdl",
         "className": "RemAggregatedCld",
         "id": "rem-aggregated-cld",
@@ -56,6 +68,18 @@
         }
     },
     {
+        "url": "models/Delft/02_04/0204MunroLaneII.mdl",
+        "className": "MunroLaneIi",
+        "category": "02_04",
+        "comment": "Munro Lane model version II",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/02_04/0204MunroLaneII.mdl"
+        }
+    },
+    {
         "url": "models/Delft/02_05/0205sfd.mdl",
         "className": "SfdDiagram",
         "id": "sfd-diagram",
@@ -67,6 +91,30 @@
             "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
             "license": "CC-BY-NC-SA-4.0",
             "url": "https://simulation.tudelft.nl/SD/"
+        }
+    },
+    {
+        "url": "models/Delft/02_05/0205sfd2cld.mdl",
+        "className": "Sfd2Cld",
+        "category": "02_05",
+        "comment": "Stock and flow diagram to causal loop diagram",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/02_05/0205sfd2cld.mdl"
+        }
+    },
+    {
+        "url": "models/Delft/02_05/0205sfd2cld2newCLD.mdl",
+        "className": "Sfd2Cld2NewCld",
+        "category": "02_05",
+        "comment": "Stock and flow diagram to CLD to new CLD",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/02_05/0205sfd2cld2newCLD.mdl"
         }
     },
     {
@@ -84,6 +132,18 @@
         }
     },
     {
+        "url": "models/Delft/02_09/0209BurglariesCLDen.mdl",
+        "className": "BurglariesCldEn",
+        "category": "02_09",
+        "comment": "Burglaries CLD (English)",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/02_09/0209BurglariesCLDen.mdl"
+        }
+    },
+    {
         "url": "models/Delft/02_10/0210ConflictInMiddleEast.mdl",
         "className": "ConflictMiddleEast",
         "id": "conflict-middle-east",
@@ -95,6 +155,18 @@
             "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
             "license": "CC-BY-NC-SA-4.0",
             "url": "https://simulation.tudelft.nl/SD/"
+        }
+    },
+    {
+        "url": "models/Delft/02_11/0211BankCrisisALaFortisCLD.mdl",
+        "className": "BankCrisisALaFortisCld",
+        "category": "02_11",
+        "comment": "Bank crisis a la Fortis CLD model",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/02_11/0211BankCrisisALaFortisCLD.mdl"
         }
     },
     {
@@ -126,26 +198,36 @@
         }
     },
     {
+        "url": "models/Delft/02_13/0213_FDBCK_SoftDrugs_SHORT_EN.pdf",
+        "className": "FeedbackSoftDrugsShortEn",
+        "category": "02_13",
+        "comment": "Soft drugs feedback document (short, English)",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/02_13/0213_FDBCK_SoftDrugs_SHORT_EN.pdf"
+        }
+    },
+    {
+        "url": "models/Delft/02_13/0213_FDBCK_Wiettop_LONG_NL.pdf",
+        "className": "FeedbackWiettopLongNl",
+        "category": "02_13",
+        "comment": "Wiettop feedback document (long, Dutch)",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/02_13/0213_FDBCK_Wiettop_LONG_NL.pdf"
+        }
+    },
+    {
         "url": "models/Delft/06_01/0601Cocaine_CLD.mdl",
         "className": "CocaineCld",
         "id": "cocaine-cld",
         "category": "causal-loop",
         "difficulty": "introductory",
         "comment": "Causal loop diagram of feedback loops in cocaine use and addiction dynamics",
-        "metadata": {
-            "author": "Dr. Erik Pruyt",
-            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
-            "license": "CC-BY-NC-SA-4.0",
-            "url": "https://simulation.tudelft.nl/SD/"
-        }
-    },
-    {
-        "url": "models/Delft/10_09/1009_RANDOMvsRANDOMIZED.mdl",
-        "className": "RandomVsRandomized",
-        "id": "random-vs-randomized",
-        "category": "causal-loop",
-        "difficulty": "introductory",
-        "comment": "Demonstrates the difference between RANDOM and RANDOMIZED functions in Vensim",
         "metadata": {
             "author": "Dr. Erik Pruyt",
             "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
@@ -179,6 +261,42 @@
             "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
             "license": "CC-BY-NC-SA-4.0",
             "url": "https://simulation.tudelft.nl/SD/"
+        }
+    },
+    {
+        "url": "models/Delft/06_02/0602Muskrats1_DEBUGGING.mdl",
+        "className": "Muskrats1Debugging",
+        "category": "06_02",
+        "comment": "Muskrats 1 debugging version",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/06_02/0602Muskrats1_DEBUGGING.mdl"
+        }
+    },
+    {
+        "url": "models/Delft/06_02/0602Muskrats1_DEBUGGING_1.mdl",
+        "className": "Muskrats1Debugging1",
+        "category": "06_02",
+        "comment": "Muskrats 1 debugging version (variant 1)",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/06_02/0602Muskrats1_DEBUGGING_1.mdl"
+        }
+    },
+    {
+        "url": "models/Delft/06_02/0602Muskrats2.mdl",
+        "className": "Muskrats2",
+        "category": "06_02",
+        "comment": "Muskrats model version 2",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/06_02/0602Muskrats2.mdl"
         }
     },
     {
@@ -224,6 +342,18 @@
         }
     },
     {
+        "url": "models/Delft/06_05/0605Feral Pigs with policy SFD EN.mdl",
+        "className": "FeralPigsWithPolicySfdEn",
+        "category": "06_05",
+        "comment": "Feral Pigs with policy stock and flow diagram (English)",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/06_05/0605Feral%20Pigs%20with%20policy%20SFD%20EN.mdl"
+        }
+    },
+    {
         "url": "models/Delft/06_07/0607UnintendedFamilyPlanningBenefits.mdl",
         "className": "FamilyPlanning",
         "id": "family-planning",
@@ -235,6 +365,18 @@
             "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
             "license": "CC-BY-NC-SA-4.0",
             "url": "https://simulation.tudelft.nl/SD/"
+        }
+    },
+    {
+        "url": "models/Delft/06_08/0608_FDBCK_PneumonicPlague_SHORT_EN.pdf",
+        "className": "FeedbackPneumonicPlagueShortEn",
+        "category": "06_08",
+        "comment": "Pneumonic Plague feedback document (short, English)",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/06_08/0608_FDBCK_PneumonicPlague_SHORT_EN.pdf"
         }
     },
     {
@@ -266,6 +408,54 @@
         }
     },
     {
+        "url": "models/Delft/06_09/0609SDEducationVersion2.mdl",
+        "className": "SdEducationVersion2",
+        "category": "06_09",
+        "comment": "System Dynamics education model version 2",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/06_09/0609SDEducationVersion2.mdl"
+        }
+    },
+    {
+        "url": "models/Delft/06_09/0609SDEducationVersion3.mdl",
+        "className": "SdEducationVersion3",
+        "category": "06_09",
+        "comment": "System Dynamics education model version 3",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/06_09/0609SDEducationVersion3.mdl"
+        }
+    },
+    {
+        "url": "models/Delft/06_09/0609SystemDynamicsEducationA.mdl",
+        "className": "SystemDynamicsEducationA",
+        "category": "06_09",
+        "comment": "System Dynamics education model (version A)",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/06_09/0609SystemDynamicsEducationA.mdl"
+        }
+    },
+    {
+        "url": "models/Delft/06_10/0610_FDBCK_Diffusion_LONG_NL.pdf",
+        "className": "FeedbackDiffusionLongNl",
+        "category": "06_10",
+        "comment": "Diffusion feedback document (long, Dutch)",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/06_10/0610_FDBCK_Diffusion_LONG_NL.pdf"
+        }
+    },
+    {
         "url": "models/Delft/06_10/0610Diffusion and Adoption of Micro-CHP.mdl",
         "className": "MicroChpDiffusion",
         "id": "micro-chp-diffusion",
@@ -277,6 +467,18 @@
             "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
             "license": "CC-BY-NC-SA-4.0",
             "url": "https://simulation.tudelft.nl/SD/"
+        }
+    },
+    {
+        "url": "models/Delft/06_11/0611_FDBCK_ExtendingHousingStock_LONG_EN.pdf",
+        "className": "FeedbackExtendingHousingStockLongEn",
+        "category": "06_11",
+        "comment": "Extending housing stock feedback document (long, English)",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/06_11/0611_FDBCK_ExtendingHousingStock_LONG_EN.pdf"
         }
     },
     {
@@ -294,12 +496,62 @@
         }
     },
     {
+        "url": "models/Delft/06_11/0611HousingStockDynamicsQ5Q6.mdl",
+        "className": "HousingStockDynamicsQ5Q6",
+        "category": "06_11",
+        "comment": "Housing stock dynamics model (Q5/Q6)",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/06_11/0611HousingStockDynamicsQ5Q6.mdl"
+        }
+    },
+    {
+        "url": "models/Delft/06_11/0611HousingStockDynamicsQ5Q6plus.mdl",
+        "className": "HousingStockDynamicsQ5Q6Plus",
+        "category": "06_11",
+        "comment": "Housing stock dynamics model (Q5/Q6 extended)",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/06_11/0611HousingStockDynamicsQ5Q6plus.mdl"
+        }
+    },
+    {
+        "url": "models/Delft/10_06/1006_PneumonicPlagueChina_sfd en.mdl",
+        "className": "PneumonicPlagueChinaSfdEn",
+        "category": "10_06",
+        "comment": "Pneumonic Plague in China SFD (English)",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/10_06/1006_PneumonicPlagueChina_sfd%20en.mdl"
+        }
+    },
+    {
         "url": "models/Delft/10_08/1008_PULSEandPULSETRAIN.mdl",
         "className": "PulseAndPulseTrain",
         "id": "pulse-and-pulse-train",
         "category": "introductory",
         "difficulty": "introductory",
         "comment": "Demonstrates PULSE and PULSE TRAIN built-in functions with a simple accumulator",
+        "metadata": {
+            "author": "Dr. Erik Pruyt",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/"
+        }
+    },
+    {
+        "url": "models/Delft/10_09/1009_RANDOMvsRANDOMIZED.mdl",
+        "className": "RandomVsRandomized",
+        "id": "random-vs-randomized",
+        "category": "causal-loop",
+        "difficulty": "introductory",
+        "comment": "Demonstrates the difference between RANDOM and RANDOMIZED functions in Vensim",
         "metadata": {
             "author": "Dr. Erik Pruyt",
             "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
@@ -336,6 +588,54 @@
         }
     },
     {
+        "url": "models/Delft/10_13/1013_FDBCK_OVP_SHORT_EN.pdf",
+        "className": "FeedbackOvpShortEn",
+        "category": "10_13",
+        "comment": "Oostvaardersplassen feedback document (short, English)",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/10_13/1013_FDBCK_OVP_SHORT_EN.pdf"
+        }
+    },
+    {
+        "url": "models/Delft/10_13/1013_OostvaardersplassenSmall_v4a.mdl",
+        "className": "OostvaardersplassenSmallV4A",
+        "category": "10_13",
+        "comment": "Oostvaardersplassen small model version 4a",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/10_13/1013_OostvaardersplassenSmall_v4a.mdl"
+        }
+    },
+    {
+        "url": "models/Delft/10_13/1013Mass starvation Oostvaardersplassen policy 1.mdl",
+        "className": "MassStarvationOostvaardersplassenPolicy1",
+        "category": "10_13",
+        "comment": "Mass starvation Oostvaardersplassen policy 1 model",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/10_13/1013Mass%20starvation%20Oostvaardersplassen%20policy%201.mdl"
+        }
+    },
+    {
+        "url": "models/Delft/10_13/1013Mass starvation Oostvaardersplassen policy 2.mdl",
+        "className": "MassStarvationOostvaardersplassenPolicy2",
+        "category": "10_13",
+        "comment": "Mass starvation Oostvaardersplassen policy 2 model",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/10_13/1013Mass%20starvation%20Oostvaardersplassen%20policy%202.mdl"
+        }
+    },
+    {
         "url": "models/Delft/10_13/1013Mass starvation Oostvaardersplassen.mdl",
         "className": "Oostvaardersplassen",
         "id": "oostvaardersplassen",
@@ -350,6 +650,198 @@
         }
     },
     {
+        "url": "models/Delft/10_13/1013Mass starvation OostvaardersplassenPolicy.mdl",
+        "className": "MassStarvationOostvaardersplassenPolicy",
+        "category": "10_13",
+        "comment": "Mass starvation Oostvaardersplassen policy model",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/10_13/1013Mass%20starvation%20OostvaardersplassenPolicy.mdl"
+        }
+    },
+    {
+        "url": "models/Delft/10_14/0602Muskrats1_DEBUGGING.mdl",
+        "className": "Muskrats1Debugging1014",
+        "category": "10_14",
+        "comment": "Muskrats 1 debugging exercise",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/10_14/0602Muskrats1_DEBUGGING.mdl"
+        }
+    },
+    {
+        "url": "models/Delft/10_14/ex0601cocaine_DEBUGGING.mdl",
+        "className": "CocaineDebugging",
+        "category": "10_14",
+        "comment": "Cocaine model debugging exercise",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/10_14/ex0601cocaine_DEBUGGING.mdl"
+        }
+    },
+    {
+        "url": "models/Delft/10_14/ex0603EcOvershootCollapseBasedOnEZ416Bossel_DEBUGGING.mdl",
+        "className": "EcOvershootCollapseBasedOnEz416BosselDebugging",
+        "category": "10_14",
+        "comment": "Ecological overshoot and collapse debugging exercise",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/10_14/ex0603EcOvershootCollapseBasedOnEZ416Bossel_DEBUGGING.mdl"
+        }
+    },
+    {
+        "url": "models/Delft/10_14/ex0604Aging_DEBUGGING.mdl",
+        "className": "AgingDebugging",
+        "category": "10_14",
+        "comment": "Aging model debugging exercise",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/10_14/ex0604Aging_DEBUGGING.mdl"
+        }
+    },
+    {
+        "url": "models/Delft/10_14/ex0604Aging_DEBUGGING_1.mdl",
+        "className": "AgingDebugging1",
+        "category": "10_14",
+        "comment": "Aging model debugging exercise (variant 1)",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/10_14/ex0604Aging_DEBUGGING_1.mdl"
+        }
+    },
+    {
+        "url": "models/Delft/10_14/ex0607UnintendedFamilyPlanningBenefits_DEBUGGING.mdl",
+        "className": "UnintendedFamilyPlanningBenefitsDebugging",
+        "category": "10_14",
+        "comment": "Unintended family planning benefits debugging exercise",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/10_14/ex0607UnintendedFamilyPlanningBenefits_DEBUGGING.mdl"
+        }
+    },
+    {
+        "url": "models/Delft/10_14/ex0608PneumonicPlagueChinaA_DEBUGGING.mdl",
+        "className": "PneumonicPlagueChinaADebugging",
+        "category": "10_14",
+        "comment": "Pneumonic Plague China debugging exercise",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/10_14/ex0608PneumonicPlagueChinaA_DEBUGGING.mdl"
+        }
+    },
+    {
+        "url": "models/Delft/10_14/ex0609SDEducationVersion2_DEBUGGING.mdl",
+        "className": "SdEducationVersion2Debugging",
+        "category": "10_14",
+        "comment": "SD Education version 2 debugging exercise",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/10_14/ex0609SDEducationVersion2_DEBUGGING.mdl"
+        }
+    },
+    {
+        "url": "models/Delft/10_14/ex0609SDEducationVersion3_DEBUGGING.mdl",
+        "className": "SdEducationVersion3Debugging",
+        "category": "10_14",
+        "comment": "SD Education version 3 debugging exercise",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/10_14/ex0609SDEducationVersion3_DEBUGGING.mdl"
+        }
+    },
+    {
+        "url": "models/Delft/10_14/ex0610MicroCHP_DEBUGGING.mdl",
+        "className": "MicroChpDebugging",
+        "category": "10_14",
+        "comment": "Micro-CHP diffusion debugging exercise",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/10_14/ex0610MicroCHP_DEBUGGING.mdl"
+        }
+    },
+    {
+        "url": "models/Delft/10_14/ex0611HousingStockDynamicsA_DEBUGGING.mdl",
+        "className": "HousingStockDynamicsADebugging",
+        "category": "10_14",
+        "comment": "Housing stock dynamics debugging exercise",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/10_14/ex0611HousingStockDynamicsA_DEBUGGING.mdl"
+        }
+    },
+    {
+        "url": "models/Delft/10_14/ex1013_Oostvaardersplassen_DEBUGGING.mdl",
+        "className": "OostvaardersplassenDebugging",
+        "category": "10_14",
+        "comment": "Oostvaardersplassen model debugging exercise",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/10_14/ex1013_Oostvaardersplassen_DEBUGGING.mdl"
+        }
+    },
+    {
+        "url": "models/Delft/10_14/ex1412_OverfishingBluefinTuna_DEBUGGING.mdl",
+        "className": "OverfishingBluefinTunaDebugging",
+        "category": "10_14",
+        "comment": "Overfishing of Bluefin Tuna debugging exercise",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/10_14/ex1412_OverfishingBluefinTuna_DEBUGGING.mdl"
+        }
+    },
+    {
+        "url": "models/Delft/10_14/ex1803_DutchHospitalsI_DEBUGGING.mdl",
+        "className": "DutchHospitalsIDebugging",
+        "category": "10_14",
+        "comment": "Dutch Hospitals I debugging exercise",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/10_14/ex1803_DutchHospitalsI_DEBUGGING.mdl"
+        }
+    },
+    {
+        "url": "models/Delft/10_14/ex1807_RealEstateBoomBustDubai_DEBUGGING.mdl",
+        "className": "RealEstateBoomBustDubaiDebugging",
+        "category": "10_14",
+        "comment": "Real estate boom and bust in Dubai debugging exercise",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/10_14/ex1807_RealEstateBoomBustDubai_DEBUGGING.mdl"
+        }
+    },
+    {
         "url": "models/Delft/10_16/1016_BurnoutHomer1.mdl",
         "className": "BurnoutHomer",
         "id": "burnout-homer",
@@ -361,6 +853,18 @@
             "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
             "license": "CC-BY-NC-SA-4.0",
             "url": "https://simulation.tudelft.nl/SD/"
+        }
+    },
+    {
+        "url": "models/Delft/14_01/1401_FDBCK_DynamicsFaculty_LONG_NL.pdf",
+        "className": "FeedbackDynamicsFacultyLongNl",
+        "category": "14_01",
+        "comment": "Dynamics of Faculty feedback document (long, Dutch)",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/14_01/1401_FDBCK_DynamicsFaculty_LONG_NL.pdf"
         }
     },
     {
@@ -392,6 +896,18 @@
         }
     },
     {
+        "url": "models/Delft/14_02/1402_SCMandBWE.mdl",
+        "className": "ScmAndBwe",
+        "category": "14_02",
+        "comment": "Supply chain management and bullwhip effect model",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/14_02/1402_SCMandBWE.mdl"
+        }
+    },
+    {
         "url": "models/Delft/14_03/1403_DebtCrisisBasedOnZ605.mdl",
         "className": "DebtCrisis",
         "id": "debt-crisis",
@@ -420,6 +936,18 @@
         }
     },
     {
+        "url": "models/Delft/14_05/1405_FDBCK_MexicanFlu_SHORT_EN.pdf",
+        "className": "FeedbackMexicanFluShortEn",
+        "category": "14_05",
+        "comment": "Mexican Flu feedback document (short, English)",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/14_05/1405_FDBCK_MexicanFlu_SHORT_EN.pdf"
+        }
+    },
+    {
         "url": "models/Delft/14_05/1405_Flu2regionsV2cIFTHENELSE.mdl",
         "className": "FluTwoRegions",
         "id": "flu-two-regions",
@@ -434,6 +962,18 @@
         }
     },
     {
+        "url": "models/Delft/14_06/1406_FDBCK_NewTownPlanning_SHORT_EN.pdf",
+        "className": "FeedbackNewTownPlanningShortEn",
+        "category": "14_06",
+        "comment": "New town planning feedback document (short, English)",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/14_06/1406_FDBCK_NewTownPlanning_SHORT_EN.pdf"
+        }
+    },
+    {
         "url": "models/Delft/14_06/1406_NewTownsNL_v2.mdl",
         "className": "NewTowns",
         "id": "new-towns",
@@ -445,6 +985,18 @@
             "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
             "license": "CC-BY-NC-SA-4.0",
             "url": "https://simulation.tudelft.nl/SD/"
+        }
+    },
+    {
+        "url": "models/Delft/14_06/1406_NewTownsWOunits.mdl",
+        "className": "NewTownsWoUnits",
+        "category": "14_06",
+        "comment": "New towns model (without units)",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/14_06/1406_NewTownsWOunits.mdl"
         }
     },
     {
@@ -476,6 +1028,18 @@
         }
     },
     {
+        "url": "models/Delft/14_08/1408_FDBCK_EVandLithium_SHORT_EN.pdf",
+        "className": "FeedbackEvAndLithiumShortEn",
+        "category": "14_08",
+        "comment": "Electric vehicles and lithium feedback document (short, English)",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/14_08/1408_FDBCK_EVandLithium_SHORT_EN.pdf"
+        }
+    },
+    {
         "url": "models/Delft/14_09/1409_CholeraZBwoUnits.mdl",
         "className": "Cholera",
         "id": "cholera",
@@ -487,6 +1051,54 @@
             "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
             "license": "CC-BY-NC-SA-4.0",
             "url": "https://simulation.tudelft.nl/SD/"
+        }
+    },
+    {
+        "url": "models/Delft/14_09/1409_CholeraZimbabweCLD.mdl",
+        "className": "CholeraZimbabweCld",
+        "category": "14_09",
+        "comment": "Cholera Zimbabwe CLD model",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/14_09/1409_CholeraZimbabweCLD.mdl"
+        }
+    },
+    {
+        "url": "models/Delft/14_09/1409_FDBCK_Cholera_SHORT_EN.pdf",
+        "className": "FeedbackCholeraShortEn",
+        "category": "14_09",
+        "comment": "Cholera feedback document (short, English)",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/14_09/1409_FDBCK_Cholera_SHORT_EN.pdf"
+        }
+    },
+    {
+        "url": "models/Delft/14_10/1410_FDBCK_Fortis_LONG_EN.pdf",
+        "className": "FeedbackFortisLongEn",
+        "category": "14_10",
+        "comment": "Fortis bank feedback document (long, English)",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/14_10/1410_FDBCK_Fortis_LONG_EN.pdf"
+        }
+    },
+    {
+        "url": "models/Delft/14_10/1410_FDBCK_Fortis_SHORT_EN.pdf",
+        "className": "FeedbackFortisShortEn",
+        "category": "14_10",
+        "comment": "Fortis bank feedback document (short, English)",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/14_10/1410_FDBCK_Fortis_SHORT_EN.pdf"
         }
     },
     {
@@ -504,6 +1116,42 @@
         }
     },
     {
+        "url": "models/Delft/14_11/1411_FDBCK_Housebreaking_SHORT_EN.pdf",
+        "className": "FeedbackHousebreakingShortEn",
+        "category": "14_11",
+        "comment": "Housebreaking feedback document (short, English)",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/14_11/1411_FDBCK_Housebreaking_SHORT_EN.pdf"
+        }
+    },
+    {
+        "url": "models/Delft/14_12/1412_FDBCK_Tuna_NL_LONG.pdf",
+        "className": "FeedbackTunaNlLong",
+        "category": "14_12",
+        "comment": "Tuna overfishing feedback document (long, Dutch)",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/14_12/1412_FDBCK_Tuna_NL_LONG.pdf"
+        }
+    },
+    {
+        "url": "models/Delft/14_12/1412_FDBCK_Tuna_SHORT_EN.pdf",
+        "className": "FeedbackTunaShortEn",
+        "category": "14_12",
+        "comment": "Tuna overfishing feedback document (short, English)",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/14_12/1412_FDBCK_Tuna_SHORT_EN.pdf"
+        }
+    },
+    {
         "url": "models/Delft/14_12/1412_OverfishingOfNBFTunaEN.mdl",
         "className": "BluefinTunaOverfishing",
         "id": "bluefin-tuna-overfishing",
@@ -515,6 +1163,18 @@
             "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
             "license": "CC-BY-NC-SA-4.0",
             "url": "https://simulation.tudelft.nl/SD/"
+        }
+    },
+    {
+        "url": "models/Delft/14_13/1413_FDBCK_ProductionManagement_LONG_EN.pdf",
+        "className": "FeedbackProductionManagementLongEn",
+        "category": "14_13",
+        "comment": "Production management feedback document (long, English)",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/14_13/1413_FDBCK_ProductionManagement_LONG_EN.pdf"
         }
     },
     {
@@ -546,6 +1206,54 @@
         }
     },
     {
+        "url": "models/Delft/14_14/1414_FDBCK_RedevelopingSocialHousingDistricts_SHORT_EN.pdf",
+        "className": "FeedbackRedevelopingSocialHousingDistrictsShortEn",
+        "category": "14_14",
+        "comment": "Redeveloping social housing districts feedback document (short, English)",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/14_14/1414_FDBCK_RedevelopingSocialHousingDistricts_SHORT_EN.pdf"
+        }
+    },
+    {
+        "url": "models/Delft/14_14/1414_FDBCK_RedevelopmentSocialHousingDistricts_LONG_NL.pdf",
+        "className": "FeedbackRedevelopmentSocialHousingDistrictsLongNl",
+        "category": "14_14",
+        "comment": "Redevelopment of social housing districts feedback document (long, Dutch)",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/14_14/1414_FDBCK_RedevelopmentSocialHousingDistricts_LONG_NL.pdf"
+        }
+    },
+    {
+        "url": "models/Delft/14_15/1415_FDBCK_MineralsMetalsI_SHORT_EN.pdf",
+        "className": "FeedbackMineralsMetalsIShortEn",
+        "category": "14_15",
+        "comment": "Minerals and metals I feedback document (short, English)",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/14_15/1415_FDBCK_MineralsMetalsI_SHORT_EN.pdf"
+        }
+    },
+    {
+        "url": "models/Delft/14_15/1415_FDBCK_ZAMv2I_LONG_NL.pdf",
+        "className": "FeedbackZamV2ILongNl",
+        "category": "14_15",
+        "comment": "ZAM v2 I feedback document (long, Dutch)",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/14_15/1415_FDBCK_ZAMv2I_LONG_NL.pdf"
+        }
+    },
+    {
         "url": "models/Delft/14_15/1415_MineralMetalScarcityI_EN.mdl",
         "className": "MineralMetalScarcity",
         "id": "mineral-metal-scarcity",
@@ -574,6 +1282,18 @@
         }
     },
     {
+        "url": "models/Delft/14_16/1416_FDBCK_Radicalization1_SHORT_EN.pdf",
+        "className": "FeedbackRadicalization1ShortEn",
+        "category": "14_16",
+        "comment": "Radicalization 1 feedback document (short, English)",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/14_16/1416_FDBCK_Radicalization1_SHORT_EN.pdf"
+        }
+    },
+    {
         "url": "models/Delft/18_02/1802_UnemploymentBasedOnEZ511.mdl",
         "className": "Unemployment",
         "id": "unemployment",
@@ -585,6 +1305,18 @@
             "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
             "license": "CC-BY-NC-SA-4.0",
             "url": "https://simulation.tudelft.nl/SD/"
+        }
+    },
+    {
+        "url": "models/Delft/18_02/1802_UnemploymentEPbBasedOnEZ511.mdl",
+        "className": "UnemploymentEpbBasedOnEz511",
+        "category": "18_02",
+        "comment": "Unemployment EPb model based on EZ511",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/18_02/1802_UnemploymentEPbBasedOnEZ511.mdl"
         }
     },
     {
@@ -602,6 +1334,66 @@
         }
     },
     {
+        "url": "models/Delft/18_03/1803HospitalManagement.mdl",
+        "className": "HospitalManagement1803",
+        "category": "18_03",
+        "comment": "Hospital management model (alternate version)",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/18_03/1803HospitalManagement.mdl"
+        }
+    },
+    {
+        "url": "models/Delft/18_04/1804_Kaibab1.mdl",
+        "className": "Kaibab1",
+        "category": "18_04",
+        "comment": "Kaibab deer model version 1",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/18_04/1804_Kaibab1.mdl"
+        }
+    },
+    {
+        "url": "models/Delft/18_04/1804_Kaibab2.mdl",
+        "className": "Kaibab2",
+        "category": "18_04",
+        "comment": "Kaibab deer model version 2",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/18_04/1804_Kaibab2.mdl"
+        }
+    },
+    {
+        "url": "models/Delft/18_04/1804_Kaibab3.mdl",
+        "className": "Kaibab3",
+        "category": "18_04",
+        "comment": "Kaibab deer model version 3",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/18_04/1804_Kaibab3.mdl"
+        }
+    },
+    {
+        "url": "models/Delft/18_05/1805_FDBCK_Prostitution_SHORT_EN.pdf",
+        "className": "FeedbackProstitutionShortEn",
+        "category": "18_05",
+        "comment": "Prostitution and human trafficking feedback document (short, English)",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/18_05/1805_FDBCK_Prostitution_SHORT_EN.pdf"
+        }
+    },
+    {
         "url": "models/Delft/18_05/1805_ProstitutionHumanTraffickingEN_withoutSolvingUnitErrors.mdl",
         "className": "ProstitutionTrafficking",
         "id": "prostitution-trafficking",
@@ -616,6 +1408,30 @@
         }
     },
     {
+        "url": "models/Delft/18_07/1807_FDBCK_Dubai_LONG_EN.pdf",
+        "className": "FeedbackDubaiLongEn",
+        "category": "18_07",
+        "comment": "Dubai real estate feedback document (long, English)",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/18_07/1807_FDBCK_Dubai_LONG_EN.pdf"
+        }
+    },
+    {
+        "url": "models/Delft/18_07/1807_FDBCK_Dubai_SHORT_EN.pdf",
+        "className": "FeedbackDubaiShortEn",
+        "category": "18_07",
+        "comment": "Dubai real estate feedback document (short, English)",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/18_07/1807_FDBCK_Dubai_SHORT_EN.pdf"
+        }
+    },
+    {
         "url": "models/Delft/18_07/1807_RealEstateBoomAndBust_EN.mdl",
         "className": "RealEstateBoom",
         "id": "real-estate-boom",
@@ -627,6 +1443,30 @@
             "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
             "license": "CC-BY-NC-SA-4.0",
             "url": "https://simulation.tudelft.nl/SD/"
+        }
+    },
+    {
+        "url": "models/Delft/18_12/1812_FDBCK_DSB_NL.pdf",
+        "className": "FeedbackDsbNl",
+        "category": "18_12",
+        "comment": "DSB bank feedback document (Dutch)",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/18_12/1812_FDBCK_DSB_NL.pdf"
+        }
+    },
+    {
+        "url": "models/Delft/18_12/1812_FDBCK_DSB_SHORT_EN.pdf",
+        "className": "FeedbackDsbShortEn",
+        "category": "18_12",
+        "comment": "DSB bank feedback document (short, English)",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/18_12/1812_FDBCK_DSB_SHORT_EN.pdf"
         }
     },
     {
@@ -658,6 +1498,54 @@
         }
     },
     {
+        "url": "models/Delft/18_13/1813_FDBCK_Radicalization2_SHORT_EN.pdf",
+        "className": "FeedbackRadicalization2ShortEn",
+        "category": "18_13",
+        "comment": "Radicalization 2 feedback document (short, English)",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/18_13/1813_FDBCK_Radicalization2_SHORT_EN.pdf"
+        }
+    },
+    {
+        "url": "models/Delft/18_14/1814_FDBCK_ProjectManagement_LONG_NL.pdf",
+        "className": "FeedbackProjectManagementLongNl",
+        "category": "18_14",
+        "comment": "Project management feedback document (long, Dutch)",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/18_14/1814_FDBCK_ProjectManagement_LONG_NL.pdf"
+        }
+    },
+    {
+        "url": "models/Delft/18_14/1814_FDBCK_ProjectManagement_NL.pdf",
+        "className": "FeedbackProjectManagementNl",
+        "category": "18_14",
+        "comment": "Project management feedback document (Dutch)",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/18_14/1814_FDBCK_ProjectManagement_NL.pdf"
+        }
+    },
+    {
+        "url": "models/Delft/18_14/1814_FDBCK_ProjectManagement_SHORT_EN.pdf",
+        "className": "FeedbackProjectManagementShortEn",
+        "category": "18_14",
+        "comment": "Project management feedback document (short, English)",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/18_14/1814_FDBCK_ProjectManagement_SHORT_EN.pdf"
+        }
+    },
+    {
         "url": "models/Delft/18_14/1814_ProjectManagement_EN.mdl",
         "className": "ProjectManagement",
         "id": "project-management",
@@ -669,6 +1557,30 @@
             "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
             "license": "CC-BY-NC-SA-4.0",
             "url": "https://simulation.tudelft.nl/SD/"
+        }
+    },
+    {
+        "url": "models/Delft/18_15/1815_FDBCK_MineralMetalScarcityII_SHORT_EN.pdf",
+        "className": "FeedbackMineralMetalScarcityIiShortEn",
+        "category": "18_15",
+        "comment": "Mineral and metal scarcity II feedback document (short, English)",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/18_15/1815_FDBCK_MineralMetalScarcityII_SHORT_EN.pdf"
+        }
+    },
+    {
+        "url": "models/Delft/18_15/1815_FDBCK_REM_NL.pdf",
+        "className": "FeedbackRemNl",
+        "category": "18_15",
+        "comment": "REM feedback document (Dutch)",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/18_15/1815_FDBCK_REM_NL.pdf"
         }
     },
     {
@@ -686,6 +1598,42 @@
         }
     },
     {
+        "url": "models/Delft/18_16/1816_EnergyTransitionManagement_Q3b_EN.mdl",
+        "className": "EnergyTransitionManagementQ3BEn",
+        "category": "18_16",
+        "comment": "Energy transition management model Q3b (English)",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/18_16/1816_EnergyTransitionManagement_Q3b_EN.mdl"
+        }
+    },
+    {
+        "url": "models/Delft/18_16/1816_FDBCK_EnergieTransitie_NL.pdf",
+        "className": "FeedbackEnergieTransitieNl",
+        "category": "18_16",
+        "comment": "Energy transition feedback document (Dutch)",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/18_16/1816_FDBCK_EnergieTransitie_NL.pdf"
+        }
+    },
+    {
+        "url": "models/Delft/18_16/1816_FDBCK_SHORT_EnergyTransition_EN.pdf",
+        "className": "FeedbackEnergyTransitionShortEn",
+        "category": "18_16",
+        "comment": "Energy transition feedback document (short, English)",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/18_16/1816_FDBCK_SHORT_EnergyTransition_EN.pdf"
+        }
+    },
+    {
         "url": "models/Delft/18_19/1819_GlobalizationEZ608fromZOO.mdl",
         "className": "Globalization",
         "id": "globalization",
@@ -697,6 +1645,18 @@
             "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
             "license": "CC-BY-NC-SA-4.0",
             "url": "https://simulation.tudelft.nl/SD/"
+        }
+    },
+    {
+        "url": "models/Delft/18_20/1820_FDBCK_StudentFineCase_SHORT_EN.pdf",
+        "className": "FeedbackStudentFineCaseShortEn",
+        "category": "18_20",
+        "comment": "Student fine case feedback document (short, English)",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/18_20/1820_FDBCK_StudentFineCase_SHORT_EN.pdf"
         }
     },
     {
@@ -714,6 +1674,18 @@
         }
     },
     {
+        "url": "models/Delft/18_21/1821_HousingMarketCrisisNLnoUnitsANDEREVERSIE.mdl",
+        "className": "HousingMarketCrisisNlNoUnitsAndereVersie",
+        "category": "18_21",
+        "comment": "Housing market crisis Netherlands model (no units, alternate version)",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/18_21/1821_HousingMarketCrisisNLnoUnitsANDEREVERSIE.mdl"
+        }
+    },
+    {
         "url": "models/Delft/18_22/1822_CollapseOfCivilisations.mdl",
         "className": "CollapseCivilisations",
         "id": "collapse-civilisations",
@@ -725,6 +1697,18 @@
             "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
             "license": "CC-BY-NC-SA-4.0",
             "url": "https://simulation.tudelft.nl/SD/"
+        }
+    },
+    {
+        "url": "models/Delft/extra/FishShipsCLD.mdl",
+        "className": "FishShipsCld",
+        "category": "extra",
+        "comment": "Fish and ships CLD model",
+        "metadata": {
+            "author": "Pruyt, E.",
+            "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library, Delft, the Netherlands.",
+            "license": "CC-BY-NC-SA-4.0",
+            "url": "https://simulation.tudelft.nl/SD/model_files_nested/extra/FishShipsCLD.mdl"
         }
     }
 ]
