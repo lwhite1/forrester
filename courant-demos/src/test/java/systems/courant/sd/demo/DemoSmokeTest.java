@@ -342,8 +342,8 @@ class DemoSmokeTest {
         Flow demand = Flows.linearGrowth("New Orders", DAY, wip, 200);
 
         Flow throughput = Flow.create("Delivered Reports", DAY, () -> {
-            int demandDelay = Math.max(0, (int) Math.round(tat.getValue()));
-            int stepToGet = Math.max(0, (int) sim.getCurrentStep() - demandDelay);
+            long demandDelay = Math.max(0, Math.round(tat.getValue()));
+            long stepToGet = Math.max(0, sim.getCurrentStep() - demandDelay);
             double demandPlusDelay = demand.getHistoryAtTimeStep(stepToGet);
             return new Quantity(Math.min(capacity, demandPlusDelay),
                     Units.DIMENSIONLESS);
