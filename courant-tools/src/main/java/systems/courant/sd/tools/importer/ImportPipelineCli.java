@@ -45,10 +45,9 @@ public class ImportPipelineCli implements Closeable {
 
     @Override
     public void close() {
-        if (stdinScanner != null) {
-            stdinScanner.close();
-            stdinScanner = null;
-        }
+        // Do not close stdinScanner — it wraps System.in, and Scanner.close()
+        // would close the underlying stream, breaking later stdin reads in the JVM.
+        stdinScanner = null;
     }
 
     int run(String[] args) throws IOException {
