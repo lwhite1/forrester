@@ -42,6 +42,10 @@ class CourantAppFxTest {
         assertThat(stage.getX())
                 .as("window X should be within the visible screen area")
                 .isGreaterThanOrEqualTo(primaryBounds.getMinX());
+
+        assertThat(stage.getY() + stage.getHeight())
+                .as("window bottom should not extend past the visible screen area")
+                .isLessThanOrEqualTo(primaryBounds.getMaxY() + 1.0);
     }
 
     @Test
@@ -75,7 +79,9 @@ class CourantAppFxTest {
 
         Rectangle2D primaryBounds = Screen.getPrimary().getVisualBounds();
         double targetX = primaryBounds.getMinX() + 100;
-        double targetY = primaryBounds.getMinY() + 100;
+        // Pick a Y where the full window fits on-screen (top and bottom)
+        double targetY = Math.min(primaryBounds.getMinY() + 100,
+                primaryBounds.getMaxY() - stage.getHeight());
 
         WaitForAsyncUtils.asyncFx(() -> {
             stage.setX(targetX);
@@ -105,6 +111,33 @@ class CourantAppFxTest {
                 .isGreaterThanOrEqualTo(primaryBounds.getMinX());
         assertThat(stage.getY())
                 .as("centered Y should be within screen bounds")
+                .isGreaterThanOrEqualTo(primaryBounds.getMinY());
+    }
+
+    @Test
+    @DisplayName("should pull window up when bottom extends past screen")
+    void shouldFixBottomOverflow() {
+        WaitForAsyncUtils.waitForFxEvents();
+
+        Rectangle2D primaryBounds = Screen.getPrimary().getVisualBounds();
+        // Position the window so it starts near the bottom of the screen,
+        // pushing the status bar off-screen.
+        double overflowY = primaryBounds.getMaxY() - 100;
+
+        WaitForAsyncUtils.asyncFx(() -> {
+            stage.setX(primaryBounds.getMinX() + 50);
+            stage.setY(overflowY);
+        });
+        WaitForAsyncUtils.waitForFxEvents();
+
+        WaitForAsyncUtils.asyncFx(() -> app.ensureWindowOnScreen(stage));
+        WaitForAsyncUtils.waitForFxEvents();
+
+        assertThat(stage.getY() + stage.getHeight())
+                .as("window bottom should be pulled back on-screen")
+                .isLessThanOrEqualTo(primaryBounds.getMaxY() + 1.0);
+        assertThat(stage.getY())
+                .as("window top should remain on-screen")
                 .isGreaterThanOrEqualTo(primaryBounds.getMinY());
     }
 
