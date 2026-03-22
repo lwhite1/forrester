@@ -94,6 +94,7 @@ public class ModelWindow {
     private final UndoManager undoManager = new UndoManager();
     private MenuItem undoItem;
     private MenuItem redoItem;
+    private MenuItem undoHistoryItem;
     private ModelEditListener logListener;
     private ModelEditListener staleListener;
     private AnalysisRunner analysisRunner;
@@ -177,6 +178,7 @@ public class ModelWindow {
         menuBar = menuResult.menuBar();
         undoItem = menuResult.undoItem();
         redoItem = menuResult.redoItem();
+        undoHistoryItem = menuResult.undoHistoryItem();
         validationIssuesItem = menuResult.validationIssuesItem();
         editorOnlyItems.addAll(menuResult.editorOnlyItems());
         dockManager = new DashboardDockManager(dashboardPanel, dashboardTab,
@@ -849,6 +851,9 @@ public class ModelWindow {
         }
         if (redoItem != null) {
             redoItem.setDisable(activeUndo == null || !activeUndo.canRedo());
+        }
+        if (undoHistoryItem != null) {
+            undoHistoryItem.setDisable(activeUndo == null || !activeUndo.canUndo());
         }
     }
 
