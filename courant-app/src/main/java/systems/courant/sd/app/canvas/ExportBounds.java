@@ -141,6 +141,11 @@ final class ExportBounds {
             }
         }
 
+        // If no element contributed real coordinates, return empty bounds
+        if (minX > maxX) {
+            return new Bounds(0, 0, 2 * PADDING, 2 * PADDING);
+        }
+
         // Add padding
         minX -= PADDING;
         minY -= PADDING;

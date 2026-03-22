@@ -147,4 +147,28 @@ class ExportBoundsTest {
         ExportBounds.Bounds bounds = ExportBounds.compute(state, editor);
         assertThat(bounds.width()).isGreaterThan(0);
     }
+
+    @Test
+    @DisplayName("should return empty bounds when flows have no cloud positions and draw order is empty")
+    void shouldReturnEmptyBoundsForOrphanFlowsWithNoClouds() {
+        CanvasState state = new CanvasState();
+        // No elements on canvas — draw order is empty
+
+        // Create a flow between two stocks, but don't place anything on the canvas
+        ModelEditor editor = new ModelEditor();
+        editor.loadFrom(new ModelDefinitionBuilder()
+                .name("Test")
+                .stock("S1", 0, null)
+                .stock("S2", 0, null)
+                .flow("F1", "10", "day", "S1", "S2")
+                .build());
+
+        ExportBounds.Bounds bounds = ExportBounds.compute(state, editor);
+
+        // Should return the default empty bounds, not an invalid bounding box
+        assertThat(bounds.minX()).isEqualTo(0);
+        assertThat(bounds.minY()).isEqualTo(0);
+        assertThat(bounds.width()).isEqualTo(100); // 2 * PADDING
+        assertThat(bounds.height()).isEqualTo(100);
+    }
 }
