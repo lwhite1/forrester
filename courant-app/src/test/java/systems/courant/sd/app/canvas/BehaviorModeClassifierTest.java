@@ -147,5 +147,23 @@ class BehaviorModeClassifierTest {
         void shouldReturnEmptyForNullInput() {
             assertThat(BehaviorModeClassifier.classify(null)).isEmpty();
         }
+
+        @Test
+        void shouldReturnEmptyWhenDataContainsNaN() {
+            double[] values = {1, 2, Double.NaN, 4, 5, 6, 7, 8};
+            assertThat(BehaviorModeClassifier.classify(values)).isEmpty();
+        }
+
+        @Test
+        void shouldReturnEmptyWhenDataContainsPositiveInfinity() {
+            double[] values = {1, 2, 3, Double.POSITIVE_INFINITY, 5, 6, 7, 8};
+            assertThat(BehaviorModeClassifier.classify(values)).isEmpty();
+        }
+
+        @Test
+        void shouldReturnEmptyWhenDataContainsNegativeInfinity() {
+            double[] values = {1, 2, 3, 4, Double.NEGATIVE_INFINITY, 6, 7, 8};
+            assertThat(BehaviorModeClassifier.classify(values)).isEmpty();
+        }
     }
 }

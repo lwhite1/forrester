@@ -22,6 +22,10 @@ public final class BehaviorModeClassifier {
             return "";
         }
 
+        if (containsNonFinite(values)) {
+            return "";
+        }
+
         if (isConstant(values)) {
             return "Equilibrium";
         }
@@ -195,6 +199,15 @@ public final class BehaviorModeClassifier {
         double rise = peakValue - values[0];
         double fall = peakValue - lastValue;
         return rise > 0 && fall > rise * 0.3;
+    }
+
+    private static boolean containsNonFinite(double[] values) {
+        for (double v : values) {
+            if (!Double.isFinite(v)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static double range(double[] values) {
