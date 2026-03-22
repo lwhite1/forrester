@@ -333,6 +333,13 @@ public class ModelWindow {
                 simulationController::runSimulation,
                 simulationController::validateModel,
                 simulationController::openSimulationSettings);
+        propertiesPanel.setFileNameSupplier(() -> {
+            if (fileController == null || fileController.getCurrentFile() == null) {
+                return null;
+            }
+            java.nio.file.Path fn = fileController.getCurrentFile().getFileName();
+            return fn != null ? fn.toString() : null;
+        });
 
         // Right-side TabPane with Properties and Dashboard tabs
         rightTabPane = new TabPane();
