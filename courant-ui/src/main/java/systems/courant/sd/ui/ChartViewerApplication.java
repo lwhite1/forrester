@@ -121,16 +121,7 @@ public class ChartViewerApplication extends Application {
      */
     static ChartData snapshot() {
         synchronized (LOCK) {
-            List<Series<String, Number>> deepCopy = new ArrayList<>(series.size());
-            for (Series<String, Number> original : series) {
-                Series<String, Number> copy = new Series<>();
-                copy.setName(original.getName());
-                for (XYChart.Data<String, Number> d : original.getData()) {
-                    copy.getData().add(new XYChart.Data<>(d.getXValue(), d.getYValue()));
-                }
-                deepCopy.add(copy);
-            }
-            return new ChartData(deepCopy, width, height, title, xAxisLabel, formatter);
+            return captureChartData();
         }
     }
 
@@ -141,19 +132,27 @@ public class ChartViewerApplication extends Application {
      */
     private static ChartData snapshotAndReset() {
         synchronized (LOCK) {
-            List<Series<String, Number>> deepCopy = new ArrayList<>(series.size());
-            for (Series<String, Number> original : series) {
-                Series<String, Number> copy = new Series<>();
-                copy.setName(original.getName());
-                for (XYChart.Data<String, Number> d : original.getData()) {
-                    copy.getData().add(new XYChart.Data<>(d.getXValue(), d.getYValue()));
-                }
-                deepCopy.add(copy);
-            }
-            ChartData result = new ChartData(deepCopy, width, height, title, xAxisLabel, formatter);
+            ChartData result = captureChartData();
             resetInternal();
             return result;
         }
+    }
+
+    /**
+     * Deep-copies the current static state into a {@link ChartData} record.
+     * Must be called while holding {@link #LOCK}.
+     */
+    private static ChartData captureChartData() {
+        List<Series<String, Number>> deepCopy = new ArrayList<>(series.size());
+        for (Series<String, Number> original : series) {
+            Series<String, Number> copy = new Series<>();
+            copy.setName(original.getName());
+            for (XYChart.Data<String, Number> d : original.getData()) {
+                copy.getData().add(new XYChart.Data<>(d.getXValue(), d.getYValue()));
+            }
+            deepCopy.add(copy);
+        }
+        return new ChartData(deepCopy, width, height, title, xAxisLabel, formatter);
     }
 
     /**
