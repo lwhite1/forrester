@@ -363,16 +363,14 @@ final class InteractionOverlayPass implements RenderPass {
 
         if (isCausalLink) {
             if (fromName.equals(toName)) {
-                FlowGeometry.Point2D cf = FlowGeometry.clipToElement(
-                        canvasState, fromName, toX, toY);
-                FlowGeometry.Point2D ct = FlowGeometry.clipToElement(
-                        canvasState, toName, fromX, fromY);
+                double halfW = LayoutMetrics.effectiveWidth(canvasState, fromName) / 2;
+                double halfH = LayoutMetrics.effectiveHeight(canvasState, fromName) / 2;
+                double[] loopPts = CausalLinkGeometry.selfLoopPoints(
+                        fromX, fromY, halfW, halfH, loopCtx, fromName);
                 if (isHover) {
-                    SelectionRenderer.drawConnectionHover(gc,
-                            cf.x(), cf.y(), ct.x(), ct.y());
+                    SelectionRenderer.drawConnectionHoverCubic(gc, loopPts);
                 } else {
-                    SelectionRenderer.drawConnectionSelection(gc,
-                            cf.x(), cf.y(), ct.x(), ct.y());
+                    SelectionRenderer.drawConnectionSelectionCubic(gc, loopPts);
                 }
                 return;
             }
