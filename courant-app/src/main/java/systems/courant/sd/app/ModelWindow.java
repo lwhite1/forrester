@@ -333,8 +333,6 @@ public class ModelWindow {
                 simulationController::runSimulation,
                 simulationController::validateModel,
                 simulationController::openSimulationSettings);
-        propertiesPanel.setFileNameSupplier(() ->
-                fileController != null ? fileController.getDisplayFileName() : null);
 
         // Right-side TabPane with Properties and Dashboard tabs
         rightTabPane = new TabPane();
@@ -611,7 +609,8 @@ public class ModelWindow {
                         dashboardPanel),
                 null, "menuExportReport");
         commandRegistry.add("Model Info", "File",
-                () -> ModelInfoDialog.show(editor, stage, this::updateTitle));
+                () -> ModelInfoDialog.show(editor, stage,
+                        fileController.getDisplayFileName(), this::updateTitle));
         commandRegistry.add("Import Reference Data", "File",
                 () -> fileController.importReferenceData(
                         simulationController::runSimulation),
