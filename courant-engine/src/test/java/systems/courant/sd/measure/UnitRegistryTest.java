@@ -195,6 +195,13 @@ class UnitRegistryTest {
         }
 
         @Test
+        @DisplayName("should resolve '1' to DIMENSIONLESS unit")
+        void shouldResolveOneToDimensionless() {
+            Unit unit = registry.resolve("1");
+            assertThat(unit).isSameAs(DimensionlessUnits.DIMENSIONLESS);
+        }
+
+        @Test
         @DisplayName("should silently create unit for domain-specific names like 'Deer'")
         void shouldSilentlyCreateDomainSpecificName() {
             Unit unit = registry.resolve("Deer");
