@@ -144,7 +144,7 @@ class WorkflowComplexModelFxTest {
     @Test
     @DisplayName("Market: load → validate → simulate")
     void shouldSimulateMarket(FxRobot robot) throws Exception {
-        loadExample("Market", "economics/market.json");
+        loadExample("Market", "economics/MARKET.json");
 
         triggerValidation(robot);
 
