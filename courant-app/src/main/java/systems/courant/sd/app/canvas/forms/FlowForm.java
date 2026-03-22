@@ -95,6 +95,7 @@ public class FlowForm implements ElementForm {
         sourceLabel.setText(flow.source() != null ? flow.source() : "(cloud)");
         sinkLabel.setText(flow.sink() != null ? flow.sink() : "(cloud)");
         commentArea.setText(flow.comment() != null ? flow.comment() : "");
+        dimAnalysis.revalidate();
     }
 
     @Override
