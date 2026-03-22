@@ -111,6 +111,7 @@ public class DemoClassGenerator {
             sb.append("import systems.courant.sd.model.def.StockDef;\n");
         }
         boolean needsList = needsListImport(definition);
+        boolean needsSimSettings = needsFullSimulationConstructor(definition.defaultSimulation());
         if (!definition.modules().isEmpty()) {
             sb.append("import systems.courant.sd.model.def.ModelDefinition;\n");
             sb.append("import systems.courant.sd.model.def.ModuleInstanceDef;\n");
@@ -118,9 +119,14 @@ public class DemoClassGenerator {
             sb.append("\n");
             sb.append("import java.util.List;\n");
             sb.append("import java.util.Map;\n");
-        } else if (needsList) {
-            sb.append("\n");
-            sb.append("import java.util.List;\n");
+        } else {
+            if (needsSimSettings) {
+                sb.append("import systems.courant.sd.model.def.SimulationSettings;\n");
+            }
+            if (needsList) {
+                sb.append("\n");
+                sb.append("import java.util.List;\n");
+            }
         }
 
         sb.append('\n');
@@ -183,16 +189,7 @@ public class DemoClassGenerator {
         sb.append(INDENT2).append(".name(").append(escapeString(definition.name())).append(")");
 
         if (definition.defaultSimulation() != null) {
-            SimulationSettings sim = definition.defaultSimulation();
-            sb.append("\n").append(INDENT2)
-                    .append(".defaultSimulation(")
-                    .append(escapeString(sim.timeStep())).append(", ")
-                    .append(sim.duration()).append(", ")
-                    .append(escapeString(sim.durationUnit()));
-            if (sim.dt() != 1.0) {
-                sb.append(", ").append(sim.dt());
-            }
-            sb.append(")");
+            emitDefaultSimulation(sb, definition.defaultSimulation(), INDENT2);
         }
         sb.append(";\n\n");
 
@@ -305,15 +302,7 @@ public class DemoClassGenerator {
         sb.append(blockIndent).append("var innerBuilder = new ModelDefinitionBuilder()\n");
         sb.append(chainIndent).append(".name(").append(escapeString(inner.name())).append(")");
         if (inner.defaultSimulation() != null) {
-            SimulationSettings sim = inner.defaultSimulation();
-            sb.append("\n").append(chainIndent).append(".defaultSimulation(")
-                    .append(escapeString(sim.timeStep())).append(", ")
-                    .append(sim.duration()).append(", ")
-                    .append(escapeString(sim.durationUnit()));
-            if (sim.dt() != 1.0) {
-                sb.append(", ").append(sim.dt());
-            }
-            sb.append(")");
+            emitDefaultSimulation(sb, inner.defaultSimulation(), chainIndent);
         }
         sb.append(";\n");
 
@@ -358,6 +347,35 @@ public class DemoClassGenerator {
         emitMapLiteral(sb, module.outputBindings(), chainIndent);
         sb.append("));\n");
         sb.append(indent).append("}\n");
+    }
+
+    private static boolean needsFullSimulationConstructor(SimulationSettings sim) {
+        return sim != null && (sim.strictMode() || sim.savePer() != 1 || sim.initialTime() != 0.0);
+    }
+
+    private void emitDefaultSimulation(StringBuilder sb, SimulationSettings sim, String indent) {
+        if (needsFullSimulationConstructor(sim)) {
+            sb.append("\n").append(indent)
+                    .append(".defaultSimulation(new SimulationSettings(")
+                    .append(escapeString(sim.timeStep())).append(", ")
+                    .append(sim.duration()).append(", ")
+                    .append(escapeString(sim.durationUnit())).append(", ")
+                    .append(sim.dt()).append(", ")
+                    .append(sim.strictMode()).append(", ")
+                    .append(sim.savePer()).append(", ")
+                    .append(sim.initialTime())
+                    .append("))");
+        } else {
+            sb.append("\n").append(indent)
+                    .append(".defaultSimulation(")
+                    .append(escapeString(sim.timeStep())).append(", ")
+                    .append(sim.duration()).append(", ")
+                    .append(escapeString(sim.durationUnit()));
+            if (sim.dt() != 1.0) {
+                sb.append(", ").append(sim.dt());
+            }
+            sb.append(")");
+        }
     }
 
     /**

@@ -5,6 +5,7 @@ import systems.courant.sd.model.def.FlowDef;
 import systems.courant.sd.model.def.LookupTableDef;
 import systems.courant.sd.model.def.ModelDefinition;
 import systems.courant.sd.model.def.ModelDefinitionBuilder;
+import systems.courant.sd.model.def.SimulationSettings;
 import systems.courant.sd.model.def.StockDef;
 import systems.courant.sd.model.def.VariableDef;
 
@@ -545,6 +546,126 @@ class DemoClassGeneratorTest {
             // Subscripted constant should use VariableDef constructor, not builder.constant()
             assertThat(source).contains("new VariableDef(");
             assertThat(source).contains("List.of(\"Region\")");
+        }
+    }
+
+    @Nested
+    @DisplayName("Issue #1262 — savePer, initialTime, strictMode preservation")
+    class SimulationSettingsPreservation {
+
+        @Test
+        void shouldEmitFullConstructorWhenInitialTimeNonDefault() {
+            SimulationSettings sim = new SimulationSettings("Year", 200.0, "Years",
+                    1.0, false, 1, 1990.0);
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .stock("Pop", 100.0, "people")
+                    .defaultSimulation(sim)
+                    .build();
+
+            ModelMetadata metadata = ModelMetadata.builder().license("CC-BY-SA-4.0").build();
+            String source = generator.generate(def, metadata, "TestDemo",
+                    "systems.courant.sd.demo", "test.mdl", List.of(), List.of());
+
+            assertThat(source).contains("new SimulationSettings(");
+            assertThat(source).contains("1990.0");
+            assertThat(source).contains("import systems.courant.sd.model.def.SimulationSettings;");
+        }
+
+        @Test
+        void shouldEmitFullConstructorWhenSavePerNonDefault() {
+            SimulationSettings sim = new SimulationSettings("Month", 120.0, "Months",
+                    1.0, false, 4, 0.0);
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .stock("Pop", 100.0, "people")
+                    .defaultSimulation(sim)
+                    .build();
+
+            ModelMetadata metadata = ModelMetadata.builder().license("CC-BY-SA-4.0").build();
+            String source = generator.generate(def, metadata, "TestDemo",
+                    "systems.courant.sd.demo", "test.mdl", List.of(), List.of());
+
+            assertThat(source).contains("new SimulationSettings(");
+            assertThat(source).contains(", 4,");
+        }
+
+        @Test
+        void shouldEmitFullConstructorWhenStrictModeTrue() {
+            SimulationSettings sim = new SimulationSettings("Day", 365.0, "Days",
+                    0.5, true, 1, 0.0);
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .stock("Pop", 100.0, "people")
+                    .defaultSimulation(sim)
+                    .build();
+
+            ModelMetadata metadata = ModelMetadata.builder().license("CC-BY-SA-4.0").build();
+            String source = generator.generate(def, metadata, "TestDemo",
+                    "systems.courant.sd.demo", "test.mdl", List.of(), List.of());
+
+            assertThat(source).contains("new SimulationSettings(");
+            assertThat(source).contains("true");
+        }
+
+        @Test
+        void shouldEmitAllNonDefaultSimulationFields() {
+            SimulationSettings sim = new SimulationSettings("Month", 240.0, "Months",
+                    0.25, true, 3, 1980.0);
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .stock("Pop", 100.0, "people")
+                    .defaultSimulation(sim)
+                    .build();
+
+            ModelMetadata metadata = ModelMetadata.builder().license("CC-BY-SA-4.0").build();
+            String source = generator.generate(def, metadata, "TestDemo",
+                    "systems.courant.sd.demo", "test.mdl", List.of(), List.of());
+
+            assertThat(source).contains(
+                    "new SimulationSettings(\"Month\", 240.0, \"Months\", 0.25, true, 3, 1980.0)");
+        }
+
+        @Test
+        void shouldUseShortFormWhenAllExtrasAreDefault() {
+            SimulationSettings sim = new SimulationSettings("Year", 50.0, "Years",
+                    1.0, false, 1, 0.0);
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .stock("Pop", 100.0, "people")
+                    .defaultSimulation(sim)
+                    .build();
+
+            ModelMetadata metadata = ModelMetadata.builder().license("CC-BY-SA-4.0").build();
+            String source = generator.generate(def, metadata, "TestDemo",
+                    "systems.courant.sd.demo", "test.mdl", List.of(), List.of());
+
+            assertThat(source).contains(".defaultSimulation(\"Year\", 50.0, \"Years\")");
+            assertThat(source).doesNotContain("new SimulationSettings(");
+        }
+
+        @Test
+        void shouldEmitFullConstructorForModuleInnerDefinition() {
+            SimulationSettings innerSim = new SimulationSettings("Year", 100.0, "Years",
+                    1.0, false, 1, 1990.0);
+            ModelDefinition innerDef = new ModelDefinitionBuilder()
+                    .name("Inner")
+                    .stock("X", 0, "unit")
+                    .defaultSimulation(innerSim)
+                    .build();
+
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Outer")
+                    .module("sub", innerDef, Map.of(), Map.of())
+                    .defaultSimulation("Year", 50.0, "Years")
+                    .build();
+
+            ModelMetadata metadata = ModelMetadata.builder().license("CC-BY-SA-4.0").build();
+            String source = generator.generate(def, metadata, "TestDemo",
+                    "systems.courant.sd.demo", "test.mdl", List.of(), List.of());
+
+            assertThat(source).contains("new SimulationSettings(\"Year\", 100.0, \"Years\"," +
+                    " 1.0, false, 1, 1990.0)");
         }
     }
 
