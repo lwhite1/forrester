@@ -1206,6 +1206,22 @@ class ExprCompilerTest {
             // Initial value should be 75 (from init_val)
             assertThat(val).isCloseTo(75.0, within(0.01));
         }
+
+        @Test
+        void shouldWarnWhenInitialValueIsNotCompileTimeConstant() {
+            context.addVariable("normal_price",
+                    new systems.courant.sd.model.Variable("normal_price",
+                            ItemUnits.PEOPLE, () -> 50.0));
+            context.addVariable("input",
+                    new systems.courant.sd.model.Variable("input",
+                            ItemUnits.PEOPLE, () -> 100.0));
+
+            compiler.compile("SMOOTHI(input, 5, normal_price)");
+            assertThat(context.getWarnings())
+                    .anyMatch(w -> w.contains("SMOOTHI initialValue")
+                            && w.contains("not a compile-time constant")
+                            && w.contains("uninitialized variables"));
+        }
     }
 
     @Nested
