@@ -625,11 +625,11 @@ class ExprCompilerTest {
         }
 
         @Test
-        void shouldUseHalfToEvenRoundingForROUND() {
-            // Half-to-even (banker's rounding): 0.5 rounds to nearest even
-            assertThat(compiler.compile("ROUND(0.5)").getCurrentValue()).isEqualTo(0.0);
+        void shouldUseHalfUpRoundingForROUND() {
+            // Half-up rounding: 0.5 always rounds away from zero
+            assertThat(compiler.compile("ROUND(0.5)").getCurrentValue()).isEqualTo(1.0);
             assertThat(compiler.compile("ROUND(1.5)").getCurrentValue()).isEqualTo(2.0);
-            assertThat(compiler.compile("ROUND(2.5)").getCurrentValue()).isEqualTo(2.0);
+            assertThat(compiler.compile("ROUND(2.5)").getCurrentValue()).isEqualTo(3.0);
             assertThat(compiler.compile("ROUND(3.5)").getCurrentValue()).isEqualTo(4.0);
             assertThat(compiler.compile("ROUND(-2.5)").getCurrentValue()).isEqualTo(-2.0);
         }
@@ -1205,6 +1205,22 @@ class ExprCompilerTest {
             double val = formula.getCurrentValue();
             // Initial value should be 75 (from init_val)
             assertThat(val).isCloseTo(75.0, within(0.01));
+        }
+
+        @Test
+        void shouldWarnWhenInitialValueIsNotCompileTimeConstant() {
+            context.addVariable("normal_price",
+                    new systems.courant.sd.model.Variable("normal_price",
+                            ItemUnits.PEOPLE, () -> 50.0));
+            context.addVariable("input",
+                    new systems.courant.sd.model.Variable("input",
+                            ItemUnits.PEOPLE, () -> 100.0));
+
+            compiler.compile("SMOOTHI(input, 5, normal_price)");
+            assertThat(context.getWarnings())
+                    .anyMatch(w -> w.contains("SMOOTHI initialValue")
+                            && w.contains("not a compile-time constant")
+                            && w.contains("uninitialized variables"));
         }
     }
 

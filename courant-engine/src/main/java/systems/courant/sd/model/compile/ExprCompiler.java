@@ -426,7 +426,13 @@ public class ExprCompiler {
     private DoubleSupplier compileRound(List<Expr> args) {
         requireArgs("ROUND", args, 1);
         DoubleSupplier a = compileExpr(args.get(0));
-        return () -> Math.rint(a.getAsDouble());
+        return () -> {
+            double v = a.getAsDouble();
+            if (Math.abs(v) >= 1e15) {
+                return v; // already integral at this magnitude
+            }
+            return Math.round(v);
+        };
     }
 
     private DoubleSupplier compileModulo(List<Expr> args) {
@@ -1171,15 +1177,24 @@ public class ExprCompiler {
     }
 
     /**
-     * Compiles an expression and evaluates it immediately. Used for parameters
-     * like delay times that must be known at compile time but may reference
-     * variables or variables (evaluated at their initial/current values).
+     * Evaluates an expression at compile time to obtain a numeric value.
+     * Tries strict constant evaluation first (literals, named constants,
+     * arithmetic on those). If that fails, falls back to compiling and
+     * evaluating the full expression against current model state, which
+     * may contain uninitialized variables. A warning is logged when the
+     * fallback is used so that incorrect initial values can be diagnosed.
      */
     private double evaluateAtCompileTime(Expr expr, String paramDescription) {
         try {
             return evaluateConstant(expr, paramDescription);
         } catch (CompilationException e) {
-            // Fall back to compiling and evaluating the full expression
+            String msg = paramDescription
+                    + ": expression is not a compile-time constant ("
+                    + e.getMessage()
+                    + ") — evaluating against current model state, which may"
+                    + " contain uninitialized variables";
+            logger.warn(msg);
+            context.addWarning(msg);
             DoubleSupplier compiled = compileExpr(expr);
             return compiled.getAsDouble();
         }

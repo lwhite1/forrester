@@ -27,6 +27,8 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.nio.charset.Charset;
+import java.nio.charset.CharacterCodingException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -75,7 +77,12 @@ public class XmileImporter implements ModelImporter {
             throw new IOException("File exceeds maximum allowed size of "
                     + (MAX_FILE_SIZE / (1024 * 1024)) + " MB: " + path);
         }
-        String content = Files.readString(path, StandardCharsets.UTF_8);
+        String content;
+        try {
+            content = Files.readString(path, StandardCharsets.UTF_8);
+        } catch (CharacterCodingException e) {
+            content = Files.readString(path, Charset.forName("windows-1252"));
+        }
         Path fileName = path.getFileName();
         String modelName = fileName != null ? fileName.toString() : path.toString();
         int dotPos = modelName.lastIndexOf('.');
