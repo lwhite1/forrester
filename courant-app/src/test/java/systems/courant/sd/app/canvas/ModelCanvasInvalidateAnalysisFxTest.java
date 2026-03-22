@@ -14,6 +14,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
 
+import org.testfx.util.WaitForAsyncUtils;
+
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -112,6 +114,9 @@ class ModelCanvasInvalidateAnalysisFxTest {
 
         canvas.setModel(editor, state.toViewDef());
 
+        // Validation is debounced via Platform.runLater — flush pending FX events
+        WaitForAsyncUtils.waitForFxEvents();
+
         // Validation should be computed (stock with no flow should have issues)
         assertThat(canvas.analysis().getLastValidationResult()).isNotNull();
         assertThat(canvas.analysis().getLastValidationResult().issues()).isNotNull();
@@ -124,5 +129,42 @@ class ModelCanvasInvalidateAnalysisFxTest {
         // invalidateAnalysis should not throw
         assertThat(canvas.analysis().getLastValidationResult()).isNotNull();
         assertThat(canvas.analysis().getLastValidationResult().issues()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("rapid invalidations should coalesce validation into one FX pulse (#1267)")
+    void shouldCoalesceRapidInvalidations() {
+        CountingModelEditor editor = new CountingModelEditor();
+        editor.addStock(); // Stock 1
+        CanvasState state = new CanvasState();
+        state.addElement("Stock 1", ElementType.STOCK, 100, 200);
+        canvas.setModel(editor, state.toViewDef());
+
+        // Flush any pending validation from setModel
+        WaitForAsyncUtils.waitForFxEvents();
+        editor.resetCount();
+
+        // Three rapid invalidations — each calls modelDefSupplier.get() once
+        // for loop/trace, but validation is coalesced via Platform.runLater
+        canvas.invalidateAnalysis();
+        canvas.invalidateAnalysis();
+        canvas.invalidateAnalysis();
+
+        int preFlushCount = editor.snapshotCount();
+        assertThat(preFlushCount)
+                .as("three invalidations should call modelDefSupplier three times for loop/trace")
+                .isEqualTo(3);
+
+        // Process FX events — the single deferred validation uses the captured def
+        WaitForAsyncUtils.waitForFxEvents();
+
+        // No additional supplier calls — validation reused the captured def
+        assertThat(editor.snapshotCount())
+                .as("deferred validation should reuse captured def, no extra supplier calls")
+                .isEqualTo(preFlushCount);
+
+        // Validation result should be populated after the pulse
+        assertThat(canvas.analysis().getLastValidationResult()).isNotNull();
+        assertThat(canvas.analysis().getLastValidationResult().issues()).isNotNull();
     }
 }
