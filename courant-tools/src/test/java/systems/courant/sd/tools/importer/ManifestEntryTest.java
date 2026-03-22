@@ -21,35 +21,35 @@ class ManifestEntryTest {
 
         @Test
         void shouldRejectNullUrl() {
-            assertThatThrownBy(() -> new ManifestEntry(null, "Demo", null, null, null, METADATA))
+            assertThatThrownBy(() -> new ManifestEntry(null, "Demo", null, null, null, null, METADATA))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("url");
         }
 
         @Test
         void shouldRejectBlankUrl() {
-            assertThatThrownBy(() -> new ManifestEntry("  ", "Demo", null, null, null, METADATA))
+            assertThatThrownBy(() -> new ManifestEntry("  ", "Demo", null, null, null, null, METADATA))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("url");
         }
 
         @Test
         void shouldRejectNullClassName() {
-            assertThatThrownBy(() -> new ManifestEntry("http://example.com/m.mdl", null, null, null, null, METADATA))
+            assertThatThrownBy(() -> new ManifestEntry("http://example.com/m.mdl", null, null, null, null, null, METADATA))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("className");
         }
 
         @Test
         void shouldRejectBlankClassName() {
-            assertThatThrownBy(() -> new ManifestEntry("http://example.com/m.mdl", "", null, null, null, METADATA))
+            assertThatThrownBy(() -> new ManifestEntry("http://example.com/m.mdl", "", null, null, null, null, METADATA))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("className");
         }
 
         @Test
         void shouldRejectNullMetadata() {
-            assertThatThrownBy(() -> new ManifestEntry("http://example.com/m.mdl", "Demo", null, null, null, null))
+            assertThatThrownBy(() -> new ManifestEntry("http://example.com/m.mdl", "Demo", null, null, null, null, null))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("metadata");
         }
@@ -63,12 +63,13 @@ class ManifestEntryTest {
         void shouldCreateValidEntry() {
             ManifestEntry entry = new ManifestEntry(
                     "http://example.com/model.mdl", "SirDemo", "sir-epidemic",
-                    "epidemiology", "SIR model", METADATA);
+                    "epidemiology", "SIR Epidemic", "SIR model", METADATA);
 
             assertThat(entry.url()).isEqualTo("http://example.com/model.mdl");
             assertThat(entry.className()).isEqualTo("SirDemo");
             assertThat(entry.id()).isEqualTo("sir-epidemic");
             assertThat(entry.category()).isEqualTo("epidemiology");
+            assertThat(entry.displayName()).isEqualTo("SIR Epidemic");
             assertThat(entry.comment()).isEqualTo("SIR model");
             assertThat(entry.metadata()).isEqualTo(METADATA);
         }
@@ -76,14 +77,14 @@ class ManifestEntryTest {
         @Test
         void shouldAcceptNullCategory() {
             ManifestEntry entry = new ManifestEntry(
-                    "http://example.com/model.mdl", "Demo", null, null, null, METADATA);
+                    "http://example.com/model.mdl", "Demo", null, null, null, null, METADATA);
             assertThat(entry.category()).isNull();
         }
 
         @Test
         void shouldAcceptNullComment() {
             ManifestEntry entry = new ManifestEntry(
-                    "http://example.com/model.mdl", "Demo", null, null, null, METADATA);
+                    "http://example.com/model.mdl", "Demo", null, null, null, null, METADATA);
             assertThat(entry.comment()).isNull();
         }
     }

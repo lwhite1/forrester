@@ -200,6 +200,7 @@ public class BatchImportCli {
             String className = requiredText(node, "className");
             String id = textOrNull(node, "id");
             String category = textOrNull(node, "category");
+            String displayName = textOrNull(node, "displayName");
             String comment = textOrNull(node, "comment");
 
             JsonNode metaNode = node.get("metadata");
@@ -221,7 +222,7 @@ public class BatchImportCli {
                     .url(textOrNull(metaNode, "url"))
                     .build();
 
-            entries.add(new ManifestEntry(url, className, id, category, comment, metadata));
+            entries.add(new ManifestEntry(url, className, id, category, displayName, comment, metadata));
         }
         return entries;
     }

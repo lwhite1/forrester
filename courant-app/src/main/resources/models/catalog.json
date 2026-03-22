@@ -1021,11 +1021,11 @@
     {
       "id": "vensim-intro",
       "fileName": "INTRO",
-      "displayName": "Vensim Intro",
+      "displayName": "Workforce & Production",
       "description": "Model 'INTRO' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "management",
       "difficulty": "intermediate",
-      "path": "management/VensimIntro.json",
+      "path": "management/INTRO.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -1037,11 +1037,11 @@
     {
       "id": "vensim-bpr3",
       "fileName": "BPR3",
-      "displayName": "Vensim Bpr3",
+      "displayName": "Business Process Reengineering",
       "description": "Model 'BPR3' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "management",
       "difficulty": "intermediate",
-      "path": "management/VensimBpr3.json",
+      "path": "management/BPR3.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -1053,11 +1053,11 @@
     {
       "id": "vensim-age",
       "fileName": "AGE",
-      "displayName": "Vensim Age",
+      "displayName": "Age Structure Demographics",
       "description": "Model 'AGE' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "demographics",
       "difficulty": "intermediate",
-      "path": "demographics/VensimAge.json",
+      "path": "demographics/AGE.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -1069,11 +1069,11 @@
     {
       "id": "vensim-agechain",
       "fileName": "AGECHAIN",
-      "displayName": "Vensim Agechain",
+      "displayName": "Aging Chain",
       "description": "Model 'AGECHAIN' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "demographics",
       "difficulty": "intermediate",
-      "path": "demographics/VensimAgechain.json",
+      "path": "demographics/AGECHAIN.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -1085,11 +1085,11 @@
     {
       "id": "vensim-agemodel",
       "fileName": "AGEMODEL",
-      "displayName": "Vensim Agemodel",
+      "displayName": "Age Structure Model",
       "description": "Model 'AGEMODEL' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "demographics",
       "difficulty": "intermediate",
-      "path": "demographics/VensimAgemodel.json",
+      "path": "demographics/AGEMODEL.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -1101,11 +1101,11 @@
     {
       "id": "vensim-ball",
       "fileName": "BALL",
-      "displayName": "Vensim Ball",
+      "displayName": "Bouncing Ball",
       "description": "Model 'BALL' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "physics",
       "difficulty": "intermediate",
-      "path": "physics/VensimBall.json",
+      "path": "physics/BALL.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -1117,11 +1117,11 @@
     {
       "id": "vensim-ballmodel",
       "fileName": "BALLMODEL",
-      "displayName": "Vensim Ballmodel",
+      "displayName": "Bouncing Ball Model",
       "description": "Model 'BALLMODEL' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "physics",
       "difficulty": "intermediate",
-      "path": "physics/VensimBallmodel.json",
+      "path": "physics/BALLMODEL.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -1133,11 +1133,11 @@
     {
       "id": "vensim-burnout",
       "fileName": "BURNOUT",
-      "displayName": "Vensim Burnout",
+      "displayName": "Workplace Burnout",
       "description": "Model 'BURNOUT' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "management",
       "difficulty": "intermediate",
-      "path": "management/VensimBurnout.json",
+      "path": "management/BURNOUT.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -1149,11 +1149,11 @@
     {
       "id": "vensim-burnoutmodel",
       "fileName": "BURNOUTMODEL",
-      "displayName": "Vensim Burnoutmodel",
+      "displayName": "Workplace Burnout Model",
       "description": "Model 'BURNOUTMODEL' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "management",
       "difficulty": "intermediate",
-      "path": "management/VensimBurnoutmodel.json",
+      "path": "management/BURNOUTMODEL.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -1165,11 +1165,11 @@
     {
       "id": "vensim-caffeine",
       "fileName": "CAFFEINE",
-      "displayName": "Vensim Caffeine",
+      "displayName": "Caffeine Metabolism",
       "description": "Model 'CAFFEINE' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "introductory",
       "difficulty": "intermediate",
-      "path": "introductory/VensimCaffeine.json",
+      "path": "introductory/CAFFEINE.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -1181,11 +1181,11 @@
     {
       "id": "vensim-commod",
       "fileName": "COMMOD",
-      "displayName": "Vensim Commod",
+      "displayName": "Commodity Cycles",
       "description": "Model 'COMMOD' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "economics",
       "difficulty": "intermediate",
-      "path": "economics/VensimCommod.json",
+      "path": "economics/COMMOD.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -1197,11 +1197,11 @@
     {
       "id": "vensim-compete1",
       "fileName": "COMPETE1",
-      "displayName": "Vensim Compete1",
+      "displayName": "Price Competition",
       "description": "Model 'COMPETE1' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "economics",
       "difficulty": "intermediate",
-      "path": "economics/VensimCompete1.json",
+      "path": "economics/COMPETE1.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -1213,11 +1213,11 @@
     {
       "id": "vensim-compete1model",
       "fileName": "COMPETE1MODEL",
-      "displayName": "Vensim Compete1model",
+      "displayName": "Price Competition Model",
       "description": "Model 'COMPETE1MODEL' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "economics",
       "difficulty": "intermediate",
-      "path": "economics/VensimCompete1model.json",
+      "path": "economics/COMPETE1MODEL.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -1229,11 +1229,11 @@
     {
       "id": "vensim-cool",
       "fileName": "COOL",
-      "displayName": "Vensim Cool",
+      "displayName": "Coffee Cooling",
       "description": "Model 'COOL' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "introductory",
       "difficulty": "intermediate",
-      "path": "introductory/VensimCool.json",
+      "path": "introductory/COOL.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -1245,11 +1245,11 @@
     {
       "id": "vensim-corpgrth",
       "fileName": "CORPGRTH",
-      "displayName": "Vensim Corpgrth",
+      "displayName": "Corporate Growth",
       "description": "Model 'CORPGRTH' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "economics",
       "difficulty": "intermediate",
-      "path": "economics/VensimCorpgrth.json",
+      "path": "economics/CORPGRTH.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -1261,11 +1261,11 @@
     {
       "id": "vensim-corpgrthe",
       "fileName": "CORPGRTHE",
-      "displayName": "Vensim Corpgrthe",
+      "displayName": "Corporate Growth Extended",
       "description": "Model 'CORPGRTHE' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "economics",
       "difficulty": "intermediate",
-      "path": "economics/VensimCorpgrthe.json",
+      "path": "economics/CORPGRTHE.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -1277,11 +1277,11 @@
     {
       "id": "vensim-deliv",
       "fileName": "DELIV",
-      "displayName": "Vensim Deliv",
+      "displayName": "Delivery Delay",
       "description": "Model 'DELIV' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "marketing",
       "difficulty": "intermediate",
-      "path": "marketing/VensimDeliv.json",
+      "path": "marketing/DELIV.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -1293,11 +1293,11 @@
     {
       "id": "vensim-eit",
       "fileName": "EIT",
-      "displayName": "Vensim Eit",
+      "displayName": "Trees & Population",
       "description": "Model 'EIT' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "ecology",
       "difficulty": "intermediate",
-      "path": "ecology/VensimEit.json",
+      "path": "ecology/EIT.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -1309,11 +1309,11 @@
     {
       "id": "vensim-epidemic",
       "fileName": "EPIDEMIC",
-      "displayName": "Vensim Epidemic",
+      "displayName": "Epidemic",
       "description": "Model 'EPIDEMIC' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "epidemiology",
       "difficulty": "intermediate",
-      "path": "epidemiology/VensimEpidemic.json",
+      "path": "epidemiology/EPIDEMIC.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -1325,11 +1325,11 @@
     {
       "id": "vensim-gravity",
       "fileName": "GRAVITY",
-      "displayName": "Vensim Gravity",
+      "displayName": "Two-Body Gravity",
       "description": "Model 'GRAVITY' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "physics",
       "difficulty": "intermediate",
-      "path": "physics/VensimGravity.json",
+      "path": "physics/GRAVITY.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -1341,11 +1341,11 @@
     {
       "id": "vensim-popgame",
       "fileName": "POPGAME",
-      "displayName": "Vensim Popgame",
+      "displayName": "Population Game",
       "description": "Model 'POPGAME' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "demographics",
       "difficulty": "intermediate",
-      "path": "demographics/VensimPopgame.json",
+      "path": "demographics/POPGAME.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -1357,11 +1357,11 @@
     {
       "id": "vensim-procrast",
       "fileName": "PROCRAST",
-      "displayName": "Vensim Procrast",
+      "displayName": "Procrastination",
       "description": "Model 'PROCRAST' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "management",
       "difficulty": "intermediate",
-      "path": "management/VensimProcrast.json",
+      "path": "management/PROCRAST.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -1373,11 +1373,11 @@
     {
       "id": "vensim-proj",
       "fileName": "PROJ",
-      "displayName": "Vensim Proj",
+      "displayName": "Project Management",
       "description": "Model 'PROJ' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "management",
       "difficulty": "intermediate",
-      "path": "management/VensimProj.json",
+      "path": "management/PROJ.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -1389,11 +1389,11 @@
     {
       "id": "vensim-rabfox",
       "fileName": "RABFOX",
-      "displayName": "Vensim Rabfox",
+      "displayName": "Rabbit & Fox",
       "description": "Model 'RABFOX' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "ecology",
       "difficulty": "intermediate",
-      "path": "ecology/VensimRabfox.json",
+      "path": "ecology/RABFOX.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -1405,11 +1405,11 @@
     {
       "id": "vensim-snowball",
       "fileName": "SNOWBALL",
-      "displayName": "Vensim Snowball",
+      "displayName": "Snowball Growth",
       "description": "Model 'SNOWBALL' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "introductory",
       "difficulty": "intermediate",
-      "path": "introductory/VensimSnowball.json",
+      "path": "introductory/SNOWBALL.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -1421,11 +1421,11 @@
     {
       "id": "vensim-speed",
       "fileName": "SPEED",
-      "displayName": "Vensim Speed",
+      "displayName": "Speed & Acceleration",
       "description": "Model 'SPEED' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "introductory",
       "difficulty": "intermediate",
-      "path": "introductory/VensimSpeed.json",
+      "path": "introductory/SPEED.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -1437,11 +1437,11 @@
     {
       "id": "vensim-tubs",
       "fileName": "TUBS",
-      "displayName": "Vensim Tubs",
+      "displayName": "Cascading Bathtubs",
       "description": "Model 'TUBS' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "introductory",
       "difficulty": "intermediate",
-      "path": "introductory/VensimTubs.json",
+      "path": "introductory/TUBS.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -1453,11 +1453,11 @@
     {
       "id": "vensim-world",
       "fileName": "WORLD",
-      "displayName": "Vensim World",
+      "displayName": "World Dynamics",
       "description": "Model 'WORLD' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "environment",
       "difficulty": "intermediate",
-      "path": "environment/VensimWorld.json",
+      "path": "environment/WORLD.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -1469,11 +1469,11 @@
     {
       "id": "vensim-venread",
       "fileName": "venread",
-      "displayName": "Vensim Venread",
+      "displayName": "Customer Adoption Game",
       "description": "Model 'venread' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "marketing",
       "difficulty": "intermediate",
-      "path": "marketing/VensimVenread.json",
+      "path": "marketing/venread.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -1485,11 +1485,11 @@
     {
       "id": "vensim-finance",
       "fileName": "FINANCE",
-      "displayName": "Vensim Finance",
+      "displayName": "Corporate Finance",
       "description": "Model 'FINANCE' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "economics",
       "difficulty": "intermediate",
-      "path": "economics/VensimFinance.json",
+      "path": "economics/FINANCE.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -1501,11 +1501,11 @@
     {
       "id": "vensim-market2",
       "fileName": "MARKET2",
-      "displayName": "Vensim Market2",
+      "displayName": "Market Dynamics",
       "description": "Model 'MARKET2' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "economics",
       "difficulty": "intermediate",
-      "path": "economics/VensimMarket2.json",
+      "path": "economics/MARKET2.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -1517,27 +1517,11 @@
     {
       "id": "vensim-products",
       "fileName": "Products",
-      "displayName": "Vensim Products",
+      "displayName": "Product Development",
       "description": "Model 'Products' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "marketing",
       "difficulty": "intermediate",
-      "path": "marketing/VensimProducts.json",
-      "tags": [],
-      "elements": {
-        "stocks": 0,
-        "flows": 0,
-        "variables": 0,
-        "parameters": 0
-      }
-    },
-    {
-      "id": "vensim-advertising",
-      "fileName": "advertising",
-      "displayName": "Vensim Advertising",
-      "description": "Model 'advertising' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-      "category": "marketing",
-      "difficulty": "intermediate",
-      "path": "marketing/VensimAdvertising.json",
+      "path": "marketing/Products.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -1549,11 +1533,11 @@
     {
       "id": "vensim-market-model-original",
       "fileName": "market_model_original",
-      "displayName": "Vensim Market Model Original",
+      "displayName": "Market Model",
       "description": "Model 'market_model_original' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "economics",
       "difficulty": "intermediate",
-      "path": "economics/VensimMarketModelOriginal.json",
+      "path": "economics/market_model_original.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -1565,11 +1549,11 @@
     {
       "id": "vensim-urban",
       "fileName": "URBAN",
-      "displayName": "Vensim Urban",
+      "displayName": "Urban Dynamics",
       "description": "Model 'URBAN' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "social",
       "difficulty": "intermediate",
-      "path": "social/VensimUrban.json",
+      "path": "social/URBAN.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -1581,11 +1565,11 @@
     {
       "id": "vensim-worldapp",
       "fileName": "WORLDAPP",
-      "displayName": "Vensim Worldapp",
+      "displayName": "World Dynamics Application",
       "description": "Model 'WORLDAPP' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "environment",
       "difficulty": "intermediate",
-      "path": "environment/VensimWorldapp.json",
+      "path": "environment/WORLDAPP.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -1597,11 +1581,11 @@
     {
       "id": "vensim-worldappedited",
       "fileName": "WORLDAPPEDITED",
-      "displayName": "Vensim Worldappedited",
+      "displayName": "World Dynamics (Edited)",
       "description": "Model 'WORLDAPPEDITED' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "environment",
       "difficulty": "intermediate",
-      "path": "environment/VensimWorldappedited.json",
+      "path": "environment/WORLDAPPEDITED.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -1613,11 +1597,11 @@
     {
       "id": "vensim-change",
       "fileName": "change",
-      "displayName": "Vensim Change",
+      "displayName": "Stock Adjustment",
       "description": "Model 'change' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "introductory",
       "difficulty": "intermediate",
-      "path": "introductory/VensimChange.json",
+      "path": "introductory/change.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -1629,11 +1613,11 @@
     {
       "id": "vensim-flicker",
       "fileName": "flicker",
-      "displayName": "Vensim Flicker",
+      "displayName": "Flicker Noise",
       "description": "Model 'flicker' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "introductory",
       "difficulty": "intermediate",
-      "path": "introductory/VensimFlicker.json",
+      "path": "introductory/flicker.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -1645,11 +1629,11 @@
     {
       "id": "vensim-mplayer",
       "fileName": "mplayer",
-      "displayName": "Vensim Mplayer",
+      "displayName": "Regional Population",
       "description": "Model 'mplayer' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "demographics",
       "difficulty": "intermediate",
-      "path": "demographics/VensimMplayer.json",
+      "path": "demographics/mplayer.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -1661,11 +1645,11 @@
     {
       "id": "vensim-world303scenarios",
       "fileName": "World3_03_Scenarios",
-      "displayName": "Vensim World303scenarios",
+      "displayName": "World3 Scenarios",
       "description": "Model 'World3_03_Scenarios' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "environment",
       "difficulty": "intermediate",
-      "path": "environment/VensimWorld303Scenarios.json",
+      "path": "environment/World3_03_Scenarios.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -1677,11 +1661,11 @@
     {
       "id": "vensim-wfinv",
       "fileName": "WFINV",
-      "displayName": "Vensim Wfinv",
+      "displayName": "Workforce & Inventory",
       "description": "Model 'WFINV' from Vensim User Guide, Chapter 03. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "management",
       "difficulty": "intermediate",
-      "path": "management/VensimWfinv.json",
+      "path": "management/WFINV.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -1693,11 +1677,11 @@
     {
       "id": "vensim-pop",
       "fileName": "POP",
-      "displayName": "Vensim Pop",
+      "displayName": "Rabbit Population",
       "description": "Model 'POP' from Vensim User Guide, Chapter 06. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "demographics",
       "difficulty": "intermediate",
-      "path": "demographics/VensimPop.json",
+      "path": "demographics/POP.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -1709,11 +1693,11 @@
     {
       "id": "vensim-price3",
       "fileName": "price3",
-      "displayName": "Vensim Price3",
+      "displayName": "Price Adjustment",
       "description": "Model 'price3' from Vensim User Guide, Chapter 07. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "economics",
       "difficulty": "intermediate",
-      "path": "economics/VensimPrice3.json",
+      "path": "economics/price3.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -1725,11 +1709,11 @@
     {
       "id": "vensim-rabbit3",
       "fileName": "RABBIT3",
-      "displayName": "Vensim Rabbit3",
+      "displayName": "Rabbit Crowding",
       "description": "Model 'RABBIT3' from Vensim User Guide, Chapter 08. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "ecology",
       "difficulty": "intermediate",
-      "path": "ecology/VensimRabbit3.json",
+      "path": "ecology/RABBIT3.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -1741,11 +1725,11 @@
     {
       "id": "vensim-cap1",
       "fileName": "CAP1",
-      "displayName": "Vensim Cap1",
+      "displayName": "Capacity Planning",
       "description": "Model 'CAP1' from Vensim User Guide, Chapter 09. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "management",
       "difficulty": "intermediate",
-      "path": "management/VensimCap1.json",
+      "path": "management/CAP1.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -1757,11 +1741,11 @@
     {
       "id": "vensim-cust3",
       "fileName": "CUST3",
-      "displayName": "Vensim Cust3",
+      "displayName": "Customer Acquisition",
       "description": "Model 'CUST3' from Vensim User Guide, Chapter 09. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "management",
       "difficulty": "intermediate",
-      "path": "management/VensimCust3.json",
+      "path": "management/CUST3.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -1773,11 +1757,11 @@
     {
       "id": "vensim-wom1",
       "fileName": "WOM1",
-      "displayName": "Vensim Wom1",
+      "displayName": "Word of Mouth",
       "description": "Model 'WOM1' from Vensim User Guide, Chapter 12. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "marketing",
       "difficulty": "intermediate",
-      "path": "marketing/VensimWom1.json",
+      "path": "marketing/WOM1.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -1789,11 +1773,11 @@
     {
       "id": "vensim-wom4",
       "fileName": "WOM4",
-      "displayName": "Vensim Wom4",
+      "displayName": "Word of Mouth Game",
       "description": "Model 'WOM4' from Vensim User Guide, Chapter 12. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "marketing",
       "difficulty": "intermediate",
-      "path": "marketing/VensimWom4.json",
+      "path": "marketing/WOM4.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -1805,11 +1789,11 @@
     {
       "id": "vensim-arms1",
       "fileName": "arms1",
-      "displayName": "Vensim Arms1",
+      "displayName": "Arms Race",
       "description": "Model 'arms1' from Vensim User Guide, Chapter 13. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "policy",
       "difficulty": "intermediate",
-      "path": "policy/VensimArms1.json",
+      "path": "policy/arms1.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -1821,11 +1805,11 @@
     {
       "id": "vensim-yeast4",
       "fileName": "YEAST4",
-      "displayName": "Vensim Yeast4",
+      "displayName": "Yeast Growth",
       "description": "Model 'YEAST4' from Vensim User Guide, Chapter 14. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "ecology",
       "difficulty": "intermediate",
-      "path": "ecology/VensimYeast4.json",
+      "path": "ecology/YEAST4.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -1837,11 +1821,11 @@
     {
       "id": "vensim-sales",
       "fileName": "SALES",
-      "displayName": "Vensim Sales",
+      "displayName": "Sales Force",
       "description": "Model 'SALES' from Vensim User Guide, Chapter 15. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "marketing",
       "difficulty": "intermediate",
-      "path": "marketing/VensimSales.json",
+      "path": "marketing/SALES.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -1853,11 +1837,11 @@
     {
       "id": "vensim-cfc2",
       "fileName": "CFC2",
-      "displayName": "Vensim Cfc2",
+      "displayName": "CFC Atmospheric Dynamics",
       "description": "Model 'CFC2' from Vensim User Guide, Chapter 16. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "environment",
       "difficulty": "intermediate",
-      "path": "environment/VensimCfc2.json",
+      "path": "environment/CFC2.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -1869,11 +1853,11 @@
     {
       "id": "vensim-proj1",
       "fileName": "PROJ1",
-      "displayName": "Vensim Proj1",
+      "displayName": "Project Task Scheduling",
       "description": "Model 'PROJ1' from Vensim User Guide, Chapter 17. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "management",
       "difficulty": "intermediate",
-      "path": "management/VensimProj1.json",
+      "path": "management/PROJ1.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -1885,11 +1869,11 @@
     {
       "id": "vensim-proj3",
       "fileName": "PROJ3",
-      "displayName": "Vensim Proj3",
+      "displayName": "Multi-Phase Project",
       "description": "Model 'PROJ3' from Vensim User Guide, Chapter 17. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "management",
       "difficulty": "intermediate",
-      "path": "management/VensimProj3.json",
+      "path": "management/PROJ3.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -1901,11 +1885,11 @@
     {
       "id": "vensim-electric",
       "fileName": "ELECTRIC",
-      "displayName": "Vensim Electric",
+      "displayName": "Electric Household Adoption",
       "description": "Model 'ELECTRIC' from Vensim User Guide, Chapter 18. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "technology",
       "difficulty": "intermediate",
-      "path": "technology/VensimElectric.json",
+      "path": "technology/ELECTRIC.json",
       "tags": [],
       "elements": {
         "stocks": 0,
@@ -1917,27 +1901,11 @@
     {
       "id": "vensim-mentalsimulation01",
       "fileName": "MentalSimulation01",
-      "displayName": "Vensim Mentalsimulation01",
+      "displayName": "Mental Simulation",
       "description": "Model 'MentalSimulation01' from Vensim User Guide, Chapter 20. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "introductory",
       "difficulty": "intermediate",
-      "path": "introductory/VensimMentalsimulation01.json",
-      "tags": [],
-      "elements": {
-        "stocks": 0,
-        "flows": 0,
-        "variables": 0,
-        "parameters": 0
-      }
-    },
-    {
-      "id": "vensim-repair02",
-      "fileName": "repair02",
-      "displayName": "Vensim Repair02",
-      "description": "Model 'repair02' from Vensim User Guide, Chapter 20. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
-      "category": "control",
-      "difficulty": "intermediate",
-      "path": "control/VensimRepair02.json",
+      "path": "introductory/MentalSimulation01.json",
       "tags": [],
       "elements": {
         "stocks": 0,
