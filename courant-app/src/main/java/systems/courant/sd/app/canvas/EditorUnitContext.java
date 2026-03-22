@@ -34,8 +34,7 @@ public final class EditorUnitContext implements DimensionalAnalyzer.UnitContext 
         if (stockOpt.isPresent()) {
             String unitName = stockOpt.get().unit();
             if (unitName != null && !unitName.isBlank()) {
-                Unit unit = registry.resolve(unitName);
-                return Optional.of(CompositeUnit.of(unit));
+                return Optional.of(registry.resolveComposite(unitName));
             }
             return Optional.of(CompositeUnit.dimensionless());
         }
@@ -60,8 +59,7 @@ public final class EditorUnitContext implements DimensionalAnalyzer.UnitContext 
         if (auxOpt.isPresent()) {
             String unitName = auxOpt.get().unit();
             if (unitName != null && !unitName.isBlank()) {
-                Unit unit = registry.resolve(unitName);
-                return Optional.of(CompositeUnit.of(unit));
+                return Optional.of(registry.resolveComposite(unitName));
             }
             return Optional.of(CompositeUnit.dimensionless());
         }
@@ -74,10 +72,10 @@ public final class EditorUnitContext implements DimensionalAnalyzer.UnitContext 
         if (lookupOpt.isPresent()) {
             String unitName = lookupOpt.get().unit();
             if (unitName != null && !unitName.isBlank()) {
-                Unit unit = registry.resolve(unitName);
-                return Optional.of(CompositeUnit.of(unit));
+                return Optional.of(registry.resolveComposite(unitName));
             }
-            return Optional.of(CompositeUnit.dimensionless());
+            // No declared unit → unknown (not dimensionless)
+            return Optional.empty();
         }
 
         return Optional.empty();

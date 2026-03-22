@@ -227,14 +227,17 @@ public class DimensionalAnalyzer {
 
         if ("LOOKUP".equals(name) || "LOOKUP_AREA".equals(name)) {
             // Resolve the table's declared output unit from the first argument (table name)
+            CompositeUnit tableUnit = null;
             if (!call.arguments().isEmpty()
                     && call.arguments().getFirst() instanceof Expr.Ref tableRef) {
-                CompositeUnit tableUnit = context.resolveUnit(tableRef.name()).orElse(null);
-                if (tableUnit != null) {
-                    return tableUnit;
-                }
+                tableUnit = context.resolveUnit(tableRef.name()).orElse(null);
             }
-            return CompositeUnit.dimensionless();
+            // Analyze remaining arguments for potential internal warnings
+            for (int i = 1; i < call.arguments().size(); i++) {
+                infer(call.arguments().get(i), warnings);
+            }
+            // null signals unknown output unit (table has no declared unit)
+            return tableUnit;
         }
 
         // STEP, RAMP, PULSE, PULSE_TRAIN, TREND, FORECAST, NPV,

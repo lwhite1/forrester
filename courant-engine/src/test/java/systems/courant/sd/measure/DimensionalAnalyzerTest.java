@@ -266,11 +266,31 @@ class DimensionalAnalyzerTest {
         }
 
         @Test
-        void shouldReturnDimensionlessForLOOKUPWithNoUnit() {
+        void shouldReturnDimensionlessForLOOKUPWithExplicitDimensionlessUnit() {
             TestContext ctx = new TestContext().put("table", CompositeUnit.dimensionless());
             var result = analyze("LOOKUP(table, 5)", ctx);
             assertThat(result.inferredUnit().isDimensionless()).isTrue();
             assertThat(result.isConsistent()).isTrue();
+        }
+
+        @Test
+        void shouldReturnNullForLOOKUPWhenTableHasNoUnit() {
+            // Table not in context → unknown unit → return null
+            var result = analyze("LOOKUP(unknown_table, 5)", new TestContext());
+            assertThat(result.inferredUnit()).isNull();
+            assertThat(result.isConsistent()).isTrue();
+        }
+
+        @Test
+        void shouldAnalyzeLOOKUPArgumentsForWarnings() {
+            TestContext ctx = new TestContext()
+                    .put("Pop", ITEMS)
+                    .put("Weight", MASS);
+            // LOOKUP input adds incompatible units → should produce warning
+            var result = analyze("LOOKUP(unknown_table, Pop + Weight)", ctx);
+            assertThat(result.isConsistent()).isFalse();
+            assertThat(result.warnings().getFirst().message())
+                    .contains("incompatible");
         }
 
         @Test
