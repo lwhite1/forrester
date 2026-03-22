@@ -17,8 +17,10 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.concurrent.locks.LockSupport;
 
 /**
  * Snapshot-based undo/redo manager. Stores LZ4-compressed JSON snapshots
@@ -340,25 +342,20 @@ public class UndoManager implements AutoCloseable {
         if (raw != null) {
             return raw;
         }
-        // Non-blocking retry loop: try getNow() with brief pauses to avoid
-        // blocking the FX thread for more than ~100ms total.  The raw snapshot
-        // fast-path above handles most cases; this loop covers entries whose
-        // raw snapshot was already consumed but whose compression is nearly done.
-        CompressedData data = null;
-        for (int attempt = 0; attempt < 10; attempt++) {
-            try {
-                data = entry.future().getNow(null);
-            } catch (java.util.concurrent.CompletionException e) {
-                throw new IllegalStateException("Undo compression failed", e.getCause());
-            }
-            if (data != null) {
-                break;
-            }
-            LockSupport.parkNanos(10_000_000L); // 10 ms
-        }
-        if (data == null) {
+        // Block on the future with a bounded timeout instead of spin-waiting.
+        // The raw snapshot fast-path above handles most cases; this covers
+        // entries whose raw snapshot was already consumed.
+        CompressedData data;
+        try {
+            data = entry.future().get(100, TimeUnit.MILLISECONDS);
+        } catch (ExecutionException e) {
+            throw new IllegalStateException("Undo compression failed", e.getCause());
+        } catch (TimeoutException e) {
             throw new IllegalStateException(
                     "Undo decompression timed out — compression did not complete within 100 ms");
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("Undo decompression interrupted", e);
         }
         byte[] rawBytes = new byte[data.originalLength()];
         DECOMPRESSOR.decompress(data.data(), 0, rawBytes, 0, data.originalLength());
