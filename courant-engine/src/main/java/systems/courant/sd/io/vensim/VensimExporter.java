@@ -424,8 +424,10 @@ public final class VensimExporter {
     }
 
     static String formatCoord(double value) {
-        if (value == Math.floor(value) && !Double.isInfinite(value)
-                && Math.abs(value) < 1e15) {
+        if (!Double.isFinite(value)) {
+            return "0";
+        }
+        if (value == Math.floor(value) && Math.abs(value) < 1e15) {
             return String.valueOf((long) value);
         }
         return String.valueOf(value);

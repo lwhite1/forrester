@@ -8,7 +8,7 @@ import systems.courant.sd.measure.Unit;
  */
 public enum AreaUnits implements Unit {
 
-    SQUARE_METER("m²", 1.0),
+    SQUARE_METER("Square Meter", 1.0),
     HECTARE("hectare", 10_000.0),
     SQUARE_KILOMETER("km²", 1_000_000.0),
     ACRE("acre", 4_046.8564224);

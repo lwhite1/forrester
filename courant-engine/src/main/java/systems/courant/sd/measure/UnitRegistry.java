@@ -160,7 +160,7 @@ public class UnitRegistry {
                                 + " custom units — possible unbounded auto-creation");
             }
             byName.put(unit.getName(), unit);
-            byNameLower.put(unit.getName().toLowerCase(), unit);
+            byNameLower.putIfAbsent(unit.getName().toLowerCase(), unit);
             customUnitCount++;
         }
     }
@@ -389,7 +389,7 @@ public class UnitRegistry {
     }
 
     /**
-     * A simple area unit (Length^2) with a conversion factor to square meters.
+     * A simple area unit with a conversion factor to square meters.
      */
     private static final class AreaUnit implements Unit {
 

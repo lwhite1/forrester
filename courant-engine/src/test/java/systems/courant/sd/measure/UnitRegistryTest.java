@@ -312,6 +312,23 @@ class UnitRegistryTest {
             Unit unit = registry.find("hectares");
             assertThat(unit).isNotNull();
         }
+
+        @Test
+        @DisplayName("area dimension should be distinct from length (#1226)")
+        void areaShouldNotBeLength() {
+            Unit hectare = registry.find("hectare");
+            Unit meter = registry.find("Meter");
+            assertThat(hectare.getDimension()).isNotSameAs(meter.getDimension());
+            assertThat(hectare.getDimension()).isSameAs(Dimension.AREA);
+        }
+
+        @Test
+        @DisplayName("area units should convert via direct square-meter ratio (#1226)")
+        void areaConversionShouldUseDirectRatio() {
+            Unit hectare = registry.find("hectare");
+            // 1 hectare = 10,000 m²
+            assertThat(hectare.ratioToBaseUnit()).isEqualTo(10_000.0);
+        }
     }
 
     @Nested
@@ -450,6 +467,23 @@ class UnitRegistryTest {
             assertThatThrownBy(() -> reg.register(new ItemUnit("OneMore")))
                     .isInstanceOf(IllegalStateException.class)
                     .hasMessageContaining("10000");
+        }
+
+        @Test
+        @DisplayName("case-insensitive lookup should return first registered variant")
+        void shouldNotOverwriteCaseInsensitiveEntryOnCollision() {
+            UnitRegistry reg = new UnitRegistry();
+            ItemUnit upper = new ItemUnit("Foo");
+            ItemUnit lower = new ItemUnit("foo");
+            reg.register(upper);
+            reg.register(lower);
+
+            // Case-sensitive lookups return their exact match
+            assertThat(reg.find("Foo")).isSameAs(upper);
+            assertThat(reg.find("foo")).isSameAs(lower);
+
+            // Case-insensitive fallback returns the first registered (Foo)
+            assertThat(reg.find("FOO")).isSameAs(upper);
         }
 
         @Test
