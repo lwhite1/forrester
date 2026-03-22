@@ -1,5 +1,6 @@
 package systems.courant.sd.measure;
 
+import systems.courant.sd.measure.dimension.Area;
 import systems.courant.sd.measure.dimension.Item;
 import systems.courant.sd.measure.dimension.Length;
 import systems.courant.sd.measure.dimension.Mass;
@@ -19,6 +20,7 @@ public interface Dimension {
     Dimension MONEY = Money.INSTANCE;
     Dimension MASS = Mass.INSTANCE;
     Dimension LENGTH = Length.INSTANCE;
+    Dimension AREA = Area.INSTANCE;
     Dimension VOLUME = Volume.INSTANCE;
     Dimension ITEM = Item.INSTANCE;
     Dimension TEMPERATURE = Temperature.INSTANCE;

@@ -389,7 +389,7 @@ public class UnitRegistry {
     }
 
     /**
-     * A simple area unit (Length^2) with a conversion factor to square meters.
+     * A simple area unit with a conversion factor to square meters.
      */
     private static final class AreaUnit implements Unit {
 
@@ -408,17 +408,12 @@ public class UnitRegistry {
 
         @Override
         public Dimension getDimension() {
-            return Dimension.LENGTH;
+            return Dimension.AREA;
         }
 
-        /**
-         * Returns the ratio to the base length unit (Meter) such that
-         * dimensional analysis treats this as Length^2. The actual conversion
-         * factor is sqrt(sqMeters) so that area = unit * unit = sqMeters m^2.
-         */
         @Override
         public double ratioToBaseUnit() {
-            return Math.sqrt(sqMeters);
+            return sqMeters;
         }
 
         @Override
