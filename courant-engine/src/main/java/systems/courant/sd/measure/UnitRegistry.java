@@ -1,5 +1,6 @@
 package systems.courant.sd.measure;
 
+import systems.courant.sd.measure.units.area.AreaUnits;
 import systems.courant.sd.measure.units.dimensionless.DimensionlessUnits;
 import systems.courant.sd.measure.units.item.ItemUnit;
 import systems.courant.sd.measure.units.item.ItemUnits;
@@ -66,6 +67,7 @@ public class UnitRegistry {
         registerAll(MoneyUnits.values());
         registerAll(VolumeUnits.values());
         registerAll(TemperatureUnits.values());
+        registerAll(AreaUnits.values());
         registerAll(DimensionlessUnits.values());
         registerTimeUnitAliases();
         registerCurrencyAliases();
@@ -97,7 +99,7 @@ public class UnitRegistry {
     }
 
     /**
-     * Registers area units as composite Length^2 constants with conversion factors to m^2.
+     * Registers named area units with conversion factors to square meters.
      */
     private void registerAreaUnits() {
         // hectare = 10,000 m^2
@@ -148,10 +150,11 @@ public class UnitRegistry {
      */
     public void register(Unit unit) {
         synchronized (this) {
+            String lowerName = unit.getName().toLowerCase();
             if (byName.containsKey(unit.getName())) {
                 // Replacing existing unit — no count change
                 byName.put(unit.getName(), unit);
-                byNameLower.put(unit.getName().toLowerCase(), unit);
+                byNameLower.put(lowerName, unit);
                 return;
             }
             if (customUnitCount >= MAX_CUSTOM_UNITS) {
@@ -159,9 +162,12 @@ public class UnitRegistry {
                         "Unit registry exceeded " + MAX_CUSTOM_UNITS
                                 + " custom units — possible unbounded auto-creation");
             }
+            boolean isNewCaseInsensitive = !byNameLower.containsKey(lowerName);
             byName.put(unit.getName(), unit);
-            byNameLower.putIfAbsent(unit.getName().toLowerCase(), unit);
-            customUnitCount++;
+            byNameLower.putIfAbsent(lowerName, unit);
+            if (isNewCaseInsensitive) {
+                customUnitCount++;
+            }
         }
     }
 
@@ -418,8 +424,12 @@ public class UnitRegistry {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
             AreaUnit areaUnit = (AreaUnit) o;
             return name.equals(areaUnit.name);
         }
