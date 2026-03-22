@@ -287,7 +287,7 @@ class UnitRegistryTest {
         void shouldFindHectare() {
             Unit unit = registry.find("hectare");
             assertThat(unit).isNotNull();
-            assertThat(unit.getDimension()).isSameAs(Dimension.LENGTH);
+            assertThat(unit.getDimension()).isSameAs(Dimension.AREA);
         }
 
         @Test
@@ -295,7 +295,7 @@ class UnitRegistryTest {
         void shouldFindKm2() {
             Unit unit = registry.find("km2");
             assertThat(unit).isNotNull();
-            assertThat(unit.getDimension()).isSameAs(Dimension.LENGTH);
+            assertThat(unit.getDimension()).isSameAs(Dimension.AREA);
         }
 
         @Test
@@ -303,7 +303,7 @@ class UnitRegistryTest {
         void shouldFindAcre() {
             Unit unit = registry.find("acre");
             assertThat(unit).isNotNull();
-            assertThat(unit.getDimension()).isSameAs(Dimension.LENGTH);
+            assertThat(unit.getDimension()).isSameAs(Dimension.AREA);
         }
 
         @Test
@@ -381,7 +381,7 @@ class UnitRegistryTest {
         void shouldResolveDivisionWithAreaUnit() {
             CompositeUnit result = registry.resolveComposite("acre/Deer");
             assertThat(result.exponents())
-                    .containsEntry(Dimension.LENGTH, 1)
+                    .containsEntry(Dimension.AREA, 1)
                     .containsEntry(Dimension.ITEM, -1);
         }
 
