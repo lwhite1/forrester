@@ -11,8 +11,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -120,6 +122,7 @@ public class ExtremeConditionTest {
                                   List<ExtremeConditionFinding> findings) {
         List<String> stockNames = runResult.getStockNames();
         List<String> variableNames = runResult.getVariableNames();
+        Set<String> reported = new HashSet<>();
 
         for (int stepIdx = 0; stepIdx < runResult.getStepCount(); stepIdx++) {
             long step = runResult.getStep(stepIdx);
@@ -128,44 +131,49 @@ public class ExtremeConditionTest {
 
             // Check stocks for negative values and extreme magnitudes
             for (int s = 0; s < stockNames.size(); s++) {
+                String name = stockNames.get(s);
+                if (reported.contains(name)) {
+                    continue;
+                }
                 double value = stockValues[s];
                 if (value < 0) {
                     findings.add(new ExtremeConditionFinding(
                             param.name(), param.baselineValue(), condition, extremeValue,
-                            stockNames.get(s), step,
-                            "Stock '" + stockNames.get(s) + "' went negative ("
+                            name, step,
+                            "Stock '" + name + "' went negative ("
                                     + value + ") at step " + step));
-                    // Only report first negative occurrence per stock per run
-                    return;
-                }
-                if (Math.abs(value) > boundThreshold) {
+                    reported.add(name);
+                } else if (Math.abs(value) > boundThreshold) {
                     findings.add(new ExtremeConditionFinding(
                             param.name(), param.baselineValue(), condition, extremeValue,
-                            stockNames.get(s), step,
-                            "Stock '" + stockNames.get(s) + "' exceeded bound threshold ("
+                            name, step,
+                            "Stock '" + name + "' exceeded bound threshold ("
                                     + value + ") at step " + step));
-                    return;
+                    reported.add(name);
                 }
             }
 
             // Check variables for extreme magnitudes
             for (int v = 0; v < variableNames.size(); v++) {
+                String name = variableNames.get(v);
+                if (reported.contains(name)) {
+                    continue;
+                }
                 double value = varValues[v];
                 if (!Double.isFinite(value)) {
                     findings.add(new ExtremeConditionFinding(
                             param.name(), param.baselineValue(), condition, extremeValue,
-                            variableNames.get(v), step,
-                            "Variable '" + variableNames.get(v) + "' became "
+                            name, step,
+                            "Variable '" + name + "' became "
                                     + value + " at step " + step));
-                    return;
-                }
-                if (Math.abs(value) > boundThreshold) {
+                    reported.add(name);
+                } else if (Math.abs(value) > boundThreshold) {
                     findings.add(new ExtremeConditionFinding(
                             param.name(), param.baselineValue(), condition, extremeValue,
-                            variableNames.get(v), step,
-                            "Variable '" + variableNames.get(v) + "' exceeded bound threshold ("
+                            name, step,
+                            "Variable '" + name + "' exceeded bound threshold ("
                                     + value + ") at step " + step));
-                    return;
+                    reported.add(name);
                 }
             }
         }
