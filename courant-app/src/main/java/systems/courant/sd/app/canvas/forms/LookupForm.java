@@ -444,6 +444,7 @@ public class LookupForm implements ElementForm {
         LookupTableDef updated = new LookupTableDef(
                 ctx.getElementName(), lt.comment(), newX, newY, lt.interpolation(), lt.unit());
         ctx.getCanvas().applyMutation(() -> ctx.getEditor().setLookupTable(ctx.getElementName(), updated));
+        ctx.requestFormRebuild();
     }
 
     public void deletePointByIndex(int index) {
@@ -466,6 +467,7 @@ public class LookupForm implements ElementForm {
         LookupTableDef updated = new LookupTableDef(
                 ctx.getElementName(), lt.comment(), newX, newY, lt.interpolation(), lt.unit());
         ctx.getCanvas().applyMutation(() -> ctx.getEditor().setLookupTable(ctx.getElementName(), updated));
+        ctx.requestFormRebuild();
     }
 
     private void commitChartDrag(int index, double newX, double newY) {
