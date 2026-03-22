@@ -106,6 +106,61 @@ class MdlParserTest {
         }
 
         @Test
+        void shouldNotMisclassifyExpressionWithParensAsLookup() {
+            String content = "result = a + b(x,y)\n\t~\t\n\t~\t\n\t|";
+            MdlParser.ParsedMdl result = MdlParser.parse(content);
+
+            assertThat(result.equations()).hasSize(1);
+            MdlEquation eq = result.equations().get(0);
+            assertThat(eq.operator()).isEqualTo("=");
+            assertThat(eq.expression()).isEqualTo("a + b(x,y)");
+        }
+
+        @Test
+        void shouldNotMisclassifyMultiplicationWithParensAsLookup() {
+            String content = "z = x * func(a)\n\t~\t\n\t~\t\n\t|";
+            MdlParser.ParsedMdl result = MdlParser.parse(content);
+
+            assertThat(result.equations()).hasSize(1);
+            MdlEquation eq = result.equations().get(0);
+            assertThat(eq.operator()).isEqualTo("=");
+            assertThat(eq.expression()).isEqualTo("x * func(a)");
+        }
+
+        @Test
+        void shouldNotMisclassifySubtractionWithParensAsLookup() {
+            String content = "w = total - offset(t)\n\t~\t\n\t~\t\n\t|";
+            MdlParser.ParsedMdl result = MdlParser.parse(content);
+
+            assertThat(result.equations()).hasSize(1);
+            MdlEquation eq = result.equations().get(0);
+            assertThat(eq.operator()).isEqualTo("=");
+            assertThat(eq.expression()).isEqualTo("total - offset(t)");
+        }
+
+        @Test
+        void shouldNotMisclassifyDivisionWithParensAsLookup() {
+            String content = "r = num / denom(x)\n\t~\t\n\t~\t\n\t|";
+            MdlParser.ParsedMdl result = MdlParser.parse(content);
+
+            assertThat(result.equations()).hasSize(1);
+            MdlEquation eq = result.equations().get(0);
+            assertThat(eq.operator()).isEqualTo("=");
+            assertThat(eq.expression()).isEqualTo("num / denom(x)");
+        }
+
+        @Test
+        void shouldParseInlineLookupViaFallbackPath() {
+            // Inline lookup data where the whole equationPart is: name( data )
+            String content = "my table( [(0,0)-(10,10)],(0,0),(5,3),(10,10) )\n\t~\t\n\t~\t\n\t|";
+            MdlParser.ParsedMdl result = MdlParser.parse(content);
+
+            assertThat(result.equations()).hasSize(1);
+            MdlEquation eq = result.equations().get(0);
+            assertThat(eq.operator()).isEqualTo("()");
+        }
+
+        @Test
         void shouldParseINTEGExpression() {
             String content = "Stock = INTEG(inflow - outflow, 100)\n\t~\tItems\n\t~\tA stock\n\t|";
             MdlParser.ParsedMdl result = MdlParser.parse(content);

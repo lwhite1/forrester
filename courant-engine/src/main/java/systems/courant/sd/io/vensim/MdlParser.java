@@ -361,7 +361,9 @@ public final class MdlParser {
             String beforeParen = equationPart.substring(0, parenPos).strip();
             // Make sure what's before the paren looks like a name (no operators)
             if (!beforeParen.isEmpty() && !beforeParen.contains("=")
-                    && !beforeParen.contains(":")) {
+                    && !beforeParen.contains(":") && !beforeParen.contains("+")
+                    && !beforeParen.contains("-") && !beforeParen.contains("*")
+                    && !beforeParen.contains("/")) {
                 String afterParen = equationPart.substring(parenPos + 1).strip();
                 // Strip trailing )
                 if (afterParen.endsWith(")")) {
