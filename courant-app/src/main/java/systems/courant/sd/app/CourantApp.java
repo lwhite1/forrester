@@ -60,10 +60,21 @@ public class CourantApp extends Application {
         var scene = stage.getScene();
         double sceneWidth = scene != null ? scene.getWidth() : 1200;
         double sceneHeight = scene != null ? scene.getHeight() : 800;
+        double windowWidth = sceneWidth;
         double windowHeight = sceneHeight + DECORATION_ALLOWANCE;
 
+        // Shrink to fit if the window would exceed the screen
+        if (windowHeight > bounds.getHeight()) {
+            stage.setHeight(bounds.getHeight());
+            windowHeight = bounds.getHeight();
+        }
+        if (windowWidth > bounds.getWidth()) {
+            stage.setWidth(bounds.getWidth());
+            windowWidth = bounds.getWidth();
+        }
+
         stage.setX(Math.max(bounds.getMinX(),
-                bounds.getMinX() + (bounds.getWidth() - sceneWidth) / 2));
+                bounds.getMinX() + (bounds.getWidth() - windowWidth) / 2));
         stage.setY(Math.max(bounds.getMinY(),
                 bounds.getMinY() + (bounds.getHeight() - windowHeight) / 2));
     }
@@ -100,6 +111,23 @@ public class CourantApp extends Application {
 
         if (!topVisible) {
             centerOnPrimaryScreen(stage);
+            return;
+        }
+
+        // Ensure the bottom of the window is on-screen so the status bar is visible.
+        Rectangle2D screenBounds = Screen.getScreensForRectangle(x, y, width, height)
+                .stream()
+                .map(Screen::getVisualBounds)
+                .findFirst()
+                .orElse(Screen.getPrimary().getVisualBounds());
+
+        if (height > screenBounds.getHeight()) {
+            stage.setHeight(screenBounds.getHeight());
+            height = screenBounds.getHeight();
+        }
+        double bottomOverflow = (y + height) - screenBounds.getMaxY();
+        if (bottomOverflow > 0) {
+            stage.setY(Math.max(screenBounds.getMinY(), y - bottomOverflow));
         }
     }
 
