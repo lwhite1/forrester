@@ -5,6 +5,7 @@ import systems.courant.sd.model.def.FlowDef;
 import systems.courant.sd.model.def.ModelDefinition;
 import systems.courant.sd.model.def.StockDef;
 import systems.courant.sd.model.def.SubscriptDef;
+import systems.courant.sd.model.expr.BuiltinFunctions;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -226,6 +227,16 @@ public class SubscriptExpander {
             }
 
             int afterMatch = matcher.end();
+
+            // If the name is followed by '(' and matches a built-in function,
+            // treat it as a function call rather than a subscripted variable.
+            if (afterMatch < equation.length()
+                    && equation.charAt(afterMatch) == '('
+                    && BuiltinFunctions.NAMES.contains(rawName.toUpperCase())) {
+                result.append(matchedText);
+                cursor = matcher.end();
+                continue;
+            }
             if (afterMatch < equation.length() && equation.charAt(afterMatch) == '[') {
                 int closeBracket = equation.indexOf(']', afterMatch);
                 if (closeBracket < 0) {

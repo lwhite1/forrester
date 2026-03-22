@@ -137,6 +137,27 @@ class SubscriptExpanderTest {
 
             assertThat(expanded.flows().get(0).equation()).isEqualTo("Pop[X] + density[X]");
         }
+
+        @Test
+        void shouldNotRewriteBuiltinFunctionCallMatchingSubscriptedName() {
+            // "SIN" is both a subscripted element and a built-in function name.
+            // The function call SIN(angle) must not be rewritten to SIN[A](angle).
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Builtin Conflict")
+                    .subscript("Region", List.of("A", "B"))
+                    .stock("SIN", 100, "Thing", List.of("Region"))
+                    .constant("angle", 1.0, "Radian")
+                    .flow("outflow", "SIN * 0.1 + SIN(angle)", "Day", "SIN", null, List.of("Region"))
+                    .build();
+
+            ModelDefinition expanded = SubscriptExpander.expand(def);
+
+            // SIN as a variable reference should be expanded; SIN(angle) as a function call should not
+            assertThat(expanded.flows().get(0).equation())
+                    .isEqualTo("SIN[A] * 0.1 + SIN(angle)");
+            assertThat(expanded.flows().get(1).equation())
+                    .isEqualTo("SIN[B] * 0.1 + SIN(angle)");
+        }
     }
 
     @Nested
