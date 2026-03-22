@@ -26,6 +26,13 @@ final class ModelInfoDialog {
      * {@code editor} and invokes {@code onSaved}.
      */
     static void show(ModelEditor editor, Stage owner, Runnable onSaved) {
+        show(editor, owner, null, onSaved);
+    }
+
+    /**
+     * Shows the Model Info dialog with an optional file name display.
+     */
+    static void show(ModelEditor editor, Stage owner, String fileName, Runnable onSaved) {
         Dialog<ButtonType> dialog = new Dialog<>();
         dialog.setTitle("Model Info");
         dialog.setHeaderText(null);
@@ -64,6 +71,10 @@ final class ModelInfoDialog {
         int row = 0;
         grid.add(new Label("Name:"), 0, row);
         grid.add(nameField, 1, row++);
+        Label fileLabel = new Label(fileName != null ? fileName : "(not saved)");
+        fileLabel.setStyle("-fx-text-fill: #666;");
+        grid.add(new Label("File:"), 0, row);
+        grid.add(fileLabel, 1, row++);
         grid.add(new Label("Comment:"), 0, row);
         grid.add(commentArea, 1, row++);
         grid.add(new Label("Author:"), 0, row);
