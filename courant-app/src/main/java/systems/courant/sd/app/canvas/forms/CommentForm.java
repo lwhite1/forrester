@@ -3,8 +3,6 @@ package systems.courant.sd.app.canvas.forms;
 import systems.courant.sd.model.def.CommentDef;
 
 import javafx.scene.control.TextArea;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Priority;
 
 import java.util.Objects;
 
@@ -40,9 +38,8 @@ public class CommentForm implements ElementForm {
         textArea.setWrapText(true);
         textArea.setPromptText("Enter annotation text...");
         textArea.setMaxWidth(Double.MAX_VALUE);
-        GridPane.setHgrow(textArea, Priority.ALWAYS);
         fields.addTextAreaCommitHandlers(textArea, this::commitText);
-        fields.addFieldRow(row++, "Text", textArea,
+        fields.addFieldRow(row++, "Text", fields.wrapResizable(textArea),
                 "Free-text annotation displayed on the canvas");
 
         return row;

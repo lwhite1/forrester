@@ -197,7 +197,7 @@ public class PropertiesPanel extends VBox {
         descArea.setMaxWidth(Double.MAX_VALUE);
         descArea.setPromptText("Model description...");
         GridPane.setHgrow(descArea, Priority.ALWAYS);
-        fields.addFieldRow(row++, "Description", descArea);
+        fields.addFieldRow(row++, "Description", fields.wrapResizable(descArea));
         descArea.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
             if (!isFocused && !ctx.isUpdatingFields()) {
                 commitModelComment(descArea, editor);

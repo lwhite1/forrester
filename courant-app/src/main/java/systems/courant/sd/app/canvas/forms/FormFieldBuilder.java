@@ -3,6 +3,7 @@ package systems.courant.sd.app.canvas.forms;
 import javafx.animation.PauseTransition;
 import javafx.geometry.Pos;
 import javafx.geometry.Side;
+import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
@@ -14,6 +15,8 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 
 import java.util.List;
@@ -227,8 +230,44 @@ public class FormFieldBuilder {
         area.setMaxWidth(Double.MAX_VALUE);
         GridPane.setHgrow(area, Priority.ALWAYS);
         addTextAreaCommitHandlers(area, commitHandler);
-        addFieldRow(row, "Description", area, "Documentation for this element");
+        VBox resizable = wrapResizable(area);
+        addFieldRow(row, "Description", resizable, "Documentation for this element");
         return area;
+    }
+
+    /**
+     * Wraps a TextArea in a VBox with a drag handle at the bottom that allows
+     * the user to resize the TextArea vertically.
+     */
+    public VBox wrapResizable(TextArea area) {
+        Region handle = new Region();
+        handle.setPrefHeight(6);
+        handle.setMinHeight(6);
+        handle.setMaxHeight(6);
+        handle.setCursor(Cursor.S_RESIZE);
+        handle.setStyle("-fx-background-color: #cccccc; -fx-background-radius: 2;");
+        handle.hoverProperty().addListener((obs, wasHover, isHover) ->
+                handle.setStyle(isHover
+                        ? "-fx-background-color: #999999; -fx-background-radius: 2;"
+                        : "-fx-background-color: #cccccc; -fx-background-radius: 2;"));
+
+        double[] dragState = new double[2]; // [startY, startHeight]
+        handle.setOnMousePressed(e -> {
+            dragState[0] = e.getScreenY();
+            dragState[1] = area.getHeight();
+            e.consume();
+        });
+        handle.setOnMouseDragged(e -> {
+            double delta = e.getScreenY() - dragState[0];
+            double newHeight = Math.max(40, dragState[1] + delta);
+            area.setPrefHeight(newHeight);
+            e.consume();
+        });
+
+        VBox box = new VBox(area, handle);
+        box.setMaxWidth(Double.MAX_VALUE);
+        GridPane.setHgrow(box, Priority.ALWAYS);
+        return box;
     }
 
     public void addComboCommitHandlers(ComboBox<String> box, Consumer<ComboBox<String>> handler) {
