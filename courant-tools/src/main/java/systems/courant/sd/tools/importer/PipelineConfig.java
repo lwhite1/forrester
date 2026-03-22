@@ -58,6 +58,11 @@ public record PipelineConfig(
         if (className == null || className.isBlank()) {
             throw new IllegalArgumentException("className must not be blank");
         }
+        if (!className.matches("[A-Z][a-zA-Z0-9_]*")) {
+            throw new IllegalArgumentException(
+                    "className must be a valid Java class name starting with an uppercase letter: "
+                            + className);
+        }
         if (outputDir == null) {
             throw new IllegalArgumentException("outputDir must not be null");
         }

@@ -56,6 +56,45 @@ class PipelineConfigTest {
         }
 
         @Test
+        void shouldRejectClassNameStartingWithLowercase() {
+            assertThatThrownBy(() -> new PipelineConfig(
+                    SOURCE, METADATA, null, "demo", OUTPUT, false, false))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("className");
+        }
+
+        @Test
+        void shouldRejectClassNameWithHyphen() {
+            assertThatThrownBy(() -> new PipelineConfig(
+                    SOURCE, METADATA, null, "My-Demo", OUTPUT, false, false))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("className");
+        }
+
+        @Test
+        void shouldRejectClassNameWithSpaces() {
+            assertThatThrownBy(() -> new PipelineConfig(
+                    SOURCE, METADATA, null, "My Demo", OUTPUT, false, false))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("className");
+        }
+
+        @Test
+        void shouldRejectClassNameWithDot() {
+            assertThatThrownBy(() -> new PipelineConfig(
+                    SOURCE, METADATA, null, "My.Demo", OUTPUT, false, false))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("className");
+        }
+
+        @Test
+        void shouldAcceptClassNameWithUnderscore() {
+            PipelineConfig config = new PipelineConfig(
+                    SOURCE, METADATA, null, "My_Demo", OUTPUT, false, false);
+            assertThat(config.className()).isEqualTo("My_Demo");
+        }
+
+        @Test
         void shouldRejectNullOutputDir() {
             assertThatThrownBy(() -> new PipelineConfig(
                     SOURCE, METADATA, null, "Demo", null, false, false))
