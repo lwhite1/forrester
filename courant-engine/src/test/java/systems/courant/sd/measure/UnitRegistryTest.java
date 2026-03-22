@@ -470,6 +470,23 @@ class UnitRegistryTest {
         }
 
         @Test
+        @DisplayName("case-insensitive lookup should return first registered variant")
+        void shouldNotOverwriteCaseInsensitiveEntryOnCollision() {
+            UnitRegistry reg = new UnitRegistry();
+            ItemUnit upper = new ItemUnit("Foo");
+            ItemUnit lower = new ItemUnit("foo");
+            reg.register(upper);
+            reg.register(lower);
+
+            // Case-sensitive lookups return their exact match
+            assertThat(reg.find("Foo")).isSameAs(upper);
+            assertThat(reg.find("foo")).isSameAs(lower);
+
+            // Case-insensitive fallback returns the first registered (Foo)
+            assertThat(reg.find("FOO")).isSameAs(upper);
+        }
+
+        @Test
         @DisplayName("re-registering same name should not increment count")
         void shouldNotIncrementCountForReRegistration() {
             UnitRegistry reg = new UnitRegistry();
