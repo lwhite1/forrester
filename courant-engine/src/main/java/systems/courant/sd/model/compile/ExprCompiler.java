@@ -143,12 +143,14 @@ public class ExprCompiler {
                 boolean[] warned = newWarnedFlag();
                 yield () -> {
                     double result = Math.pow(left.getAsDouble(), right.getAsDouble());
-                    if (Double.isNaN(result) || Double.isInfinite(result)) {
+                    if (Double.isNaN(result)) {
                         if (!warned[0]) {
-                            logger.warn("Power produced non-finite result");
+                            logger.warn("Power produced NaN result");
                             warned[0] = true;
                         }
-                        return Double.NaN;
+                    } else if (Double.isInfinite(result) && !warned[0]) {
+                        logger.warn("Power produced infinite result");
+                        warned[0] = true;
                     }
                     return result;
                 };
@@ -478,12 +480,14 @@ public class ExprCompiler {
         boolean[] warned = newWarnedFlag();
         return () -> {
             double result = Math.pow(a.getAsDouble(), b.getAsDouble());
-            if (Double.isNaN(result) || Double.isInfinite(result)) {
+            if (Double.isNaN(result)) {
                 if (!warned[0]) {
-                    logger.warn("POWER produced non-finite result");
+                    logger.warn("POWER produced NaN result");
                     warned[0] = true;
                 }
-                return Double.NaN;
+            } else if (Double.isInfinite(result) && !warned[0]) {
+                logger.warn("POWER produced infinite result");
+                warned[0] = true;
             }
             return result;
         };

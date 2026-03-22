@@ -78,6 +78,18 @@ class ExprCompilerTest {
     }
 
     @Test
+    void shouldPreserveInfinityFromPowerOperator() {
+        Formula formula = compiler.compile("2 ** 10000");
+        assertThat(formula.getCurrentValue()).isEqualTo(Double.POSITIVE_INFINITY);
+    }
+
+    @Test
+    void shouldReturnNaNFromPowerOperatorForUndefinedResult() {
+        Formula formula = compiler.compile("(-1) ** 0.5");
+        assertThat(formula.getCurrentValue()).isNaN();
+    }
+
+    @Test
     void shouldCompileNegation() {
         Formula formula = compiler.compile("-Rate");
         assertThat(formula.getCurrentValue()).isCloseTo(-0.05, within(1e-10));
@@ -682,6 +694,18 @@ class ExprCompilerTest {
         void shouldCompilePOWER() {
             Formula formula = compiler.compile("POWER(2, 10)");
             assertThat(formula.getCurrentValue()).isEqualTo(1024.0);
+        }
+
+        @Test
+        void shouldPreserveInfinityFromPOWER() {
+            Formula formula = compiler.compile("POWER(2, 10000)");
+            assertThat(formula.getCurrentValue()).isEqualTo(Double.POSITIVE_INFINITY);
+        }
+
+        @Test
+        void shouldReturnNaNFromPOWERForUndefinedResult() {
+            Formula formula = compiler.compile("POWER(-1, 0.5)");
+            assertThat(formula.getCurrentValue()).isNaN();
         }
     }
 
