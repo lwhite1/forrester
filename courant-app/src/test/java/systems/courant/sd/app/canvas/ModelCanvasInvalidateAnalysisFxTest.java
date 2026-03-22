@@ -114,6 +114,9 @@ class ModelCanvasInvalidateAnalysisFxTest {
 
         canvas.setModel(editor, state.toViewDef());
 
+        // Validation is debounced via Platform.runLater — flush pending FX events
+        WaitForAsyncUtils.waitForFxEvents();
+
         // Validation should be computed (stock with no flow should have issues)
         assertThat(canvas.analysis().getLastValidationResult()).isNotNull();
         assertThat(canvas.analysis().getLastValidationResult().issues()).isNotNull();
