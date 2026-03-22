@@ -287,7 +287,7 @@ class UnitRegistryTest {
         void shouldFindHectare() {
             Unit unit = registry.find("hectare");
             assertThat(unit).isNotNull();
-            assertThat(unit.getDimension()).isSameAs(Dimension.LENGTH);
+            assertThat(unit.getDimension()).isSameAs(Dimension.AREA);
         }
 
         @Test
@@ -295,7 +295,7 @@ class UnitRegistryTest {
         void shouldFindKm2() {
             Unit unit = registry.find("km2");
             assertThat(unit).isNotNull();
-            assertThat(unit.getDimension()).isSameAs(Dimension.LENGTH);
+            assertThat(unit.getDimension()).isSameAs(Dimension.AREA);
         }
 
         @Test
@@ -303,7 +303,7 @@ class UnitRegistryTest {
         void shouldFindAcre() {
             Unit unit = registry.find("acre");
             assertThat(unit).isNotNull();
-            assertThat(unit.getDimension()).isSameAs(Dimension.LENGTH);
+            assertThat(unit.getDimension()).isSameAs(Dimension.AREA);
         }
 
         @Test
@@ -311,6 +311,23 @@ class UnitRegistryTest {
         void shouldFindHectaresPlural() {
             Unit unit = registry.find("hectares");
             assertThat(unit).isNotNull();
+        }
+
+        @Test
+        @DisplayName("area dimension should be distinct from length (#1226)")
+        void areaShouldNotBeLength() {
+            Unit hectare = registry.find("hectare");
+            Unit meter = registry.find("Meter");
+            assertThat(hectare.getDimension()).isNotSameAs(meter.getDimension());
+            assertThat(hectare.getDimension()).isSameAs(Dimension.AREA);
+        }
+
+        @Test
+        @DisplayName("area units should convert via direct square-meter ratio (#1226)")
+        void areaConversionShouldUseDirectRatio() {
+            Unit hectare = registry.find("hectare");
+            // 1 hectare = 10,000 m²
+            assertThat(hectare.ratioToBaseUnit()).isEqualTo(10_000.0);
         }
     }
 
@@ -381,7 +398,7 @@ class UnitRegistryTest {
         void shouldResolveDivisionWithAreaUnit() {
             CompositeUnit result = registry.resolveComposite("acre/Deer");
             assertThat(result.exponents())
-                    .containsEntry(Dimension.LENGTH, 1)
+                    .containsEntry(Dimension.AREA, 1)
                     .containsEntry(Dimension.ITEM, -1);
         }
 
