@@ -426,7 +426,13 @@ public class ExprCompiler {
     private DoubleSupplier compileRound(List<Expr> args) {
         requireArgs("ROUND", args, 1);
         DoubleSupplier a = compileExpr(args.get(0));
-        return () -> Math.rint(a.getAsDouble());
+        return () -> {
+            double v = a.getAsDouble();
+            if (Math.abs(v) >= 1e15) {
+                return v; // already integral at this magnitude
+            }
+            return Math.round(v);
+        };
     }
 
     private DoubleSupplier compileModulo(List<Expr> args) {

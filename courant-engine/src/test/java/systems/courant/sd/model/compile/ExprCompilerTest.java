@@ -625,11 +625,11 @@ class ExprCompilerTest {
         }
 
         @Test
-        void shouldUseHalfToEvenRoundingForROUND() {
-            // Half-to-even (banker's rounding): 0.5 rounds to nearest even
-            assertThat(compiler.compile("ROUND(0.5)").getCurrentValue()).isEqualTo(0.0);
+        void shouldUseHalfUpRoundingForROUND() {
+            // Half-up rounding: 0.5 always rounds away from zero
+            assertThat(compiler.compile("ROUND(0.5)").getCurrentValue()).isEqualTo(1.0);
             assertThat(compiler.compile("ROUND(1.5)").getCurrentValue()).isEqualTo(2.0);
-            assertThat(compiler.compile("ROUND(2.5)").getCurrentValue()).isEqualTo(2.0);
+            assertThat(compiler.compile("ROUND(2.5)").getCurrentValue()).isEqualTo(3.0);
             assertThat(compiler.compile("ROUND(3.5)").getCurrentValue()).isEqualTo(4.0);
             assertThat(compiler.compile("ROUND(-2.5)").getCurrentValue()).isEqualTo(-2.0);
         }
