@@ -338,6 +338,47 @@ class XmileImporterTest {
         }
 
         @Test
+        void shouldPreserveNonZeroInitialTime() {
+            String xmile = """
+                    <?xml version="1.0" encoding="UTF-8"?>
+                    <xmile xmlns="http://docs.oasis-open.org/xmile/ns/XMILE/v1.0" version="1.0">
+                      <header><name>Test</name></header>
+                      <sim_specs time_units="year">
+                        <start>1900</start><stop>2000</stop><dt>1</dt>
+                      </sim_specs>
+                      <model><variables>
+                        <aux name="x"><eqn>1</eqn></aux>
+                      </variables></model>
+                    </xmile>
+                    """;
+
+            ImportResult result = importer.importModel(xmile, "Test");
+            var sim = result.definition().defaultSimulation();
+            assertThat(sim.initialTime()).isEqualTo(1900.0);
+            assertThat(sim.duration()).isEqualTo(100.0);
+        }
+
+        @Test
+        void shouldDefaultInitialTimeToZero() {
+            String xmile = """
+                    <?xml version="1.0" encoding="UTF-8"?>
+                    <xmile xmlns="http://docs.oasis-open.org/xmile/ns/XMILE/v1.0" version="1.0">
+                      <header><name>Test</name></header>
+                      <sim_specs time_units="day">
+                        <start>0</start><stop>10</stop><dt>1</dt>
+                      </sim_specs>
+                      <model><variables>
+                        <aux name="x"><eqn>1</eqn></aux>
+                      </variables></model>
+                    </xmile>
+                    """;
+
+            ImportResult result = importer.importModel(xmile, "Test");
+            var sim = result.definition().defaultSimulation();
+            assertThat(sim.initialTime()).isEqualTo(0.0);
+        }
+
+        @Test
         void shouldUseModelNameFromHeader() {
             String xmile = """
                     <?xml version="1.0" encoding="UTF-8"?>

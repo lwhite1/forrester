@@ -8,6 +8,7 @@ import systems.courant.sd.model.def.LookupTableDef;
 import systems.courant.sd.model.def.ModelDefinition;
 import systems.courant.sd.model.def.ModelDefinitionBuilder;
 import systems.courant.sd.model.def.ModuleInstanceDef;
+import systems.courant.sd.model.def.SimulationSettings;
 import systems.courant.sd.model.def.StockDef;
 import systems.courant.sd.model.def.ViewDef;
 
@@ -163,7 +164,8 @@ public class XmileImporter implements ModelImporter {
 
         ModelDefinitionBuilder builder = new ModelDefinitionBuilder()
                 .name(modelName)
-                .defaultSimulation(timeUnit, duration, timeUnit, dt);
+                .defaultSimulation(new SimulationSettings(
+                        timeUnit, duration, timeUnit, dt, false, 1, start));
 
         if (mainModelElem == null) {
             return new ImportResult(builder.build(), warnings);
