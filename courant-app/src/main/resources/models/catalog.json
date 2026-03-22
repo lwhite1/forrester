@@ -1053,7 +1053,7 @@
     {
       "id": "vensim-age",
       "fileName": "AGE",
-      "displayName": "Age Structure Demographics",
+      "displayName": "Population Age Cohorts",
       "description": "Model 'AGE' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "demographics",
       "difficulty": "intermediate",
@@ -1085,7 +1085,7 @@
     {
       "id": "vensim-agemodel",
       "fileName": "AGEMODEL",
-      "displayName": "Age Structure Model",
+      "displayName": "Population Age Structure",
       "description": "Model 'AGEMODEL' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "demographics",
       "difficulty": "intermediate",
@@ -1117,7 +1117,7 @@
     {
       "id": "vensim-ballmodel",
       "fileName": "BALLMODEL",
-      "displayName": "Bouncing Ball Model",
+      "displayName": "Bouncing Ball (Adaptive Time Step)",
       "description": "Model 'BALLMODEL' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "physics",
       "difficulty": "intermediate",
@@ -1133,7 +1133,7 @@
     {
       "id": "vensim-burnout",
       "fileName": "BURNOUT",
-      "displayName": "Workplace Burnout",
+      "displayName": "Worker Burnout (Homer)",
       "description": "Model 'BURNOUT' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "management",
       "difficulty": "intermediate",
@@ -1149,7 +1149,7 @@
     {
       "id": "vensim-burnoutmodel",
       "fileName": "BURNOUTMODEL",
-      "displayName": "Workplace Burnout Model",
+      "displayName": "Worker Burnout (Homer, Extended)",
       "description": "Model 'BURNOUTMODEL' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "management",
       "difficulty": "intermediate",
@@ -1165,7 +1165,7 @@
     {
       "id": "vensim-caffeine",
       "fileName": "CAFFEINE",
-      "displayName": "Caffeine Metabolism",
+      "displayName": "Caffeine Tolerance & Drowsiness",
       "description": "Model 'CAFFEINE' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "introductory",
       "difficulty": "intermediate",
@@ -1181,7 +1181,7 @@
     {
       "id": "vensim-commod",
       "fileName": "COMMOD",
-      "displayName": "Commodity Cycles",
+      "displayName": "Hog Commodity Cycle",
       "description": "Model 'COMMOD' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "economics",
       "difficulty": "intermediate",
@@ -1213,7 +1213,7 @@
     {
       "id": "vensim-compete1model",
       "fileName": "COMPETE1MODEL",
-      "displayName": "Price Competition Model",
+      "displayName": "Price Competition (Explore)",
       "description": "Model 'COMPETE1MODEL' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "economics",
       "difficulty": "intermediate",
@@ -1229,7 +1229,7 @@
     {
       "id": "vensim-cool",
       "fileName": "COOL",
-      "displayName": "Coffee Cooling",
+      "displayName": "Cooling (Newton's Law)",
       "description": "Model 'COOL' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "introductory",
       "difficulty": "intermediate",
@@ -1245,7 +1245,7 @@
     {
       "id": "vensim-corpgrth",
       "fileName": "CORPGRTH",
-      "displayName": "Corporate Growth",
+      "displayName": "Corporate Growth (Forrester)",
       "description": "Model 'CORPGRTH' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "economics",
       "difficulty": "intermediate",
@@ -1261,7 +1261,7 @@
     {
       "id": "vensim-corpgrthe",
       "fileName": "CORPGRTHE",
-      "displayName": "Corporate Growth Extended",
+      "displayName": "Corporate Growth (Explore)",
       "description": "Model 'CORPGRTHE' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "economics",
       "difficulty": "intermediate",
@@ -1277,7 +1277,7 @@
     {
       "id": "vensim-deliv",
       "fileName": "DELIV",
-      "displayName": "Delivery Delay",
+      "displayName": "Delivery Delay & Customer Growth",
       "description": "Model 'DELIV' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "marketing",
       "difficulty": "intermediate",
@@ -1293,7 +1293,7 @@
     {
       "id": "vensim-eit",
       "fileName": "EIT",
-      "displayName": "Trees & Population",
+      "displayName": "Easter Island Deforestation",
       "description": "Model 'EIT' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "ecology",
       "difficulty": "intermediate",
@@ -1309,7 +1309,7 @@
     {
       "id": "vensim-epidemic",
       "fileName": "EPIDEMIC",
-      "displayName": "Epidemic",
+      "displayName": "SI Epidemic",
       "description": "Model 'EPIDEMIC' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "epidemiology",
       "difficulty": "intermediate",
@@ -1325,7 +1325,7 @@
     {
       "id": "vensim-gravity",
       "fileName": "GRAVITY",
-      "displayName": "Two-Body Gravity",
+      "displayName": "Two-Body Gravitational Attraction",
       "description": "Model 'GRAVITY' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "physics",
       "difficulty": "intermediate",
@@ -1341,7 +1341,7 @@
     {
       "id": "vensim-popgame",
       "fileName": "POPGAME",
-      "displayName": "Population Game",
+      "displayName": "Population Birth & Death Rates",
       "description": "Model 'POPGAME' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "demographics",
       "difficulty": "intermediate",
@@ -1357,7 +1357,7 @@
     {
       "id": "vensim-procrast",
       "fileName": "PROCRAST",
-      "displayName": "Procrastination",
+      "displayName": "Procrastination & Decision Making",
       "description": "Model 'PROCRAST' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "management",
       "difficulty": "intermediate",
@@ -1373,7 +1373,7 @@
     {
       "id": "vensim-proj",
       "fileName": "PROJ",
-      "displayName": "Project Management",
+      "displayName": "Software Project Management",
       "description": "Model 'PROJ' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "management",
       "difficulty": "intermediate",
@@ -1389,7 +1389,7 @@
     {
       "id": "vensim-rabfox",
       "fileName": "RABFOX",
-      "displayName": "Rabbit & Fox",
+      "displayName": "Predator-Prey (Rabbit & Fox)",
       "description": "Model 'RABFOX' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "ecology",
       "difficulty": "intermediate",
@@ -1405,7 +1405,7 @@
     {
       "id": "vensim-snowball",
       "fileName": "SNOWBALL",
-      "displayName": "Snowball Growth",
+      "displayName": "Snowball Exponential Growth",
       "description": "Model 'SNOWBALL' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "introductory",
       "difficulty": "intermediate",
@@ -1421,7 +1421,7 @@
     {
       "id": "vensim-speed",
       "fileName": "SPEED",
-      "displayName": "Speed & Acceleration",
+      "displayName": "Speed Goal Seeking",
       "description": "Model 'SPEED' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "introductory",
       "difficulty": "intermediate",
@@ -1437,7 +1437,7 @@
     {
       "id": "vensim-tubs",
       "fileName": "TUBS",
-      "displayName": "Cascading Bathtubs",
+      "displayName": "Cascading Water Tubs",
       "description": "Model 'TUBS' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "introductory",
       "difficulty": "intermediate",
@@ -1453,7 +1453,7 @@
     {
       "id": "vensim-world",
       "fileName": "WORLD",
-      "displayName": "World Dynamics",
+      "displayName": "World2 Dynamics",
       "description": "Model 'WORLD' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "environment",
       "difficulty": "intermediate",
@@ -1469,7 +1469,7 @@
     {
       "id": "vensim-venread",
       "fileName": "venread",
-      "displayName": "Customer Adoption Game",
+      "displayName": "Word of Mouth Market Diffusion",
       "description": "Model 'venread' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "marketing",
       "difficulty": "intermediate",
@@ -1485,7 +1485,7 @@
     {
       "id": "vensim-finance",
       "fileName": "FINANCE",
-      "displayName": "Corporate Finance",
+      "displayName": "Startup Finance & Growth",
       "description": "Model 'FINANCE' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "economics",
       "difficulty": "intermediate",
@@ -1501,7 +1501,7 @@
     {
       "id": "vensim-market2",
       "fileName": "MARKET2",
-      "displayName": "Market Dynamics",
+      "displayName": "Market Sales Pipeline",
       "description": "Model 'MARKET2' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "economics",
       "difficulty": "intermediate",
@@ -1517,7 +1517,7 @@
     {
       "id": "vensim-products",
       "fileName": "Products",
-      "displayName": "Product Development",
+      "displayName": "Product Development & Obsolescence",
       "description": "Model 'Products' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "marketing",
       "difficulty": "intermediate",
@@ -1533,7 +1533,7 @@
     {
       "id": "vensim-market-model-original",
       "fileName": "market_model_original",
-      "displayName": "Market Model",
+      "displayName": "Market Sales Pipeline (Original)",
       "description": "Model 'market_model_original' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "economics",
       "difficulty": "intermediate",
@@ -1565,7 +1565,7 @@
     {
       "id": "vensim-worldapp",
       "fileName": "WORLDAPP",
-      "displayName": "World Dynamics Application",
+      "displayName": "World2 Application",
       "description": "Model 'WORLDAPP' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "environment",
       "difficulty": "intermediate",
@@ -1581,7 +1581,7 @@
     {
       "id": "vensim-worldappedited",
       "fileName": "WORLDAPPEDITED",
-      "displayName": "World Dynamics (Edited)",
+      "displayName": "World2 Application (Edited)",
       "description": "Model 'WORLDAPPEDITED' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "environment",
       "difficulty": "intermediate",
@@ -1597,7 +1597,7 @@
     {
       "id": "vensim-change",
       "fileName": "change",
-      "displayName": "Stock Adjustment",
+      "displayName": "Stock Adjustment with Step Change",
       "description": "Model 'change' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "introductory",
       "difficulty": "intermediate",
@@ -1629,7 +1629,7 @@
     {
       "id": "vensim-mplayer",
       "fileName": "mplayer",
-      "displayName": "Regional Population",
+      "displayName": "Multi-Region Rabbit Population",
       "description": "Model 'mplayer' from Vensim Sample models. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "demographics",
       "difficulty": "intermediate",
@@ -1661,7 +1661,7 @@
     {
       "id": "vensim-wfinv",
       "fileName": "WFINV",
-      "displayName": "Workforce & Inventory",
+      "displayName": "Workforce & Inventory Control",
       "description": "Model 'WFINV' from Vensim User Guide, Chapter 03. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "management",
       "difficulty": "intermediate",
@@ -1677,7 +1677,7 @@
     {
       "id": "vensim-pop",
       "fileName": "POP",
-      "displayName": "Rabbit Population",
+      "displayName": "Rabbit Population Growth",
       "description": "Model 'POP' from Vensim User Guide, Chapter 06. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "demographics",
       "difficulty": "intermediate",
@@ -1693,7 +1693,7 @@
     {
       "id": "vensim-price3",
       "fileName": "price3",
-      "displayName": "Price Adjustment",
+      "displayName": "Price & Demand Dynamics",
       "description": "Model 'price3' from Vensim User Guide, Chapter 07. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "economics",
       "difficulty": "intermediate",
@@ -1709,7 +1709,7 @@
     {
       "id": "vensim-rabbit3",
       "fileName": "RABBIT3",
-      "displayName": "Rabbit Crowding",
+      "displayName": "Rabbit Population with Carrying Capacity",
       "description": "Model 'RABBIT3' from Vensim User Guide, Chapter 08. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "ecology",
       "difficulty": "intermediate",
@@ -1725,7 +1725,7 @@
     {
       "id": "vensim-cap1",
       "fileName": "CAP1",
-      "displayName": "Capacity Planning",
+      "displayName": "Production Capacity Adjustment",
       "description": "Model 'CAP1' from Vensim User Guide, Chapter 09. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "management",
       "difficulty": "intermediate",
@@ -1741,7 +1741,7 @@
     {
       "id": "vensim-cust3",
       "fileName": "CUST3",
-      "displayName": "Customer Acquisition",
+      "displayName": "Customer Adoption & Word of Mouth",
       "description": "Model 'CUST3' from Vensim User Guide, Chapter 09. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "management",
       "difficulty": "intermediate",
@@ -1773,7 +1773,7 @@
     {
       "id": "vensim-wom4",
       "fileName": "WOM4",
-      "displayName": "Word of Mouth Game",
+      "displayName": "Word of Mouth Simulator",
       "description": "Model 'WOM4' from Vensim User Guide, Chapter 12. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "marketing",
       "difficulty": "intermediate",
@@ -1789,7 +1789,7 @@
     {
       "id": "vensim-arms1",
       "fileName": "arms1",
-      "displayName": "Arms Race",
+      "displayName": "Arms Race & Economic Capacity",
       "description": "Model 'arms1' from Vensim User Guide, Chapter 13. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "policy",
       "difficulty": "intermediate",
@@ -1805,7 +1805,7 @@
     {
       "id": "vensim-yeast4",
       "fileName": "YEAST4",
-      "displayName": "Yeast Growth",
+      "displayName": "Yeast Culture Growth",
       "description": "Model 'YEAST4' from Vensim User Guide, Chapter 14. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "ecology",
       "difficulty": "intermediate",
@@ -1821,7 +1821,7 @@
     {
       "id": "vensim-sales",
       "fileName": "SALES",
-      "displayName": "Sales Force",
+      "displayName": "Sales Force Sizing",
       "description": "Model 'SALES' from Vensim User Guide, Chapter 15. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "marketing",
       "difficulty": "intermediate",
@@ -1837,7 +1837,7 @@
     {
       "id": "vensim-cfc2",
       "fileName": "CFC2",
-      "displayName": "CFC Atmospheric Dynamics",
+      "displayName": "CFC-11 Atmospheric Transport",
       "description": "Model 'CFC2' from Vensim User Guide, Chapter 16. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "environment",
       "difficulty": "intermediate",
@@ -1853,7 +1853,7 @@
     {
       "id": "vensim-proj1",
       "fileName": "PROJ1",
-      "displayName": "Project Task Scheduling",
+      "displayName": "Simple Project Task Completion",
       "description": "Model 'PROJ1' from Vensim User Guide, Chapter 17. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "management",
       "difficulty": "intermediate",
@@ -1885,7 +1885,7 @@
     {
       "id": "vensim-electric",
       "fileName": "ELECTRIC",
-      "displayName": "Electric Household Adoption",
+      "displayName": "Electrification of US Households",
       "description": "Model 'ELECTRIC' from Vensim User Guide, Chapter 18. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "technology",
       "difficulty": "intermediate",
@@ -1901,7 +1901,7 @@
     {
       "id": "vensim-mentalsimulation01",
       "fileName": "MentalSimulation01",
-      "displayName": "Mental Simulation",
+      "displayName": "Mental Simulation (Level & Inflow)",
       "description": "Model 'MentalSimulation01' from Vensim User Guide, Chapter 20. Imported from models bundled with Vensim; our imported version may not exactly reproduce the original.",
       "category": "introductory",
       "difficulty": "intermediate",
