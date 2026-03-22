@@ -179,7 +179,7 @@ class EditorUnitContextTest {
     class LookupResolution {
 
         @Test
-        void shouldResolveLookupAsDimensionless() {
+        void shouldReturnEmpty_whenLookupHasNoUnit() {
             ModelDefinition def = new ModelDefinitionBuilder()
                     .name("Test")
                     .lookupTable("Effect of Pressure",
@@ -189,12 +189,11 @@ class EditorUnitContextTest {
 
             Optional<CompositeUnit> result = context.resolveUnit("Effect of Pressure");
 
-            assertThat(result).isPresent();
-            assertThat(result.get().isDimensionless()).isTrue();
+            assertThat(result).isEmpty();
         }
 
         @Test
-        void shouldResolveLookupByUnderscoreName() {
+        void shouldReturnEmpty_whenLookupByUnderscoreNameHasNoUnit() {
             ModelDefinition def = new ModelDefinitionBuilder()
                     .name("Test")
                     .lookupTable("Effect of Pressure",
@@ -204,8 +203,45 @@ class EditorUnitContextTest {
 
             Optional<CompositeUnit> result = context.resolveUnit("Effect_of_Pressure");
 
+            assertThat(result).isEmpty();
+        }
+    }
+
+    @Nested
+    @DisplayName("resolveUnit with compound unit strings (#1211)")
+    class CompoundUnitResolution {
+
+        @Test
+        void shouldResolveVariableWithCompoundUnit() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .variable("rate", "0.1", "Deer/year")
+                    .build();
+            editor.loadFrom(def);
+
+            Optional<CompositeUnit> result = context.resolveUnit("rate");
+
             assertThat(result).isPresent();
-            assertThat(result.get().isDimensionless()).isTrue();
+            assertThat(result.get().isDimensionless()).isFalse();
+            // Should have ITEM (Deer) and TIME^-1 (year)
+            assertThat(result.get().exponents())
+                    .containsEntry(systems.courant.sd.measure.Dimension.ITEM, 1)
+                    .containsEntry(systems.courant.sd.measure.Dimension.TIME, -1);
+        }
+
+        @Test
+        void shouldResolveStockWithSimpleUnit() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .stock("Population", 100, "Deer")
+                    .build();
+            editor.loadFrom(def);
+
+            Optional<CompositeUnit> result = context.resolveUnit("Population");
+
+            assertThat(result).isPresent();
+            assertThat(result.get().exponents())
+                    .containsEntry(systems.courant.sd.measure.Dimension.ITEM, 1);
         }
     }
 

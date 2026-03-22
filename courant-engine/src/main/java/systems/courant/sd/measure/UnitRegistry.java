@@ -222,6 +222,139 @@ public class UnitRegistry {
     }
 
     /**
+     * Resolves a compound unit string such as {@code "Deer/year"} or {@code "Deer/(year*lion)"}
+     * into a {@link CompositeUnit}. Supports division ({@code /}), multiplication ({@code *}),
+     * and parentheses for grouping. A leading {@code "1"} denotes dimensionless
+     * (e.g. {@code "1/year"} → inverse-time).
+     *
+     * <p>Simple names without operators are resolved via {@link #resolve(String)} and
+     * wrapped with {@link CompositeUnit#of(Unit)}.
+     *
+     * @param unitString the unit string to parse
+     * @return the composite unit, or dimensionless for null/blank/dimensionless inputs
+     */
+    public CompositeUnit resolveComposite(String unitString) {
+        if (unitString == null || unitString.isBlank()) {
+            return CompositeUnit.dimensionless();
+        }
+        String trimmed = unitString.trim();
+
+        if ("1".equals(trimmed) || DIMENSIONLESS_NAMES.contains(trimmed.toLowerCase())) {
+            return CompositeUnit.dimensionless();
+        }
+
+        if (!hasUnitOperators(trimmed)) {
+            return CompositeUnit.of(resolve(trimmed));
+        }
+
+        return new UnitStringParser(trimmed, this).parse();
+    }
+
+    private static boolean hasUnitOperators(String s) {
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            if (c == '/' || c == '*' || c == '(' || c == ')') {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Recursive-descent parser for compound unit strings.
+     * <pre>
+     * expression → product ('/' product)?
+     * product    → atom ('*' atom)*
+     * atom       → '(' expression ')' | '1' | name
+     * </pre>
+     */
+    private static final class UnitStringParser {
+        private final String input;
+        private final UnitRegistry registry;
+        private int pos;
+
+        UnitStringParser(String input, UnitRegistry registry) {
+            this.input = input;
+            this.registry = registry;
+        }
+
+        CompositeUnit parse() {
+            pos = 0;
+            CompositeUnit result = parseExpression();
+            // If we didn't consume everything, fall back to treating the whole string as a name
+            if (pos < input.length()) {
+                return CompositeUnit.of(registry.resolve(input));
+            }
+            return result;
+        }
+
+        private CompositeUnit parseExpression() {
+            CompositeUnit left = parseProduct();
+            skipSpaces();
+            if (pos < input.length() && input.charAt(pos) == '/') {
+                pos++;
+                CompositeUnit right = parseProduct();
+                return left.divide(right);
+            }
+            return left;
+        }
+
+        private CompositeUnit parseProduct() {
+            CompositeUnit result = parseAtom();
+            while (pos < input.length()) {
+                skipSpaces();
+                if (pos < input.length() && input.charAt(pos) == '*') {
+                    pos++;
+                    result = result.multiply(parseAtom());
+                } else {
+                    break;
+                }
+            }
+            return result;
+        }
+
+        private CompositeUnit parseAtom() {
+            skipSpaces();
+            if (pos >= input.length()) {
+                return CompositeUnit.dimensionless();
+            }
+            if (input.charAt(pos) == '(') {
+                pos++;
+                CompositeUnit inner = parseExpression();
+                skipSpaces();
+                if (pos < input.length() && input.charAt(pos) == ')') {
+                    pos++;
+                }
+                return inner;
+            }
+            String name = readName();
+            if (name.isEmpty() || "1".equals(name)) {
+                return CompositeUnit.dimensionless();
+            }
+            return CompositeUnit.of(registry.resolve(name));
+        }
+
+        private String readName() {
+            skipSpaces();
+            int start = pos;
+            while (pos < input.length()) {
+                char c = input.charAt(pos);
+                if (c == '/' || c == '*' || c == '(' || c == ')') {
+                    break;
+                }
+                pos++;
+            }
+            return input.substring(start, pos).trim();
+        }
+
+        private void skipSpaces() {
+            while (pos < input.length() && input.charAt(pos) == ' ') {
+                pos++;
+            }
+        }
+    }
+
+    /**
      * Resolves a time unit by name. Throws if the resolved unit is not a {@link TimeUnit}.
      *
      * @param name the time unit name

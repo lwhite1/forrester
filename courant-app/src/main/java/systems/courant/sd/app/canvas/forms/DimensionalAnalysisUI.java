@@ -120,6 +120,7 @@ public class DimensionalAnalysisUI {
             // Build display text
             String inferredDisplay = analysis.inferredUnit().displayString();
             CompositeUnit expected = getExpectedUnit(unitRegistry);
+            String rawExpected = getRawExpectedUnitLabel();
 
             if (!analysis.isConsistent()) {
                 // Show first warning
@@ -127,11 +128,23 @@ public class DimensionalAnalysisUI {
                 dimensionLabel.setText("Warning: " + warning);
                 dimensionLabel.setStyle(Styles.DIMENSION_MISMATCH);
             } else if (expected != null && !expected.isCompatibleWith(analysis.inferredUnit())) {
-                dimensionLabel.setText("Equation yields " + inferredDisplay
-                        + ", expected " + expected.displayString());
-                dimensionLabel.setStyle(Styles.DIMENSION_MISMATCH);
+                // Pure constant expressions carry the declared unit implicitly — no mismatch
+                if (analysis.inferredUnit().isDimensionless() && isPureConstant(expr)) {
+                    String label = rawExpected != null ? rawExpected : expected.displayString();
+                    dimensionLabel.setText("= " + label);
+                    dimensionLabel.setStyle(Styles.DIMENSION_MATCH);
+                } else {
+                    String expectedLabel = rawExpected != null ? rawExpected
+                            : expected.displayString();
+                    dimensionLabel.setText("Equation yields " + inferredDisplay
+                            + ", expected " + expectedLabel);
+                    dimensionLabel.setStyle(Styles.DIMENSION_MISMATCH);
+                }
             } else {
-                dimensionLabel.setText("= " + inferredDisplay);
+                // When matched, prefer showing raw declared unit for readability
+                String label = (rawExpected != null && expected != null)
+                        ? rawExpected : inferredDisplay;
+                dimensionLabel.setText("= " + label);
                 dimensionLabel.setStyle(expected != null ? Styles.DIMENSION_MATCH
                         : Styles.DIMENSION_LABEL);
             }
@@ -140,6 +153,61 @@ public class DimensionalAnalysisUI {
         } catch (ParseException e) {
             hideDimensionLabel(dimensionLabel);
         }
+    }
+
+    /**
+     * Returns the raw declared unit string for the current element, for use in display messages.
+     * Returns null if no raw string is available (e.g. unknown element type or no declared unit).
+     */
+    private String getRawExpectedUnitLabel() {
+        var flowOpt = ctx.getEditor().getFlowByName(ctx.getElementName());
+        if (flowOpt.isPresent()) {
+            var flow = flowOpt.get();
+            String material = null;
+            if (flow.materialUnit() != null && !flow.materialUnit().isBlank()) {
+                material = flow.materialUnit();
+            } else if (flow.sink() != null) {
+                var sink = ctx.getEditor().getStockByName(flow.sink());
+                if (sink.isPresent() && sink.get().unit() != null
+                        && !sink.get().unit().isBlank()) {
+                    material = sink.get().unit();
+                }
+            } else if (flow.source() != null) {
+                var source = ctx.getEditor().getStockByName(flow.source());
+                if (source.isPresent() && source.get().unit() != null
+                        && !source.get().unit().isBlank()) {
+                    material = source.get().unit();
+                }
+            }
+            if (material != null && flow.timeUnit() != null) {
+                return material + "/" + flow.timeUnit();
+            }
+            return null;
+        }
+        var auxOpt = ctx.getEditor().getVariableByName(ctx.getElementName());
+        if (auxOpt.isPresent()) {
+            String unitName = auxOpt.get().unit();
+            if (unitName != null && !unitName.isBlank()) {
+                return unitName;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns true if the expression contains only literals and arithmetic — no variable
+     * references or function calls. Constants carry their declared unit implicitly.
+     */
+    private boolean isPureConstant(Expr expr) {
+        return switch (expr) {
+            case Expr.Literal _ -> true;
+            case Expr.Ref _ -> false;
+            case Expr.BinaryOp op -> isPureConstant(op.left()) && isPureConstant(op.right());
+            case Expr.UnaryOp op -> isPureConstant(op.operand());
+            case Expr.FunctionCall _ -> false;
+            case Expr.Conditional cond -> isPureConstant(cond.condition())
+                    && isPureConstant(cond.thenExpr()) && isPureConstant(cond.elseExpr());
+        };
     }
 
     /**
@@ -179,7 +247,7 @@ public class DimensionalAnalysisUI {
         if (auxOpt.isPresent()) {
             String unitName = auxOpt.get().unit();
             if (unitName != null && !unitName.isBlank()) {
-                return CompositeUnit.of(registry.resolve(unitName));
+                return registry.resolveComposite(unitName);
             }
         }
 

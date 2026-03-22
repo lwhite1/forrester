@@ -330,6 +330,104 @@ class UnitRegistryTest {
     }
 
     @Nested
+    @DisplayName("Compound unit parsing — resolveComposite (#1211)")
+    class CompoundUnitParsing {
+
+        @Test
+        @DisplayName("should resolve simple unit name")
+        void shouldResolveSimpleUnit() {
+            CompositeUnit result = registry.resolveComposite("Deer");
+            assertThat(result.isDimensionless()).isFalse();
+            assertThat(result.exponents()).containsEntry(Dimension.ITEM, 1);
+        }
+
+        @Test
+        @DisplayName("should resolve rate unit 'Deer/year'")
+        void shouldResolveRateUnit() {
+            CompositeUnit result = registry.resolveComposite("Deer/year");
+            assertThat(result.exponents())
+                    .containsEntry(Dimension.ITEM, 1)
+                    .containsEntry(Dimension.TIME, -1);
+        }
+
+        @Test
+        @DisplayName("should resolve inverse unit '1/year'")
+        void shouldResolveInverseUnit() {
+            CompositeUnit result = registry.resolveComposite("1/year");
+            assertThat(result.exponents())
+                    .containsEntry(Dimension.TIME, -1)
+                    .hasSize(1);
+        }
+
+        @Test
+        @DisplayName("should resolve compound denominator 'Deer/(year*lion)'")
+        void shouldResolveCompoundDenominator() {
+            // Deer and lion are both ITEM, so ITEM cancels: {ITEM:1} / {TIME:1, ITEM:1} = {TIME:-1}
+            CompositeUnit result = registry.resolveComposite("Deer/(year*lion)");
+            assertThat(result.exponents())
+                    .containsEntry(Dimension.TIME, -1)
+                    .hasSize(1);
+        }
+
+        @Test
+        @DisplayName("should resolve 'acre/Deer'")
+        void shouldResolveDivisionWithAreaUnit() {
+            CompositeUnit result = registry.resolveComposite("acre/Deer");
+            assertThat(result.exponents())
+                    .containsEntry(Dimension.LENGTH, 1)
+                    .containsEntry(Dimension.ITEM, -1);
+        }
+
+        @Test
+        @DisplayName("should return dimensionless for null or blank")
+        void shouldReturnDimensionlessForNullOrBlank() {
+            assertThat(registry.resolveComposite(null).isDimensionless()).isTrue();
+            assertThat(registry.resolveComposite("").isDimensionless()).isTrue();
+            assertThat(registry.resolveComposite("  ").isDimensionless()).isTrue();
+        }
+
+        @Test
+        @DisplayName("should return dimensionless for '1'")
+        void shouldReturnDimensionlessForOne() {
+            assertThat(registry.resolveComposite("1").isDimensionless()).isTrue();
+        }
+
+        @Test
+        @DisplayName("should return dimensionless for 'dmnl'")
+        void shouldReturnDimensionlessForDmnl() {
+            assertThat(registry.resolveComposite("dmnl").isDimensionless()).isTrue();
+        }
+
+        @Test
+        @DisplayName("should handle multiplication 'year*lion'")
+        void shouldResolveProductUnit() {
+            CompositeUnit result = registry.resolveComposite("year*lion");
+            assertThat(result.exponents())
+                    .containsEntry(Dimension.TIME, 1)
+                    .containsEntry(Dimension.ITEM, 1);
+        }
+
+        @Test
+        @DisplayName("should handle spaces around operators")
+        void shouldHandleSpacesAroundOperators() {
+            CompositeUnit result = registry.resolveComposite("Deer / year");
+            assertThat(result.exponents())
+                    .containsEntry(Dimension.ITEM, 1)
+                    .containsEntry(Dimension.TIME, -1);
+        }
+
+        @Test
+        @DisplayName("Deer/year and acre/Deer should have expected compatibility")
+        void shouldProduceCompatibleUnitsForKaibabModel() {
+            // Deer * (1/year) should equal Deer/year
+            CompositeUnit deerPerYear = registry.resolveComposite("Deer/year");
+            CompositeUnit deer = registry.resolveComposite("Deer");
+            CompositeUnit inverseYear = registry.resolveComposite("1/year");
+            assertThat(deer.multiply(inverseYear)).isEqualTo(deerPerYear);
+        }
+    }
+
+    @Nested
     @DisplayName("MAX_CUSTOM_UNITS guard on register() (#632)")
     class RegisterGuard {
 
