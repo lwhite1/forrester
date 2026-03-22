@@ -15,8 +15,11 @@ import systems.courant.sd.model.def.StockDef;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -908,6 +911,61 @@ class XmileImporterTest {
             double finalTemp = tempStock.getValue();
             assertThat(finalTemp).isLessThan(180.0);
             assertThat(finalTemp).isGreaterThan(70.0);
+        }
+    }
+
+    @Nested
+    @DisplayName("Charset fallback")
+    class CharsetFallback {
+
+        @TempDir
+        Path tempDir;
+
+        @Test
+        void shouldFallBackToWindows1252WhenUtf8Fails() throws IOException {
+            // \u00e9 (e-acute) is 0xE9 in windows-1252 but invalid as a standalone byte in UTF-8
+            String xmile = """
+                    <?xml version="1.0" encoding="windows-1252"?>
+                    <xmile xmlns="http://docs.oasis-open.org/xmile/ns/XMILE/v1.0" version="1.0">
+                      <header><name>Caf\u00e9</name></header>
+                      <sim_specs time_units="day"><start>0</start><stop>10</stop><dt>1</dt></sim_specs>
+                      <model><variables>
+                        <stock name="Temp\u00e9rature">
+                          <eqn>100</eqn>
+                        </stock>
+                      </variables></model>
+                    </xmile>
+                    """;
+            Path file = tempDir.resolve("test.xmile");
+            Files.write(file, xmile.getBytes(Charset.forName("windows-1252")));
+
+            ImportResult result = importer.importModel(file);
+
+            assertThat(result.definition().stocks()).hasSize(1);
+            assertThat(result.definition().stocks().get(0).name()).isEqualTo("Temp\u00e9rature");
+        }
+
+        @Test
+        void shouldStillReadUtf8FilesSuccessfully() throws IOException {
+            String xmile = """
+                    <?xml version="1.0" encoding="UTF-8"?>
+                    <xmile xmlns="http://docs.oasis-open.org/xmile/ns/XMILE/v1.0" version="1.0">
+                      <header><name>Caf\u00e9</name></header>
+                      <sim_specs time_units="day"><start>0</start><stop>10</stop><dt>1</dt></sim_specs>
+                      <model><variables>
+                        <stock name="Temp\u00e9rature">
+                          <eqn>100</eqn>
+                        </stock>
+                      </variables></model>
+                    </xmile>
+                    """;
+            Path file = tempDir.resolve("test.xmile");
+            Files.writeString(file, xmile);
+
+            ImportResult result = importer.importModel(file);
+
+            assertThat(result.definition().stocks()).hasSize(1);
+            assertThat(result.definition().stocks().get(0).name()).isEqualTo("Temp\u00e9rature");
         }
     }
 }
