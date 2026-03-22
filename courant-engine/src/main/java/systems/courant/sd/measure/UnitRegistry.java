@@ -31,7 +31,7 @@ public class UnitRegistry {
 
     /** Dimensionless-equivalent names (lowercase). Resolved to DIMENSIONLESS. */
     private static final Set<String> DIMENSIONLESS_NAMES = Set.of(
-            "dmnl", "units", "unit", "dimensionless",
+            "1", "dmnl", "units", "unit", "dimensionless",
             "fraction", "percent", "percentage", "ratio", "index");
 
     /**
