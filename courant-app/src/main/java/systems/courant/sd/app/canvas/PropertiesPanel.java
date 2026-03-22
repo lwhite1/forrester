@@ -66,6 +66,7 @@ public class PropertiesPanel extends VBox {
     private Runnable onRunSimulation;
     private Runnable onValidateModel;
     private Runnable onOpenSettings;
+    private java.util.function.Supplier<String> fileNameSupplier;
 
     public PropertiesPanel() {
         setId("propertiesPanel");
@@ -125,6 +126,13 @@ public class PropertiesPanel extends VBox {
     }
 
     /**
+     * Sets a supplier that returns the current file name (without path), or null if unsaved.
+     */
+    public void setFileNameSupplier(java.util.function.Supplier<String> supplier) {
+        this.fileNameSupplier = supplier;
+    }
+
+    /**
      * Updates the panel to reflect the current selection on the canvas.
      * Called by CourantApp whenever the canvas status changes.
      * Wrapped in updatingFields guard to prevent spurious focus-loss commits.
@@ -180,13 +188,17 @@ public class PropertiesPanel extends VBox {
         TextField nameField = fields.createTextField(
                 editor.getModelName() != null ? editor.getModelName() : "Untitled");
         nameField.setId("modelNameField");
-        fields.addFieldRow(row++, "Model", nameField);
+        fields.addFieldRow(row++, "Name", nameField);
         nameField.setOnAction(e -> commitModelName(nameField, editor));
         nameField.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
             if (!isFocused && !ctx.isUpdatingFields()) {
                 commitModelName(nameField, editor);
             }
         });
+
+        // File name (read-only)
+        String fileName = fileNameSupplier != null ? fileNameSupplier.get() : null;
+        fields.addReadOnlyRow(row++, "File", fileName != null ? fileName : "(not saved)");
 
         // Description (editable)
         TextArea descArea = new TextArea(
