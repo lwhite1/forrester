@@ -998,7 +998,7 @@ public class ExprCompiler {
         DoubleSupplier mean = compileExpr(args.get(2));
         DoubleSupplier stddev = compileExpr(args.get(3));
         long userSeed = args.size() == 5
-                ? (long) evaluateConstant(args.get(4), "RANDOM_NORMAL seed") : 0L;
+                ? Math.round(evaluateConstant(args.get(4), "RANDOM_NORMAL seed")) : 0L;
         long seed = userSeed != 0 ? userSeed
                 : System.nanoTime() ^ SEED_COUNTER.incrementAndGet();
         java.util.Random rng = new java.util.Random(seed);
@@ -1013,7 +1013,7 @@ public class ExprCompiler {
         requireArgs("RANDOM_UNIFORM", args, 3);
         DoubleSupplier minVal = compileExpr(args.get(0));
         DoubleSupplier maxVal = compileExpr(args.get(1));
-        long userSeed = (long) evaluateConstant(args.get(2), "RANDOM_UNIFORM seed");
+        long userSeed = Math.round(evaluateConstant(args.get(2), "RANDOM_UNIFORM seed"));
         long seed = userSeed != 0 ? userSeed
                 : System.nanoTime() ^ SEED_COUNTER.incrementAndGet();
         java.util.Random rng = new java.util.Random(seed);
