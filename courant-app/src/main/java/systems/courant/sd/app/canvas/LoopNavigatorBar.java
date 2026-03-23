@@ -178,31 +178,49 @@ public class LoopNavigatorBar extends HBox {
             elementsPopup.close();
         }
 
+        boolean isSFGroup = loop.type() == LoopType.INDETERMINATE
+                && loop.label().startsWith("Feedback Group");
+
         VBox content = new VBox(2);
         content.setPadding(new Insets(10, 14, 10, 14));
         content.setStyle("-fx-background-color: white; -fx-border-color: #B0B0B0; -fx-border-radius: 4;");
 
-        Label title = new Label(loop.label() + " — " + formatType(loop.type()));
+        String titleText = isSFGroup
+                ? loop.label() + " (" + loop.path().size() + " stocks)"
+                : loop.label() + " \u2014 " + formatType(loop.type());
+        Label title = new Label(titleText);
         title.setStyle("-fx-font-weight: bold; -fx-font-size: 13px; -fx-padding: 0 0 4 0;");
         content.getChildren().add(title);
 
         List<String> path = loop.path();
-        var polarities = loop.polarities();
-        for (int i = 0; i < path.size(); i++) {
-            String polSymbol = switch (polarities.get(i)) {
-                case POSITIVE -> " \u2192(+) ";
-                case NEGATIVE -> " \u2192(\u2212) ";
-                case UNKNOWN -> " \u2192(?) ";
-            };
-            String next = path.get((i + 1) % path.size());
-            Label row = new Label(path.get(i) + polSymbol + next);
-            row.setStyle("-fx-font-size: 12px; -fx-padding: 1 0 1 4;");
-            content.getChildren().add(row);
+        if (isSFGroup) {
+            // S&F feedback group: plain list of stocks (no polarity)
+            for (String stock : path) {
+                Label row = new Label("\u2022 " + stock);
+                row.setStyle("-fx-font-size: 12px; -fx-padding: 1 0 1 4;");
+                content.getChildren().add(row);
+            }
+        } else {
+            // CLD loop: show polarity arrows between elements
+            var polarities = loop.polarities();
+            for (int i = 0; i < path.size(); i++) {
+                String polSymbol = switch (polarities.get(i)) {
+                    case POSITIVE -> " \u2192(+) ";
+                    case NEGATIVE -> " \u2192(\u2212) ";
+                    case UNKNOWN -> " \u2192(?) ";
+                };
+                String next = path.get((i + 1) % path.size());
+                Label row = new Label(path.get(i) + polSymbol + next);
+                row.setStyle("-fx-font-size: 12px; -fx-padding: 1 0 1 4;");
+                content.getChildren().add(row);
+            }
         }
 
         Stage popup = new Stage(StageStyle.UTILITY);
         popup.initModality(Modality.NONE);
-        popup.setTitle(loop.label() + " Loop Elements");
+        popup.setTitle(isSFGroup
+                ? loop.label() + " Elements"
+                : loop.label() + " Loop Elements");
         popup.setScene(new Scene(content));
         popup.setAlwaysOnTop(true);
 
@@ -276,6 +294,8 @@ public class LoopNavigatorBar extends HBox {
      */
     public void update(FeedbackAnalysis analysis, int activeIndex,
                        LoopType typeFilter, int filteredCount) {
+        boolean popupWasShowing = elementsPopup != null && elementsPopup.isShowing();
+
         if (analysis == null) {
             loopLabel.setText("Loop analysis not available");
             loopLabel.setTooltip(null);
@@ -284,6 +304,8 @@ public class LoopNavigatorBar extends HBox {
             allButton.setDisable(true);
             filterRBtn.setDisable(true);
             filterBBtn.setDisable(true);
+            elementsButton.setDisable(true);
+            closePopup();
             return;
         }
         if (analysis.loopCount() == 0) {
@@ -294,6 +316,8 @@ public class LoopNavigatorBar extends HBox {
             allButton.setDisable(true);
             filterRBtn.setDisable(true);
             filterBBtn.setDisable(true);
+            elementsButton.setDisable(true);
+            closePopup();
             return;
         }
 
@@ -314,6 +338,7 @@ public class LoopNavigatorBar extends HBox {
             String filterDesc = typeFilter == LoopType.REINFORCING ? "reinforcing" : "balancing";
             loopLabel.setText("No " + filterDesc + " loops");
             loopLabel.setTooltip(null);
+            closePopup();
         } else if (activeIndex < 0) {
             String suffix = typeFilter != null
                     ? " " + formatType(typeFilter)
@@ -321,6 +346,7 @@ public class LoopNavigatorBar extends HBox {
             loopLabel.setText(displayCount + (displayCount == 1 ? " loop" : " loops")
                     + suffix + " \u2014 click \u25B6 to step");
             loopLabel.setTooltip(null);
+            closePopup();
         } else {
             FeedbackAnalysis.CausalLoop activeLoop = analysis.causalLoops().get(activeIndex);
             analysis.loopInfo(activeIndex).ifPresent(info -> {
@@ -353,6 +379,19 @@ public class LoopNavigatorBar extends HBox {
             });
             elementsButton.setDisable(false);
             elementsButton.setOnAction(e -> showElementsPopup(activeLoop));
+            if (popupWasShowing) {
+                showElementsPopup(activeLoop);
+            }
+        }
+    }
+
+    /**
+     * Closes the elements popup if it is currently showing.
+     */
+    public void closePopup() {
+        if (elementsPopup != null) {
+            elementsPopup.close();
+            elementsPopup = null;
         }
     }
 
