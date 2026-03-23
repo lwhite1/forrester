@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.UnaryOperator;
 
 /**
@@ -70,7 +71,7 @@ public final class EquationReferenceManager {
                 continue;
             }
             String updated = replaceToken(f.equation(), oldToken, newToken);
-            if (!updated.equals(f.equation())) {
+            if (!Objects.equals(updated, f.equation())) {
                 flows.set(i, new FlowDef(f.name(), f.comment(), updated,
                         f.timeUnit(), f.materialUnit(), f.source(), f.sink(), f.subscripts()));
                 modified.add(f.name());
@@ -82,7 +83,7 @@ public final class EquationReferenceManager {
                 continue;
             }
             String updated = replaceToken(a.equation(), oldToken, newToken);
-            if (!updated.equals(a.equation())) {
+            if (!Objects.equals(updated, a.equation())) {
                 variables.set(i, new VariableDef(a.name(), a.comment(), updated, a.unit(), a.subscripts()));
                 modified.add(a.name());
             }
@@ -137,6 +138,9 @@ public final class EquationReferenceManager {
             FlowDef f = flows.get(i);
             if (f.name().equals(elementName)) {
                 String eq = f.equation();
+                if (eq == null) {
+                    return false;
+                }
                 if (containsWholeToken(eq, token)) {
                     return true;
                 }
@@ -151,6 +155,9 @@ public final class EquationReferenceManager {
             VariableDef a = variables.get(i);
             if (a.name().equals(elementName)) {
                 String eq = a.equation();
+                if (eq == null) {
+                    return false;
+                }
                 if (containsWholeToken(eq, token)) {
                     return true;
                 }
