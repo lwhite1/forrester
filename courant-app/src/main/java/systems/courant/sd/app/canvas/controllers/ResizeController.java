@@ -80,8 +80,9 @@ public final class ResizeController {
         double minH = LayoutMetrics.minHeightFor(type);
         double pad = SelectionRenderer.SELECTION_PADDING;
 
-        double rawW = Math.abs(worldX - anchorX) - pad;
-        double rawH = Math.abs(worldY - anchorY) - pad;
+        double doublePad = 2 * pad;
+        double rawW = Math.abs(worldX - anchorX) - doublePad;
+        double rawH = Math.abs(worldY - anchorY) - doublePad;
         double newW = Math.max(minW, rawW);
         double newH = Math.max(minH, rawH);
 
@@ -92,10 +93,8 @@ public final class ResizeController {
         if (signX != 0) { lastSignX = signX; } else { signX = lastSignX; }
         if (signY != 0) { lastSignY = signY; } else { signY = lastSignY; }
 
-        double edgeX = anchorX + signX * (newW / 2 + pad);
-        double edgeY = anchorY + signY * (newH / 2 + pad);
-        double newCx = (anchorX + edgeX) / 2;
-        double newCy = (anchorY + edgeY) / 2;
+        double newCx = anchorX + signX * (newW / 2 + pad);
+        double newCy = anchorY + signY * (newH / 2 + pad);
 
         state.setSize(target, newW, newH);
         state.setPosition(target, newCx, newCy);
