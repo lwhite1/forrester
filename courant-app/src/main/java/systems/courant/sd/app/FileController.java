@@ -292,6 +292,11 @@ final class FileController {
                 markDirty();
             }
 
+            @Override
+            public void onModelMetadataChanged() {
+                markDirty();
+            }
+
         };
     }
 

@@ -19,6 +19,9 @@ public interface ModelEditListener {
     default void onEquationChanged(String elementName) {
     }
 
+    default void onModelMetadataChanged() {
+    }
+
     default void onSimulationRun() {
     }
 
