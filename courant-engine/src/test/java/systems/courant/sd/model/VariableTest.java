@@ -1,5 +1,12 @@
 package systems.courant.sd.model;
 
+import java.util.List;
+import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -135,6 +142,34 @@ public class VariableTest {
             // Should not throw StackOverflowError
             double a = vars[0].getValue();
             assertThat(a).isFinite();
+        }
+
+        @Test
+        @DisplayName("concurrent getValue calls should not corrupt state")
+        void concurrentGetValueShouldNotCorruptState() throws Exception {
+            Variable v = new Variable("X", THING, () -> 42.0);
+            int threadCount = 8;
+            int iterations = 1000;
+            CyclicBarrier barrier = new CyclicBarrier(threadCount);
+
+            try (ExecutorService executor = Executors.newFixedThreadPool(threadCount)) {
+                List<Future<?>> futures = new java.util.ArrayList<>();
+                for (int t = 0; t < threadCount; t++) {
+                    futures.add(executor.submit(() -> {
+                        try {
+                            barrier.await(5, TimeUnit.SECONDS);
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                        for (int i = 0; i < iterations; i++) {
+                            assertThat(v.getValue()).isEqualTo(42.0);
+                        }
+                    }));
+                }
+                for (Future<?> f : futures) {
+                    f.get(10, TimeUnit.SECONDS);
+                }
+            }
         }
     }
 }
