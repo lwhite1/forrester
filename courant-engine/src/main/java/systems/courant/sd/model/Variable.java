@@ -1,5 +1,7 @@
 package systems.courant.sd.model;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import com.carrotsearch.hppc.DoubleArrayList;
 import systems.courant.sd.measure.Unit;
 import com.google.common.base.Preconditions;
@@ -18,17 +20,18 @@ public class Variable extends Element {
      * Cached value from the most recent evaluation, used as the initial guess
      * when breaking algebraic loops via the re-entrancy guard.
      */
-    private volatile double cachedValue;
+    private double cachedValue;
 
     /**
      * True while this variable's formula is being evaluated. A re-entrant call
      * (caused by an algebraic loop) returns {@link #cachedValue} instead of
      * recursing, effectively using the previous timestep's value to break the cycle.
      *
-     * <p>Volatile to ensure visibility if a Variable is ever accessed from multiple
-     * threads (e.g., parallel parameter sweeps sharing a compiled model).
+     * <p>Uses {@link AtomicBoolean#compareAndSet} so that the check-then-act
+     * on this flag is atomic, avoiding a race where two threads could both
+     * pass the re-entrancy check before either sets the flag.
      */
-    private volatile boolean evaluating;
+    private final AtomicBoolean evaluating = new AtomicBoolean();
 
     /**
      * Creates a new variable with the given name, unit, and formula.
@@ -54,15 +57,14 @@ public class Variable extends Element {
      * using the previous timestep value to break algebraic loops.
      */
     public double getValue() {
-        if (evaluating) {
+        if (!evaluating.compareAndSet(false, true)) {
             return cachedValue;
         }
-        evaluating = true;
         try {
             cachedValue = formula.getCurrentValue();
             return cachedValue;
         } finally {
-            evaluating = false;
+            evaluating.set(false);
         }
     }
 
