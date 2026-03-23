@@ -944,6 +944,74 @@ class ExprCompilerTest {
                     .as("Two RANDOM_NORMAL formulas compiled separately should produce different sequences")
                     .isTrue();
         }
+
+        @Test
+        void shouldProduceReproducibleSequenceWithUserSeed() {
+            Formula formula1 = compiler.compile("RANDOM_NORMAL(0, 100, 50, 10, 12345)");
+            Formula formula2 = compiler.compile("RANDOM_NORMAL(0, 100, 50, 10, 12345)");
+            for (int i = 0; i < 10; i++) {
+                assertThat(formula1.getCurrentValue())
+                        .as("Same seed should produce identical values at step %d", i)
+                        .isEqualTo(formula2.getCurrentValue());
+            }
+        }
+
+        @Test
+        void shouldUseSystemTimeWhenSeedIsZero() {
+            Formula formula1 = compiler.compile("RANDOM_NORMAL(0, 100, 50, 10, 0)");
+            Formula formula2 = compiler.compile("RANDOM_NORMAL(0, 100, 50, 10, 0)");
+            boolean foundDifference = false;
+            for (int i = 0; i < 20; i++) {
+                if (formula1.getCurrentValue() != formula2.getCurrentValue()) {
+                    foundDifference = true;
+                    break;
+                }
+            }
+            assertThat(foundDifference)
+                    .as("Seed=0 should use system time, producing different sequences")
+                    .isTrue();
+        }
+    }
+
+    @Nested
+    @DisplayName("RANDOM_UNIFORM function")
+    class RandomUniformTests {
+
+        @Test
+        void shouldReturnValueWithinBounds() {
+            Formula formula = compiler.compile("RANDOM_UNIFORM(0, 1, 0)");
+            for (int i = 0; i < 100; i++) {
+                double val = formula.getCurrentValue();
+                assertThat(val).isBetween(0.0, 1.0);
+            }
+        }
+
+        @Test
+        void shouldProduceReproducibleSequenceWithUserSeed() {
+            Formula formula1 = compiler.compile("RANDOM_UNIFORM(0, 1, 12345)");
+            Formula formula2 = compiler.compile("RANDOM_UNIFORM(0, 1, 12345)");
+            for (int i = 0; i < 10; i++) {
+                assertThat(formula1.getCurrentValue())
+                        .as("Same seed should produce identical values at step %d", i)
+                        .isEqualTo(formula2.getCurrentValue());
+            }
+        }
+
+        @Test
+        void shouldUseSystemTimeWhenSeedIsZero() {
+            Formula formula1 = compiler.compile("RANDOM_UNIFORM(0, 1, 0)");
+            Formula formula2 = compiler.compile("RANDOM_UNIFORM(0, 1, 0)");
+            boolean foundDifference = false;
+            for (int i = 0; i < 20; i++) {
+                if (formula1.getCurrentValue() != formula2.getCurrentValue()) {
+                    foundDifference = true;
+                    break;
+                }
+            }
+            assertThat(foundDifference)
+                    .as("Seed=0 should use system time, producing different sequences")
+                    .isTrue();
+        }
     }
 
     @Nested

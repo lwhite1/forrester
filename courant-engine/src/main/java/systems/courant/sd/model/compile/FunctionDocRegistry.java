@@ -448,7 +448,7 @@ public final class FunctionDocRegistry {
                         p("max", "maximum allowed value"),
                         p("mean", "mean of the normal distribution"),
                         p("std_dev", "standard deviation"),
-                        p("seed", "(optional) random seed (currently ignored; uses system time)")),
+                        p("seed", "(optional) random seed; 0 means use system time")),
                 "Generates a random number from a normal distribution with the given mean "
                         + "and standard deviation, clamped to [min, max].",
                 "RANDOM_NORMAL(0, 100, 50, 10) → ~50 with std dev 10, clamped to 0-100",
@@ -458,7 +458,7 @@ public final class FunctionDocRegistry {
                 "SD",
                 List.of(p("min", "minimum value"),
                         p("max", "maximum value"),
-                        p("seed", "random seed (currently ignored; uses system time)")),
+                        p("seed", "random seed; 0 means use system time")),
                 "Generates a uniformly distributed random number between min and max.",
                 "RANDOM_UNIFORM(0, 1, 0) → uniform random in [0, 1]",
                 List.of("RANDOM_NORMAL"));
