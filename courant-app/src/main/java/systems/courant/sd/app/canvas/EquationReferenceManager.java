@@ -66,6 +66,9 @@ public final class EquationReferenceManager {
         List<String> modified = new ArrayList<>();
         for (int i = 0; i < flows.size(); i++) {
             FlowDef f = flows.get(i);
+            if (f.equation() == null) {
+                continue;
+            }
             String updated = replaceToken(f.equation(), oldToken, newToken);
             if (!updated.equals(f.equation())) {
                 flows.set(i, new FlowDef(f.name(), f.comment(), updated,
@@ -75,6 +78,9 @@ public final class EquationReferenceManager {
         }
         for (int i = 0; i < variables.size(); i++) {
             VariableDef a = variables.get(i);
+            if (a.equation() == null) {
+                continue;
+            }
             String updated = replaceToken(a.equation(), oldToken, newToken);
             if (!updated.equals(a.equation())) {
                 variables.set(i, new VariableDef(a.name(), a.comment(), updated, a.unit(), a.subscripts()));
@@ -92,6 +98,9 @@ public final class EquationReferenceManager {
         for (int i = 0; i < flows.size(); i++) {
             FlowDef f = flows.get(i);
             if (f.name().equals(targetName)) {
+                if (f.equation() == null) {
+                    return false;
+                }
                 String updated = transform.apply(f.equation());
                 if (!updated.equals(f.equation())) {
                     flows.set(i, new FlowDef(f.name(), f.comment(), updated,
@@ -104,6 +113,9 @@ public final class EquationReferenceManager {
         for (int i = 0; i < variables.size(); i++) {
             VariableDef a = variables.get(i);
             if (a.name().equals(targetName)) {
+                if (a.equation() == null) {
+                    return false;
+                }
                 String updated = transform.apply(a.equation());
                 if (!updated.equals(a.equation())) {
                     variables.set(i, new VariableDef(a.name(), a.comment(), updated, a.unit(), a.subscripts()));
@@ -128,7 +140,7 @@ public final class EquationReferenceManager {
                 if (containsWholeToken(eq, token)) {
                     return true;
                 }
-                String updated = "0".equals(eq.trim()) ? token : eq + " * " + token;
+                String updated = (eq == null || "0".equals(eq.trim())) ? token : eq + " * " + token;
                 flows.set(i, new FlowDef(f.name(), f.comment(), updated,
                         f.timeUnit(), f.materialUnit(), f.source(), f.sink(), f.subscripts()));
                 return true;
@@ -142,7 +154,7 @@ public final class EquationReferenceManager {
                 if (containsWholeToken(eq, token)) {
                     return true;
                 }
-                String updated = "0".equals(eq.trim()) ? token : eq + " * " + token;
+                String updated = (eq == null || "0".equals(eq.trim())) ? token : eq + " * " + token;
                 variables.set(i, new VariableDef(a.name(), a.comment(), updated, a.unit(), a.subscripts()));
                 return true;
             }
@@ -156,6 +168,9 @@ public final class EquationReferenceManager {
      * respecting word boundaries (adjacent characters must not be token characters).
      */
     static boolean containsWholeToken(String equation, String token) {
+        if (equation == null) {
+            return false;
+        }
         int len = equation.length();
         int tokenLen = token.length();
         int i = 0;
