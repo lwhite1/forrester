@@ -324,4 +324,25 @@ class EquationReferenceManagerTest {
             assertThat(EquationReferenceManager.containsWholeToken("Pop * 5", "Rate")).isFalse();
         }
     }
+
+    @Nested
+    @DisplayName("null equation handling (#1263)")
+    class NullEquationHandling {
+
+        @Test
+        void containsWholeTokenShouldReturnFalseForNullEquation() {
+            assertThat(EquationReferenceManager.containsWholeToken(null, "Rate")).isFalse();
+        }
+
+        @Test
+        void replaceTokenShouldReturnNullForNullEquation() {
+            assertThat(EquationReferenceManager.replaceToken(null, "A", "B")).isNull();
+        }
+
+        @Test
+        void replaceTokenByStringShouldHandleNoMatch() {
+            assertThat(EquationReferenceManager.replaceTokenByString("X + Y", "Z", "W"))
+                    .isEqualTo("X + Y");
+        }
+    }
 }
