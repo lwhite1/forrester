@@ -114,11 +114,6 @@ public record FeedbackAnalysis(
         }
     }
 
-    /** Maximum number of elementary cycles to enumerate per analysis. */
-    private static final int MAX_CYCLES = 100;
-
-    /** Maximum recursion depth for graph traversal, matching ExprParser.MAX_DEPTH. */
-    private static final int MAX_DEPTH = 200;
 
     /**
      * Analyzes a model definition to find feedback loops in both the
@@ -684,56 +679,136 @@ public record FeedbackAnalysis(
     }
 
     /**
-     * Finds all elementary cycles within an SCC using DFS backtracking.
-     * To avoid reporting duplicate cycles, only explores cycles starting
-     * from the lexicographically smallest node.
+     * Finds an independent cycle basis within an SCC using a BFS spanning tree.
+     *
+     * <p>Algorithm:
+     * <ol>
+     *   <li>Build a BFS spanning tree from the lexicographically first node.</li>
+     *   <li>For each non-tree edge (u, v), find the shortest path from v back to u
+     *       in the full graph using BFS.</li>
+     *   <li>The fundamental cycle is: u → v → (shortest path back to u).</li>
+     * </ol>
+     *
+     * <p>This produces exactly E − V + 1 independent cycles (the circuit rank),
+     * which matches the minimal set SD practitioners expect. Cycles are sorted
+     * by length so shorter, more intuitive loops appear first.
      */
     private static List<List<String>> findElementaryCycles(Set<String> sccNodes,
             Map<String, Set<String>> graph) {
-        List<List<String>> cycles = new ArrayList<>();
+        if (sccNodes.size() < 2) {
+            return Collections.emptyList();
+        }
+
+        // Deterministic root: lexicographically first node
         List<String> sortedNodes = new ArrayList<>(sccNodes);
         Collections.sort(sortedNodes);
+        String root = sortedNodes.getFirst();
 
-        for (int i = 0; i < sortedNodes.size(); i++) {
-            if (cycles.size() >= MAX_CYCLES) {
-                break;
+        // BFS spanning tree
+        Set<Edge> treeEdges = new LinkedHashSet<>();
+        Set<String> visited = new LinkedHashSet<>();
+        Deque<String> queue = new ArrayDeque<>();
+        queue.add(root);
+        visited.add(root);
+
+        while (!queue.isEmpty()) {
+            String current = queue.poll();
+            for (String next : graph.getOrDefault(current, Collections.emptySet())) {
+                if (sccNodes.contains(next) && visited.add(next)) {
+                    treeEdges.add(new Edge(current, next));
+                    queue.add(next);
+                }
             }
-            String start = sortedNodes.get(i);
-            // Only search through nodes at index >= i to avoid duplicate cycles
-            Set<String> allowedNodes = new LinkedHashSet<>(
-                    sortedNodes.subList(i, sortedNodes.size()));
-            List<String> path = new ArrayList<>();
-            path.add(start);
-            Set<String> visited = new HashSet<>();
-            visited.add(start);
-            dfsCycles(start, start, path, visited, allowedNodes, graph, cycles, 0);
         }
+
+        // For each non-tree edge, find the shortest cycle through it
+        Set<List<String>> seen = new LinkedHashSet<>();
+        List<List<String>> cycles = new ArrayList<>();
+
+        for (String from : sortedNodes) {
+            for (String to : graph.getOrDefault(from, Collections.emptySet())) {
+                if (!sccNodes.contains(to) || treeEdges.contains(new Edge(from, to))) {
+                    continue;
+                }
+                // Non-tree edge from → to: find shortest path to → from in full graph
+                List<String> returnPath = bfsShortestPath(to, from, graph, sccNodes);
+                if (returnPath == null) {
+                    continue;
+                }
+                // Cycle is: from → to → ... → from
+                List<String> cycle = new ArrayList<>(returnPath.size() + 1);
+                cycle.add(from);
+                cycle.addAll(returnPath.subList(0, returnPath.size() - 1));
+
+                // Normalize: rotate to start at lexicographically smallest node
+                List<String> normalized = normalizeCycle(cycle);
+                if (seen.add(normalized)) {
+                    cycles.add(normalized);
+                }
+            }
+        }
+
+        // Sort by length (shorter = more intuitive)
+        cycles.sort((a, b) -> Integer.compare(a.size(), b.size()));
         return cycles;
     }
 
-    private static void dfsCycles(String current, String start,
-            List<String> path, Set<String> visited,
-            Set<String> allowedNodes, Map<String, Set<String>> graph,
-            List<List<String>> cycles, int depth) {
-        if (cycles.size() >= MAX_CYCLES || depth > MAX_DEPTH) {
-            return;
+    /**
+     * Finds the shortest directed path from start to end within the allowed nodes.
+     */
+    private static List<String> bfsShortestPath(String start, String end,
+            Map<String, Set<String>> graph, Set<String> allowedNodes) {
+        if (start.equals(end)) {
+            return List.of(start);
         }
-        for (String next : graph.getOrDefault(current, Collections.emptySet())) {
-            if (!allowedNodes.contains(next)) {
-                continue;
-            }
-            if (next.equals(start) && path.size() > 1) {
-                cycles.add(new ArrayList<>(path));
-                continue;
-            }
-            if (!visited.contains(next)) {
-                visited.add(next);
-                path.add(next);
-                dfsCycles(next, start, path, visited, allowedNodes, graph, cycles, depth + 1);
-                path.removeLast();
-                visited.remove(next);
+        Map<String, String> parent = new LinkedHashMap<>();
+        Deque<String> queue = new ArrayDeque<>();
+        queue.add(start);
+        parent.put(start, null);
+
+        while (!queue.isEmpty()) {
+            String current = queue.poll();
+            for (String next : graph.getOrDefault(current, Collections.emptySet())) {
+                if (!allowedNodes.contains(next) || parent.containsKey(next)) {
+                    continue;
+                }
+                parent.put(next, current);
+                if (next.equals(end)) {
+                    List<String> path = new ArrayList<>();
+                    String node = end;
+                    while (node != null) {
+                        path.add(node);
+                        node = parent.get(node);
+                    }
+                    Collections.reverse(path);
+                    return path;
+                }
+                queue.add(next);
             }
         }
+        return null;
+    }
+
+    /**
+     * Normalizes a cycle by rotating it to start at the lexicographically smallest node.
+     * This allows deduplication of cycles that represent the same loop from different
+     * starting points.
+     */
+    private static List<String> normalizeCycle(List<String> cycle) {
+        int minIdx = 0;
+        for (int i = 1; i < cycle.size(); i++) {
+            if (cycle.get(i).compareTo(cycle.get(minIdx)) < 0) {
+                minIdx = i;
+            }
+        }
+        if (minIdx == 0) {
+            return cycle;
+        }
+        List<String> rotated = new ArrayList<>(cycle.size());
+        for (int i = 0; i < cycle.size(); i++) {
+            rotated.add(cycle.get((minIdx + i) % cycle.size()));
+        }
+        return rotated;
     }
 
     // ---- Shared utilities ----

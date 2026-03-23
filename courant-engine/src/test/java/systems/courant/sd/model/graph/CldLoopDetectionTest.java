@@ -246,8 +246,9 @@ class CldLoopDetectionTest {
 
             FeedbackAnalysis analysis = FeedbackAnalysis.analyze(def);
 
-            // Should find at least the 3 cycles listed above
-            assertThat(analysis.causalLoops().size()).isGreaterThanOrEqualTo(3);
+            // Independent cycle basis: 3 unique cycles (A↔B, B↔C, A↔C)
+            // Two non-tree edges (B→C, C→B) produce the same normalized cycle
+            assertThat(analysis.causalLoops().size()).isEqualTo(3);
         }
     }
 
@@ -385,6 +386,72 @@ class CldLoopDetectionTest {
             // Both loops should be reinforcing (even number of negative links)
             assertThat(analysis.causalLoops()).allSatisfy(loop ->
                     assertThat(loop.type()).isEqualTo(LoopType.REINFORCING));
+        }
+    }
+
+    @Nested
+    @DisplayName("Middle East model (#1301)")
+    class MiddleEastModel {
+
+        @Test
+        void shouldProduceReasonableLoopCount() {
+            // Reproduces the Middle East CLD model (13 variables, 22 links after polarity fix)
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("ConflictInMiddleEast")
+                    .cldVariable("successful suicide attacks")
+                    .cldVariable("autonomy Palestinians")
+                    .cldVariable("preparedness to dialogue")
+                    .cldVariable("willingness suicide attacks")
+                    .cldVariable("security by shielding wall")
+                    .cldVariable("degree of equality in negotiations")
+                    .cldVariable("living conditions Palestinians")
+                    .cldVariable("restrictions on Palestinians")
+                    .cldVariable("reprisal Isi on Paln")
+                    .cldVariable("trust Isi in Paln")
+                    .cldVariable("trust Paln in Isi")
+                    .cldVariable("progress peace process")
+                    .cldVariable("chance of success of peace process")
+                    .causalLink("trust Isi in Paln", "restrictions on Palestinians", CausalLinkDef.Polarity.NEGATIVE)
+                    .causalLink("restrictions on Palestinians", "living conditions Palestinians", CausalLinkDef.Polarity.NEGATIVE)
+                    .causalLink("successful suicide attacks", "trust Isi in Paln", CausalLinkDef.Polarity.NEGATIVE)
+                    .causalLink("successful suicide attacks", "reprisal Isi on Paln", CausalLinkDef.Polarity.POSITIVE)
+                    .causalLink("reprisal Isi on Paln", "living conditions Palestinians", CausalLinkDef.Polarity.NEGATIVE)
+                    .causalLink("trust Isi in Paln", "security by shielding wall", CausalLinkDef.Polarity.NEGATIVE)
+                    .causalLink("security by shielding wall", "successful suicide attacks", CausalLinkDef.Polarity.NEGATIVE)
+                    .causalLink("security by shielding wall", "living conditions Palestinians", CausalLinkDef.Polarity.NEGATIVE)
+                    .causalLink("living conditions Palestinians", "willingness suicide attacks", CausalLinkDef.Polarity.NEGATIVE)
+                    .causalLink("willingness suicide attacks", "successful suicide attacks", CausalLinkDef.Polarity.POSITIVE)
+                    .causalLink("living conditions Palestinians", "preparedness to dialogue", CausalLinkDef.Polarity.POSITIVE)
+                    .causalLink("trust Paln in Isi", "preparedness to dialogue", CausalLinkDef.Polarity.POSITIVE)
+                    .causalLink("trust Isi in Paln", "preparedness to dialogue", CausalLinkDef.Polarity.POSITIVE)
+                    .causalLink("preparedness to dialogue", "progress peace process", CausalLinkDef.Polarity.POSITIVE)
+                    .causalLink("reprisal Isi on Paln", "trust Paln in Isi", CausalLinkDef.Polarity.NEGATIVE)
+                    .causalLink("living conditions Palestinians", "degree of equality in negotiations", CausalLinkDef.Polarity.POSITIVE)
+                    .causalLink("degree of equality in negotiations", "chance of success of peace process", CausalLinkDef.Polarity.POSITIVE)
+                    .causalLink("chance of success of peace process", "progress peace process", CausalLinkDef.Polarity.POSITIVE)
+                    .causalLink("progress peace process", "autonomy Palestinians", CausalLinkDef.Polarity.POSITIVE)
+                    .causalLink("autonomy Palestinians", "living conditions Palestinians", CausalLinkDef.Polarity.POSITIVE)
+                    .causalLink("autonomy Palestinians", "successful suicide attacks", CausalLinkDef.Polarity.POSITIVE)
+                    .causalLink("progress peace process", "trust Paln in Isi", CausalLinkDef.Polarity.POSITIVE)
+                    .causalLink("progress peace process", "trust Isi in Paln", CausalLinkDef.Polarity.POSITIVE)
+                    .build();
+
+            FeedbackAnalysis analysis = FeedbackAnalysis.analyze(def);
+
+            // Independent cycle basis: exactly 8 loops, matching original hand-labeled model
+            assertThat(analysis.loopCount()).isEqualTo(8);
+
+            // No duplicate loops (different labels, same path)
+            List<List<String>> paths = analysis.causalLoops().stream()
+                    .map(CausalLoop::path).toList();
+            assertThat(paths).doesNotHaveDuplicates();
+
+            // Shortest loops should come first
+            for (int i = 1; i < paths.size(); i++) {
+                assertThat(paths.get(i).size())
+                        .as("loops should be sorted by length")
+                        .isGreaterThanOrEqualTo(paths.get(i - 1).size());
+            }
         }
     }
 
