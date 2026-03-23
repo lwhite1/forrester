@@ -169,6 +169,25 @@ class DelayFixedTest {
         }
 
         @Test
+        @DisplayName("should clamp iterations to buffer length for huge delta")
+        void shouldClampIterationsForHugeDelta() {
+            long[] step = {0};
+            double[] input = {10};
+            DelayFixed delay = DelayFixed.of(() -> input[0], 3, 0, () -> step[0]);
+
+            // Initialize at step 0
+            delay.getCurrentValue();
+
+            // Jump far beyond buffer size — must not spin or overflow
+            input[0] = 77;
+            step[0] = Integer.MAX_VALUE + 100L;
+            double result = delay.getCurrentValue();
+            // After the huge jump, the entire buffer is filled with last-known (10)
+            // then current input (77) written at the end; output is oldest = 10
+            assertThat(result).as("should complete without spinning").isEqualTo(10);
+        }
+
+        @Test
         @DisplayName("should match step-by-step when delta is always 1")
         void shouldMatchStepByStepWithNoCatchUp() {
             int[] step = {0};
