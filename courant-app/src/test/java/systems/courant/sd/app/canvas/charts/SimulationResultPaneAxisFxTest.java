@@ -132,4 +132,29 @@ class SimulationResultPaneAxisFxTest {
         assertThat(yAxis.getUpperBound()).isGreaterThan(shrunkUpper);
         assertThat(yAxis.getUpperBound()).isGreaterThanOrEqualTo(400.0);
     }
+
+    @Test
+    @DisplayName("y-axis should show sensible default range when all series hidden (#649)")
+    void yAxisShouldShowDefaultRangeWhenAllHidden(FxRobot robot) {
+        WaitForAsyncUtils.waitForFxEvents();
+
+        TabPane tabPane = robot.lookup(".tab-pane").queryAs(TabPane.class);
+        robot.interact(() -> tabPane.getSelectionModel().select(1));
+        WaitForAsyncUtils.waitForFxEvents();
+
+        LineChart<?, ?> chart = robot.lookup(".chart").queryAs(LineChart.class);
+        NumberAxis yAxis = (NumberAxis) chart.getYAxis();
+
+        // Uncheck all checkboxes to hide every series
+        Set<CheckBox> checkBoxes = robot.lookup(".check-box").queryAllAs(CheckBox.class);
+        for (CheckBox cb : checkBoxes) {
+            robot.interact(() -> cb.setSelected(false));
+        }
+        WaitForAsyncUtils.waitForFxEvents();
+
+        // Y-axis bounds should be sensible, not astronomically large
+        assertThat(yAxis.getLowerBound()).isGreaterThan(-100.0);
+        assertThat(yAxis.getUpperBound()).isLessThan(100.0);
+        assertThat(yAxis.getUpperBound()).isGreaterThan(yAxis.getLowerBound());
+    }
 }

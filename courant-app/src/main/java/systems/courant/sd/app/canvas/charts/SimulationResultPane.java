@@ -352,8 +352,15 @@ public class SimulationResultPane extends BorderPane {
                 }
             }
             if (yMin >= yMax) {
-                yMin = yMin - 1;
-                yMax = yMax + 1;
+                if (yMin == Double.MAX_VALUE) {
+                    // No visible data — use a sensible default range
+                    yMin = 0;
+                    yMax = 1;
+                } else {
+                    // Single constant value — expand around it
+                    yMin = yMin - 1;
+                    yMax = yMax + 1;
+                }
             }
             double pad = (yMax - yMin) * 0.05;
             if (pad == 0) {
