@@ -133,7 +133,7 @@ public final class EquationReferenceManager {
             if (f.name().equals(elementName)) {
                 String eq = f.equation();
                 if (eq == null) {
-                    return true;
+                    return false;
                 }
                 if (containsWholeToken(eq, token)) {
                     return true;
@@ -150,7 +150,7 @@ public final class EquationReferenceManager {
             if (a.name().equals(elementName)) {
                 String eq = a.equation();
                 if (eq == null) {
-                    return true;
+                    return false;
                 }
                 if (containsWholeToken(eq, token)) {
                     return true;
