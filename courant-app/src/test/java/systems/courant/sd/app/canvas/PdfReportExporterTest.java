@@ -52,6 +52,37 @@ class PdfReportExporterTest {
         }
 
         @Test
+        @DisplayName("should close br tags with whitespace")
+        void shouldCloseBrTagsWithWhitespace() {
+            assertThat(PdfReportExporter.toXhtml("a<br >b")).contains("<br/>");
+            assertThat(PdfReportExporter.toXhtml("a<br/>b")).contains("<br/>");
+            assertThat(PdfReportExporter.toXhtml("a<br />b")).contains("<br/>");
+        }
+
+        @Test
+        @DisplayName("should close hr tags with whitespace")
+        void shouldCloseHrTagsWithWhitespace() {
+            assertThat(PdfReportExporter.toXhtml("<hr >")).contains("<hr/>");
+            assertThat(PdfReportExporter.toXhtml("<hr/>")).contains("<hr/>");
+            assertThat(PdfReportExporter.toXhtml("<hr />")).contains("<hr/>");
+        }
+
+        @Test
+        @DisplayName("should close meta tag without attributes")
+        void shouldCloseMetaTagWithoutAttributes() {
+            String xhtml = PdfReportExporter.toXhtml("<meta>");
+            assertThat(xhtml).isEqualTo("<meta/>");
+        }
+
+        @Test
+        @DisplayName("should not double-close already self-closed tags")
+        void shouldNotDoubleCloseSelfClosedTags() {
+            assertThat(PdfReportExporter.toXhtml("<meta charset=\"UTF-8\"/>"))
+                    .isEqualTo("<meta charset=\"UTF-8\"/>");
+            assertThat(PdfReportExporter.toXhtml("<br/>")).isEqualTo("<br/>");
+        }
+
+        @Test
         @DisplayName("should preserve existing content")
         void shouldPreserveContent() {
             String html = "<div class=\"container\"><p>Hello World</p></div>";
