@@ -182,15 +182,8 @@ public class LoopNavigatorBar extends HBox {
                 && loop.label().startsWith("Feedback Group");
 
         VBox content = new VBox(2);
-        content.setPadding(new Insets(10, 14, 10, 14));
-        content.setStyle("-fx-background-color: white; -fx-border-color: #B0B0B0; -fx-border-radius: 4;");
-
-        String titleText = isSFGroup
-                ? loop.label() + " (" + loop.path().size() + " stocks)"
-                : loop.label() + " \u2014 " + formatType(loop.type());
-        Label title = new Label(titleText);
-        title.setStyle("-fx-font-weight: bold; -fx-font-size: 13px; -fx-padding: 0 0 4 0;");
-        content.getChildren().add(title);
+        content.setPadding(new Insets(6, 14, 10, 14));
+        content.setStyle("-fx-background-color: white;");
 
         List<String> path = loop.path();
         if (isSFGroup) {
@@ -218,9 +211,10 @@ public class LoopNavigatorBar extends HBox {
 
         Stage popup = new Stage(StageStyle.UTILITY);
         popup.initModality(Modality.NONE);
-        popup.setTitle(isSFGroup
-                ? loop.label() + " Elements"
-                : loop.label() + " Loop Elements");
+        String windowTitle = isSFGroup
+                ? loop.label() + " \u2014 " + path.size() + " Stocks"
+                : loop.label() + " \u2014 " + formatType(loop.type());
+        popup.setTitle(windowTitle);
         popup.setScene(new Scene(content));
         popup.setAlwaysOnTop(true);
 
