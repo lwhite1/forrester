@@ -112,6 +112,10 @@ public class ModelEditor {
         for (ModelEditListener l : listeners) { l.onEquationChanged(elementName); }
     }
 
+    private void fireModelMetadataChanged() {
+        for (ModelEditListener l : listeners) { l.onModelMetadataChanged(); }
+    }
+
     // ── Load / Snapshot ──────────────────────────────────────────────────
 
     /**
@@ -555,14 +559,19 @@ public class ModelEditor {
 
     public void setModelName(String name) {
         checkFxThread();
-        if (name != null && !name.isBlank()) {
+        if (name != null && !name.isBlank() && !name.equals(queryFacade.modelName)) {
             queryFacade.modelName = name;
+            fireModelMetadataChanged();
         }
     }
 
     public void setModelComment(String comment) {
         checkFxThread();
-        queryFacade.modelComment = comment != null ? comment : "";
+        String value = comment != null ? comment : "";
+        if (!value.equals(queryFacade.modelComment)) {
+            queryFacade.modelComment = value;
+            fireModelMetadataChanged();
+        }
     }
 
     public void setMetadata(ModelMetadata metadata) {

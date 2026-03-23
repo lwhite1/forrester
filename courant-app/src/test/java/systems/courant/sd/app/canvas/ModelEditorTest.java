@@ -2327,4 +2327,63 @@ class ModelEditorTest {
                     c.from().equals("Variable 1") && c.to().equals("Module 1"));
         }
     }
+
+    @Nested
+    @DisplayName("Model metadata change notifications (#318)")
+    class MetadataNotifications {
+
+        @Test
+        void shouldFireMetadataChangedOnModelNameChange() {
+            List<String> events = new ArrayList<>();
+            editor.addListener(new ModelEditListener() {
+                @Override
+                public void onModelMetadataChanged() {
+                    events.add("metadataChanged");
+                }
+            });
+            editor.setModelName("NewName");
+            assertThat(events).containsExactly("metadataChanged");
+        }
+
+        @Test
+        void shouldNotFireMetadataChangedWhenNameUnchanged() {
+            editor.setModelName("SameName");
+            List<String> events = new ArrayList<>();
+            editor.addListener(new ModelEditListener() {
+                @Override
+                public void onModelMetadataChanged() {
+                    events.add("metadataChanged");
+                }
+            });
+            editor.setModelName("SameName");
+            assertThat(events).isEmpty();
+        }
+
+        @Test
+        void shouldFireMetadataChangedOnCommentChange() {
+            List<String> events = new ArrayList<>();
+            editor.addListener(new ModelEditListener() {
+                @Override
+                public void onModelMetadataChanged() {
+                    events.add("metadataChanged");
+                }
+            });
+            editor.setModelComment("New comment");
+            assertThat(events).containsExactly("metadataChanged");
+        }
+
+        @Test
+        void shouldNotFireMetadataChangedWhenCommentUnchanged() {
+            editor.setModelComment("Same comment");
+            List<String> events = new ArrayList<>();
+            editor.addListener(new ModelEditListener() {
+                @Override
+                public void onModelMetadataChanged() {
+                    events.add("metadataChanged");
+                }
+            });
+            editor.setModelComment("Same comment");
+            assertThat(events).isEmpty();
+        }
+    }
 }
