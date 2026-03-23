@@ -25,7 +25,6 @@ public class SubscriptRange {
     private final List<Subscript> subscripts;
     private final int totalSize;
     private final int[] strides;
-    private final List<List<String>> combinations;
 
     /**
      * Creates a multi-dimensional range from the given subscript dimensions.
@@ -59,19 +58,6 @@ public class SubscriptRange {
             }
         }
         this.totalSize = stride;
-
-        // Compute cartesian product of all label lists
-        List<List<String>> labelLists = new ArrayList<>(dims);
-        for (Subscript s : subscripts) {
-            labelLists.add(s.getLabels());
-        }
-        List<List<String>> product = Lists.cartesianProduct(labelLists);
-        // Materialize into an immutable list
-        List<List<String>> materialized = new ArrayList<>(product.size());
-        for (List<String> combo : product) {
-            materialized.add(Collections.unmodifiableList(new ArrayList<>(combo)));
-        }
-        this.combinations = Collections.unmodifiableList(materialized);
     }
 
     /**
@@ -186,11 +172,7 @@ public class SubscriptRange {
      * @return the composed name
      */
     public String composeName(String baseName, int flatIndex) {
-        if (flatIndex < 0 || flatIndex >= totalSize) {
-            throw new IllegalArgumentException(
-                    "Flat index " + flatIndex + " out of range (totalSize=" + totalSize + ")");
-        }
-        List<String> labels = combinations.get(flatIndex);
+        List<String> labels = getLabelsAt(flatIndex);
         StringJoiner joiner = new StringJoiner(",");
         for (String label : labels) {
             joiner.add(label);
@@ -205,11 +187,12 @@ public class SubscriptRange {
      * @return an unmodifiable list of labels, one per dimension
      */
     public List<String> getLabelsAt(int flatIndex) {
-        if (flatIndex < 0 || flatIndex >= totalSize) {
-            throw new IllegalArgumentException(
-                    "Flat index " + flatIndex + " out of range (totalSize=" + totalSize + ")");
+        int[] coords = toCoordinates(flatIndex);
+        List<String> labels = new ArrayList<>(coords.length);
+        for (int d = 0; d < coords.length; d++) {
+            labels.add(subscripts.get(d).getLabels().get(coords[d]));
         }
-        return combinations.get(flatIndex);
+        return Collections.unmodifiableList(labels);
     }
 
     /**
@@ -218,7 +201,11 @@ public class SubscriptRange {
      * @return an unmodifiable list of unmodifiable label lists
      */
     public List<List<String>> allCombinations() {
-        return combinations;
+        List<List<String>> labelLists = new ArrayList<>(subscripts.size());
+        for (Subscript s : subscripts) {
+            labelLists.add(s.getLabels());
+        }
+        return Lists.cartesianProduct(labelLists);
     }
 
     /**
