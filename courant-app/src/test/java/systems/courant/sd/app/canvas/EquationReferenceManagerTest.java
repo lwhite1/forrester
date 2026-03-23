@@ -61,6 +61,12 @@ class EquationReferenceManagerTest {
             String result = EquationReferenceManager.replaceToken("", "A", "B");
             assertThat(result).isEmpty();
         }
+
+        @Test
+        void shouldReturnNullForNullEquation() {
+            String result = EquationReferenceManager.replaceToken(null, "A", "B");
+            assertThat(result).isNull();
+        }
     }
 
     @Nested
@@ -124,6 +130,7 @@ class EquationReferenceManagerTest {
             assertThat(flows.getFirst().equation()).isEqualTo("Pop * 5");
         }
 
+
         @Test
         void shouldPreserveVariableSubscripts() {
             variables.add(new VariableDef("Ratio", "comment", "Pop / Total", "units",
@@ -165,6 +172,7 @@ class EquationReferenceManagerTest {
             boolean changed = manager.updateEquationByName("Drain", eq -> eq);
             assertThat(changed).isFalse();
         }
+
 
         @Test
         void shouldPreserveMaterialUnitWhenTransformingFlow() {
@@ -232,6 +240,7 @@ class EquationReferenceManagerTest {
             boolean added = manager.addConnectionReference("Missing", "Pop");
             assertThat(added).isFalse();
         }
+
 
         @Test
         void shouldNotFalsePositiveOnSubstringMatch() {
@@ -322,6 +331,11 @@ class EquationReferenceManagerTest {
         @Test
         void shouldNotMatchWhenTokenAbsent() {
             assertThat(EquationReferenceManager.containsWholeToken("Pop * 5", "Rate")).isFalse();
+        }
+
+        @Test
+        void shouldReturnFalseForNullEquation() {
+            assertThat(EquationReferenceManager.containsWholeToken(null, "Rate")).isFalse();
         }
     }
 }
