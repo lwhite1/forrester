@@ -90,12 +90,12 @@ public final class PdfReportExporter {
                 "<html xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"en\">");
 
         // Close self-closing tags that are not closed in HTML5
-        xhtml = xhtml.replaceAll("<meta ([^>]*[^/])>", "<meta $1/>");
-        xhtml = xhtml.replaceAll("<link ([^>]*[^/])>", "<link $1/>");
-        xhtml = xhtml.replaceAll("<input ([^>]*[^/])>", "<input $1/>");
-        xhtml = xhtml.replaceAll("<br>", "<br/>");
-        xhtml = xhtml.replaceAll("<hr>", "<hr/>");
-        xhtml = xhtml.replaceAll("<img ([^>]*[^/])>", "<img $1/>");
+        xhtml = xhtml.replaceAll("<meta(\\s[^>]*[^/])?>", "<meta$1/>");
+        xhtml = xhtml.replaceAll("<link(\\s[^>]*[^/])?>", "<link$1/>");
+        xhtml = xhtml.replaceAll("<input(\\s[^>]*[^/])?>", "<input$1/>");
+        xhtml = xhtml.replaceAll("<br\\s*/?>", "<br/>");
+        xhtml = xhtml.replaceAll("<hr\\s*/?>", "<hr/>");
+        xhtml = xhtml.replaceAll("<img(\\s[^>]*[^/])?>", "<img$1/>");
 
         return xhtml;
     }
