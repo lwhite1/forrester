@@ -144,7 +144,7 @@ public final class EquationReferenceManager {
                 if (containsWholeToken(eq, token)) {
                     return true;
                 }
-                String updated = (eq == null || "0".equals(eq.trim())) ? token : eq + " * " + token;
+                String updated = "0".equals(eq.trim()) ? token : eq + " * " + token;
                 flows.set(i, new FlowDef(f.name(), f.comment(), updated,
                         f.timeUnit(), f.materialUnit(), f.source(), f.sink(), f.subscripts()));
                 return true;
@@ -161,7 +161,7 @@ public final class EquationReferenceManager {
                 if (containsWholeToken(eq, token)) {
                     return true;
                 }
-                String updated = (eq == null || "0".equals(eq.trim())) ? token : eq + " * " + token;
+                String updated = "0".equals(eq.trim()) ? token : eq + " * " + token;
                 variables.set(i, new VariableDef(a.name(), a.comment(), updated, a.unit(), a.subscripts()));
                 return true;
             }
