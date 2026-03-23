@@ -456,6 +456,49 @@ class CldLoopDetectionTest {
     }
 
     @Nested
+    @DisplayName("filterToLoop isolation")
+    class FilterToLoopIsolation {
+
+        @Test
+        void shouldHighlightDifferentElementsForOverlappingLoops() {
+            // Two loops sharing 2 elements but differing on the 3rd:
+            // R1: A → B → C → A
+            // R2: A → B → D → A
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Overlapping")
+                    .cldVariable("A")
+                    .cldVariable("B")
+                    .cldVariable("C")
+                    .cldVariable("D")
+                    .causalLink("A", "B", CausalLinkDef.Polarity.POSITIVE)
+                    .causalLink("B", "C", CausalLinkDef.Polarity.POSITIVE)
+                    .causalLink("C", "A", CausalLinkDef.Polarity.POSITIVE)
+                    .causalLink("B", "D", CausalLinkDef.Polarity.POSITIVE)
+                    .causalLink("D", "A", CausalLinkDef.Polarity.POSITIVE)
+                    .build();
+
+            FeedbackAnalysis analysis = FeedbackAnalysis.analyze(def);
+            assertThat(analysis.loopCount()).isGreaterThanOrEqualTo(2);
+
+            FeedbackAnalysis loop0 = analysis.filterToLoop(0);
+            FeedbackAnalysis loop1 = analysis.filterToLoop(1);
+
+            // Each filtered analysis must contain ONLY its own path elements
+            assertThat(loop0.loopParticipants())
+                    .as("loop 0 participants must match its path exactly")
+                    .containsExactlyInAnyOrderElementsOf(loop0.causalLoops().getFirst().path());
+            assertThat(loop1.loopParticipants())
+                    .as("loop 1 participants must match its path exactly")
+                    .containsExactlyInAnyOrderElementsOf(loop1.causalLoops().getFirst().path());
+
+            // The two loops must NOT highlight identical element sets
+            assertThat(loop0.loopParticipants())
+                    .as("overlapping loops must highlight different elements")
+                    .isNotEqualTo(loop1.loopParticipants());
+        }
+    }
+
+    @Nested
     @DisplayName("loop labels")
     class LoopLabels {
 

@@ -344,7 +344,7 @@ public record FeedbackAnalysis(
             }
         }
         // Include S&F flow edges that mediate between cycle stocks
-        addMediatingFlowEdges(participants, edges, loopEdges);
+        addMediatingFlowEdges(participants, edges, loopEdges, loopPathElements());
         return new FeedbackAnalysis(
                 Collections.unmodifiableSet(participants),
                 Collections.emptyList(),
@@ -371,8 +371,7 @@ public record FeedbackAnalysis(
         for (int i = 0; i < path.size(); i++) {
             edges.add(new Edge(path.get(i), path.get((i + 1) % path.size())));
         }
-        // Include S&F flow edges that mediate between cycle stocks
-        addMediatingFlowEdges(participants, edges, loopEdges);
+        addMediatingFlowEdges(participants, edges, loopEdges, loopPathElements());
         return new FeedbackAnalysis(
                 Collections.unmodifiableSet(participants),
                 Collections.emptyList(),
@@ -402,16 +401,40 @@ public record FeedbackAnalysis(
     }
 
     /**
+     * Returns the set of all elements that appear in any CausalLoop path.
+     * This excludes S&F flow participants that were added by mediation,
+     * so it can be used to distinguish flows from loop variables.
+     */
+    private Set<String> loopPathElements() {
+        Set<String> elements = new LinkedHashSet<>();
+        for (CausalLoop loop : causalLoops) {
+            elements.addAll(loop.path());
+        }
+        return elements;
+    }
+
+    /**
      * Adds flow nodes and their edges when they mediate between stocks
      * already in the participants set. This ensures that when filtering
      * to a single S&F cycle, the connecting flows are also highlighted.
+     *
+     * <p>Only considers intermediary nodes that do NOT appear in any loop's path.
+     * S&F flows are legitimate intermediaries (they don't appear in loop paths,
+     * which contain only stocks). CLD variables DO appear in loop paths, so they
+     * are excluded — without this guard, CLD causal link edges from other loops
+     * would leak elements into a single-loop filter, causing different loops to
+     * highlight the same elements.
+     *
+     * @param loopPathElements all elements that appear in any CausalLoop path,
+     *                        used to exclude CLD variables from mediation
      */
     private static void addMediatingFlowEdges(Set<String> participants,
-            Set<Edge> edges, Set<Edge> allEdges) {
+            Set<Edge> edges, Set<Edge> allEdges, Set<String> loopPathElements) {
         Set<String> stockSet = Set.copyOf(participants);
         for (Edge e : allEdges) {
-            if (stockSet.contains(e.from()) && !stockSet.contains(e.to())) {
-                // e.from() is a stock, e.to() is a flow — check if flow leads to another stock in set
+            if (stockSet.contains(e.from()) && !stockSet.contains(e.to())
+                    && !loopPathElements.contains(e.to())) {
+                // e.to() is a flow (not in any loop path) — check if it leads to a stock in set
                 for (Edge e2 : allEdges) {
                     if (e2.from().equals(e.to()) && stockSet.contains(e2.to())) {
                         participants.add(e.to());
