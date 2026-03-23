@@ -154,12 +154,53 @@ public class ModelCanvas extends Canvas {
     public void setModel(ModelEditor editor, ViewDef view) {
         this.editor = editor;
         canvasState.loadFrom(view);
+        placeUnplacedElements(editor);
         canvasState.setCldLoopInfo(
                 CldLoopInfo.compute(editor.getCldVariables(), editor.getCausalLinks()));
         this.connectors = editor.generateConnectors();
         invalidateAnalysis();
         redraw();
         fireStatusChanged();
+    }
+
+    /**
+     * Places any model elements that exist in the editor but are missing from the canvas.
+     * This can happen when importing models where some elements lack view placements.
+     * Unplaced elements are stacked at a default position so the user can see and arrange them.
+     */
+    private void placeUnplacedElements(ModelEditor editor) {
+        double offsetX = 50;
+        double offsetY = 50;
+        double step = 40;
+        int count = 0;
+        for (var v : editor.getCldVariables()) {
+            if (!canvasState.hasElement(v.name())) {
+                canvasState.addElement(v.name(), ElementType.CLD_VARIABLE,
+                        offsetX, offsetY + count * step);
+                count++;
+            }
+        }
+        for (var s : editor.getStocks()) {
+            if (!canvasState.hasElement(s.name())) {
+                canvasState.addElement(s.name(), ElementType.STOCK,
+                        offsetX, offsetY + count * step);
+                count++;
+            }
+        }
+        for (var f : editor.getFlows()) {
+            if (!canvasState.hasElement(f.name())) {
+                canvasState.addElement(f.name(), ElementType.FLOW,
+                        offsetX, offsetY + count * step);
+                count++;
+            }
+        }
+        for (var v : editor.getVariables()) {
+            if (!canvasState.hasElement(v.name())) {
+                canvasState.addElement(v.name(), ElementType.AUX,
+                        offsetX, offsetY + count * step);
+                count++;
+            }
+        }
     }
 
     public ViewDef toViewDef() {
