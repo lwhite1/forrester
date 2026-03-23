@@ -1,5 +1,6 @@
 package systems.courant.sd.model;
 
+import java.util.List;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -150,25 +151,25 @@ public class VariableTest {
             int threadCount = 8;
             int iterations = 1000;
             CyclicBarrier barrier = new CyclicBarrier(threadCount);
-            ExecutorService executor = Executors.newFixedThreadPool(threadCount);
 
-            Future<?>[] futures = new Future<?>[threadCount];
-            for (int t = 0; t < threadCount; t++) {
-                futures[t] = executor.submit(() -> {
-                    try {
-                        barrier.await(5, TimeUnit.SECONDS);
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                    for (int i = 0; i < iterations; i++) {
-                        assertThat(v.getValue()).isEqualTo(42.0);
-                    }
-                });
+            try (ExecutorService executor = Executors.newFixedThreadPool(threadCount)) {
+                List<Future<?>> futures = new java.util.ArrayList<>();
+                for (int t = 0; t < threadCount; t++) {
+                    futures.add(executor.submit(() -> {
+                        try {
+                            barrier.await(5, TimeUnit.SECONDS);
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                        for (int i = 0; i < iterations; i++) {
+                            assertThat(v.getValue()).isEqualTo(42.0);
+                        }
+                    }));
+                }
+                for (Future<?> f : futures) {
+                    f.get(10, TimeUnit.SECONDS);
+                }
             }
-            for (Future<?> f : futures) {
-                f.get(10, TimeUnit.SECONDS);
-            }
-            executor.shutdown();
         }
     }
 }
