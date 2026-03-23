@@ -13,6 +13,11 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
+import javafx.scene.Scene;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import javafx.util.Duration;
 
 import java.util.List;
@@ -42,11 +47,13 @@ public class LoopNavigatorBar extends HBox {
     private final ToggleButton filterBBtn = new ToggleButton("Balancing");
     private final ToggleGroup filterGroup = new ToggleGroup();
     private final Button helpIcon = new Button("?");
+    private final Button elementsButton = new Button("Elements");
 
     private Runnable onPrev;
     private Runnable onNext;
     private Runnable onShowAll;
     private Consumer<LoopType> onFilterChanged;
+    private Stage elementsPopup;
 
     public LoopNavigatorBar() {
         setId("loopNavigatorBar");
@@ -59,6 +66,7 @@ public class LoopNavigatorBar extends HBox {
         configureNavigationButtons();
         configureFilterButtons();
         configureHelpIcon();
+        configureElementsButton();
         assembleChildren();
     }
 
@@ -157,6 +165,58 @@ public class LoopNavigatorBar extends HBox {
         });
     }
 
+    private void configureElementsButton() {
+        elementsButton.setId("loopElements");
+        elementsButton.setTooltip(new Tooltip("Show loop elements"));
+        elementsButton.setStyle("-fx-font-size: 11px; -fx-padding: 2 8 2 8;");
+        elementsButton.setFocusTraversable(false);
+        elementsButton.setDisable(true);
+    }
+
+    private void showElementsPopup(FeedbackAnalysis.CausalLoop loop) {
+        if (elementsPopup != null) {
+            elementsPopup.close();
+        }
+
+        VBox content = new VBox(2);
+        content.setPadding(new Insets(10, 14, 10, 14));
+        content.setStyle("-fx-background-color: white; -fx-border-color: #B0B0B0; -fx-border-radius: 4;");
+
+        Label title = new Label(loop.label() + " — " + formatType(loop.type()));
+        title.setStyle("-fx-font-weight: bold; -fx-font-size: 13px; -fx-padding: 0 0 4 0;");
+        content.getChildren().add(title);
+
+        List<String> path = loop.path();
+        var polarities = loop.polarities();
+        for (int i = 0; i < path.size(); i++) {
+            String polSymbol = switch (polarities.get(i)) {
+                case POSITIVE -> " \u2192(+) ";
+                case NEGATIVE -> " \u2192(\u2212) ";
+                case UNKNOWN -> " \u2192(?) ";
+            };
+            String next = path.get((i + 1) % path.size());
+            Label row = new Label(path.get(i) + polSymbol + next);
+            row.setStyle("-fx-font-size: 12px; -fx-padding: 1 0 1 4;");
+            content.getChildren().add(row);
+        }
+
+        Stage popup = new Stage(StageStyle.UTILITY);
+        popup.initModality(Modality.NONE);
+        popup.setTitle(loop.label() + " Loop Elements");
+        popup.setScene(new Scene(content));
+        popup.setAlwaysOnTop(true);
+
+        // Position near the button
+        var bounds = elementsButton.localToScreen(elementsButton.getBoundsInLocal());
+        if (bounds != null) {
+            popup.setX(bounds.getMinX());
+            popup.setY(bounds.getMaxY() + 4);
+        }
+
+        popup.show();
+        elementsPopup = popup;
+    }
+
     private void assembleChildren() {
         Label filterLabel = new Label("Filter:");
         filterLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: #666;");
@@ -168,6 +228,7 @@ public class LoopNavigatorBar extends HBox {
         spacer2.setPrefWidth(8);
 
         getChildren().addAll(prevButton, nextButton, loopLabel, allButton,
+                elementsButton,
                 spacer, filterLabel, filterAllBtn, filterRBtn, filterBBtn,
                 spacer2, helpIcon);
     }
@@ -247,6 +308,8 @@ public class LoopNavigatorBar extends HBox {
         nextButton.setDisable(!hasMatches);
         allButton.setDisable(activeIndex < 0);
 
+        elementsButton.setDisable(true);
+
         if (!hasMatches) {
             String filterDesc = typeFilter == LoopType.REINFORCING ? "reinforcing" : "balancing";
             loopLabel.setText("No " + filterDesc + " loops");
@@ -259,6 +322,7 @@ public class LoopNavigatorBar extends HBox {
                     + suffix + " \u2014 click \u25B6 to step");
             loopLabel.setTooltip(null);
         } else {
+            FeedbackAnalysis.CausalLoop activeLoop = analysis.causalLoops().get(activeIndex);
             analysis.loopInfo(activeIndex).ifPresent(info -> {
                 // Show position within filtered set
                 List<Integer> indices = analysis.filteredIndices(typeFilter);
@@ -287,6 +351,8 @@ public class LoopNavigatorBar extends HBox {
                 tip.setMaxWidth(400);
                 loopLabel.setTooltip(tip);
             });
+            elementsButton.setDisable(false);
+            elementsButton.setOnAction(e -> showElementsPopup(activeLoop));
         }
     }
 
