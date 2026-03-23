@@ -272,6 +272,7 @@ public class ModelWindow {
             loopNavigatorBar.setManaged(active);
             if (!active) {
                 loopNavigatorBar.resetFilter();
+                loopNavigatorBar.closePopup();
             }
             updateLoopStatus();
             updateLoopNavigator();
@@ -1032,6 +1033,7 @@ public class ModelWindow {
         loopNavigatorBar.setVisible(false);
         loopNavigatorBar.setManaged(false);
         loopNavigatorBar.resetFilter();
+        loopNavigatorBar.closePopup();
         toolBar.deactivateLoopToggle();
         canvas.analysis().setLoopHighlightActive(false);
 
@@ -1069,6 +1071,7 @@ public class ModelWindow {
      */
     public void close() {
         detachEditorListeners();
+        loopNavigatorBar.closePopup();
         if (analysisRunner != null) {
             analysisRunner.shutdown();
         }
