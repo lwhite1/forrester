@@ -215,7 +215,8 @@ public class LoopNavigatorBar extends HBox {
                 ? loop.label() + " \u2014 " + path.size() + " Stocks"
                 : loop.label() + " \u2014 " + formatType(loop.type());
         popup.setTitle(windowTitle);
-        popup.setScene(new Scene(content));
+        Scene scene = new Scene(content);
+        popup.setScene(scene);
         popup.setAlwaysOnTop(true);
 
         // Position near the button
@@ -226,6 +227,12 @@ public class LoopNavigatorBar extends HBox {
         }
 
         popup.show();
+
+        // Ensure window is wide enough for the title text
+        double minWidth = computeTextWidth(windowTitle) + 60;
+        if (popup.getWidth() < minWidth) {
+            popup.setWidth(minWidth);
+        }
         elementsPopup = popup;
     }
 
@@ -395,6 +402,12 @@ public class LoopNavigatorBar extends HBox {
     public void resetFilter() {
         filterAllBtn.setSelected(true);
         updateFilterStyles();
+    }
+
+    private static double computeTextWidth(String text) {
+        javafx.scene.text.Text measure = new javafx.scene.text.Text(text);
+        measure.setFont(javafx.scene.text.Font.getDefault());
+        return measure.getLayoutBounds().getWidth();
     }
 
     public static String formatType(LoopType type) {
