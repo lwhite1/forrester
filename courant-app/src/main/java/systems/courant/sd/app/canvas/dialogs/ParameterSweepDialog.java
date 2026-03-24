@@ -36,26 +36,34 @@ public class ParameterSweepDialog extends Dialog<ParameterSweepDialog.Config> {
     private final TextField stepField;
     private final ComboBox<String> trackCombo;
 
-    public ParameterSweepDialog(List<String> constantNames, List<String> trackableNames) {
+    public ParameterSweepDialog(List<String> constantNames, List<String> trackableNames,
+                                Config previousConfig) {
         HelpContextResolver.addHelpButton(this);
         setTitle("Parameter Sweep");
         setHeaderText("Configure parameter sweep");
 
         parameterCombo = new ComboBox<>(FXCollections.observableArrayList(constantNames));
         parameterCombo.setId("sweepParameter");
-        startField = new TextField("0");
+        startField = new TextField(previousConfig != null
+                ? String.valueOf(previousConfig.start()) : "0");
         startField.setId("sweepStart");
-        endField = new TextField("10");
+        endField = new TextField(previousConfig != null
+                ? String.valueOf(previousConfig.end()) : "10");
         endField.setId("sweepEnd");
-        stepField = new TextField("1");
+        stepField = new TextField(previousConfig != null
+                ? String.valueOf(previousConfig.step()) : "1");
         stepField.setId("sweepStep");
         trackCombo = new ComboBox<>(FXCollections.observableArrayList(trackableNames));
         trackCombo.setId("sweepTrack");
 
-        if (!constantNames.isEmpty()) {
+        if (previousConfig != null && constantNames.contains(previousConfig.parameterName())) {
+            parameterCombo.setValue(previousConfig.parameterName());
+        } else if (!constantNames.isEmpty()) {
             parameterCombo.setValue(constantNames.getFirst());
         }
-        if (!trackableNames.isEmpty()) {
+        if (previousConfig != null && trackableNames.contains(previousConfig.trackVariable())) {
+            trackCombo.setValue(previousConfig.trackVariable());
+        } else if (!trackableNames.isEmpty()) {
             trackCombo.setValue(trackableNames.getFirst());
         }
 

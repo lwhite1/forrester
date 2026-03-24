@@ -59,6 +59,7 @@ final class SimulationController {
     private final StatusBar statusBar;
     private final Consumer<String> showError;
     private final Consumer<Consumer<ModelEditListener>> fireLogEvent;
+    private ParameterSweepDialog.Config lastSweepConfig;
 
     SimulationController(ModelCanvas canvas,
                          AnalysisRunner analysisRunner,
@@ -139,13 +140,15 @@ final class SimulationController {
             return;
         }
 
-        ParameterSweepDialog dialog = new ParameterSweepDialog(parameterNames, trackableNames);
+        ParameterSweepDialog dialog = new ParameterSweepDialog(
+                parameterNames, trackableNames, lastSweepConfig);
         Optional<ParameterSweepDialog.Config> configOpt = dialog.showAndWait();
         if (configOpt.isEmpty()) {
             return;
         }
 
         ParameterSweepDialog.Config config = configOpt.get();
+        lastSweepConfig = config;
         ModelDefinition def = canvas.navigation().toModelDefinition();
         SimulationSettings finalSettings = settings;
 
