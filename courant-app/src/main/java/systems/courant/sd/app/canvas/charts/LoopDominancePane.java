@@ -38,10 +38,10 @@ public final class LoopDominancePane extends VBox {
     private AreaChart<Number, Number> chart;
     private ChartTimeCursor timeCursor;
 
-    public LoopDominancePane(LoopDominanceAnalysis dominance) {
+    public LoopDominancePane(LoopDominanceAnalysis dominance, String timeStepLabel) {
         this.dominance = dominance;
         NumberAxis xAxis = new NumberAxis();
-        xAxis.setLabel("Step");
+        xAxis.setLabel(timeStepLabel);
         xAxis.setAutoRanging(true);
 
         NumberAxis yAxis = new NumberAxis();

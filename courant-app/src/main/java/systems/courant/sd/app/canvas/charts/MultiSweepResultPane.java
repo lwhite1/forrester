@@ -38,10 +38,12 @@ import systems.courant.sd.app.canvas.ClipboardExporter;
 public class MultiSweepResultPane extends BorderPane {
 
     private final MultiSweepResult result;
+    private final String timeStepLabel;
     private LineChart<Number, Number> currentChart;
 
-    public MultiSweepResultPane(MultiSweepResult result) {
+    public MultiSweepResultPane(MultiSweepResult result, String timeStepLabel) {
         this.result = result;
+        this.timeStepLabel = timeStepLabel;
 
         TabPane tabPane = new TabPane();
         tabPane.setId("multiSweepTabs");
@@ -152,7 +154,7 @@ public class MultiSweepResultPane extends BorderPane {
 
     private BorderPane buildRunChart(RunResult run) {
         NumberAxis xAxis = new NumberAxis();
-        xAxis.setLabel("Step");
+        xAxis.setLabel(timeStepLabel);
         NumberAxis yAxis = new NumberAxis();
         yAxis.setLabel("Value");
 

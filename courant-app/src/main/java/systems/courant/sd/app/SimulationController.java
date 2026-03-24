@@ -96,6 +96,7 @@ final class SimulationController {
 
         ModelDefinition def = canvas.navigation().toModelDefinition();
         SimulationSettings finalSettings = settings;
+        dashboardPanel.setTimeStepLabel(settings.timeStep());
 
         // Snapshot parameter values for ghost run labeling
         Map<String, Double> paramSnapshot = new LinkedHashMap<>();
@@ -122,6 +123,7 @@ final class SimulationController {
         if (settings == null) {
             return;
         }
+        dashboardPanel.setTimeStepLabel(settings.timeStep());
 
         ModelEditor activeEditor = canvas.getEditor();
         List<String> parameterNames = activeEditor.getParameterNames();
@@ -177,6 +179,7 @@ final class SimulationController {
         if (settings == null) {
             return;
         }
+        dashboardPanel.setTimeStepLabel(settings.timeStep());
 
         ModelEditor activeEditor = canvas.getEditor();
         List<String> parameterNames = activeEditor.getParameterNames();
@@ -231,6 +234,7 @@ final class SimulationController {
         if (settings == null) {
             return;
         }
+        dashboardPanel.setTimeStepLabel(settings.timeStep());
 
         ModelEditor activeEditor = canvas.getEditor();
         List<String> parameterNames = activeEditor.getParameterNames();
@@ -297,6 +301,7 @@ final class SimulationController {
         if (settings == null) {
             return;
         }
+        dashboardPanel.setTimeStepLabel(settings.timeStep());
 
         ModelEditor activeEditor = canvas.getEditor();
         List<String> parameterNames = activeEditor.getParameterNames();
@@ -373,6 +378,7 @@ final class SimulationController {
         if (settings == null) {
             return;
         }
+        dashboardPanel.setTimeStepLabel(settings.timeStep());
 
         ModelEditor activeEditor = canvas.getEditor();
         List<String> parameterNames = activeEditor.getParameterNames();

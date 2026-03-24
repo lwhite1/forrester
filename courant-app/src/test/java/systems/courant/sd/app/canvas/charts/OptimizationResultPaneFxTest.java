@@ -37,7 +37,7 @@ class OptimizationResultPaneFxTest {
     @Start
     void start(Stage stage) {
         OptimizationResult result = buildOptimizationResult();
-        pane = new OptimizationResultPane(result);
+        pane = new OptimizationResultPane(result, "Day");
         stage.setScene(new Scene(pane, 800, 600));
         stage.show();
     }

@@ -31,10 +31,12 @@ import systems.courant.sd.app.canvas.Styles;
 public class OptimizationResultPane extends BorderPane {
 
     private final OptimizationResult result;
+    private final String timeStepLabel;
     private LineChart<Number, Number> chart;
 
-    public OptimizationResultPane(OptimizationResult result) {
+    public OptimizationResultPane(OptimizationResult result, String timeStepLabel) {
         this.result = result;
+        this.timeStepLabel = timeStepLabel;
         // Summary grid
         GridPane summaryGrid = new GridPane();
         summaryGrid.setHgap(10);
@@ -79,7 +81,7 @@ public class OptimizationResultPane extends BorderPane {
 
     private LineChart<Number, Number> buildChart(RunResult bestRun) {
         NumberAxis xAxis = new NumberAxis();
-        xAxis.setLabel("Step");
+        xAxis.setLabel(timeStepLabel);
         NumberAxis yAxis = new NumberAxis();
         yAxis.setLabel("Value");
 

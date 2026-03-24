@@ -37,7 +37,7 @@ class SweepResultPaneFxTest {
     @Start
     void start(Stage stage) {
         SweepResult result = buildSweepResult();
-        pane = new SweepResultPane(result, "drainRate");
+        pane = new SweepResultPane(result, "drainRate", "Day");
         stage.setScene(new Scene(pane, 800, 600));
         stage.show();
     }
