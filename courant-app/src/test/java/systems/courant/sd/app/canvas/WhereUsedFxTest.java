@@ -8,6 +8,8 @@ import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
+import javafx.application.Platform;
+
 import java.util.Set;
 
 import org.junit.jupiter.api.DisplayName;
@@ -15,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
+import org.testfx.util.WaitForAsyncUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -91,7 +94,8 @@ class WhereUsedFxTest {
     @Test
     @DisplayName("showWhereUsed selects all dependent elements")
     void shouldSelectDependentsOnShowWhereUsed() {
-        canvas.analysis().showWhereUsed("Duration");
+        Platform.runLater(() -> canvas.analysis().showWhereUsed("Duration"));
+        WaitForAsyncUtils.waitForFxEvents();
 
         Set<String> selected = canvas.getSelectedElementNames();
         assertThat(selected).contains("Recovery");
@@ -100,7 +104,8 @@ class WhereUsedFxTest {
     @Test
     @DisplayName("showUses selects all dependency elements")
     void shouldSelectDependenciesOnShowUses() {
-        canvas.analysis().showUses("Recovery");
+        Platform.runLater(() -> canvas.analysis().showUses("Recovery"));
+        WaitForAsyncUtils.waitForFxEvents();
 
         Set<String> selected = canvas.getSelectedElementNames();
         assertThat(selected).contains("Infectious", "Duration");
