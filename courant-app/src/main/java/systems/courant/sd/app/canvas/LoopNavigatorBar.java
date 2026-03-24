@@ -8,6 +8,7 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
@@ -19,8 +20,6 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
-
-import javafx.scene.control.TextField;
 
 import java.util.List;
 import java.util.Map;
@@ -359,6 +358,7 @@ public class LoopNavigatorBar extends HBox {
             filterRBtn.setDisable(true);
             filterBBtn.setDisable(true);
             elementsButton.setDisable(true);
+            hideNameField();
             closePopup();
             return;
         }

@@ -255,13 +255,16 @@ public class CanvasState {
         this.cldLoopInfo = loopInfo;
     }
 
-    /** Returns the mutable loop names map (loop label → custom name). */
+    /** Returns an unmodifiable view of loop names (loop label → custom name). */
     public Map<String, String> getLoopNames() {
-        return loopNames;
+        return Collections.unmodifiableMap(loopNames);
     }
 
     /** Sets a custom name for a loop, or removes it if the name is blank. */
     public void setLoopName(String loopLabel, String customName) {
+        if (loopLabel == null) {
+            return;
+        }
         if (customName == null || customName.isBlank()) {
             loopNames.remove(loopLabel);
         } else {
@@ -351,8 +354,7 @@ public class CanvasState {
                 placements.add(new ElementPlacement(name, type, pos.x(), pos.y()));
             }
         }
-        return new ViewDef(viewName, placements, List.of(), List.of(),
-                Map.copyOf(loopNames));
+        return new ViewDef(viewName, placements, List.of(), List.of(), loopNames);
     }
 
     /**
