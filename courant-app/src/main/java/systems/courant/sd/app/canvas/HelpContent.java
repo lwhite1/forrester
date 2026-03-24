@@ -2,9 +2,22 @@ package systems.courant.sd.app.canvas;
 
 import javafx.geometry.Insets;
 import javafx.scene.Node;
+import javafx.scene.control.Hyperlink;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.Tooltip;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Consumer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Provides help content for each {@link HelpTopic}.
@@ -17,12 +30,24 @@ public final class HelpContent {
     }
 
     /**
-     * Returns the help content node for the given topic.
+     * Returns the help content node for the given topic (without glossary annotation).
      *
      * @param topic the help topic
      * @return a scrollable node containing the help content
      */
     public static Node forTopic(HelpTopic topic) {
+        return forTopic(topic, null);
+    }
+
+    /**
+     * Returns the help content node for the given topic, with glossary terms annotated
+     * as tooltips and hyperlinks when a navigation callback is provided.
+     *
+     * @param topic             the help topic
+     * @param onGlossaryNavigate callback invoked when a glossary term link is clicked, or null
+     * @return a scrollable node containing the help content
+     */
+    public static Node forTopic(HelpTopic topic, Consumer<String> onGlossaryNavigate) {
         TextFlow content = switch (topic) {
             case OVERVIEW -> overviewContent();
             case STOCK -> stockContent();
@@ -48,6 +73,11 @@ public final class HelpContent {
             case CAUSAL_TRACE -> causalTraceContent();
             case MODULE_PORTS -> modulePortsContent();
         };
+
+        if (onGlossaryNavigate != null) {
+            annotateGlossaryTerms(content, onGlossaryNavigate);
+        }
+
         content.setPadding(new Insets(16));
         content.setLineSpacing(4);
         content.setMaxWidth(520);
@@ -584,5 +614,98 @@ public final class HelpContent {
         Text text = new Text(content);
         text.setStyle("-fx-font-family: monospace;");
         return text;
+    }
+
+    // --- Glossary annotation ---
+
+    /**
+     * Post-processes a TextFlow to annotate glossary terms in plain text nodes
+     * with tooltips and hyperlinks. Only the first occurrence of each term is annotated.
+     */
+    static void annotateGlossaryTerms(TextFlow flow, Consumer<String> onNavigate) {
+        Map<String, Glossary.Entry> lookupMap = Glossary.instance().lookupMap();
+        if (lookupMap.isEmpty()) {
+            return;
+        }
+        Pattern pattern = buildTermPattern(lookupMap);
+        Set<String> annotated = new HashSet<>();
+
+        List<Node> original = new ArrayList<>(flow.getChildren());
+        flow.getChildren().clear();
+
+        for (Node node : original) {
+            if (!(node instanceof Text textNode)
+                    || textNode.getStyle() != null && !textNode.getStyle().isEmpty()) {
+                // Skip bold, mono, or styled text
+                flow.getChildren().add(node);
+                continue;
+            }
+            String source = textNode.getText();
+            List<Node> replacement = splitAtTerms(source, pattern, lookupMap, annotated, onNavigate);
+            flow.getChildren().addAll(replacement);
+        }
+    }
+
+    private static Pattern buildTermPattern(Map<String, Glossary.Entry> lookupMap) {
+        // Sort keys longest-first so "Causal Loop Diagram" matches before "Loop"
+        List<String> keys = new ArrayList<>(lookupMap.keySet());
+        keys.sort(Comparator.comparingInt(String::length).reversed());
+
+        StringBuilder sb = new StringBuilder("(?i)\\b(");
+        for (int i = 0; i < keys.size(); i++) {
+            if (i > 0) {
+                sb.append('|');
+            }
+            sb.append(Pattern.quote(keys.get(i)));
+        }
+        sb.append(")\\b");
+        return Pattern.compile(sb.toString());
+    }
+
+    private static List<Node> splitAtTerms(String text, Pattern pattern,
+                                            Map<String, Glossary.Entry> lookupMap,
+                                            Set<String> annotated,
+                                            Consumer<String> onNavigate) {
+        List<Node> nodes = new ArrayList<>();
+        Matcher matcher = pattern.matcher(text);
+        int lastEnd = 0;
+
+        while (matcher.find()) {
+            String matched = matcher.group();
+            String key = matched.toLowerCase(Locale.ROOT);
+            Glossary.Entry entry = lookupMap.get(key);
+            if (entry == null || annotated.contains(entry.term())) {
+                continue;
+            }
+            annotated.add(entry.term());
+
+            // Add text before the match
+            if (matcher.start() > lastEnd) {
+                nodes.add(new Text(text.substring(lastEnd, matcher.start())));
+            }
+
+            // Create annotated hyperlink
+            Hyperlink link = new Hyperlink(matched);
+            link.setStyle("-fx-text-fill: #1a73e8; -fx-border-color: transparent;");
+            link.setPadding(Insets.EMPTY);
+            Tooltip tip = new Tooltip(entry.term() + ": " + entry.definition());
+            tip.setWrapText(true);
+            tip.setMaxWidth(350);
+            Tooltip.install(link, tip);
+            link.setOnAction(e -> onNavigate.accept(entry.term()));
+            nodes.add(link);
+
+            lastEnd = matcher.end();
+        }
+
+        // Add remaining text
+        if (lastEnd < text.length()) {
+            nodes.add(new Text(text.substring(lastEnd)));
+        }
+
+        if (nodes.isEmpty()) {
+            nodes.add(new Text(text));
+        }
+        return nodes;
     }
 }
