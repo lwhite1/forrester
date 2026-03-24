@@ -27,14 +27,44 @@ public final class ElementRenderer {
     public static final String BADGE_MODULE = "Module";
     /** Badge label for elements containing delay functions. */
     public static final String BADGE_DELAY = "D";
+    /** Badge prefix for subscript dimension indicators. */
+    public static final String BADGE_SUBSCRIPT_PREFIX = "\u2193";
 
     private ElementRenderer() {
     }
 
     /**
-     * Draws a stock: heavy rounded rectangle with centered name and unit badge.
+     * Draws a subscript dimension badge at the bottom-right of an element.
+     * Shows dimension names joined by " x " (e.g., "Region" or "Region x Age").
+     * Does nothing if the subscript list is empty.
+     */
+    public static void drawSubscriptBadge(GraphicsContext gc, List<String> subscripts,
+                                           double x, double y, double width, double height) {
+        if (subscripts == null || subscripts.isEmpty()) {
+            return;
+        }
+        String label = String.join(" \u00d7 ", subscripts);
+        gc.setFill(ColorPalette.SUBSCRIPT_BADGE);
+        gc.setFont(LayoutMetrics.BADGE_FONT);
+        gc.setTextAlign(TextAlignment.RIGHT);
+        gc.setTextBaseline(VPos.BOTTOM);
+        gc.fillText(label, x + width - 4, y + height - 3);
+    }
+
+    /**
+     * Draws a stock (scalar, no subscript badge).
      */
     public static void drawStock(GraphicsContext gc, String name, String unit,
+                                 double x, double y, double width, double height) {
+        drawStock(gc, name, unit, List.of(), x, y, width, height);
+    }
+
+    /**
+     * Draws a stock: heavy rounded rectangle with centered name, unit badge,
+     * and optional subscript badge.
+     */
+    public static void drawStock(GraphicsContext gc, String name, String unit,
+                                 List<String> subscripts,
                                  double x, double y, double width, double height) {
         double r = LayoutMetrics.STOCK_CORNER_RADIUS;
 
@@ -64,6 +94,9 @@ public final class ElementRenderer {
             gc.setTextBaseline(VPos.BOTTOM);
             gc.fillText("[" + unit + "]", x + width / 2, y + height - 3);
         }
+
+        // Subscript badge bottom-right
+        drawSubscriptBadge(gc, subscripts, x, y, width, height);
     }
 
     /**
@@ -75,6 +108,12 @@ public final class ElementRenderer {
      * @param height   bounding box height
      */
     public static void drawFlow(GraphicsContext gc, String name, boolean hasDelay,
+                                double x, double y, double width, double height) {
+        drawFlow(gc, name, hasDelay, List.of(), x, y, width, height);
+    }
+
+    public static void drawFlow(GraphicsContext gc, String name, boolean hasDelay,
+                                List<String> subscripts,
                                 double x, double y, double width, double height) {
         double cx = x + width / 2;
         double cy = y + height / 2;
@@ -107,6 +146,17 @@ public final class ElementRenderer {
             gc.setTextBaseline(VPos.BOTTOM);
             gc.fillText(BADGE_DELAY, cx + half + 2, cy - half + 4);
         }
+
+        // Subscript badge right of name
+        if (subscripts != null && !subscripts.isEmpty()) {
+            String label = String.join(" \u00d7 ", subscripts);
+            gc.setFill(ColorPalette.SUBSCRIPT_BADGE);
+            gc.setFont(LayoutMetrics.BADGE_FONT);
+            gc.setTextAlign(TextAlignment.CENTER);
+            gc.setTextBaseline(VPos.TOP);
+            double nameY = cy + half + LayoutMetrics.FLOW_NAME_GAP;
+            gc.fillText(label, cx, nameY + 12);
+        }
     }
 
     /**
@@ -121,7 +171,13 @@ public final class ElementRenderer {
     public static void drawAux(GraphicsContext gc, String name, boolean isLiteral, String equation,
                                boolean hasDelay,
                                double x, double y, double width, double height) {
-        drawAux(gc, name, isLiteral, equation, hasDelay, x, y, width, height, false);
+        drawAux(gc, name, isLiteral, equation, hasDelay, List.of(), x, y, width, height, false);
+    }
+
+    public static void drawAux(GraphicsContext gc, String name, boolean isLiteral, String equation,
+                               boolean hasDelay, List<String> subscripts,
+                               double x, double y, double width, double height) {
+        drawAux(gc, name, isLiteral, equation, hasDelay, subscripts, x, y, width, height, false);
     }
 
     /**
@@ -129,7 +185,8 @@ public final class ElementRenderer {
      * When hovered, uses a stronger fill to provide visual feedback.
      */
     public static void drawAux(GraphicsContext gc, String name, boolean isLiteral, String equation,
-                               boolean hasDelay, double x, double y, double width, double height,
+                               boolean hasDelay, List<String> subscripts,
+                               double x, double y, double width, double height,
                                boolean hovered) {
         double r = LayoutMetrics.AUX_CORNER_RADIUS;
 
@@ -168,6 +225,9 @@ public final class ElementRenderer {
             gc.setTextBaseline(VPos.TOP);
             gc.fillText(BADGE_DELAY, x + width - 5, y + 3);
         }
+
+        // Subscript badge bottom-right
+        drawSubscriptBadge(gc, subscripts, x, y, width, height);
     }
 
     /**

@@ -8,6 +8,8 @@ import systems.courant.sd.app.canvas.ModelEditor;
 import systems.courant.sd.model.def.VariableDef;
 import systems.courant.sd.model.expr.DelayDetector;
 
+import java.util.List;
+
 /**
  * Renders auxiliary/constant elements: rounded rectangle with badge, name, and
  * optional delay indicator.
@@ -24,7 +26,8 @@ final class AuxRenderer implements ElementTypeRenderer {
         String equation = editor.getVariableEquation(name).orElse(null);
         boolean hasDelay = showDelay
                 && DelayDetector.equationContainsDelay(equation);
-        ElementRenderer.drawAux(gc, name, isLiteral, equation, hasDelay,
+        List<String> subscripts = editor.getElementSubscripts(name);
+        ElementRenderer.drawAux(gc, name, isLiteral, equation, hasDelay, subscripts,
                 cx - w / 2, cy - h / 2, w, h);
     }
 }

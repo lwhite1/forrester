@@ -121,6 +121,26 @@ final class ModelQueryFacade {
         return null;
     }
 
+    /**
+     * Returns the subscript dimension names for the given element, or an empty list
+     * if the element is scalar or not found.
+     */
+    List<String> getElementSubscripts(String name) {
+        Optional<StockDef> stock = getStockByName(name);
+        if (stock.isPresent()) {
+            return stock.get().subscripts();
+        }
+        Optional<FlowDef> flow = getFlowByName(name);
+        if (flow.isPresent()) {
+            return flow.get().subscripts();
+        }
+        Optional<VariableDef> variable = getVariableByName(name);
+        if (variable.isPresent()) {
+            return variable.get().subscripts();
+        }
+        return List.of();
+    }
+
     // === Derived queries ===
 
     boolean hasElement(String name) { return nameIndex.contains(name); }

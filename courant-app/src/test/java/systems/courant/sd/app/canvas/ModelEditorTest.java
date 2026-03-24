@@ -2616,4 +2616,51 @@ class ModelEditorTest {
             assertThat(copy.subscripts()).containsExactly("Region");
         }
     }
+
+    @Nested
+    @DisplayName("getElementSubscripts")
+    class GetElementSubscripts {
+
+        @Test
+        void shouldReturnSubscriptsForSubscriptedStock() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .subscript("Region", List.of("N", "S"))
+                    .stock("Pop", 100, "Person", List.of("Region"))
+                    .build();
+            editor.loadFrom(def);
+
+            assertThat(editor.getElementSubscripts("Pop")).containsExactly("Region");
+        }
+
+        @Test
+        void shouldReturnSubscriptsForSubscriptedFlow() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .subscript("Region", List.of("N", "S"))
+                    .flow("Migration", "0", "Year", null, null, List.of("Region"))
+                    .build();
+            editor.loadFrom(def);
+
+            assertThat(editor.getElementSubscripts("Migration")).containsExactly("Region");
+        }
+
+        @Test
+        void shouldReturnEmptyListForScalarElement() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .stock("S", 0, "units")
+                    .build();
+            editor.loadFrom(def);
+
+            assertThat(editor.getElementSubscripts("S")).isEmpty();
+        }
+
+        @Test
+        void shouldReturnEmptyListForUnknownElement() {
+            editor.loadFrom(new ModelDefinitionBuilder().name("Test").build());
+
+            assertThat(editor.getElementSubscripts("Missing")).isEmpty();
+        }
+    }
 }

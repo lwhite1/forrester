@@ -466,24 +466,14 @@ public class SimulationResultPane extends BorderPane {
                 && currentSeries.stream().anyMatch(s -> !stockNames.contains(s.getName()));
         if (hasGrouping) {
             addSectionHeader(sidebar, "Stocks");
-            for (int i = 0; i < currentSeries.size(); i++) {
-                if (isStock.get(i)) {
-                    addSeriesRow(sidebar, currentSeries.get(i), i,
-                            behaviorModes.get(i), seriesCheckBoxes, rescaleYAxis);
-                }
-            }
+            addGroupedSeriesRows(sidebar, currentSeries, behaviorModes, isStock,
+                    true, seriesCheckBoxes, rescaleYAxis);
             addSectionHeader(sidebar, "Variables");
-            for (int i = 0; i < currentSeries.size(); i++) {
-                if (!isStock.get(i)) {
-                    addSeriesRow(sidebar, currentSeries.get(i), i,
-                            behaviorModes.get(i), seriesCheckBoxes, rescaleYAxis);
-                }
-            }
+            addGroupedSeriesRows(sidebar, currentSeries, behaviorModes, isStock,
+                    false, seriesCheckBoxes, rescaleYAxis);
         } else {
-            for (int i = 0; i < currentSeries.size(); i++) {
-                addSeriesRow(sidebar, currentSeries.get(i), i,
-                        behaviorModes.get(i), seriesCheckBoxes, rescaleYAxis);
-            }
+            addGroupedSeriesRows(sidebar, currentSeries, behaviorModes, null,
+                    true, seriesCheckBoxes, rescaleYAxis);
         }
 
         if (!netFlowSeries.isEmpty()) {
@@ -683,6 +673,66 @@ public class SimulationResultPane extends BorderPane {
     public DoubleProperty cursorTimeStepProperty() {
         return timeCursor != null ? timeCursor.cursorTimeStepProperty()
                 : new SimpleDoubleProperty(Double.NaN);
+    }
+
+    /**
+     * Adds series rows to the sidebar, grouping subscripted elements under their
+     * base name with a master toggle checkbox. Scalar series are ungrouped.
+     *
+     * @param filterStock  if non-null, only include series where isStock matches this value;
+     *                     if null, include all series
+     * @param matchStock   the value to match against (true = stocks, false = variables)
+     */
+    private void addGroupedSeriesRows(
+            VBox sidebar, List<XYChart.Series<Number, Number>> currentSeries,
+            List<String> behaviorModes, List<Boolean> isStock,
+            boolean matchStock, List<CheckBox> seriesCheckBoxes, Runnable rescaleYAxis) {
+        // Build ordered groups: baseName → list of series indices
+        java.util.LinkedHashMap<String, List<Integer>> groups = new java.util.LinkedHashMap<>();
+        for (int i = 0; i < currentSeries.size(); i++) {
+            if (isStock != null && isStock.get(i) != matchStock) {
+                continue;
+            }
+            String baseName = ChartUtils.baseElementName(currentSeries.get(i).getName());
+            groups.computeIfAbsent(baseName, k -> new ArrayList<>()).add(i);
+        }
+        for (var entry : groups.entrySet()) {
+            List<Integer> indices = entry.getValue();
+            if (indices.size() > 1) {
+                // Group header with master toggle
+                addArrayGroupHeader(sidebar, entry.getKey(), indices,
+                        seriesCheckBoxes, rescaleYAxis);
+                for (int idx : indices) {
+                    addSeriesRow(sidebar, currentSeries.get(idx), idx,
+                            behaviorModes.get(idx), seriesCheckBoxes, rescaleYAxis);
+                }
+            } else {
+                addSeriesRow(sidebar, currentSeries.get(indices.getFirst()), indices.getFirst(),
+                        behaviorModes.get(indices.getFirst()), seriesCheckBoxes, rescaleYAxis);
+            }
+        }
+    }
+
+    private void addArrayGroupHeader(VBox sidebar, String baseName,
+                                      List<Integer> seriesIndices,
+                                      List<CheckBox> seriesCheckBoxes,
+                                      Runnable rescaleYAxis) {
+        CheckBox groupCb = new CheckBox();
+        groupCb.setSelected(true);
+        groupCb.selectedProperty().addListener((obs, wasSelected, isSelected) -> {
+            for (int idx : seriesIndices) {
+                if (idx < seriesCheckBoxes.size()) {
+                    seriesCheckBoxes.get(idx).setSelected(isSelected);
+                }
+            }
+        });
+
+        Label groupLabel = new Label(baseName);
+        groupLabel.setStyle(Styles.FIELD_LABEL + " -fx-text-fill: #444;");
+
+        HBox row = new HBox(4, groupCb, groupLabel);
+        row.setAlignment(Pos.CENTER_LEFT);
+        sidebar.getChildren().add(row);
     }
 
     private void addSectionHeader(VBox sidebar, String title) {

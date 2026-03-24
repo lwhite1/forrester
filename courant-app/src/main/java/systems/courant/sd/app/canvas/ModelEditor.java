@@ -773,6 +773,7 @@ public class ModelEditor {
     public Optional<String> getFlowEquation(String name) { return queryFacade.getFlowEquation(name); }
     public Optional<String> getVariableEquation(String name) { return queryFacade.getVariableEquation(name); }
     public int getModuleIndex(String name) { return queryFacade.getModuleIndex(name); }
+    public List<String> getElementSubscripts(String name) { return queryFacade.getElementSubscripts(name); }
     public ModelDefinition toModelDefinition() { return toModelDefinition(null); }
     public ModelDefinition toModelDefinition(ViewDef view) { return queryFacade.toModelDefinition(view); }
 
