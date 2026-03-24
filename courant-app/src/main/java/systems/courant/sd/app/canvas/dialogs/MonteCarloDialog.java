@@ -19,9 +19,11 @@ import javafx.scene.layout.VBox;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import systems.courant.sd.app.canvas.HelpContextResolver;
 import systems.courant.sd.app.canvas.ParameterRowBase;
 import systems.courant.sd.app.canvas.Styles;
+import systems.courant.sd.app.canvas.renderers.ElementRenderer;
 
 /**
  * Dialog for configuring a Monte Carlo simulation: add parameters with
@@ -48,17 +50,20 @@ public class MonteCarloDialog extends Dialog<MonteCarloDialog.Config> {
     private final ObservableList<ParameterRow> parameterRows = FXCollections.observableArrayList();
     private final IntegerProperty fieldChangeCounter = new SimpleIntegerProperty(0);
     private final List<String> constantNames;
+    private final Map<String, Double> constantValues;
     private final TextField iterationsField;
     private final ComboBox<String> samplingCombo;
     private final TextField seedField;
 
     public MonteCarloDialog(List<String> constantNames) {
-        this(constantNames, null);
+        this(constantNames, Map.of(), null);
     }
 
-    public MonteCarloDialog(List<String> constantNames, Config previousConfig) {
+    public MonteCarloDialog(List<String> constantNames, Map<String, Double> constantValues,
+                            Config previousConfig) {
         HelpContextResolver.addHelpButton(this);
         this.constantNames = constantNames;
+        this.constantValues = constantValues != null ? constantValues : Map.of();
         setTitle("Monte Carlo Simulation");
         setHeaderText("Configure Monte Carlo parameters");
 
@@ -226,6 +231,23 @@ public class MonteCarloDialog extends Dialog<MonteCarloDialog.Config> {
                 updateLabels(val);
                 fieldChangeCounter.set(fieldChangeCounter.get() + 1);
             });
+
+            // Auto-fill mean from constant value when name changes
+            nameCombo.valueProperty().addListener((obs, oldName, newName) -> {
+                if (newName != null && distCombo.getValue() == DistributionType.NORMAL) {
+                    Double value = constantValues.get(newName);
+                    if (value != null) {
+                        param1Field.setText(ElementRenderer.formatValue(value));
+                    }
+                }
+            });
+            // Set initial mean for the default selection
+            if (!constantNames.isEmpty() && distCombo.getValue() == DistributionType.NORMAL) {
+                Double value = constantValues.get(nameCombo.getValue());
+                if (value != null) {
+                    param1Field.setText(ElementRenderer.formatValue(value));
+                }
+            }
             wireFieldChange(param1Field);
             wireFieldChange(param2Field);
 
