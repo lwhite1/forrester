@@ -185,4 +185,26 @@ class ChartUtilsTest {
             }
         }
     }
+
+    @Nested
+    @DisplayName("subscript column helpers")
+    class SubscriptColumnHelpers {
+
+        @Test
+        void shouldExtractBaseNameFromBracketedColumn() {
+            assertThat(ChartUtils.baseElementName("Population[North]")).isEqualTo("Population");
+            assertThat(ChartUtils.baseElementName("Population[North,Young]")).isEqualTo("Population");
+        }
+
+        @Test
+        void shouldReturnNameUnchangedForScalarColumn() {
+            assertThat(ChartUtils.baseElementName("Population")).isEqualTo("Population");
+        }
+
+        @Test
+        void shouldDetectSubscriptedColumn() {
+            assertThat(ChartUtils.isSubscriptedColumn("Population[North]")).isTrue();
+            assertThat(ChartUtils.isSubscriptedColumn("Population")).isFalse();
+        }
+    }
 }

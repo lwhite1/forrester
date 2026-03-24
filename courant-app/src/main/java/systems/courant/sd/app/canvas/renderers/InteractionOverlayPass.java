@@ -208,7 +208,8 @@ final class InteractionOverlayPass implements RenderPass {
             String eq = ed.getVariableEquation(hoveredElement).orElse(null);
             boolean hasDel = ctx.showDelayBadges()
                     && DelayDetector.equationContainsDelay(eq);
-            ElementRenderer.drawAux(gc, hoveredElement, isLit, eq, hasDel,
+            java.util.List<String> subs = ed.getElementSubscripts(hoveredElement);
+            ElementRenderer.drawAux(gc, hoveredElement, isLit, eq, hasDel, subs,
                     hx, hy, hw, hh, true);
         } else if (hoverType == ElementType.LOOKUP) {
             double hw = LayoutMetrics.effectiveWidth(canvasState, hoveredElement);

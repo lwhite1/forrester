@@ -74,6 +74,9 @@ public final class ColorPalette {
     // Delay indicator badge
     public static final Color DELAY_BADGE = Color.web("#8E44AD");
 
+    /** Teal accent for subscript dimension badge on arrayed elements. */
+    public static final Color SUBSCRIPT_BADGE = Color.web("#2980B9");
+
     // Maturity indicators (#89)
     /** Amber accent stripe on elements missing equations. */
     public static final Color MATURITY_ACCENT = Color.web("#F39C12", 0.8);

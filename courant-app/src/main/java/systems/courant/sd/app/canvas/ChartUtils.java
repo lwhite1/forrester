@@ -160,4 +160,20 @@ public final class ChartUtils {
         }
         return String.format(Locale.US, "%.4f", value);
     }
+
+    /**
+     * Extracts the base element name from a possibly bracketed subscript name.
+     * Returns "Population" for "Population[North]", or the input unchanged if no brackets.
+     */
+    public static String baseElementName(String columnName) {
+        int bracket = columnName.indexOf('[');
+        return bracket >= 0 ? columnName.substring(0, bracket) : columnName;
+    }
+
+    /**
+     * Returns true if the column name contains a subscript bracket suffix.
+     */
+    public static boolean isSubscriptedColumn(String columnName) {
+        return columnName.indexOf('[') >= 0;
+    }
 }

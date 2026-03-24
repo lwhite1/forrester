@@ -7,6 +7,8 @@ import systems.courant.sd.app.canvas.LayoutMetrics;
 import systems.courant.sd.app.canvas.ModelEditor;
 import systems.courant.sd.model.expr.DelayDetector;
 
+import java.util.List;
+
 /**
  * Renders flow elements: diamond indicator with name label and optional delay badge.
  */
@@ -18,8 +20,9 @@ final class FlowRenderer implements ElementTypeRenderer {
         boolean hasDelay = showDelay
                 && editor.getFlowEquation(name)
                         .map(DelayDetector::equationContainsDelay).orElse(false);
+        List<String> subscripts = editor.getElementSubscripts(name);
         double size = LayoutMetrics.FLOW_INDICATOR_SIZE;
-        ElementRenderer.drawFlow(gc, name, hasDelay,
+        ElementRenderer.drawFlow(gc, name, hasDelay, subscripts,
                 cx - size / 2, cy - size / 2, size, size);
     }
 }
