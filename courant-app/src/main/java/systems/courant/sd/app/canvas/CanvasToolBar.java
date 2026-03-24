@@ -62,34 +62,34 @@ public class CanvasToolBar extends ToolBar {
 
         selectButton = makeButton("Select", Tool.SELECT);
         selectButton.setId("toolSelect");
-        selectButton.setTooltip(new Tooltip("Select and move elements (S)"));
+        selectButton.setTooltip(new Tooltip("Select and move elements (1)"));
         ToggleButton stockButton = makeButton("Stock", Tool.PLACE_STOCK);
         stockButton.setId("toolStock");
-        stockButton.setTooltip(new Tooltip("Add a stock \u2014 an accumulator that holds a quantity"));
+        stockButton.setTooltip(new Tooltip("Add a stock \u2014 an accumulator that holds a quantity (2)"));
         ToggleButton flowButton = makeButton("Flow", Tool.PLACE_FLOW);
         flowButton.setId("toolFlow");
-        flowButton.setTooltip(new Tooltip("Add a flow \u2014 a rate that moves material between stocks"));
+        flowButton.setTooltip(new Tooltip("Add a flow \u2014 a rate that moves material between stocks (3)"));
         ToggleButton auxButton = makeButton("Variable", Tool.PLACE_VARIABLE);
         auxButton.setId("toolAux");
-        auxButton.setTooltip(new Tooltip("Add a variable \u2014 a computed intermediate value"));
+        auxButton.setTooltip(new Tooltip("Add a variable \u2014 a computed intermediate value (4)"));
         ToggleButton moduleButton = makeButton("Module", Tool.PLACE_MODULE);
         moduleButton.setId("toolModule");
-        moduleButton.setTooltip(new Tooltip("Add a module \u2014 a reusable sub-model"));
+        moduleButton.setTooltip(new Tooltip("Add a module \u2014 a reusable sub-model (5)"));
         ToggleButton lookupButton = makeButton("Lookup", Tool.PLACE_LOOKUP);
         lookupButton.setId("toolLookup");
-        lookupButton.setTooltip(new Tooltip("Add a lookup table \u2014 a graphical function"));
+        lookupButton.setTooltip(new Tooltip("Add a lookup table \u2014 a graphical function (6)"));
         ToggleButton cldVarButton = makeButton("Causal Variable", Tool.PLACE_CLD_VARIABLE);
         cldVarButton.setId("toolCldVar");
-        cldVarButton.setTooltip(new Tooltip("Add a CLD variable \u2014 a qualitative causal factor"));
+        cldVarButton.setTooltip(new Tooltip("Add a CLD variable \u2014 a qualitative causal factor (7)"));
         ToggleButton causalLinkButton = makeButton("Causal Link", Tool.PLACE_CAUSAL_LINK);
         causalLinkButton.setId("toolCausalLink");
-        causalLinkButton.setTooltip(new Tooltip("Draw a causal link between variables"));
+        causalLinkButton.setTooltip(new Tooltip("Draw a causal link between variables (8)"));
         ToggleButton infoLinkButton = makeButton("Info Link", Tool.PLACE_INFO_LINK);
         infoLinkButton.setId("toolInfoLink");
-        infoLinkButton.setTooltip(new Tooltip("Draw info link to/from module ports (0)"));
+        infoLinkButton.setTooltip(new Tooltip("Draw info link to/from module ports"));
         ToggleButton commentButton = makeButton("Comment", Tool.PLACE_COMMENT);
         commentButton.setId("toolComment");
-        commentButton.setTooltip(new Tooltip("Add a comment \u2014 a free-text annotation on the canvas"));
+        commentButton.setTooltip(new Tooltip("Add a comment \u2014 a free-text annotation on the canvas (9)"));
 
         selectButton.setSelected(true);
 
