@@ -9,10 +9,10 @@ package systems.courant.sd.model;
  */
 public enum NegativeValuePolicy {
 
-    /** Silently clamp negative values to zero (default). */
+    /** Silently clamp negative values to zero. */
     CLAMP_TO_ZERO,
 
-    /** Permit negative values (e.g., bank balances, temperature deltas). */
+    /** Permit negative values (default). Suitable for temperature, bank balances, etc. */
     ALLOW,
 
     /** Throw an {@link IllegalArgumentException} when a negative value is set. */

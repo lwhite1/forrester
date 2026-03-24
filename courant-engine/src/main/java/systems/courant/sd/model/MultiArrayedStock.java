@@ -24,7 +24,7 @@ public class MultiArrayedStock {
 
     /**
      * Creates a multi-arrayed stock with the same initial value for every element.
-     * Uses {@link NegativeValuePolicy#CLAMP_TO_ZERO} by default.
+     * Uses {@link NegativeValuePolicy#ALLOW} by default.
      *
      * @param baseName     the base name (each stock is named "baseName[label0,label1,...]")
      * @param range        the multi-dimensional subscript range
@@ -32,7 +32,7 @@ public class MultiArrayedStock {
      * @param unit         the unit of measure
      */
     public MultiArrayedStock(String baseName, SubscriptRange range, double initialValue, Unit unit) {
-        this(baseName, range, initialValue, unit, NegativeValuePolicy.CLAMP_TO_ZERO);
+        this(baseName, range, initialValue, unit, NegativeValuePolicy.ALLOW);
     }
 
     /**
@@ -58,7 +58,7 @@ public class MultiArrayedStock {
 
     /**
      * Creates a multi-arrayed stock with per-element initial values in row-major order.
-     * Uses {@link NegativeValuePolicy#CLAMP_TO_ZERO} by default.
+     * Uses {@link NegativeValuePolicy#ALLOW} by default.
      *
      * @param baseName      the base name
      * @param range         the multi-dimensional subscript range
@@ -67,7 +67,7 @@ public class MultiArrayedStock {
      * @throws IllegalArgumentException if the array length doesn't match the range's total size
      */
     public MultiArrayedStock(String baseName, SubscriptRange range, double[] initialValues, Unit unit) {
-        this(baseName, range, initialValues, unit, NegativeValuePolicy.CLAMP_TO_ZERO);
+        this(baseName, range, initialValues, unit, NegativeValuePolicy.ALLOW);
     }
 
     /**

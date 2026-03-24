@@ -408,7 +408,7 @@ public class ModelCompiler {
 
     private NegativeValuePolicy resolvePolicy(String policyName) {
         if (policyName == null) {
-            return NegativeValuePolicy.CLAMP_TO_ZERO;
+            return NegativeValuePolicy.ALLOW;
         }
         try {
             return NegativeValuePolicy.valueOf(policyName);

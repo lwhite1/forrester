@@ -5,6 +5,7 @@ import systems.courant.sd.measure.TimeUnit;
 import systems.courant.sd.model.Flow;
 import systems.courant.sd.model.Model;
 import systems.courant.sd.model.Module;
+import systems.courant.sd.model.NegativeValuePolicy;
 import systems.courant.sd.model.Stock;
 import systems.courant.sd.model.Variable;
 import org.junit.jupiter.api.DisplayName;
@@ -140,7 +141,7 @@ public class SimulationTest {
     @Test
     public void shouldClampStockToZeroWhenOutflowExceedsValue() {
         Model model = new Model("Clamp Test");
-        Stock tank = new Stock("Tank", 10, GALLON_US);
+        Stock tank = new Stock("Tank", 10, GALLON_US, NegativeValuePolicy.CLAMP_TO_ZERO);
 
         Flow outflow = Flow.create("BigDrain", MINUTE, () -> new Quantity(100, GALLON_US));
 
@@ -744,8 +745,8 @@ public class SimulationTest {
             sim.setSavePer(5);
             sim.execute();
 
-            // Stock should reflect all 11 steps: 100 - 11*10 = -10 → clamped to 0
-            assertThat(stock.getValue()).isEqualTo(0.0);
+            // Stock should reflect all 11 steps: 100 - 11*10 = -10
+            assertThat(stock.getValue()).isEqualTo(-10.0);
         }
 
         @Test

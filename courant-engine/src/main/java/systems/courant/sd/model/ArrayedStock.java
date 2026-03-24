@@ -24,7 +24,7 @@ public class ArrayedStock {
 
     /**
      * Creates an arrayed stock with the same initial value for every element.
-     * Uses {@link NegativeValuePolicy#CLAMP_TO_ZERO} by default.
+     * Uses {@link NegativeValuePolicy#ALLOW} by default.
      *
      * @param baseName     the base name (each stock is named "baseName[label]")
      * @param subscript    the subscript dimension
@@ -32,7 +32,7 @@ public class ArrayedStock {
      * @param unit         the unit of measure
      */
     public ArrayedStock(String baseName, Subscript subscript, double initialValue, Unit unit) {
-        this(baseName, subscript, initialValue, unit, NegativeValuePolicy.CLAMP_TO_ZERO);
+        this(baseName, subscript, initialValue, unit, NegativeValuePolicy.ALLOW);
     }
 
     /**
@@ -59,7 +59,7 @@ public class ArrayedStock {
 
     /**
      * Creates an arrayed stock with per-element initial values.
-     * Uses {@link NegativeValuePolicy#CLAMP_TO_ZERO} by default.
+     * Uses {@link NegativeValuePolicy#ALLOW} by default.
      *
      * @param baseName      the base name (each stock is named "baseName[label]")
      * @param subscript     the subscript dimension
@@ -68,7 +68,7 @@ public class ArrayedStock {
      * @throws IllegalArgumentException if the array length doesn't match the subscript size
      */
     public ArrayedStock(String baseName, Subscript subscript, double[] initialValues, Unit unit) {
-        this(baseName, subscript, initialValues, unit, NegativeValuePolicy.CLAMP_TO_ZERO);
+        this(baseName, subscript, initialValues, unit, NegativeValuePolicy.ALLOW);
     }
 
     /**
