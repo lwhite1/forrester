@@ -251,14 +251,19 @@ final class MenuBarBuilder {
         Menu helpMenu = new Menu("Help");
 
         MenuItem contextHelpItem = registry.toMenuItem("Context Help");
+
+        Menu tutorialsMenu = new Menu("Tutorials");
         MenuItem gettingStartedItem = registry.toMenuItem("Getting Started",
                 "Getting Started\u2026");
         MenuItem sirTutorialItem = registry.toMenuItem(
-                "Tutorial: SIR Epidemic", "Tutorial: SIR Epidemic\u2026");
+                "Tutorial: SIR Epidemic", "SIR Epidemic\u2026");
         MenuItem supplyChainItem = registry.toMenuItem(
-                "Tutorial: Supply Chain", "Tutorial: Supply Chain\u2026");
+                "Tutorial: Supply Chain", "Supply Chain\u2026");
         MenuItem cldTutorialItem = registry.toMenuItem(
-                "Tutorial: Causal Loop Diagrams", "Tutorial: Causal Loop Diagrams\u2026");
+                "Tutorial: Causal Loop Diagrams", "Causal Loop Diagrams\u2026");
+        tutorialsMenu.getItems().addAll(gettingStartedItem, sirTutorialItem,
+                supplyChainItem, cldTutorialItem);
+
         MenuItem sdConceptsItem = registry.toMenuItem("SD Concepts");
         MenuItem exprLangItem = registry.toMenuItem("Expression Language");
         MenuItem shortcutsItem = registry.toMenuItem("Keyboard Shortcuts");
@@ -266,7 +271,7 @@ final class MenuBarBuilder {
 
         helpMenu.getItems().addAll(contextHelpItem,
                 new SeparatorMenuItem(),
-                gettingStartedItem, sirTutorialItem, supplyChainItem, cldTutorialItem,
+                tutorialsMenu,
                 new SeparatorMenuItem(), sdConceptsItem, exprLangItem,
                 new SeparatorMenuItem(), shortcutsItem,
                 new SeparatorMenuItem(), aboutItem);
