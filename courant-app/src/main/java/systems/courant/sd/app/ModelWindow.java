@@ -19,14 +19,12 @@ import systems.courant.sd.app.canvas.ModelCanvas;
 import systems.courant.sd.app.canvas.ModelEditListener;
 import systems.courant.sd.app.canvas.ModelEditor;
 import systems.courant.sd.app.canvas.PropertiesPanel;
-import systems.courant.sd.app.canvas.dialogs.CldTutorialDialog;
+import systems.courant.sd.app.canvas.dialogs.ContentTutorialDialog;
 import systems.courant.sd.app.canvas.dialogs.KeyboardShortcutsDialog;
-import systems.courant.sd.app.canvas.dialogs.QuickstartDialog;
 import systems.courant.sd.app.canvas.dialogs.SdConceptsDialog;
-import systems.courant.sd.app.canvas.dialogs.SirTutorialDialog;
-import systems.courant.sd.app.canvas.dialogs.SupplyChainTutorialDialog;
 import systems.courant.sd.app.canvas.dialogs.SubscriptDefinitionDialog;
 import systems.courant.sd.app.canvas.dialogs.TutorialChooserDialog;
+import systems.courant.sd.app.canvas.dialogs.TutorialContentLoader;
 import systems.courant.sd.app.canvas.StatusBar;
 import systems.courant.sd.app.canvas.UndoHistoryPopup;
 import systems.courant.sd.app.canvas.UndoManager;
@@ -372,28 +370,22 @@ public class ModelWindow {
             chooser.setOnGettingStarted(() -> {
                 showEditor();
                 fileController.newModel();
-                helpWindows.showOrBring(QuickstartDialog.class, QuickstartDialog::new);
-                canvas.requestFocus();
+                showContentTutorial("modeling/first-model.json");
             });
             chooser.setOnSirTutorial(() -> {
                 showEditor();
                 fileController.newModel();
-                helpWindows.showOrBring(SirTutorialDialog.class, SirTutorialDialog::new);
-                canvas.requestFocus();
+                showContentTutorial("modeling/feedback-loops.json");
             });
             chooser.setOnSupplyChainTutorial(() -> {
                 showEditor();
                 fileController.newModel();
-                helpWindows.showOrBring(SupplyChainTutorialDialog.class,
-                        SupplyChainTutorialDialog::new);
-                canvas.requestFocus();
+                showContentTutorial("modeling/supply-chain.json");
             });
             chooser.setOnCldTutorial(() -> {
                 showEditor();
                 fileController.newModel();
-                helpWindows.showOrBring(CldTutorialDialog.class,
-                        CldTutorialDialog::new);
-                canvas.requestFocus();
+                showContentTutorial("modeling/cld-basics.json");
             });
             chooser.show();
         });
@@ -643,17 +635,13 @@ public class ModelWindow {
         commandRegistry.add("Context Help", "Help", this::showContextHelp,
                 new KeyCodeCombination(KeyCode.F1));
         commandRegistry.add("Getting Started", "Help",
-                () -> helpWindows.showOrBring(QuickstartDialog.class,
-                        QuickstartDialog::new));
+                () -> showContentTutorial("modeling/first-model.json"));
         commandRegistry.add("Tutorial: SIR Epidemic", "Help",
-                () -> helpWindows.showOrBring(SirTutorialDialog.class,
-                        SirTutorialDialog::new));
+                () -> showContentTutorial("modeling/feedback-loops.json"));
         commandRegistry.add("Tutorial: Supply Chain", "Help",
-                () -> helpWindows.showOrBring(SupplyChainTutorialDialog.class,
-                        SupplyChainTutorialDialog::new));
+                () -> showContentTutorial("modeling/supply-chain.json"));
         commandRegistry.add("Tutorial: Causal Loop Diagrams", "Help",
-                () -> helpWindows.showOrBring(CldTutorialDialog.class,
-                        CldTutorialDialog::new));
+                () -> showContentTutorial("modeling/cld-basics.json"));
         commandRegistry.add("SD Concepts", "Help",
                 () -> helpWindows.showOrBring(SdConceptsDialog.class,
                         SdConceptsDialog::new));
@@ -818,6 +806,13 @@ public class ModelWindow {
             }
 
         };
+    }
+
+    private void showContentTutorial(String jsonPath) {
+        // Use the JSON path as the unique key so each tutorial gets its own window
+        helpWindows.showOrBring(jsonPath, () ->
+                new ContentTutorialDialog(TutorialContentLoader.load(jsonPath)));
+        canvas.requestFocus();
     }
 
     private void showContextHelp() {

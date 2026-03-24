@@ -15,10 +15,8 @@ import org.testfx.api.FxRobot;
 import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
 
-import systems.courant.sd.app.canvas.dialogs.CldTutorialDialog;
-import systems.courant.sd.app.canvas.dialogs.QuickstartDialog;
-import systems.courant.sd.app.canvas.dialogs.SirTutorialDialog;
-import systems.courant.sd.app.canvas.dialogs.SupplyChainTutorialDialog;
+import systems.courant.sd.app.canvas.dialogs.ContentTutorialDialog;
+import systems.courant.sd.app.canvas.dialogs.TutorialContentLoader;
 
 import java.util.prefs.Preferences;
 
@@ -54,6 +52,10 @@ class TutorialProgressTrackingFxTest {
         TutorialProgressStore.restoreDefaultPreferences();
     }
 
+    private static ContentTutorialDialog loadDialog(String jsonPath) {
+        return new ContentTutorialDialog(TutorialContentLoader.load(jsonPath));
+    }
+
     @Nested
     @DisplayName("Completion")
     class Completion {
@@ -62,31 +64,31 @@ class TutorialProgressTrackingFxTest {
         @DisplayName("reaching the last tab marks tutorial completed")
         void shouldMarkCompletedOnLastTab(FxRobot robot) {
             robot.interact(() -> {
-                SirTutorialDialog dialog = new SirTutorialDialog();
+                ContentTutorialDialog dialog = loadDialog("modeling/feedback-loops.json");
                 TabPane tabPane = (TabPane) dialog.getScene().getRoot();
                 tabPane.getSelectionModel().selectLast();
             });
 
-            assertThat(TutorialProgressStore.isCompleted("sir-epidemic")).isTrue();
+            assertThat(TutorialProgressStore.isCompleted("feedback-loops")).isTrue();
         }
 
         @Test
         @DisplayName("middle tab does not mark completed")
         void shouldNotMarkCompletedOnMiddleTab(FxRobot robot) {
             robot.interact(() -> {
-                SirTutorialDialog dialog = new SirTutorialDialog();
+                ContentTutorialDialog dialog = loadDialog("modeling/feedback-loops.json");
                 TabPane tabPane = (TabPane) dialog.getScene().getRoot();
                 tabPane.getSelectionModel().select(3);
             });
 
-            assertThat(TutorialProgressStore.isCompleted("sir-epidemic")).isFalse();
+            assertThat(TutorialProgressStore.isCompleted("feedback-loops")).isFalse();
         }
 
         @Test
-        @DisplayName("QuickstartDialog completes as 'first-model'")
-        void quickstartCompletesAsFirstModel(FxRobot robot) {
+        @DisplayName("first-model completes as 'first-model'")
+        void firstModelCompletesCorrectly(FxRobot robot) {
             robot.interact(() -> {
-                QuickstartDialog dialog = new QuickstartDialog();
+                ContentTutorialDialog dialog = loadDialog("modeling/first-model.json");
                 TabPane tabPane = (TabPane) dialog.getScene().getRoot();
                 tabPane.getSelectionModel().selectLast();
             });
@@ -95,10 +97,10 @@ class TutorialProgressTrackingFxTest {
         }
 
         @Test
-        @DisplayName("SupplyChainTutorialDialog completes as 'supply-chain'")
-        void supplyChainCompletesAsSupplyChain(FxRobot robot) {
+        @DisplayName("supply-chain completes as 'supply-chain'")
+        void supplyChainCompletesCorrectly(FxRobot robot) {
             robot.interact(() -> {
-                SupplyChainTutorialDialog dialog = new SupplyChainTutorialDialog();
+                ContentTutorialDialog dialog = loadDialog("modeling/supply-chain.json");
                 TabPane tabPane = (TabPane) dialog.getScene().getRoot();
                 tabPane.getSelectionModel().selectLast();
             });
@@ -107,10 +109,10 @@ class TutorialProgressTrackingFxTest {
         }
 
         @Test
-        @DisplayName("CldTutorialDialog completes as 'cld-basics'")
-        void cldCompletesAsCldBasics(FxRobot robot) {
+        @DisplayName("cld-basics completes as 'cld-basics'")
+        void cldBasicsCompletesCorrectly(FxRobot robot) {
             robot.interact(() -> {
-                CldTutorialDialog dialog = new CldTutorialDialog();
+                ContentTutorialDialog dialog = loadDialog("modeling/cld-basics.json");
                 TabPane tabPane = (TabPane) dialog.getScene().getRoot();
                 tabPane.getSelectionModel().selectLast();
             });
@@ -127,14 +129,14 @@ class TutorialProgressTrackingFxTest {
         @DisplayName("selecting a middle tab sets resume point")
         void shouldSetResumePointOnMiddleTab(FxRobot robot) {
             robot.interact(() -> {
-                SirTutorialDialog dialog = new SirTutorialDialog();
+                ContentTutorialDialog dialog = loadDialog("modeling/feedback-loops.json");
                 TabPane tabPane = (TabPane) dialog.getScene().getRoot();
                 tabPane.getSelectionModel().select(3);
             });
 
             var rp = TutorialProgressStore.getResumePoint();
             assertThat(rp).isPresent();
-            assertThat(rp.get().tutorialId()).isEqualTo("sir-epidemic");
+            assertThat(rp.get().tutorialId()).isEqualTo("feedback-loops");
             assertThat(rp.get().stepIndex()).isEqualTo(3);
         }
 
@@ -142,15 +144,14 @@ class TutorialProgressTrackingFxTest {
         @DisplayName("completing a tutorial clears the resume point")
         void shouldClearResumePointOnCompletion(FxRobot robot) {
             robot.interact(() -> {
-                SirTutorialDialog dialog = new SirTutorialDialog();
+                ContentTutorialDialog dialog = loadDialog("modeling/feedback-loops.json");
                 TabPane tabPane = (TabPane) dialog.getScene().getRoot();
-                // Navigate to a middle tab first
                 tabPane.getSelectionModel().select(3);
             });
             assertThat(TutorialProgressStore.getResumePoint()).isPresent();
 
             robot.interact(() -> {
-                SirTutorialDialog dialog = new SirTutorialDialog();
+                ContentTutorialDialog dialog = loadDialog("modeling/feedback-loops.json");
                 TabPane tabPane = (TabPane) dialog.getScene().getRoot();
                 tabPane.getSelectionModel().selectLast();
             });
@@ -161,11 +162,11 @@ class TutorialProgressTrackingFxTest {
         @Test
         @DisplayName("dialog resumes at the saved step")
         void shouldResumeAtSavedStep(FxRobot robot) {
-            TutorialProgressStore.setResumePoint("sir-epidemic", 4);
+            TutorialProgressStore.setResumePoint("feedback-loops", 4);
 
             int[] selectedIndex = {-1};
             robot.interact(() -> {
-                SirTutorialDialog dialog = new SirTutorialDialog();
+                ContentTutorialDialog dialog = loadDialog("modeling/feedback-loops.json");
                 TabPane tabPane = (TabPane) dialog.getScene().getRoot();
                 selectedIndex[0] = tabPane.getSelectionModel().getSelectedIndex();
             });
@@ -180,7 +181,7 @@ class TutorialProgressTrackingFxTest {
 
             int[] selectedIndex = {-1};
             robot.interact(() -> {
-                SirTutorialDialog dialog = new SirTutorialDialog();
+                ContentTutorialDialog dialog = loadDialog("modeling/feedback-loops.json");
                 TabPane tabPane = (TabPane) dialog.getScene().getRoot();
                 selectedIndex[0] = tabPane.getSelectionModel().getSelectedIndex();
             });
@@ -191,16 +192,16 @@ class TutorialProgressTrackingFxTest {
         @Test
         @DisplayName("resume point beyond tab count is clamped")
         void shouldClampResumePointBeyondTabCount(FxRobot robot) {
-            TutorialProgressStore.setResumePoint("sir-epidemic", 99);
+            TutorialProgressStore.setResumePoint("feedback-loops", 99);
 
             int[] selectedIndex = {-1};
             robot.interact(() -> {
-                SirTutorialDialog dialog = new SirTutorialDialog();
+                ContentTutorialDialog dialog = loadDialog("modeling/feedback-loops.json");
                 TabPane tabPane = (TabPane) dialog.getScene().getRoot();
                 selectedIndex[0] = tabPane.getSelectionModel().getSelectedIndex();
             });
 
-            // SIR has 7 tabs (0-6), so clamped to 6 (the last tab)
+            // feedback-loops has 7 tabs (0-6), so clamped to 6 (the last tab)
             assertThat(selectedIndex[0]).isEqualTo(6);
         }
     }

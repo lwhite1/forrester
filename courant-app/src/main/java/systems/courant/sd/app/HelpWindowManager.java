@@ -13,7 +13,7 @@ import java.util.function.Supplier;
  */
 final class HelpWindowManager {
 
-    private final Map<Class<? extends Stage>, Stage> windows = new LinkedHashMap<>();
+    private final Map<Object, Stage> windows = new LinkedHashMap<>();
     private final Stage owner;
 
     HelpWindowManager(Stage owner) {
@@ -35,6 +35,24 @@ final class HelpWindowManager {
         window.initOwner(owner);
         window.show();
         windows.put(type, window);
+        return window;
+    }
+
+    /**
+     * Shows the window identified by a string key, creating it via the factory
+     * if it does not exist or is no longer showing. Useful for content-driven
+     * dialogs that share a class but differ by content (e.g., tutorial ID).
+     */
+    Stage showOrBring(String key, Supplier<? extends Stage> factory) {
+        Stage existing = windows.get(key);
+        if (existing != null && existing.isShowing()) {
+            bringToFront(existing);
+            return existing;
+        }
+        Stage window = factory.get();
+        window.initOwner(owner);
+        window.show();
+        windows.put(key, window);
         return window;
     }
 

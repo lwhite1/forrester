@@ -1,0 +1,58 @@
+{
+  "tracks": [
+    {
+      "id": "modeling",
+      "name": "System Dynamics Modeling",
+      "tiers": [
+        {
+          "id": "modeling-foundations",
+          "name": "Foundations",
+          "description": "Core concepts and your first models",
+          "recommendedPrerequisites": [],
+          "tutorials": ["first-model", "feedback-loops", "cld-basics"]
+        },
+        {
+          "id": "modeling-intermediate",
+          "name": "Building Realistic Models",
+          "description": "Delays, non-linearity, and multi-stock systems",
+          "recommendedPrerequisites": ["modeling-foundations"],
+          "tutorials": ["supply-chain"]
+        },
+        {
+          "id": "modeling-advanced",
+          "name": "Advanced Techniques",
+          "description": "Aging chains, subscripts, and model testing",
+          "recommendedPrerequisites": ["modeling-intermediate"],
+          "tutorials": []
+        }
+      ]
+    },
+    {
+      "id": "simulation-tools",
+      "name": "Simulation & Analysis Tools",
+      "tiers": [
+        {
+          "id": "sim-core",
+          "name": "Core Simulation",
+          "description": "Simulation settings, execution, and reading results",
+          "recommendedPrerequisites": ["modeling-foundations"],
+          "tutorials": []
+        },
+        {
+          "id": "sim-exploration",
+          "name": "Exploration & Sensitivity",
+          "description": "Parameter sweeps, multi-sweeps, and Monte Carlo analysis",
+          "recommendedPrerequisites": ["sim-core"],
+          "tutorials": []
+        },
+        {
+          "id": "sim-optimization",
+          "name": "Optimization & Calibration",
+          "description": "Optimization, calibration, and full workflow",
+          "recommendedPrerequisites": ["sim-exploration"],
+          "tutorials": []
+        }
+      ]
+    }
+  ]
+}

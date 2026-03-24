@@ -1,0 +1,18 @@
+{
+  "id": "first-model",
+  "title": "Your First Model",
+  "description": "Build a coffee cooling simulation. Learn to place stocks, flows, and variables, write equations, and run a simulation.",
+  "difficulty": "beginner",
+  "estimatedMinutes": 15,
+  "model": "introductory/coffee-cooling.json",
+  "recommendedPrerequisites": [],
+  "steps": [
+    { "title": "The Idea", "content": "first-model/01-the-idea.md" },
+    { "title": "Place Elements", "content": "first-model/02-place-elements.md" },
+    { "title": "Connect & Equate", "content": "first-model/03-connect-equate.md" },
+    { "title": "Simulate", "content": "first-model/04-simulate.md" },
+    { "title": "Experiment", "content": "first-model/05-experiment.md" },
+    { "title": "Next Steps", "content": "first-model/06-next-steps.md" }
+  ],
+  "nextTutorial": "feedback-loops"
+}

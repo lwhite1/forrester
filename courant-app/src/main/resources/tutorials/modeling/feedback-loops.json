@@ -1,0 +1,19 @@
+{
+  "id": "feedback-loops",
+  "title": "SIR Epidemic Model",
+  "description": "Model infectious disease spread with reinforcing and balancing feedback. Explore S-shaped growth and parameter sweeps.",
+  "difficulty": "beginner",
+  "estimatedMinutes": 20,
+  "model": "epidemiology/sir-basic.json",
+  "recommendedPrerequisites": ["first-model"],
+  "steps": [
+    { "title": "The Idea", "content": "feedback-loops/01-the-idea.md" },
+    { "title": "Stocks", "content": "feedback-loops/02-stocks.md" },
+    { "title": "Flows", "content": "feedback-loops/03-flows.md" },
+    { "title": "Parameters", "content": "feedback-loops/04-parameters.md" },
+    { "title": "Simulate", "content": "feedback-loops/05-simulate.md" },
+    { "title": "Experiment", "content": "feedback-loops/06-experiment.md" },
+    { "title": "Key Takeaways", "content": "feedback-loops/07-key-takeaways.md" }
+  ],
+  "nextTutorial": "cld-basics"
+}

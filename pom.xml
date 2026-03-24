@@ -133,6 +133,13 @@
                 <version>${jackson.version}</version>
             </dependency>
 
+            <!-- Markdown parsing -->
+            <dependency>
+                <groupId>org.commonmark</groupId>
+                <artifactId>commonmark</artifactId>
+                <version>0.24.0</version>
+            </dependency>
+
             <!-- Rich text editing -->
             <dependency>
                 <groupId>org.fxmisc.richtext</groupId>
