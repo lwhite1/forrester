@@ -19,6 +19,11 @@ public class SirTutorialDialog extends AbstractTutorialDialog {
     }
 
     @Override
+    protected String getTutorialId() {
+        return "sir-epidemic";
+    }
+
+    @Override
     protected List<Tab> buildTabs() {
         return List.of(
                 createTab("1. The Idea", ideaTab()),
