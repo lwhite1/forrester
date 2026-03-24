@@ -64,7 +64,7 @@ public class ModelEditor {
             new EquationReferenceManager(flows, variables);
     private final ElementFactory factory = new ElementFactory(
             stocks, flows, variables, modules, lookupTables, cldVariables,
-            causalLinks, comments, nameIndex);
+            causalLinks, comments, nameIndex, this::resolveDefaultTimeUnit);
     private final ElementCascadeManager cascadeManager = new ElementCascadeManager(
             stocks, flows, variables, modules, lookupTables, cldVariables,
             causalLinks, comments, nameIndex, equationRefManager);
@@ -673,7 +673,8 @@ public class ModelEditor {
         // Create the target S&F element with the same name
         switch (targetType) {
             case STOCK -> stocks.add(new StockDef(name, variable.comment(), 0, "units", null));
-            case FLOW -> flows.add(new FlowDef(name, variable.comment(), "0", "Day", null, null));
+            case FLOW -> flows.add(new FlowDef(name, variable.comment(), "0",
+                    resolveDefaultTimeUnit(), null, null));
             case AUX -> variables.add(new VariableDef(name, variable.comment(), "0", "units"));
             default -> {
                 // Unsupported target type — put the variable back
@@ -697,6 +698,11 @@ public class ModelEditor {
     public String getModelComment() { return queryFacade.getModelComment(); }
     public ModelMetadata getMetadata() { return queryFacade.getMetadata(); }
     public SimulationSettings getSimulationSettings() { return queryFacade.getSimulationSettings(); }
+
+    private String resolveDefaultTimeUnit() {
+        SimulationSettings settings = getSimulationSettings();
+        return settings != null ? settings.timeStep() : "Day";
+    }
     public List<StockDef> getStocks() { return queryFacade.getStocks(); }
     public List<FlowDef> getFlows() { return queryFacade.getFlows(); }
     public List<VariableDef> getVariables() { return queryFacade.getVariables(); }

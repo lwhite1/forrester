@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import static systems.courant.sd.app.canvas.ElementNameValidator.parseIdSuffix;
 import static systems.courant.sd.app.canvas.ElementNameValidator.resolveUniqueName;
@@ -38,6 +39,7 @@ final class ElementFactory {
     private final List<CausalLinkDef> causalLinks;
     private final List<CommentDef> comments;
     private final Set<String> nameIndex;
+    private final Supplier<String> defaultTimeUnit;
 
     private int nextStockId = 1;
     private int nextFlowId = 1;
@@ -51,7 +53,7 @@ final class ElementFactory {
                    List<VariableDef> variables, List<ModuleInstanceDef> modules,
                    List<LookupTableDef> lookupTables, List<CldVariableDef> cldVariables,
                    List<CausalLinkDef> causalLinks, List<CommentDef> comments,
-                   Set<String> nameIndex) {
+                   Set<String> nameIndex, Supplier<String> defaultTimeUnit) {
         this.stocks = stocks;
         this.flows = flows;
         this.variables = variables;
@@ -61,6 +63,7 @@ final class ElementFactory {
         this.causalLinks = causalLinks;
         this.comments = comments;
         this.nameIndex = nameIndex;
+        this.defaultTimeUnit = defaultTimeUnit;
     }
 
     /**
@@ -87,7 +90,8 @@ final class ElementFactory {
     String addFlow(String source, String sink) {
         String name = "Flow " + nextFlowId++;
         String materialUnit = inferMaterialUnit(source, sink);
-        flows.add(new FlowDef(name, null, "0", "Day", materialUnit, source, sink, List.of()));
+        flows.add(new FlowDef(name, null, "0", defaultTimeUnit.get(),
+                materialUnit, source, sink, List.of()));
         nameIndex.add(name);
         return name;
     }
