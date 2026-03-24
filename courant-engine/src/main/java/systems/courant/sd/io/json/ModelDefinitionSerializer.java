@@ -373,6 +373,13 @@ public class ModelDefinitionSerializer {
                 }
                 node.set("flowRoutes", flowRoutes);
             }
+            if (!v.loopNames().isEmpty()) {
+                ObjectNode loopNamesNode = mapper.createObjectNode();
+                for (Map.Entry<String, String> entry : v.loopNames().entrySet()) {
+                    loopNamesNode.put(entry.getKey(), entry.getValue());
+                }
+                node.set("loopNames", loopNamesNode);
+            }
             arr.add(node);
         }
         return arr;
@@ -829,7 +836,13 @@ public class ModelDefinitionSerializer {
                 flowRoutes.add(new FlowRoute(requiredText(fr, "flowName"), points));
             }
         }
-        return new ViewDef(name, elements, connectors, flowRoutes);
+        Map<String, String> loopNames = new HashMap<>();
+        if (n.has("loopNames")) {
+            JsonNode loopNamesNode = n.get("loopNames");
+            loopNamesNode.fieldNames().forEachRemaining(key ->
+                    loopNames.put(key, loopNamesNode.get(key).asText()));
+        }
+        return new ViewDef(name, elements, connectors, flowRoutes, loopNames);
     }
 
     private ModuleInterface deserializeModuleInterface(JsonNode node) {

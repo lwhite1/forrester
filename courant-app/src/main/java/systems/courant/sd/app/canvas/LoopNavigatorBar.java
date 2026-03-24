@@ -20,7 +20,11 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
 
+import javafx.scene.control.TextField;
+
 import java.util.List;
+import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 /**
@@ -49,11 +53,16 @@ public class LoopNavigatorBar extends HBox {
     private final Button helpIcon = new Button("?");
     private final Button elementsButton = new Button("Elements");
 
+    private final TextField nameField = new TextField();
+
     private Runnable onPrev;
     private Runnable onNext;
     private Runnable onShowAll;
     private Consumer<LoopType> onFilterChanged;
+    private BiConsumer<String, String> onLoopRenamed;
     private Stage elementsPopup;
+    private Map<String, String> loopNames = Map.of();
+    private String activeLoopLabel;
 
     public LoopNavigatorBar() {
         setId("loopNavigatorBar");
@@ -100,6 +109,21 @@ public class LoopNavigatorBar extends HBox {
 
         loopLabel.setId("loopNavigatorLabel");
         loopLabel.setStyle("-fx-font-size: 12px;");
+
+        nameField.setId("loopNameField");
+        nameField.setStyle("-fx-font-size: 11px;");
+        nameField.setPrefWidth(150);
+        nameField.setMaxWidth(200);
+        nameField.setPromptText("Name this loop");
+        nameField.setVisible(false);
+        nameField.setManaged(false);
+        nameField.setFocusTraversable(false);
+        nameField.setOnAction(e -> commitLoopName());
+        nameField.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
+            if (!isFocused) {
+                commitLoopName();
+            }
+        });
     }
 
     private void configureFilterButtons() {
@@ -246,7 +270,7 @@ public class LoopNavigatorBar extends HBox {
         Region spacer2 = new Region();
         spacer2.setPrefWidth(8);
 
-        getChildren().addAll(prevButton, nextButton, loopLabel, allButton,
+        getChildren().addAll(prevButton, nextButton, loopLabel, nameField, allButton,
                 elementsButton,
                 spacer, filterLabel, filterAllBtn, filterRBtn, filterBBtn,
                 spacer2, helpIcon);
@@ -285,6 +309,21 @@ public class LoopNavigatorBar extends HBox {
     }
 
     /**
+     * Sets the callback invoked when the user names a loop.
+     * Parameters: (loopLabel, customName) — customName may be empty to clear.
+     */
+    public void setOnLoopRenamed(BiConsumer<String, String> callback) {
+        this.onLoopRenamed = callback;
+    }
+
+    /**
+     * Sets the loop names map (typically from ViewDef). Call before update().
+     */
+    public void setLoopNames(Map<String, String> names) {
+        this.loopNames = names != null ? names : Map.of();
+    }
+
+    /**
      * Updates the navigator display based on the current loop analysis, active index,
      * and type filter.
      *
@@ -296,6 +335,7 @@ public class LoopNavigatorBar extends HBox {
     public void update(FeedbackAnalysis analysis, int activeIndex,
                        LoopType typeFilter, int filteredCount) {
         boolean popupWasShowing = elementsPopup != null && elementsPopup.isShowing();
+        activeLoopLabel = null;
 
         if (analysis == null) {
             loopLabel.setText("Loop analysis not available");
@@ -306,6 +346,7 @@ public class LoopNavigatorBar extends HBox {
             filterRBtn.setDisable(true);
             filterBBtn.setDisable(true);
             elementsButton.setDisable(true);
+            hideNameField();
             closePopup();
             return;
         }
@@ -339,6 +380,7 @@ public class LoopNavigatorBar extends HBox {
             String filterDesc = typeFilter == LoopType.REINFORCING ? "reinforcing" : "balancing";
             loopLabel.setText("No " + filterDesc + " loops");
             loopLabel.setTooltip(null);
+            hideNameField();
             closePopup();
         } else if (activeIndex < 0) {
             String suffix = typeFilter != null
@@ -347,6 +389,7 @@ public class LoopNavigatorBar extends HBox {
             loopLabel.setText(displayCount + (displayCount == 1 ? " loop" : " loops")
                     + suffix + " \u2014 click \u25B6 to step");
             loopLabel.setTooltip(null);
+            hideNameField();
             closePopup();
         } else {
             FeedbackAnalysis.CausalLoop activeLoop = analysis.causalLoops().get(activeIndex);
@@ -377,6 +420,9 @@ public class LoopNavigatorBar extends HBox {
                 tip.setWrapText(true);
                 tip.setMaxWidth(400);
                 loopLabel.setTooltip(tip);
+
+                activeLoopLabel = info.label();
+                showNameField(info.label());
             });
             elementsButton.setDisable(false);
             elementsButton.setOnAction(e -> showElementsPopup(activeLoop));
@@ -393,6 +439,29 @@ public class LoopNavigatorBar extends HBox {
         if (elementsPopup != null) {
             elementsPopup.close();
             elementsPopup = null;
+        }
+    }
+
+    private void showNameField(String loopLabel) {
+        String customName = loopNames.getOrDefault(loopLabel, "");
+        nameField.setText(customName);
+        nameField.setVisible(true);
+        nameField.setManaged(true);
+    }
+
+    private void hideNameField() {
+        nameField.setVisible(false);
+        nameField.setManaged(false);
+    }
+
+    private void commitLoopName() {
+        if (activeLoopLabel == null || onLoopRenamed == null) {
+            return;
+        }
+        String name = nameField.getText().trim();
+        String existing = loopNames.getOrDefault(activeLoopLabel, "");
+        if (!name.equals(existing)) {
+            onLoopRenamed.accept(activeLoopLabel, name);
         }
     }
 

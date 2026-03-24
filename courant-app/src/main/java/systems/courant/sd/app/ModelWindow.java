@@ -269,6 +269,10 @@ public class ModelWindow {
             updateLoopNavigator();
             canvas.requestFocus();
         });
+        loopNavigatorBar.setOnLoopRenamed((loopLabel, customName) -> {
+            canvas.canvasState().setLoopName(loopLabel, customName);
+            fileController.markDirty();
+        });
         toolBar.setOnLoopToggleChanged(active -> {
             canvas.analysis().setLoopHighlightActive(active);
             loopNavigatorBar.setVisible(active);
@@ -923,6 +927,7 @@ public class ModelWindow {
         if (loopNavigatorBar == null) {
             return;
         }
+        loopNavigatorBar.setLoopNames(canvas.canvasState().getLoopNames());
         loopNavigatorBar.update(canvas.analysis().getLoopAnalysis(), canvas.analysis().getActiveLoopIndex(),
                 canvas.analysis().getLoopTypeFilter(), canvas.analysis().getFilteredLoopCount());
     }
