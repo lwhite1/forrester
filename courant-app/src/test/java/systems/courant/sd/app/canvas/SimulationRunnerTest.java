@@ -38,7 +38,7 @@ class SimulationRunnerTest {
 
             SimulationRunner.SimulationResult result = runner.run(def, settings);
 
-            assertThat(result.columnNames()).contains("Step", "Population");
+            assertThat(result.columnNames()).contains("Day", "Population");
         }
 
         @Test
@@ -200,8 +200,8 @@ class SimulationRunnerTest {
 
             SimulationRunner.SimulationResult result = runner.run(def, settings);
 
-            // Should have Step column at minimum
-            assertThat(result.columnNames()).contains("Step");
+            // Should have time step column at minimum
+            assertThat(result.columnNames()).contains("Day");
             assertThat(result.rows()).isNotEmpty();
         }
     }

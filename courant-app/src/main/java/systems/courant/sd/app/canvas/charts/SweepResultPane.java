@@ -31,11 +31,13 @@ public class SweepResultPane extends BorderPane {
 
     private final SweepResult result;
     private final String paramName;
+    private final String timeStepLabel;
     private LineChart<Number, Number> currentChart;
 
-    public SweepResultPane(SweepResult result, String paramName) {
+    public SweepResultPane(SweepResult result, String paramName, String timeStepLabel) {
         this.result = result;
         this.paramName = paramName;
+        this.timeStepLabel = timeStepLabel;
 
         List<String> trackableNames = new ArrayList<>();
         trackableNames.addAll(ChartUtils.filterSimulationSettings(result.getStockNames()));
@@ -63,7 +65,7 @@ public class SweepResultPane extends BorderPane {
 
     private void buildChart(String variableName) {
         NumberAxis xAxis = new NumberAxis();
-        xAxis.setLabel("Step");
+        xAxis.setLabel(timeStepLabel);
 
         NumberAxis yAxis = new NumberAxis();
         yAxis.setLabel(variableName);

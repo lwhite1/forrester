@@ -30,7 +30,7 @@ class LoopDominancePaneFxTest {
     @Start
     void start(Stage stage) {
         LoopDominanceAnalysis dominance = buildTestDominance();
-        pane = new LoopDominancePane(dominance);
+        pane = new LoopDominancePane(dominance, "Day");
         stage.setScene(new Scene(pane, 800, 600));
         stage.show();
     }

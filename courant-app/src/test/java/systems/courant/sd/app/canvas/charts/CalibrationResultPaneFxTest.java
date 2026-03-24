@@ -42,7 +42,7 @@ class CalibrationResultPaneFxTest {
         List<CalibrateDialog.FitTarget> fitTargets = List.of(
                 new CalibrateDialog.FitTarget("Tank", "Observed_Tank",
                         new double[]{100, 92, 85, 77, 70, 62}));
-        pane = new CalibrationResultPane(result, fitTargets);
+        pane = new CalibrationResultPane(result, fitTargets, "Day");
         stage.setScene(new Scene(pane, 800, 600));
         stage.show();
     }

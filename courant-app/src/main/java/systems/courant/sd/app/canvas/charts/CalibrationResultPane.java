@@ -31,11 +31,14 @@ import systems.courant.sd.app.canvas.Styles;
 public class CalibrationResultPane extends BorderPane {
 
     private final OptimizationResult result;
+    private final String timeStepLabel;
     private LineChart<Number, Number> chart;
 
     public CalibrationResultPane(OptimizationResult result,
-                                  List<CalibrateDialog.FitTarget> fitTargets) {
+                                  List<CalibrateDialog.FitTarget> fitTargets,
+                                  String timeStepLabel) {
         this.result = result;
+        this.timeStepLabel = timeStepLabel;
 
         // Summary grid
         GridPane summaryGrid = new GridPane();
@@ -82,7 +85,7 @@ public class CalibrationResultPane extends BorderPane {
     private LineChart<Number, Number> buildChart(RunResult bestRun,
                                                   List<CalibrateDialog.FitTarget> fitTargets) {
         NumberAxis xAxis = new NumberAxis();
-        xAxis.setLabel("Step");
+        xAxis.setLabel(timeStepLabel);
         NumberAxis yAxis = new NumberAxis();
         yAxis.setLabel("Value");
 

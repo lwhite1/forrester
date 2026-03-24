@@ -77,7 +77,7 @@ public class SimulationRunner {
         CompiledModel compiled = compiler.compile(defWithSettings);
         Simulation sim = compiled.createSimulation();
 
-        DataCaptureHandler handler = new DataCaptureHandler();
+        DataCaptureHandler handler = new DataCaptureHandler(settings.timeStep());
         sim.addEventHandler(handler);
         sim.execute();
 
@@ -91,6 +91,7 @@ public class SimulationRunner {
      */
     public static class DataCaptureHandler implements EventHandler {
 
+        private final String timeStepLabel;
         private final List<String> columnNames = new ArrayList<>();
         private final List<double[]> rows = new ArrayList<>();
         private final Map<String, String> units = new LinkedHashMap<>();
@@ -100,10 +101,14 @@ public class SimulationRunner {
         private List<Stock> capturedStocks;
         private List<Variable> capturedVariables;
 
+        public DataCaptureHandler(String timeStepLabel) {
+            this.timeStepLabel = timeStepLabel;
+        }
+
         @Override
         public void handleSimulationStartEvent(SimulationStartEvent event) {
             Model model = event.getModel();
-            columnNames.add("Step");
+            columnNames.add(timeStepLabel);
 
             capturedStocks = new ArrayList<>(model.getStocks());
             for (Stock stock : capturedStocks) {

@@ -38,7 +38,7 @@ class MultiSweepResultPaneFxTest {
     @Start
     void start(Stage stage) {
         MultiSweepResult result = buildMultiSweepResult();
-        pane = new MultiSweepResultPane(result);
+        pane = new MultiSweepResultPane(result, "Day");
         stage.setScene(new Scene(pane, 800, 600));
         stage.show();
     }

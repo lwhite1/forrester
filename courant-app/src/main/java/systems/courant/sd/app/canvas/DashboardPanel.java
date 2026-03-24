@@ -94,6 +94,19 @@ public class DashboardPanel extends VBox {
     private OptimizationResult lastOptimizationResult;
     private LoopDominanceAnalysis lastDominanceResult;
     private List<SensitivitySummary.ParameterImpact> lastSensitivityImpacts;
+    private String timeStepLabel = "Step";
+
+    /**
+     * Sets the label used for the time axis on all charts.
+     * Should be called before showing results (e.g., "Day", "Month").
+     */
+    public void setTimeStepLabel(String label) {
+        this.timeStepLabel = (label != null && !label.isBlank()) ? label : "Step";
+    }
+
+    public String getTimeStepLabel() {
+        return timeStepLabel;
+    }
 
     public DashboardPanel() {
         Label placeholderLabel = new Label("Run a simulation to see results.");
@@ -228,7 +241,7 @@ public class DashboardPanel extends VBox {
     public void showSweepResult(SweepResult result, String paramName) {
         clearStale();
         this.lastSweepResult = result;
-        SweepResultPane pane = new SweepResultPane(result, paramName);
+        SweepResultPane pane = new SweepResultPane(result, paramName, timeStepLabel);
         sweepTab = ensureTab(sweepTab, "Sweep", pane);
         resultTabs.getSelectionModel().select(sweepTab);
     }
@@ -244,7 +257,7 @@ public class DashboardPanel extends VBox {
     public void showOptimizationResult(OptimizationResult result) {
         clearStale();
         this.lastOptimizationResult = result;
-        OptimizationResultPane pane = new OptimizationResultPane(result);
+        OptimizationResultPane pane = new OptimizationResultPane(result, timeStepLabel);
         optimizationTab = ensureTab(optimizationTab, "Optimization", pane);
         resultTabs.getSelectionModel().select(optimizationTab);
     }
@@ -252,14 +265,14 @@ public class DashboardPanel extends VBox {
     public void showCalibrationResult(OptimizationResult result,
                                       List<CalibrateDialog.FitTarget> fitTargets) {
         clearStale();
-        CalibrationResultPane pane = new CalibrationResultPane(result, fitTargets);
+        CalibrationResultPane pane = new CalibrationResultPane(result, fitTargets, timeStepLabel);
         calibrationTab = ensureTab(calibrationTab, "Calibration", pane);
         resultTabs.getSelectionModel().select(calibrationTab);
     }
 
     public void showMultiSweepResult(MultiSweepResult result) {
         clearStale();
-        MultiSweepResultPane pane = new MultiSweepResultPane(result);
+        MultiSweepResultPane pane = new MultiSweepResultPane(result, timeStepLabel);
         multiSweepTab = ensureTab(multiSweepTab, "Multi-Sweep", pane);
         resultTabs.getSelectionModel().select(multiSweepTab);
     }
@@ -282,7 +295,7 @@ public class DashboardPanel extends VBox {
             return;
         }
         this.lastDominanceResult = dominance;
-        LoopDominancePane pane = new LoopDominancePane(dominance);
+        LoopDominancePane pane = new LoopDominancePane(dominance, timeStepLabel);
         unbindCursors();
         dominanceCursor = pane.cursorTimeStepProperty();
         bindCursors();
