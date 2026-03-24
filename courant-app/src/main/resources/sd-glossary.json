@@ -1,0 +1,401 @@
+[
+  {
+    "term": "Stock",
+    "aliases": ["Level", "State Variable", "Accumulation"],
+    "definition": "A variable that accumulates over time, representing the state of a system at any point. Stocks change only through inflows and outflows.",
+    "relevance": "Stocks are the foundation of system dynamics models, capturing quantities that persist between time steps — such as population, inventory, or water in a reservoir.",
+    "related": ["Flow", "Integration", "Euler Integration", "Runge-Kutta"]
+  },
+  {
+    "term": "Flow",
+    "aliases": ["Rate", "Rate Variable"],
+    "definition": "A variable that represents the rate of change of a stock per unit time. Flows fill or drain stocks.",
+    "relevance": "Flows are the only way stocks change value. Every causal mechanism that alters an accumulation must pass through a flow.",
+    "related": ["Stock", "Auxiliary", "DT"]
+  },
+  {
+    "term": "Auxiliary",
+    "aliases": ["Converter", "Variable"],
+    "definition": "An intermediate variable used to compute values that feed into flows or other auxiliaries. Auxiliaries do not accumulate.",
+    "relevance": "Auxiliaries break complex equations into understandable pieces and make model logic transparent.",
+    "related": ["Flow", "Constant", "Connector"]
+  },
+  {
+    "term": "Constant",
+    "aliases": ["Parameter"],
+    "definition": "A model element whose value does not change during a simulation run. Constants represent fixed assumptions or parameters.",
+    "relevance": "Constants capture assumptions that can be varied across scenarios, sensitivity analyses, or optimization runs.",
+    "related": ["Auxiliary", "Parameter Sweep", "Sensitivity Analysis"]
+  },
+  {
+    "term": "Connector",
+    "aliases": ["Information Link", "Causal Arrow"],
+    "definition": "An arrow indicating that one variable's value is used in the equation of another. Connectors carry information, not material.",
+    "relevance": "Connectors make the causal structure of a model explicit, showing which variables influence which equations.",
+    "related": ["Auxiliary", "Flow", "Causal Loop Diagram"]
+  },
+  {
+    "term": "Feedback Loop",
+    "aliases": ["Feedback"],
+    "definition": "A closed chain of causal links where a variable eventually influences itself. Feedback loops are the primary source of dynamic behavior.",
+    "relevance": "All interesting dynamic behavior — growth, oscillation, goal-seeking — arises from feedback loops, making them central to system dynamics analysis.",
+    "related": ["Balancing Loop", "Reinforcing Loop", "Loop Dominance"]
+  },
+  {
+    "term": "Balancing Loop",
+    "aliases": ["Negative Loop", "Goal-Seeking Loop"],
+    "definition": "A feedback loop with an odd number of negative causal links, which acts to counteract change and drive the system toward equilibrium.",
+    "relevance": "Balancing loops produce goal-seeking and oscillatory behavior. They resist change and tend to stabilize systems.",
+    "related": ["Feedback Loop", "Reinforcing Loop", "Goal-Seeking", "Oscillation"]
+  },
+  {
+    "term": "Reinforcing Loop",
+    "aliases": ["Positive Loop", "Virtuous Circle", "Vicious Circle"],
+    "definition": "A feedback loop with an even number of negative causal links (or all positive), which amplifies change in whatever direction it starts.",
+    "relevance": "Reinforcing loops drive exponential growth or collapse. They are responsible for compounding effects and self-reinforcing dynamics.",
+    "related": ["Feedback Loop", "Balancing Loop", "Exponential Growth", "Collapse"]
+  },
+  {
+    "term": "Causal Loop Diagram",
+    "aliases": ["CLD"],
+    "definition": "A diagram showing variables connected by causal arrows annotated with polarity (+ or −), used to map feedback structure without specifying equations.",
+    "relevance": "CLDs are the primary tool for qualitative system dynamics analysis, communicating feedback structure to stakeholders before building a simulation model.",
+    "related": ["Feedback Loop", "Stock-and-Flow Diagram", "Connector"]
+  },
+  {
+    "term": "Stock-and-Flow Diagram",
+    "aliases": ["SFD", "Stock-Flow Diagram"],
+    "definition": "A diagram showing stocks, flows, auxiliaries, and connectors with full equation specifications, suitable for simulation.",
+    "relevance": "SFDs are the quantitative core of system dynamics modeling. Unlike CLDs, they can be simulated to produce time-series behavior.",
+    "related": ["Causal Loop Diagram", "Stock", "Flow", "Simulation"]
+  },
+  {
+    "term": "Aging Chain",
+    "aliases": ["Chain of Stocks", "Cohort Model"],
+    "definition": "A series of stocks connected by flows where material moves sequentially through stages, often representing time-in-stage progression.",
+    "relevance": "Aging chains model processes like disease progression (susceptible → infectious → recovered), workforce tenure, or product lifecycle stages.",
+    "related": ["Stock", "Flow", "Delay", "Conveyor"]
+  },
+  {
+    "term": "Co-flow",
+    "aliases": ["Coflow"],
+    "definition": "A parallel stock-and-flow structure that tracks an attribute of the material in a main stock (e.g., average experience of a workforce).",
+    "relevance": "Co-flows enable tracking of average qualities or attributes associated with the material in a primary stock without losing aggregation.",
+    "related": ["Stock", "Aging Chain"]
+  },
+  {
+    "term": "Conveyor",
+    "aliases": ["Pipeline Delay"],
+    "definition": "A stock structure that delays material by a fixed transit time, delivering it in the same order it entered.",
+    "relevance": "Conveyors model processes with fixed delays such as shipping pipelines, production lines, or construction projects.",
+    "related": ["Delay", "Stock", "Aging Chain"]
+  },
+  {
+    "term": "Delay",
+    "aliases": ["Material Delay", "Information Delay"],
+    "definition": "A structure that introduces a time lag between an input and its effect on an output. Material delays conserve the quantity; information delays smooth a signal.",
+    "relevance": "Delays are a major source of oscillation and instability in systems. Recognizing and correctly modeling delays is essential for realistic behavior.",
+    "related": ["Smooth", "Conveyor", "Oscillation"]
+  },
+  {
+    "term": "Smooth",
+    "aliases": ["SMTH", "Exponential Smooth", "Information Delay"],
+    "definition": "A first-order exponential smoothing function that gradually adjusts its output toward its input over an averaging time.",
+    "relevance": "Smooths represent perception, forecasting, and information averaging processes where actors base decisions on perceived rather than actual values.",
+    "related": ["Delay", "Auxiliary"]
+  },
+  {
+    "term": "Equilibrium",
+    "aliases": ["Steady State"],
+    "definition": "A state where all stocks are constant because their net flows are zero. The system is at rest unless perturbed.",
+    "relevance": "Equilibrium analysis reveals the long-run tendencies of a system and helps identify conditions under which the system is stable or unstable.",
+    "related": ["Balancing Loop", "Goal-Seeking", "S-Shaped Growth"]
+  },
+  {
+    "term": "Oscillation",
+    "aliases": ["Cyclic Behavior"],
+    "definition": "Repeated fluctuation around an equilibrium or reference value, driven by delayed balancing feedback.",
+    "relevance": "Oscillations often indicate management problems — delays in information or response cause overcorrection, producing boom-bust cycles.",
+    "related": ["Balancing Loop", "Delay", "Overshoot"]
+  },
+  {
+    "term": "Overshoot",
+    "aliases": ["Overshoot and Collapse"],
+    "definition": "Behavior where a system exceeds its sustainable limit due to delayed feedback, followed by decline or collapse.",
+    "relevance": "Overshoot is a critical behavior mode in resource and population models, showing how growth can exceed carrying capacity before corrective feedback takes effect.",
+    "related": ["Oscillation", "Collapse", "Delay", "Carrying Capacity"]
+  },
+  {
+    "term": "Exponential Growth",
+    "aliases": ["Compound Growth"],
+    "definition": "Behavior where a quantity increases at a rate proportional to its current value, producing a J-shaped curve.",
+    "relevance": "Exponential growth is the signature of unchecked reinforcing loops. Understanding it is essential for recognizing unsustainable trajectories.",
+    "related": ["Reinforcing Loop", "S-Shaped Growth", "Doubling Time"]
+  },
+  {
+    "term": "S-Shaped Growth",
+    "aliases": ["Logistic Growth", "Sigmoid Growth"],
+    "definition": "Behavior that transitions from exponential growth to equilibrium as a limiting factor activates a balancing loop.",
+    "relevance": "S-shaped growth is one of the most common real-world behavior modes — product adoption, population growth with resource limits, and market saturation all follow this pattern.",
+    "related": ["Exponential Growth", "Balancing Loop", "Carrying Capacity", "Equilibrium"]
+  },
+  {
+    "term": "Goal-Seeking",
+    "aliases": ["Goal Seeking Behavior"],
+    "definition": "Behavior where a system moves toward a target value through balancing feedback, typically following an exponential approach curve.",
+    "relevance": "Goal-seeking is the fundamental behavior mode of balancing loops. Thermostats, inventory management, and homeostasis are all goal-seeking systems.",
+    "related": ["Balancing Loop", "Equilibrium"]
+  },
+  {
+    "term": "Collapse",
+    "aliases": ["Decay", "Decline"],
+    "definition": "Behavior where a system's key variables decline to zero or a much lower value, often following a period of overshoot.",
+    "relevance": "Collapse can result from reinforcing feedback in the negative direction, resource depletion, or positive feedback between declining stocks.",
+    "related": ["Overshoot", "Reinforcing Loop", "Exponential Growth"]
+  },
+  {
+    "term": "Sensitivity Analysis",
+    "aliases": ["Sensitivity Test"],
+    "definition": "Systematically varying one or more parameters to see how they affect model behavior and identify which assumptions matter most.",
+    "relevance": "Sensitivity analysis builds confidence in model results by showing which parameters drive behavior and which are relatively unimportant.",
+    "related": ["Parameter Sweep", "Monte Carlo Analysis", "Calibration"]
+  },
+  {
+    "term": "Phase Diagram",
+    "aliases": ["Phase Plot", "Phase Portrait"],
+    "definition": "A plot showing the trajectory of two or more state variables against each other (rather than against time), revealing system dynamics geometrically.",
+    "relevance": "Phase diagrams reveal cycles, spirals, and equilibria that may not be obvious in time-series plots, making them valuable for understanding coupled-stock dynamics.",
+    "related": ["Time Series", "Stock", "Oscillation"]
+  },
+  {
+    "term": "Time Series",
+    "aliases": ["Time Plot", "Behavior Over Time Graph"],
+    "definition": "A plot of one or more variables against time, showing how values evolve during a simulation run.",
+    "relevance": "Time series are the most common way to visualize and communicate simulation results, directly showing the dynamic behavior the model produces.",
+    "related": ["Behavior Over Time", "Reference Mode", "Simulation"]
+  },
+  {
+    "term": "Reference Mode",
+    "aliases": ["Reference Behavior"],
+    "definition": "A qualitative or quantitative sketch of the expected behavior pattern over time, drawn before modeling, that the model should reproduce.",
+    "relevance": "Reference modes define success — they are the behavioral hypothesis that drives model construction and the standard against which results are compared.",
+    "related": ["Behavior Over Time", "Time Series", "Calibration"]
+  },
+  {
+    "term": "Behavior Over Time",
+    "aliases": ["BOT", "BOT Graph"],
+    "definition": "A graph showing how key variables change over time, used both as a reference mode and as a presentation of simulation results.",
+    "relevance": "BOT graphs are the primary communication tool in system dynamics, conveying dynamic behavior in an intuitive visual form.",
+    "related": ["Reference Mode", "Time Series"]
+  },
+  {
+    "term": "Integration",
+    "aliases": ["Accumulation"],
+    "definition": "The mathematical operation by which a stock's value is updated: the new value equals the old value plus the net flow multiplied by the time step.",
+    "relevance": "Integration is the mechanism that gives stocks memory — they accumulate past flows, making system dynamics models inherently dynamic and history-dependent.",
+    "related": ["Stock", "Flow", "DT", "Euler Integration", "Runge-Kutta"]
+  },
+  {
+    "term": "Differentiation",
+    "aliases": [],
+    "definition": "The mathematical operation of computing the rate of change of a variable. In SD, net flow represents the derivative of a stock.",
+    "relevance": "While stocks integrate flows, understanding differentiation helps modelers reason about how fast stocks are changing at any point in time.",
+    "related": ["Integration", "Flow", "Stock"]
+  },
+  {
+    "term": "DT",
+    "aliases": ["Time Step", "Delta T"],
+    "definition": "The discrete time increment used in numerical integration. Smaller DT increases accuracy but slows computation.",
+    "relevance": "Choosing an appropriate DT is critical — too large causes integration errors and instability; too small wastes computation. A common guideline is DT ≤ one-quarter of the shortest time constant.",
+    "related": ["Integration", "Euler Integration", "Runge-Kutta", "Simulation"]
+  },
+  {
+    "term": "Euler Integration",
+    "aliases": ["Euler Method", "First-Order Integration"],
+    "definition": "The simplest numerical integration method, computing new stock values as: Stock(t+dt) = Stock(t) + NetFlow(t) × dt.",
+    "relevance": "Euler integration is the default method in many SD tools due to its simplicity and transparency. It works well with sufficiently small DT.",
+    "related": ["Integration", "DT", "Runge-Kutta", "Stock"]
+  },
+  {
+    "term": "Runge-Kutta",
+    "aliases": ["RK4", "Fourth-Order Runge-Kutta"],
+    "definition": "A higher-order numerical integration method that evaluates flows at multiple points within each time step for greater accuracy.",
+    "relevance": "Runge-Kutta methods allow larger time steps while maintaining accuracy, particularly for models with rapid dynamics or stiff equations.",
+    "related": ["Integration", "DT", "Euler Integration"]
+  },
+  {
+    "term": "Lookup Table",
+    "aliases": ["Table Function", "Graphical Function"],
+    "definition": "A nonlinear function defined by a set of (x, y) data points with interpolation between them, used when an algebraic relationship is unknown or complex.",
+    "relevance": "Lookup tables capture empirical or judgment-based relationships — such as how price affects demand or how crowding affects productivity — that cannot easily be expressed algebraically.",
+    "related": ["Auxiliary", "Nonlinear"]
+  },
+  {
+    "term": "Nonlinear",
+    "aliases": ["Non-linear"],
+    "definition": "A relationship where the effect is not proportional to the cause — the response changes shape as the input changes magnitude.",
+    "relevance": "Most real-world relationships are nonlinear. System dynamics models routinely use lookup tables and multiplicative formulations to capture these effects.",
+    "related": ["Lookup Table", "Feedback Loop"]
+  },
+  {
+    "term": "Mental Model",
+    "aliases": [],
+    "definition": "The internal, often implicit, assumptions and beliefs a person holds about how a system works.",
+    "relevance": "System dynamics models formalize mental models, making assumptions explicit and testable. Simulation reveals where mental models produce unexpected consequences.",
+    "related": ["Endogenous", "Model Boundary"]
+  },
+  {
+    "term": "Model Boundary",
+    "aliases": ["Boundary", "Model Boundary Chart"],
+    "definition": "The conceptual line separating what is included in the model (endogenous and exogenous) from what is excluded.",
+    "relevance": "Choosing the boundary is one of the most important modeling decisions. Including too little omits critical feedback; including too much adds unnecessary complexity.",
+    "related": ["Endogenous", "Exogenous", "Mental Model"]
+  },
+  {
+    "term": "Endogenous",
+    "aliases": [],
+    "definition": "Variables whose behavior is determined within the model through feedback structure — they are computed, not assumed.",
+    "relevance": "A core principle of system dynamics is that behavior should arise endogenously from feedback structure, not be imposed by exogenous drivers.",
+    "related": ["Exogenous", "Model Boundary", "Feedback Loop"]
+  },
+  {
+    "term": "Exogenous",
+    "aliases": [],
+    "definition": "Variables whose values are specified as external inputs to the model, not influenced by feedback from within the model.",
+    "relevance": "Exogenous variables represent forces outside the modeler's scope of interest. Overuse of exogenous drivers limits a model's ability to explain behavior.",
+    "related": ["Endogenous", "Model Boundary", "Constant"]
+  },
+  {
+    "term": "Subsystem",
+    "aliases": ["Module", "Sector"],
+    "definition": "A logical grouping of related stocks, flows, and auxiliaries within a larger model, often represented as a module.",
+    "relevance": "Subsystems help organize complex models into understandable pieces, enabling team-based development and hierarchical model construction.",
+    "related": ["Module", "Model Boundary"]
+  },
+  {
+    "term": "Dimensional Consistency",
+    "aliases": ["Units Checking", "Dimensional Analysis"],
+    "definition": "The requirement that every equation in a model be valid in terms of physical units — both sides must have the same dimensions.",
+    "relevance": "Dimensional consistency is a powerful error-detection tool. Equations that fail units checking almost always contain a conceptual mistake.",
+    "related": ["Validation", "Extreme Condition Test"]
+  },
+  {
+    "term": "Extreme Condition Test",
+    "aliases": ["Extreme Value Test"],
+    "definition": "A validation test that sets parameters or stocks to extreme values (zero, very large) to check that the model produces physically reasonable results.",
+    "relevance": "Extreme condition tests catch structural errors that normal-range testing misses — a model should never produce negative populations or infinite prices.",
+    "related": ["Validation", "Behavior Reproduction Test"]
+  },
+  {
+    "term": "Behavior Reproduction Test",
+    "aliases": ["Historical Fit"],
+    "definition": "A validation test comparing model output to historical data to assess whether the model can replicate observed real-world behavior.",
+    "relevance": "Behavior reproduction builds confidence that the model captures the essential mechanisms driving observed dynamics.",
+    "related": ["Calibration", "Extreme Condition Test", "Reference Mode"]
+  },
+  {
+    "term": "Policy Analysis",
+    "aliases": ["Policy Design", "Strategy Testing"],
+    "definition": "Using a validated model to test proposed interventions, policies, or structural changes and compare their effects on system behavior.",
+    "relevance": "Policy analysis is the ultimate purpose of most SD models — understanding leverage points and evaluating which interventions produce lasting improvement.",
+    "related": ["Sensitivity Analysis", "Leverage Point", "Optimization"]
+  },
+  {
+    "term": "Leverage Point",
+    "aliases": [],
+    "definition": "A place in the system structure where a small change can produce a large, sustained shift in behavior.",
+    "relevance": "Identifying leverage points is a key insight from system dynamics. They are often counterintuitive — the most obvious intervention points are frequently the least effective.",
+    "related": ["Policy Analysis", "Feedback Loop", "Model Boundary"]
+  },
+  {
+    "term": "Loop Dominance",
+    "aliases": ["Dominant Loop"],
+    "definition": "The concept that at any point in time, one feedback loop exerts more influence on behavior than others, determining the current behavior mode.",
+    "relevance": "Behavior-mode shifts (e.g., from growth to stagnation) occur when loop dominance changes. Identifying which loop dominates explains why behavior changes character.",
+    "related": ["Feedback Loop", "Reinforcing Loop", "Balancing Loop"]
+  },
+  {
+    "term": "Carrying Capacity",
+    "aliases": [],
+    "definition": "The maximum population or quantity that an environment or system can sustain given available resources.",
+    "relevance": "Carrying capacity creates the balancing feedback that turns exponential growth into S-shaped growth or overshoot-and-collapse behavior.",
+    "related": ["S-Shaped Growth", "Overshoot", "Balancing Loop", "Equilibrium"]
+  },
+  {
+    "term": "Doubling Time",
+    "aliases": [],
+    "definition": "The time it takes for an exponentially growing quantity to double. For a growth rate r, doubling time ≈ 0.7/r.",
+    "relevance": "Doubling time is an intuitive measure of growth speed that helps modelers and stakeholders understand the pace of exponential processes.",
+    "related": ["Exponential Growth", "Reinforcing Loop"]
+  },
+  {
+    "term": "Half-Life",
+    "aliases": [],
+    "definition": "The time it takes for a decaying quantity to lose half its value. The decay analog of doubling time.",
+    "relevance": "Half-life characterizes exponential decay in stocks — radioactive decay, drug clearance, and memory loss all follow half-life dynamics.",
+    "related": ["Doubling Time", "Exponential Growth", "Goal-Seeking"]
+  },
+  {
+    "term": "Simulation",
+    "aliases": ["Model Simulation", "Run"],
+    "definition": "The process of numerically computing model behavior over time by iteratively updating stocks through their flows at each time step.",
+    "relevance": "Simulation is what makes SD models actionable — it reveals the dynamic consequences of structure and assumptions that cannot be computed mentally.",
+    "related": ["DT", "Integration", "Euler Integration", "Runge-Kutta"]
+  },
+  {
+    "term": "Monte Carlo Analysis",
+    "aliases": ["Monte Carlo Simulation", "Stochastic Simulation"],
+    "definition": "Running a model hundreds or thousands of times with randomly sampled parameter values to quantify uncertainty in model outputs.",
+    "relevance": "Monte Carlo analysis shows the range of possible outcomes given parameter uncertainty, moving beyond single-point forecasts to probabilistic understanding.",
+    "related": ["Sensitivity Analysis", "Parameter Sweep"]
+  },
+  {
+    "term": "Parameter Sweep",
+    "aliases": ["Parametric Analysis"],
+    "definition": "Systematically varying one parameter across a defined range while holding others constant, and comparing the resulting behavior across runs.",
+    "relevance": "Parameter sweeps reveal how sensitive model behavior is to specific assumptions and help identify critical thresholds or tipping points.",
+    "related": ["Sensitivity Analysis", "Monte Carlo Analysis"]
+  },
+  {
+    "term": "Calibration",
+    "aliases": ["Parameter Estimation"],
+    "definition": "The process of adjusting model parameters to minimize the difference between simulated and observed historical data.",
+    "relevance": "Calibration grounds a model in empirical data, providing parameter estimates that produce realistic behavior and enabling more credible scenario analysis.",
+    "related": ["Behavior Reproduction Test", "Optimization", "Reference Mode"]
+  },
+  {
+    "term": "Optimization",
+    "aliases": [],
+    "definition": "Finding parameter values or policy settings that maximize or minimize an objective function subject to model constraints.",
+    "relevance": "Optimization goes beyond asking 'what if' to asking 'what's best' — it systematically searches for the best policy or parameter configuration.",
+    "related": ["Calibration", "Sensitivity Analysis", "Policy Analysis"]
+  },
+  {
+    "term": "Validation",
+    "aliases": ["Model Validation", "Model Testing"],
+    "definition": "The process of building confidence that a model is useful for its intended purpose through a battery of structural and behavioral tests.",
+    "relevance": "Validation is not proof of correctness but a systematic process of challenging and testing the model to expose weaknesses and build confidence.",
+    "related": ["Dimensional Consistency", "Extreme Condition Test", "Behavior Reproduction Test"]
+  },
+  {
+    "term": "Jay Forrester",
+    "aliases": ["Jay W. Forrester"],
+    "definition": "Professor at MIT (1918–2016) who founded the field of system dynamics in the 1950s, applying feedback control theory to social and industrial systems.",
+    "relevance": "Forrester's books Industrial Dynamics (1961), Urban Dynamics (1969), and World Dynamics (1971) established system dynamics as a discipline.",
+    "related": ["Donella Meadows", "John Sterman"]
+  },
+  {
+    "term": "Donella Meadows",
+    "aliases": ["Dana Meadows"],
+    "definition": "Biophysicist and systems scientist (1941–2001), lead author of The Limits to Growth and author of Thinking in Systems: A Primer.",
+    "relevance": "Meadows made system dynamics accessible to a wide audience and identified leverage points as a framework for intervening in complex systems.",
+    "related": ["Jay Forrester", "John Sterman", "Leverage Point"]
+  },
+  {
+    "term": "John Sterman",
+    "aliases": [],
+    "definition": "Professor at MIT Sloan School of Management, author of Business Dynamics: Systems Thinking and Modeling for a Complex World (2000).",
+    "relevance": "Sterman's textbook is the standard reference for system dynamics education, covering modeling methodology, analysis techniques, and applications.",
+    "related": ["Jay Forrester", "Donella Meadows"]
+  }
+]

@@ -653,6 +653,8 @@ public class ModelWindow {
         commandRegistry.add("SD Concepts", "Help",
                 () -> helpWindows.showOrBring(SdConceptsDialog.class,
                         SdConceptsDialog::new));
+        commandRegistry.add("SD Terminology", "Help",
+                this::showGlossary);
         commandRegistry.add("Expression Language", "Help",
                 () -> helpWindows.showOrBring(ExpressionLanguageDialog.class,
                         ExpressionLanguageDialog::new));
@@ -807,6 +809,19 @@ public class ModelWindow {
             contextHelpDialog.initOwner(stage);
         }
         contextHelpDialog.showTopic(topic);
+        if (!contextHelpDialog.isShowing()) {
+            contextHelpDialog.show();
+        } else {
+            HelpWindowManager.bringToFront(contextHelpDialog);
+        }
+    }
+
+    private void showGlossary() {
+        if (contextHelpDialog == null || !contextHelpDialog.isShowing()) {
+            contextHelpDialog = new ContextHelpDialog();
+            contextHelpDialog.initOwner(stage);
+        }
+        contextHelpDialog.showGlossaryTerm(null);
         if (!contextHelpDialog.isShowing()) {
             contextHelpDialog.show();
         } else {

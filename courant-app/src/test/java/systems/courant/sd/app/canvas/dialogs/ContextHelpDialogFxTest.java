@@ -56,9 +56,10 @@ class ContextHelpDialogFxTest {
         @SuppressWarnings("unchecked")
         TreeView<HelpTopic> tree = (TreeView<HelpTopic>) root.getLeft();
 
-        // Count all leaf items (topic items, not category nodes)
+        // Count all leaf items (topic items + glossary, not category nodes)
         int leafCount = countLeaves(tree.getRoot());
-        assertThat(leafCount).isEqualTo(HelpTopic.values().length);
+        // +1 for the SD Terminology glossary leaf
+        assertThat(leafCount).isEqualTo(HelpTopic.values().length + 1);
     }
 
     @Test

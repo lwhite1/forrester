@@ -265,6 +265,7 @@ final class MenuBarBuilder {
                 supplyChainItem, cldTutorialItem);
 
         MenuItem sdConceptsItem = registry.toMenuItem("SD Concepts");
+        MenuItem sdTerminologyItem = registry.toMenuItem("SD Terminology");
         MenuItem exprLangItem = registry.toMenuItem("Expression Language");
         MenuItem shortcutsItem = registry.toMenuItem("Keyboard Shortcuts");
         MenuItem aboutItem = registry.toMenuItem("About Courant");
@@ -272,7 +273,8 @@ final class MenuBarBuilder {
         helpMenu.getItems().addAll(contextHelpItem,
                 new SeparatorMenuItem(),
                 tutorialsMenu,
-                new SeparatorMenuItem(), sdConceptsItem, exprLangItem,
+                new SeparatorMenuItem(), sdConceptsItem, sdTerminologyItem,
+                exprLangItem,
                 new SeparatorMenuItem(), shortcutsItem,
                 new SeparatorMenuItem(), aboutItem);
 

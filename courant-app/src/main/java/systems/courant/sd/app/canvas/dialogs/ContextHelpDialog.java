@@ -10,21 +10,28 @@ import javafx.stage.Stage;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import systems.courant.sd.app.canvas.GlossaryPane;
 import systems.courant.sd.app.canvas.HelpContent;
 import systems.courant.sd.app.canvas.HelpTopic;
 
 /**
  * A two-pane help dialog with a {@link TreeView} sidebar for navigation
  * and a content area displaying help for the selected {@link HelpTopic}.
+ * Includes an SD Terminology glossary section.
  *
  * <p>Intended to be used as a singleton window: call {@link #showTopic(HelpTopic)}
  * to navigate to a topic, bringing the window to front if already showing.
  */
 public class ContextHelpDialog extends Stage {
 
+    /** Sentinel value used for the glossary leaf node in the tree. */
+    static final String GLOSSARY_CATEGORY = "Glossary";
+
     private final TreeView<HelpTopic> treeView;
     private final StackPane contentPane;
     private final Map<HelpTopic, TreeItem<HelpTopic>> itemsByTopic = new LinkedHashMap<>();
+    private TreeItem<HelpTopic> glossaryItem;
+    private GlossaryPane glossaryPane;
 
     public ContextHelpDialog() {
         setTitle("Help");
@@ -46,8 +53,12 @@ public class ContextHelpDialog extends Stage {
         // Show content when tree selection changes
         treeView.getSelectionModel().selectedItemProperty().addListener(
                 (obs, oldItem, newItem) -> {
-                    if (newItem != null && newItem.getValue() != null && newItem.isLeaf()) {
-                        showContent(newItem.getValue());
+                    if (newItem != null && newItem.isLeaf()) {
+                        if (newItem == glossaryItem) {
+                            showGlossary(null);
+                        } else if (newItem.getValue() != null) {
+                            showContent(newItem.getValue());
+                        }
                     }
                 });
 
@@ -72,8 +83,37 @@ public class ContextHelpDialog extends Stage {
         requestFocus();
     }
 
+    /**
+     * Navigates to the glossary, optionally scrolling to a specific term.
+     *
+     * @param term the term to highlight, or null to show the full glossary
+     */
+    public void showGlossaryTerm(String term) {
+        if (glossaryItem != null) {
+            if (glossaryItem.getParent() != null) {
+                glossaryItem.getParent().setExpanded(true);
+            }
+            treeView.getSelectionModel().select(glossaryItem);
+        }
+        showGlossary(term);
+        toFront();
+        requestFocus();
+    }
+
     private void showContent(HelpTopic topic) {
-        contentPane.getChildren().setAll(HelpContent.forTopic(topic));
+        contentPane.getChildren().setAll(
+                HelpContent.forTopic(topic, this::showGlossaryTerm));
+    }
+
+    private void showGlossary(String term) {
+        if (glossaryPane == null) {
+            glossaryPane = new GlossaryPane();
+            glossaryPane.setOnTermNavigate(this::showGlossaryTerm);
+        }
+        contentPane.getChildren().setAll(glossaryPane);
+        if (term != null) {
+            glossaryPane.showTerm(term);
+        }
     }
 
     private TreeView<HelpTopic> buildTreeView() {
@@ -98,6 +138,13 @@ public class ContextHelpDialog extends Stage {
             root.getChildren().add(entry.getValue());
         }
 
+        // Add glossary as a leaf under a "Glossary" category
+        TreeItem<HelpTopic> glossaryCat = new TreeItem<>(null);
+        glossaryCat.setExpanded(true);
+        glossaryItem = new TreeItem<>(null);
+        glossaryCat.getChildren().add(glossaryItem);
+        root.getChildren().add(glossaryCat);
+
         TreeView<HelpTopic> tree = new TreeView<>(root);
         tree.setCellFactory(tv -> new TreeCell<>() {
             @Override
@@ -106,10 +153,16 @@ public class ContextHelpDialog extends Stage {
                 if (empty || getTreeItem() == null) {
                     setText(null);
                     setStyle("");
+                } else if (getTreeItem() == glossaryItem) {
+                    setText("SD Terminology");
+                    setStyle("");
                 } else if (item == null) {
                     // Category node — find category name from first child
                     TreeItem<HelpTopic> treeItem = getTreeItem();
-                    if (!treeItem.getChildren().isEmpty()) {
+                    if (treeItem == glossaryItem.getParent()) {
+                        setText(GLOSSARY_CATEGORY);
+                        setStyle("-fx-font-weight: bold;");
+                    } else if (!treeItem.getChildren().isEmpty()) {
                         HelpTopic firstChild = treeItem.getChildren().getFirst().getValue();
                         setText(firstChild != null ? firstChild.category() : "");
                         setStyle("-fx-font-weight: bold;");
