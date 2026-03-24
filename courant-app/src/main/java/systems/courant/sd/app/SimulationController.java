@@ -248,7 +248,17 @@ final class SimulationController {
             return;
         }
 
-        MonteCarloDialog dialog = new MonteCarloDialog(parameterNames, lastMonteCarloConfig);
+        Map<String, Double> constantValues = new java.util.HashMap<>();
+        for (String name : parameterNames) {
+            activeEditor.getVariableByName(name).ifPresent(v -> {
+                try {
+                    constantValues.put(name, Double.parseDouble(v.equation().trim()));
+                } catch (NumberFormatException ignored) {
+                }
+            });
+        }
+        MonteCarloDialog dialog = new MonteCarloDialog(parameterNames, constantValues,
+                lastMonteCarloConfig);
         Optional<MonteCarloDialog.Config> configOpt = dialog.showAndWait();
         if (configOpt.isEmpty()) {
             return;
