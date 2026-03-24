@@ -115,7 +115,15 @@ public class DimensionalAnalysisUI {
         EquationValidator.Result result =
                 EquationValidator.validate(text, ctx.getEditor(), ctx.getElementName());
         if (result.valid()) {
-            clearEquationError(field, errorLabel);
+            if (result.warning() != null) {
+                field.setFieldStyle(Styles.EQUATION_WARNING_BORDER);
+                errorLabel.setText(result.warning());
+                errorLabel.setStyle(Styles.EQUATION_WARNING_LABEL);
+                errorLabel.setVisible(true);
+                errorLabel.setManaged(true);
+            } else {
+                clearEquationError(field, errorLabel);
+            }
             runDimensionalAnalysis(text, dimensionLabel);
         } else {
             field.setFieldStyle(Styles.EQUATION_ERROR_BORDER);

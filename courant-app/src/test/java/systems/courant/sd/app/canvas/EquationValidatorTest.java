@@ -5,6 +5,9 @@ import systems.courant.sd.model.def.FlowDef;
 import systems.courant.sd.model.def.ModelDefinition;
 import systems.courant.sd.model.def.ModelDefinitionBuilder;
 import systems.courant.sd.model.def.StockDef;
+import systems.courant.sd.model.def.SubscriptDef;
+
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -164,6 +167,65 @@ class EquationValidatorTest {
         @DisplayName("empty vs non-empty")
         void emptyVsNonEmpty() {
             assertThat(EquationValidator.levenshtein("", "abc")).isEqualTo(3);
+        }
+    }
+
+    @Nested
+    @DisplayName("subscript validation")
+    class SubscriptValidation {
+
+        private ModelEditor subscriptEditor;
+
+        @BeforeEach
+        void setUp() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Subscript Test")
+                    .subscript("Region", List.of("North", "South"))
+                    .stock("Population", 100, "Person", List.of("Region"))
+                    .variable("Rate", "0.05", "1/Year")
+                    .flow("Migration", "Population * Rate", "Year",
+                            null, null, List.of("Region"))
+                    .build();
+            subscriptEditor = new ModelEditor();
+            subscriptEditor.loadFrom(def);
+        }
+
+        @Test
+        @DisplayName("bracket notation for subscripted element is accepted")
+        void bracketNotationAccepted() {
+            EquationValidator.Result result = EquationValidator.validate(
+                    "Population[North] * 0.1", subscriptEditor, "Migration");
+            assertThat(result.valid()).isTrue();
+            assertThat(result.warning()).isNull();
+        }
+
+        @Test
+        @DisplayName("bare subscripted ref from non-subscripted context warns")
+        void bareRefWarns() {
+            EquationValidator.Result result = EquationValidator.validate(
+                    "Population * 0.1", subscriptEditor, "Rate");
+            assertThat(result.valid()).isTrue();
+            assertThat(result.warning()).isNotNull();
+            assertThat(result.warning()).contains("Population");
+            assertThat(result.warning()).contains("subscripted");
+        }
+
+        @Test
+        @DisplayName("bare ref from same-dimension context does not warn")
+        void bareRefSameDimensionNoWarning() {
+            EquationValidator.Result result = EquationValidator.validate(
+                    "Population * Rate", subscriptEditor, "Migration");
+            assertThat(result.valid()).isTrue();
+            assertThat(result.warning()).isNull();
+        }
+
+        @Test
+        @DisplayName("unknown bracket label is rejected")
+        void unknownBracketLabel() {
+            EquationValidator.Result result = EquationValidator.validate(
+                    "Population[Nowhere] * 0.1", subscriptEditor, "Rate");
+            assertThat(result.valid()).isFalse();
+            assertThat(result.message()).contains("Unknown");
         }
     }
 }

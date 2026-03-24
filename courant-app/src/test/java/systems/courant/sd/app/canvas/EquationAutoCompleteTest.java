@@ -2,6 +2,7 @@ package systems.courant.sd.app.canvas;
 
 import systems.courant.sd.model.def.ModelDefinition;
 import systems.courant.sd.model.def.ModelDefinitionBuilder;
+import systems.courant.sd.model.def.SubscriptDef;
 
 import java.util.Arrays;
 import java.util.List;
@@ -353,6 +354,78 @@ class EquationAutoCompleteTest {
         @Test
         void shouldReturnFalseForNonBuiltIn() {
             assertThat(EquationAutoComplete.isBuiltInFunction("Population")).isFalse();
+        }
+    }
+
+    @Nested
+    @DisplayName("extractToken with brackets")
+    class ExtractTokenBrackets {
+
+        @Test
+        void shouldExtractTokenInsideBrackets() {
+            var token = EquationAutoComplete.extractToken("Population[Nor", 14);
+            assertThat(token).isNotNull();
+            assertThat(token.prefix()).isEqualTo("Population[Nor");
+            assertThat(token.start()).isEqualTo(0);
+        }
+
+        @Test
+        void shouldExtractTokenAfterClosingBracket() {
+            var token = EquationAutoComplete.extractToken("Population[North]", 17);
+            assertThat(token).isNotNull();
+            assertThat(token.prefix()).isEqualTo("Population[North]");
+            assertThat(token.start()).isEqualTo(0);
+        }
+
+        @Test
+        void shouldExtractBracketTokenAfterOperator() {
+            var token = EquationAutoComplete.extractToken("A + Population[So", 17);
+            assertThat(token).isNotNull();
+            assertThat(token.prefix()).isEqualTo("Population[So");
+            assertThat(token.start()).isEqualTo(4);
+        }
+
+        @Test
+        void shouldExtractTokenWithOpenBracketOnly() {
+            var token = EquationAutoComplete.extractToken("Population[", 11);
+            assertThat(token).isNotNull();
+            assertThat(token.prefix()).isEqualTo("Population[");
+            assertThat(token.start()).isEqualTo(0);
+        }
+    }
+
+    @Nested
+    @DisplayName("subscripted suggestions")
+    class SubscriptedSuggestions {
+
+        @Test
+        void shouldIncludeExpandedSubscriptedNames() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .subscript("Region", List.of("North", "South"))
+                    .stock("Population", 100, "Person", List.of("Region"))
+                    .variable("Rate", "0.05", "1/Year")
+                    .build();
+            ModelEditor ed = new ModelEditor();
+            ed.loadFrom(def);
+
+            List<String> names = EquationAutoComplete.getSuggestions(ed, null);
+            assertThat(names).contains("Population[North]", "Population[South]");
+            assertThat(names).contains("Population"); // base name still present
+        }
+
+        @Test
+        void shouldFilterBracketedSuggestions() {
+            List<AutoCompleteSuggestion> all = List.of(
+                    new AutoCompleteSuggestion("Population[North]", "Population[North]",
+                            "Stock", AutoCompleteSuggestion.Kind.STOCK, false),
+                    new AutoCompleteSuggestion("Population[South]", "Population[South]",
+                            "Stock", AutoCompleteSuggestion.Kind.STOCK, false));
+
+            List<AutoCompleteSuggestion> filtered =
+                    EquationAutoComplete.filterRichSuggestions(all, "Population[N");
+            assertThat(filtered).hasSize(1);
+            assertThat(filtered.getFirst().name()).isEqualTo("Population[North]");
         }
     }
 }

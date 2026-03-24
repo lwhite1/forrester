@@ -72,6 +72,12 @@ public final class Styles {
     public static final String EQUATION_ERROR_LABEL =
             "-fx-text-fill: #E74C3C; -fx-font-size: 10px; -fx-wrap-text: true;";
 
+    // --- Equation validation (warning) ---
+    public static final String EQUATION_WARNING_BORDER =
+            "-fx-border-color: #E67E22; -fx-border-width: 1.5;";
+    public static final String EQUATION_WARNING_LABEL =
+            "-fx-text-fill: #E67E22; -fx-font-size: 10px; -fx-wrap-text: true;";
+
     // --- Dimensional analysis ---
     public static final String DIMENSION_LABEL =
             "-fx-text-fill: #6C757D; -fx-font-size: 10px;";

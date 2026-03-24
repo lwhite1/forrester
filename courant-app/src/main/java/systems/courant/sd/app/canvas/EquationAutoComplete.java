@@ -28,10 +28,17 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+
 import systems.courant.sd.app.canvas.forms.TextFieldEquationField;
+import systems.courant.sd.model.def.FlowDef;
+import systems.courant.sd.model.def.StockDef;
+import systems.courant.sd.model.def.SubscriptDef;
+import systems.courant.sd.model.def.VariableDef;
 
 /**
  * Attaches autocomplete behaviour to equation fields.
@@ -197,9 +204,47 @@ public final class EquationAutoComplete {
         }
         int end = caret;
         int start = caret;
+
+        // Scan backward over ident chars (handles normal tokens and content after ']')
         while (start > 0 && isIdentChar(text.charAt(start - 1))) {
             start--;
         }
+
+        // Check if we're inside or just after bracket notation: Name[label...]
+        if (start > 0 && text.charAt(start - 1) == ']') {
+            // Caret is right after ']' — scan backward over bracket content and base name
+            start--; // skip ']'
+            while (start > 0 && text.charAt(start - 1) != '[') {
+                start--;
+            }
+            if (start > 0) {
+                start--; // skip '['
+                while (start > 0 && isIdentChar(text.charAt(start - 1))) {
+                    start--;
+                }
+            }
+        } else if (start > 0 && text.charAt(start - 1) == '[') {
+            // Caret is inside brackets — scan back over '[' and the base name
+            start--; // skip '['
+            while (start > 0 && isIdentChar(text.charAt(start - 1))) {
+                start--;
+            }
+        } else if (start < caret) {
+            // Check if we scanned over bracket content: "Name[lab|" where we
+            // stopped at ident chars but there's a '[' + base name before
+            int probe = start;
+            if (probe > 0 && text.charAt(probe - 1) == '[') {
+                probe--; // skip '['
+                int bracketPos = probe;
+                while (probe > 0 && isIdentChar(text.charAt(probe - 1))) {
+                    probe--;
+                }
+                if (probe < bracketPos) {
+                    start = probe; // include base name and bracket
+                }
+            }
+        }
+
         if (start == end) {
             return null;
         }
@@ -281,6 +326,9 @@ public final class EquationAutoComplete {
         addElementSuggestions(result, editor.getModules(), m -> m.instanceName(),
                 AutoCompleteSuggestion.Kind.MODULE, excludeUnderscore);
 
+        // Add expanded subscripted names (e.g., Population[North])
+        addSubscriptedSuggestions(result, editor, excludeUnderscore);
+
         result.sort(Comparator.comparing(AutoCompleteSuggestion::name));
 
         // Add functions after elements
@@ -352,6 +400,82 @@ public final class EquationAutoComplete {
             };
             dest.add(new AutoCompleteSuggestion(name, name, kindLabel, kind, false));
         }
+    }
+
+    private static void addSubscriptedSuggestions(
+            List<AutoCompleteSuggestion> dest, ModelEditor editor, String excludeUnderscore) {
+        Map<String, List<String>> dimLabels = new HashMap<>();
+        for (SubscriptDef def : editor.getSubscripts()) {
+            dimLabels.put(def.name(), def.labels());
+        }
+        if (dimLabels.isEmpty()) {
+            return;
+        }
+        addExpandedElementSuggestions(dest, editor.getStocks(), StockDef::name,
+                StockDef::subscripts, AutoCompleteSuggestion.Kind.STOCK,
+                excludeUnderscore, dimLabels);
+        addExpandedElementSuggestions(dest, editor.getFlows(), FlowDef::name,
+                FlowDef::subscripts, AutoCompleteSuggestion.Kind.FLOW,
+                excludeUnderscore, dimLabels);
+        addExpandedElementSuggestions(dest, editor.getVariables(), VariableDef::name,
+                VariableDef::subscripts, AutoCompleteSuggestion.Kind.AUX,
+                excludeUnderscore, dimLabels);
+    }
+
+    private static <T> void addExpandedElementSuggestions(
+            List<AutoCompleteSuggestion> dest, List<T> elements,
+            java.util.function.Function<T, String> nameExtractor,
+            java.util.function.Function<T, List<String>> subscriptExtractor,
+            AutoCompleteSuggestion.Kind kind, String excludeUnderscore,
+            Map<String, List<String>> dimLabels) {
+        for (T element : elements) {
+            List<String> subs = subscriptExtractor.apply(element);
+            if (subs == null || subs.isEmpty()) {
+                continue;
+            }
+            String baseName = nameExtractor.apply(element).replace(' ', '_');
+            if (baseName.equals(excludeUnderscore)) {
+                continue;
+            }
+            List<List<String>> labelLists = new ArrayList<>();
+            for (String dim : subs) {
+                List<String> labels = dimLabels.get(dim);
+                if (labels != null) {
+                    labelLists.add(labels);
+                }
+            }
+            if (labelLists.isEmpty()) {
+                continue;
+            }
+            String kindLabel = switch (kind) {
+                case STOCK -> "Stock";
+                case FLOW -> "Flow";
+                case AUX -> "Variable";
+                default -> "";
+            } + " (subscripted)";
+            for (List<String> combo : cartesianProduct(labelLists)) {
+                String expanded = baseName + "[" + String.join(",", combo) + "]";
+                dest.add(new AutoCompleteSuggestion(
+                        expanded, expanded, kindLabel, kind, false));
+            }
+        }
+    }
+
+    private static List<List<String>> cartesianProduct(List<List<String>> lists) {
+        List<List<String>> result = new ArrayList<>();
+        result.add(new ArrayList<>());
+        for (List<String> list : lists) {
+            List<List<String>> next = new ArrayList<>();
+            for (List<String> partial : result) {
+                for (String item : list) {
+                    List<String> combo = new ArrayList<>(partial);
+                    combo.add(item);
+                    next.add(combo);
+                }
+            }
+            result = next;
+        }
+        return result;
     }
 
     public static boolean isBuiltInFunction(String name) {
