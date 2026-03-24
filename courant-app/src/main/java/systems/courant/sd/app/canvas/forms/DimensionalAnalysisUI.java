@@ -1,11 +1,19 @@
 package systems.courant.sd.app.canvas.forms;
 
 import systems.courant.sd.measure.CompositeUnit;
+import systems.courant.sd.measure.Dimension;
 import systems.courant.sd.measure.DimensionalAnalyzer;
+import systems.courant.sd.measure.TimeUnit;
 import systems.courant.sd.measure.UnitRegistry;
 import systems.courant.sd.model.expr.Expr;
 import systems.courant.sd.model.expr.ExprParser;
 import systems.courant.sd.model.expr.ParseException;
+
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.StringJoiner;
 
 import javafx.animation.PauseTransition;
 import javafx.scene.control.Label;
@@ -281,6 +289,178 @@ public class DimensionalAnalysisUI {
         }
 
         return null;
+    }
+
+    /**
+     * Infers the unit from the current equation text using dimensional analysis.
+     * Returns the inferred {@link CompositeUnit}, or null if the equation is empty,
+     * unparseable, or yields no dimensional information.
+     */
+    public CompositeUnit inferUnit(String equationText) {
+        if (equationText == null || equationText.isBlank()) {
+            return null;
+        }
+        try {
+            Expr expr = ExprParser.parse(equationText);
+            if (isPureConstant(expr)) {
+                return null;
+            }
+            EditorUnitContext unitContext = new EditorUnitContext(ctx.getEditor(), unitRegistry);
+            DimensionalAnalyzer analyzer = new DimensionalAnalyzer(unitContext);
+            DimensionalAnalyzer.AnalysisResult result = analyzer.analyze(expr);
+            if (result.inferredUnit() == null || !result.isConsistent()) {
+                return null;
+            }
+            return result.inferredUnit();
+        } catch (ParseException e) {
+            return null;
+        }
+    }
+
+    /**
+     * Infers the material unit for a flow by dividing the equation's inferred unit
+     * by the flow's time unit. Returns a display string using the original declared
+     * unit names from referenced elements, or null if inference fails.
+     *
+     * @param equationText the flow equation
+     * @param timeUnitName the flow's declared time unit (e.g. "Day")
+     */
+    public String inferFlowMaterialUnit(String equationText, String timeUnitName) {
+        CompositeUnit inferred = inferUnit(equationText);
+        if (inferred == null || inferred.isDimensionless()) {
+            return null;
+        }
+        if (timeUnitName == null || timeUnitName.isBlank()) {
+            return null;
+        }
+        try {
+            TimeUnit timeUnit = unitRegistry.resolveTimeUnit(timeUnitName);
+            CompositeUnit timeComposite = CompositeUnit.of(timeUnit);
+            CompositeUnit material = inferred.multiply(timeComposite);
+            if (material.isDimensionless()) {
+                return null;
+            }
+            Expr expr = ExprParser.parse(equationText);
+            Map<Dimension, String> dimNames = buildDimensionNameMap(expr);
+            return renderWithOriginalNames(material, dimNames);
+        } catch (ParseException | IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+    /**
+     * Infers the unit for a variable from its equation. Returns a display string
+     * using the original declared unit names from referenced elements, or null if
+     * inference fails or the result is dimensionless.
+     */
+    public String inferVariableUnit(String equationText) {
+        CompositeUnit inferred = inferUnit(equationText);
+        if (inferred == null || inferred.isDimensionless()) {
+            return null;
+        }
+        try {
+            Expr expr = ExprParser.parse(equationText);
+            Map<Dimension, String> dimNames = buildDimensionNameMap(expr);
+            return renderWithOriginalNames(inferred, dimNames);
+        } catch (ParseException e) {
+            return inferred.displayString();
+        }
+    }
+
+    /**
+     * Walks the expression AST collecting element references, then maps each
+     * referenced element's declared unit dimension to its raw unit name.
+     */
+    private Map<Dimension, String> buildDimensionNameMap(Expr expr) {
+        List<String> refs = new ArrayList<>();
+        collectRefs(expr, refs);
+        Map<Dimension, String> map = new LinkedHashMap<>();
+        for (String ref : refs) {
+            String rawUnit = getRawUnitForElement(ref);
+            if (rawUnit != null && !rawUnit.isBlank()) {
+                CompositeUnit resolved = unitRegistry.resolveComposite(rawUnit);
+                for (Dimension dim : resolved.exponents().keySet()) {
+                    map.putIfAbsent(dim, rawUnit);
+                }
+            }
+        }
+        return map;
+    }
+
+    private void collectRefs(Expr expr, List<String> refs) {
+        if (expr instanceof Expr.Ref r) {
+            refs.add(r.name());
+        } else if (expr instanceof Expr.BinaryOp op) {
+            collectRefs(op.left(), refs);
+            collectRefs(op.right(), refs);
+        } else if (expr instanceof Expr.UnaryOp op) {
+            collectRefs(op.operand(), refs);
+        } else if (expr instanceof Expr.FunctionCall fc) {
+            fc.arguments().forEach(a -> collectRefs(a, refs));
+        } else if (expr instanceof Expr.Conditional c) {
+            collectRefs(c.condition(), refs);
+            collectRefs(c.thenExpr(), refs);
+            collectRefs(c.elseExpr(), refs);
+        }
+    }
+
+    /**
+     * Returns the raw declared unit string for an element, or null if unknown.
+     */
+    private String getRawUnitForElement(String name) {
+        String resolved = name.replace('_', ' ');
+        var stockOpt = ctx.getEditor().getStockByName(name);
+        if (stockOpt.isEmpty()) {
+            stockOpt = ctx.getEditor().getStockByName(resolved);
+        }
+        if (stockOpt.isPresent()) {
+            return stockOpt.get().unit();
+        }
+        var varOpt = ctx.getEditor().getVariableByName(name);
+        if (varOpt.isEmpty()) {
+            varOpt = ctx.getEditor().getVariableByName(resolved);
+        }
+        if (varOpt.isPresent()) {
+            return varOpt.get().unit();
+        }
+        var flowOpt = ctx.getEditor().getFlowByName(name);
+        if (flowOpt.isEmpty()) {
+            flowOpt = ctx.getEditor().getFlowByName(resolved);
+        }
+        if (flowOpt.isPresent()) {
+            return flowOpt.get().materialUnit();
+        }
+        return null;
+    }
+
+    /**
+     * Renders a CompositeUnit using raw unit names from the dimension map where available,
+     * falling back to the dimension's base unit name.
+     */
+    private String renderWithOriginalNames(CompositeUnit unit, Map<Dimension, String> dimNames) {
+        if (unit.isDimensionless()) {
+            return "Dimensionless";
+        }
+        StringJoiner numerator = new StringJoiner(" * ");
+        StringJoiner denominator = new StringJoiner(" * ");
+
+        for (Map.Entry<Dimension, Integer> e : unit.exponents().entrySet()) {
+            String name = dimNames.getOrDefault(e.getKey(), e.getKey().getBaseUnit().getName());
+            int exp = e.getValue();
+            if (exp > 0) {
+                numerator.add(exp == 1 ? name : name + "^" + exp);
+            } else {
+                int absExp = -exp;
+                denominator.add(absExp == 1 ? name : name + "^" + absExp);
+            }
+        }
+        if (numerator.length() == 0) {
+            numerator.add("1");
+        }
+        if (denominator.length() == 0) {
+            return numerator.toString();
+        }
+        return numerator + " / " + denominator;
     }
 
     private void clearEquationError(EquationField field, Label errorLabel) {

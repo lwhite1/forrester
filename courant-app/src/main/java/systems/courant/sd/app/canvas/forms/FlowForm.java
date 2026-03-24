@@ -129,6 +129,24 @@ public class FlowForm implements ElementForm {
             return;
         }
         ctx.getCanvas().applyMutation(() -> ctx.getEditor().setFlowEquation(ctx.getElementName(), equation));
+        autoFillMaterialUnitIfBlank(equation);
+    }
+
+    private void autoFillMaterialUnitIfBlank(String equation) {
+        Optional<FlowDef> flowOpt = ctx.getEditor().getFlowByName(ctx.getElementName());
+        if (flowOpt.isEmpty()) {
+            return;
+        }
+        FlowDef flow = flowOpt.get();
+        if (flow.materialUnit() != null && !flow.materialUnit().isBlank()) {
+            return;
+        }
+        String inferred = dimAnalysis.inferFlowMaterialUnit(equation, flow.timeUnit());
+        if (inferred != null) {
+            ctx.getCanvas().applyMutation(
+                    () -> ctx.getEditor().setFlowMaterialUnit(ctx.getElementName(), inferred));
+            materialUnitBox.setValue(inferred);
+        }
     }
 
     private void commitMaterialUnit(ComboBox<String> box) {
