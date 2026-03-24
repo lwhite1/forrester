@@ -25,8 +25,12 @@ import java.util.List;
 public abstract class AbstractTutorialDialog extends Stage {
 
     private final double contentMaxWidth;
+    private final String tutorialId;
 
     /**
+     * Constructs the dialog, calling {@link #buildTabs()} and
+     * {@link #getTutorialId()} to obtain tabs and the tracking ID.
+     *
      * @param title           the dialog window title
      * @param width           scene width
      * @param height          scene height
@@ -35,6 +39,7 @@ public abstract class AbstractTutorialDialog extends Stage {
     protected AbstractTutorialDialog(String title, double width, double height,
                                       double contentMaxWidth) {
         this.contentMaxWidth = contentMaxWidth;
+        this.tutorialId = getTutorialId();
         setTitle(title);
 
         TabPane tabPane = new TabPane();
@@ -46,17 +51,56 @@ public abstract class AbstractTutorialDialog extends Stage {
     }
 
     /**
+     * Constructs the dialog with pre-built tabs and an explicit tutorial ID,
+     * bypassing {@link #buildTabs()} and {@link #getTutorialId()}.
+     * Use this constructor when those methods depend on subclass fields that
+     * are not yet initialized during the super constructor call.
+     *
+     * @param title           the dialog window title
+     * @param width           scene width
+     * @param height          scene height
+     * @param contentMaxWidth max width for TextFlow content inside tabs
+     * @param tutorialId      tutorial ID for progress tracking, or {@code null}
+     * @param prebuiltTabs    tabs to display
+     */
+    protected AbstractTutorialDialog(String title, double width, double height,
+                                      double contentMaxWidth, String tutorialId,
+                                      List<Tab> prebuiltTabs) {
+        this.contentMaxWidth = contentMaxWidth;
+        this.tutorialId = tutorialId;
+        setTitle(title);
+
+        TabPane tabPane = new TabPane();
+        tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
+        tabPane.getTabs().addAll(prebuiltTabs);
+        installProgressTracking(tabPane);
+
+        setScene(new Scene(tabPane, width, height));
+    }
+
+    /**
      * Returns the unique tutorial identifier for progress tracking, or
      * {@code null} if this dialog does not participate in tracking.
-     * Subclasses should override to return a stable, kebab-case ID
-     * (e.g., {@code "first-model"}, {@code "sir-epidemic"}).
+     * Subclasses may override to return a stable, kebab-case ID
+     * (e.g., {@code "first-model"}, {@code "feedback-loops"}).
+     *
+     * <p>When using the pre-built-tabs constructor, this method is not
+     * called during construction — the ID is passed explicitly instead.
      */
     protected String getTutorialId() {
         return null;
     }
 
     /**
+     * Returns the tutorial ID used for progress tracking.
+     */
+    final String resolvedTutorialId() {
+        return tutorialId;
+    }
+
+    /**
      * Subclasses return the ordered list of tabs to display.
+     * Not called if pre-built tabs are supplied to the constructor.
      */
     protected abstract List<Tab> buildTabs();
 
@@ -64,9 +108,18 @@ public abstract class AbstractTutorialDialog extends Stage {
      * Creates a scrollable tab wrapping a {@link TextFlow} content pane.
      */
     protected Tab createTab(String title, TextFlow content) {
+        return createStyledTab(title, content, contentMaxWidth);
+    }
+
+    /**
+     * Creates a scrollable tab. Static variant for use when tabs must be
+     * built before the instance is fully constructed.
+     */
+    protected static Tab createStyledTab(String title, TextFlow content,
+                                          double maxWidth) {
         content.setPadding(new Insets(16));
         content.setLineSpacing(4);
-        content.setMaxWidth(contentMaxWidth);
+        content.setMaxWidth(maxWidth);
 
         ScrollPane scroll = new ScrollPane(content);
         scroll.setFitToWidth(true);
@@ -75,7 +128,6 @@ public abstract class AbstractTutorialDialog extends Stage {
     }
 
     private void installProgressTracking(TabPane tabPane) {
-        String tutorialId = getTutorialId();
         if (tutorialId == null) {
             return;
         }

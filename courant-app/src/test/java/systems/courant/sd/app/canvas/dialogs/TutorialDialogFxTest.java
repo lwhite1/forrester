@@ -19,21 +19,38 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ExtendWith(ApplicationExtension.class)
 class TutorialDialogFxTest {
 
-    private QuickstartDialog quickstartDialog;
-    private SirTutorialDialog sirDialog;
-    private SupplyChainTutorialDialog supplyChainDialog;
-    private CldTutorialDialog cldDialog;
+    private ContentTutorialDialog quickstartDialog;
+    private ContentTutorialDialog sirDialog;
+    private ContentTutorialDialog supplyChainDialog;
+    private ContentTutorialDialog cldDialog;
 
     @Start
     void start(Stage stage) {
-        quickstartDialog = new QuickstartDialog();
-        sirDialog = new SirTutorialDialog();
-        supplyChainDialog = new SupplyChainTutorialDialog();
-        cldDialog = new CldTutorialDialog();
+        quickstartDialog = new ContentTutorialDialog(
+                TutorialContentLoader.load("modeling/first-model.json"));
+        sirDialog = new ContentTutorialDialog(
+                TutorialContentLoader.load("modeling/feedback-loops.json"));
+        supplyChainDialog = new ContentTutorialDialog(
+                TutorialContentLoader.load("modeling/supply-chain.json"));
+        cldDialog = new ContentTutorialDialog(
+                TutorialContentLoader.load("modeling/cld-basics.json"));
 
         // Show a dummy stage so TestFX has something to anchor to
         stage.setScene(new Scene(new StackPane(), 100, 100));
         stage.show();
+    }
+
+    @Test
+    @DisplayName("First-model tutorial has 6 tabs")
+    void quickstartDialogHasSixTabs(FxRobot robot) {
+        TabPane tabs = (TabPane) quickstartDialog.getScene().getRoot();
+        assertThat(tabs.getTabs()).hasSize(6);
+    }
+
+    @Test
+    @DisplayName("First-model tutorial has correct window title")
+    void quickstartDialogTitle(FxRobot robot) {
+        assertThat(quickstartDialog.getTitle()).contains("Your First Model");
     }
 
     @Test
@@ -121,19 +138,6 @@ class TutorialDialogFxTest {
     }
 
     @Test
-    @DisplayName("Quickstart tutorial has 6 tabs")
-    void quickstartDialogHasSixTabs(FxRobot robot) {
-        TabPane tabs = (TabPane) quickstartDialog.getScene().getRoot();
-        assertThat(tabs.getTabs()).hasSize(6);
-    }
-
-    @Test
-    @DisplayName("Quickstart tutorial has correct window title")
-    void quickstartDialogTitle(FxRobot robot) {
-        assertThat(quickstartDialog.getTitle()).contains("Getting Started");
-    }
-
-    @Test
     @DisplayName("Tabs are not closeable")
     void tabsNotCloseable(FxRobot robot) {
         TabPane qsTabs = (TabPane) quickstartDialog.getScene().getRoot();
@@ -156,9 +160,9 @@ class TutorialDialogFxTest {
     @Test
     @DisplayName("All tutorial dialogs provide a tutorial ID for progress tracking")
     void allDialogsProvideTutorialId(FxRobot robot) {
-        assertThat(quickstartDialog.getTutorialId()).isEqualTo("first-model");
-        assertThat(sirDialog.getTutorialId()).isEqualTo("sir-epidemic");
-        assertThat(supplyChainDialog.getTutorialId()).isEqualTo("supply-chain");
-        assertThat(cldDialog.getTutorialId()).isEqualTo("cld-basics");
+        assertThat(quickstartDialog.resolvedTutorialId()).isEqualTo("first-model");
+        assertThat(sirDialog.resolvedTutorialId()).isEqualTo("feedback-loops");
+        assertThat(supplyChainDialog.resolvedTutorialId()).isEqualTo("supply-chain");
+        assertThat(cldDialog.resolvedTutorialId()).isEqualTo("cld-basics");
     }
 }

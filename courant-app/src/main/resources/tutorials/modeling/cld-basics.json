@@ -1,0 +1,19 @@
+{
+  "id": "cld-basics",
+  "title": "Causal Loop Diagrams",
+  "description": "Map cause-and-effect with CLD variables and causal links. Learn polarity, identify feedback loops, and transition from qualitative to quantitative modeling.",
+  "difficulty": "beginner",
+  "estimatedMinutes": 20,
+  "model": null,
+  "recommendedPrerequisites": [],
+  "steps": [
+    { "title": "The Idea", "content": "cld-basics/01-the-idea.md" },
+    { "title": "Variables", "content": "cld-basics/02-variables.md" },
+    { "title": "Causal Links", "content": "cld-basics/03-causal-links.md" },
+    { "title": "Polarity", "content": "cld-basics/04-polarity.md" },
+    { "title": "Feedback Loops", "content": "cld-basics/05-feedback-loops.md" },
+    { "title": "Explore", "content": "cld-basics/06-explore.md" },
+    { "title": "Key Takeaways", "content": "cld-basics/07-key-takeaways.md" }
+  ],
+  "nextTutorial": null
+}
