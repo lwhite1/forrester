@@ -47,6 +47,10 @@ public class MultiParameterSweepDialog extends Dialog<MultiParameterSweepDialog.
     private final Label combinationCountLabel;
 
     public MultiParameterSweepDialog(List<String> constantNames) {
+        this(constantNames, null);
+    }
+
+    public MultiParameterSweepDialog(List<String> constantNames, Config previousConfig) {
         HelpContextResolver.addHelpButton(this);
         setTitle("Multi-Parameter Sweep");
         setHeaderText("Configure parameters to sweep (at least 2)");
@@ -69,12 +73,24 @@ public class MultiParameterSweepDialog extends Dialog<MultiParameterSweepDialog.
 
         paramBox.getChildren().addAll(combinationCountLabel, addButton);
 
-        // Add two default rows
-        for (int i = 0; i < 2; i++) {
-            String defaultName = constantNames.size() > i ? constantNames.get(i) : null;
-            ParameterRow row = new ParameterRow(constantNames, paramBox, defaultName);
-            parameterRows.add(row);
-            paramBox.getChildren().add(paramBox.getChildren().size() - 2, row.getPane());
+        // Restore previous parameter rows, or add two defaults
+        if (previousConfig != null && !previousConfig.parameters().isEmpty()) {
+            for (ParamConfig pc : previousConfig.parameters()) {
+                if (constantNames.contains(pc.name())) {
+                    ParameterRow row = new ParameterRow(constantNames, paramBox, pc.name());
+                    row.restoreFrom(pc);
+                    parameterRows.add(row);
+                    paramBox.getChildren().add(paramBox.getChildren().size() - 2, row.getPane());
+                }
+            }
+        }
+        if (parameterRows.isEmpty()) {
+            for (int i = 0; i < 2; i++) {
+                String defaultName = constantNames.size() > i ? constantNames.get(i) : null;
+                ParameterRow row = new ParameterRow(constantNames, paramBox, defaultName);
+                parameterRows.add(row);
+                paramBox.getChildren().add(paramBox.getChildren().size() - 2, row.getPane());
+            }
         }
         updateCombinationCount();
 
@@ -233,6 +249,13 @@ public class MultiParameterSweepDialog extends Dialog<MultiParameterSweepDialog.
             } catch (NumberFormatException e) {
                 return false;
             }
+        }
+
+        void restoreFrom(ParamConfig pc) {
+            nameCombo.setValue(pc.name());
+            startField.setText(String.valueOf(pc.start()));
+            endField.setText(String.valueOf(pc.end()));
+            stepField.setText(String.valueOf(pc.step()));
         }
 
         ParamConfig toConfig() {
