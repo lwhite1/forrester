@@ -53,6 +53,10 @@ public class MonteCarloDialog extends Dialog<MonteCarloDialog.Config> {
     private final TextField seedField;
 
     public MonteCarloDialog(List<String> constantNames) {
+        this(constantNames, null);
+    }
+
+    public MonteCarloDialog(List<String> constantNames, Config previousConfig) {
         HelpContextResolver.addHelpButton(this);
         this.constantNames = constantNames;
         setTitle("Monte Carlo Simulation");
@@ -71,22 +75,41 @@ public class MonteCarloDialog extends Dialog<MonteCarloDialog.Config> {
 
         paramBox.getChildren().add(addButton);
 
-        // Add one default row
-        ParameterRow defaultRow = new ParameterRow(constantNames, paramBox);
-        parameterRows.add(defaultRow);
-        paramBox.getChildren().add(0, defaultRow.getPane());
+        // Restore previous parameter rows, or add one default row
+        if (previousConfig != null && !previousConfig.parameters().isEmpty()) {
+            for (ParameterConfig pc : previousConfig.parameters()) {
+                if (constantNames.contains(pc.name())) {
+                    ParameterRow row = new ParameterRow(constantNames, paramBox);
+                    row.restoreFrom(pc);
+                    parameterRows.add(row);
+                    paramBox.getChildren().add(paramBox.getChildren().size() - 1, row.getPane());
+                }
+            }
+        }
+        if (parameterRows.isEmpty()) {
+            ParameterRow defaultRow = new ParameterRow(constantNames, paramBox);
+            parameterRows.add(defaultRow);
+            paramBox.getChildren().add(0, defaultRow.getPane());
+        }
 
         ScrollPane paramScroll = new ScrollPane(paramBox);
         paramScroll.setFitToWidth(true);
         paramScroll.setPrefHeight(200);
 
-        iterationsField = new TextField("200");
+        String defaultIter = previousConfig != null
+                ? String.valueOf(previousConfig.iterations()) : "200";
+        String defaultSampling = previousConfig != null
+                ? previousConfig.samplingMethod() : "LATIN_HYPERCUBE";
+        String defaultSeed = previousConfig != null
+                ? String.valueOf(previousConfig.seed()) : "12345";
+
+        iterationsField = new TextField(defaultIter);
         iterationsField.setId("mcIterations");
         samplingCombo = new ComboBox<>(FXCollections.observableArrayList(
                 "LATIN_HYPERCUBE", "RANDOM"));
-        samplingCombo.setValue("LATIN_HYPERCUBE");
+        samplingCombo.setValue(defaultSampling);
         samplingCombo.setId("mcSampling");
-        seedField = new TextField("12345");
+        seedField = new TextField(defaultSeed);
         seedField.setId("mcSeed");
 
         GridPane settingsGrid = new GridPane();
@@ -244,6 +267,14 @@ public class MonteCarloDialog extends Dialog<MonteCarloDialog.Config> {
             } catch (NumberFormatException e) {
                 return false;
             }
+        }
+
+        void restoreFrom(ParameterConfig pc) {
+            nameCombo.setValue(pc.name());
+            distCombo.setValue(pc.distribution());
+            param1Field.setText(String.valueOf(pc.param1()));
+            param2Field.setText(String.valueOf(pc.param2()));
+            updateLabels(pc.distribution());
         }
 
         ParameterConfig toConfig() {

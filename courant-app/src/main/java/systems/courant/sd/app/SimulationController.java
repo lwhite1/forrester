@@ -60,6 +60,7 @@ final class SimulationController {
     private final Consumer<String> showError;
     private final Consumer<Consumer<ModelEditListener>> fireLogEvent;
     private ParameterSweepDialog.Config lastSweepConfig;
+    private MonteCarloDialog.Config lastMonteCarloConfig;
 
     SimulationController(ModelCanvas canvas,
                          AnalysisRunner analysisRunner,
@@ -247,13 +248,14 @@ final class SimulationController {
             return;
         }
 
-        MonteCarloDialog dialog = new MonteCarloDialog(parameterNames);
+        MonteCarloDialog dialog = new MonteCarloDialog(parameterNames, lastMonteCarloConfig);
         Optional<MonteCarloDialog.Config> configOpt = dialog.showAndWait();
         if (configOpt.isEmpty()) {
             return;
         }
 
         MonteCarloDialog.Config config = configOpt.get();
+        lastMonteCarloConfig = config;
 
         String validationError = validateDistributionParameters(config.parameters());
         if (!validationError.isEmpty()) {
