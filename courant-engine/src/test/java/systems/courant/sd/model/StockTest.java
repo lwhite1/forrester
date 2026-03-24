@@ -71,15 +71,22 @@ public class StockTest {
     }
 
     @Test
-    public void shouldClampNegativeValueToZeroByDefault() {
+    public void shouldAllowNegativeValueByDefault() {
         Stock stock = new Stock("Water", 100, GALLON_US);
         stock.setValue(-50);
-        assertEquals(0, stock.getValue(), 0.0);
+        assertEquals(-50, stock.getValue(), 0.0);
     }
 
     @Test
-    public void shouldClampNegativeInitialValueToZero() {
+    public void shouldAllowNegativeInitialValueByDefault() {
         Stock stock = new Stock("Water", -10, GALLON_US);
+        assertEquals(-10, stock.getValue(), 0.0);
+    }
+
+    @Test
+    public void shouldClampNegativeValueWhenPolicyIsClamp() {
+        Stock stock = new Stock("Water", 100, GALLON_US, NegativeValuePolicy.CLAMP_TO_ZERO);
+        stock.setValue(-50);
         assertEquals(0, stock.getValue(), 0.0);
     }
 

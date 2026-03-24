@@ -31,14 +31,14 @@ public class Stock extends Element {
 
     /**
      * Creates a new stock with the given name, initial value, and unit.
-     * Uses {@link NegativeValuePolicy#CLAMP_TO_ZERO} by default.
+     * Uses {@link NegativeValuePolicy#ALLOW} by default.
      *
      * @param name          the stock name
      * @param initialAmount the initial quantity stored in this stock
      * @param unit          the unit of measure for the stored quantity
      */
     public Stock(String name, double initialAmount, Unit unit) {
-        this(name, initialAmount, unit, NegativeValuePolicy.CLAMP_TO_ZERO);
+        this(name, initialAmount, unit, NegativeValuePolicy.ALLOW);
     }
 
     /**

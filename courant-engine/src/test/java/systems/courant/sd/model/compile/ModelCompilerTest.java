@@ -178,7 +178,7 @@ class ModelCompilerTest {
         void shouldHandleAuxReferencingAnotherAux() {
             ModelDefinition def = new ModelDefinitionBuilder()
                     .name("Forward Ref")
-                    .stock("S", 100, "Thing")
+                    .stock("S", null, 100, "Thing", "CLAMP_TO_ZERO")
                     .variable("A", "S * 2", "Thing")
                     .variable("B", "A + 10", "Thing")
                     .flow("F", "B", "Day", "S", null)
@@ -190,7 +190,7 @@ class ModelCompilerTest {
             sim.execute();
 
             // Before flow: A = 100*2 = 200, B = 200+10 = 210
-            // After 1 step: S = 100 - 210 is clamped to 0
+            // After 1 step: S = max(0, 100 - 210) = 0
             Stock s = findStock(compiled.getModel(), "S");
             assertThat(s.getValue()).isLessThan(100);
         }

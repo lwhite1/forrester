@@ -298,8 +298,8 @@ public class MultiArrayedStockTest {
     }
 
     @Test
-    public void shouldDefaultToClampToZero() {
+    public void shouldDefaultToAllowNegativeValues() {
         MultiArrayedStock stock = new MultiArrayedStock("X", range, -50, PEOPLE);
-        assertEquals(0, stock.getValue(0), 0.0);
+        assertEquals(-50, stock.getValue(0), 0.0);
     }
 }
