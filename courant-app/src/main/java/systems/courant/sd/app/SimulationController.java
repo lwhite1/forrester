@@ -61,6 +61,7 @@ final class SimulationController {
     private final Consumer<Consumer<ModelEditListener>> fireLogEvent;
     private ParameterSweepDialog.Config lastSweepConfig;
     private MonteCarloDialog.Config lastMonteCarloConfig;
+    private MultiParameterSweepDialog.Config lastMultiSweepConfig;
 
     SimulationController(ModelCanvas canvas,
                          AnalysisRunner analysisRunner,
@@ -193,13 +194,15 @@ final class SimulationController {
             return;
         }
 
-        MultiParameterSweepDialog dialog = new MultiParameterSweepDialog(parameterNames);
+        MultiParameterSweepDialog dialog = new MultiParameterSweepDialog(
+                parameterNames, lastMultiSweepConfig);
         Optional<MultiParameterSweepDialog.Config> configOpt = dialog.showAndWait();
         if (configOpt.isEmpty()) {
             return;
         }
 
         MultiParameterSweepDialog.Config config = configOpt.get();
+        lastMultiSweepConfig = config;
         ModelDefinition def = canvas.navigation().toModelDefinition();
         SimulationSettings finalSettings = settings;
 
