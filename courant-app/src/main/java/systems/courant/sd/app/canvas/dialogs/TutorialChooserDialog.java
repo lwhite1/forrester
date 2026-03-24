@@ -20,6 +20,7 @@ public class TutorialChooserDialog extends Stage {
     private Runnable onGettingStarted;
     private Runnable onSirTutorial;
     private Runnable onSupplyChainTutorial;
+    private Runnable onCldTutorial;
 
     public TutorialChooserDialog() {
         setTitle("Tutorials");
@@ -81,12 +82,27 @@ public class TutorialChooserDialog extends Stage {
                 });
         supplyChain.setId("tutorialSupplyChain");
 
-        VBox cards = new VBox(12, gettingStarted, sir, supplyChain);
+        VBox cld = buildTutorialCard(
+                "Causal Loop Diagrams",
+                "Map cause-and-effect with CLD variables and causal links. "
+                        + "Learn polarity, identify reinforcing and balancing feedback loops, "
+                        + "and transition from qualitative to quantitative modeling.",
+                "Beginner",
+                "#27AE60",
+                () -> {
+                    if (onCldTutorial != null) {
+                        close();
+                        onCldTutorial.run();
+                    }
+                });
+        cld.setId("tutorialCld");
+
+        VBox cards = new VBox(12, gettingStarted, sir, supplyChain, cld);
         cards.setAlignment(Pos.TOP_CENTER);
 
         content.getChildren().addAll(header, cards);
 
-        Scene scene = new Scene(content, 480, 420);
+        Scene scene = new Scene(content, 480, 510);
         setScene(scene);
     }
 
@@ -138,5 +154,9 @@ public class TutorialChooserDialog extends Stage {
 
     public void setOnSupplyChainTutorial(Runnable handler) {
         this.onSupplyChainTutorial = handler;
+    }
+
+    public void setOnCldTutorial(Runnable handler) {
+        this.onCldTutorial = handler;
     }
 }
