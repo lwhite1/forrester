@@ -19,6 +19,11 @@ public class QuickstartDialog extends AbstractTutorialDialog {
     }
 
     @Override
+    protected String getTutorialId() {
+        return "first-model";
+    }
+
+    @Override
     protected List<Tab> buildTabs() {
         return List.of(
                 createTab("1. The Idea", ideaTab()),

@@ -20,6 +20,11 @@ public class CldTutorialDialog extends AbstractTutorialDialog {
     }
 
     @Override
+    protected String getTutorialId() {
+        return "cld-basics";
+    }
+
+    @Override
     protected List<Tab> buildTabs() {
         return List.of(
                 createTab("1. The Idea", ideaTab()),

@@ -19,12 +19,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ExtendWith(ApplicationExtension.class)
 class TutorialDialogFxTest {
 
+    private QuickstartDialog quickstartDialog;
     private SirTutorialDialog sirDialog;
     private SupplyChainTutorialDialog supplyChainDialog;
     private CldTutorialDialog cldDialog;
 
     @Start
     void start(Stage stage) {
+        quickstartDialog = new QuickstartDialog();
         sirDialog = new SirTutorialDialog();
         supplyChainDialog = new SupplyChainTutorialDialog();
         cldDialog = new CldTutorialDialog();
@@ -119,8 +121,25 @@ class TutorialDialogFxTest {
     }
 
     @Test
+    @DisplayName("Quickstart tutorial has 6 tabs")
+    void quickstartDialogHasSixTabs(FxRobot robot) {
+        TabPane tabs = (TabPane) quickstartDialog.getScene().getRoot();
+        assertThat(tabs.getTabs()).hasSize(6);
+    }
+
+    @Test
+    @DisplayName("Quickstart tutorial has correct window title")
+    void quickstartDialogTitle(FxRobot robot) {
+        assertThat(quickstartDialog.getTitle()).contains("Getting Started");
+    }
+
+    @Test
     @DisplayName("Tabs are not closeable")
     void tabsNotCloseable(FxRobot robot) {
+        TabPane qsTabs = (TabPane) quickstartDialog.getScene().getRoot();
+        assertThat(qsTabs.getTabClosingPolicy())
+                .isEqualTo(TabPane.TabClosingPolicy.UNAVAILABLE);
+
         TabPane sirTabs = (TabPane) sirDialog.getScene().getRoot();
         assertThat(sirTabs.getTabClosingPolicy())
                 .isEqualTo(TabPane.TabClosingPolicy.UNAVAILABLE);
@@ -132,5 +151,14 @@ class TutorialDialogFxTest {
         TabPane cldTabs = (TabPane) cldDialog.getScene().getRoot();
         assertThat(cldTabs.getTabClosingPolicy())
                 .isEqualTo(TabPane.TabClosingPolicy.UNAVAILABLE);
+    }
+
+    @Test
+    @DisplayName("All tutorial dialogs provide a tutorial ID for progress tracking")
+    void allDialogsProvideTutorialId(FxRobot robot) {
+        assertThat(quickstartDialog.getTutorialId()).isEqualTo("first-model");
+        assertThat(sirDialog.getTutorialId()).isEqualTo("sir-epidemic");
+        assertThat(supplyChainDialog.getTutorialId()).isEqualTo("supply-chain");
+        assertThat(cldDialog.getTutorialId()).isEqualTo("cld-basics");
     }
 }
