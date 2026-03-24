@@ -59,7 +59,7 @@ class DialogConsistencyFxTest {
         void sweepWidth(FxRobot robot) {
             DialogPane[] pane = {null};
             Platform.runLater(() -> {
-                var d = new ParameterSweepDialog(List.of("a"), List.of("b"));
+                var d = new ParameterSweepDialog(List.of("a"), List.of("b"), null);
                 pane[0] = d.getDialogPane();
                 d.show();
             });
@@ -119,7 +119,7 @@ class DialogConsistencyFxTest {
         @DisplayName("all controls have fx:id")
         void allIdsPresent(FxRobot robot) {
             Platform.runLater(() -> {
-                var d = new ParameterSweepDialog(List.of("alpha"), List.of("Pop"));
+                var d = new ParameterSweepDialog(List.of("alpha"), List.of("Pop"), null);
                 d.show();
             });
             WaitForAsyncUtils.waitForFxEvents();

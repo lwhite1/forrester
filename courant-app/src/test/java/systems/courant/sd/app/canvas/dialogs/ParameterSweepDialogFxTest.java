@@ -37,7 +37,7 @@ class ParameterSweepDialogFxTest {
 
     private void showDialog(List<String> constants, List<String> trackables) {
         Platform.runLater(() -> {
-            dialog = new ParameterSweepDialog(constants, trackables);
+            dialog = new ParameterSweepDialog(constants, trackables, null);
             dialogPane = dialog.getDialogPane();
             dialog.show();
         });
