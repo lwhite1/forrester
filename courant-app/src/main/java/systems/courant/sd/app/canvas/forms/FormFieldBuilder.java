@@ -168,6 +168,10 @@ public class FormFieldBuilder {
     }
 
     private Node buildLabelNode(Label label, String helpText) {
+        Tooltip labelTip = new Tooltip(label.getText());
+        labelTip.setShowDelay(Duration.millis(400));
+        label.setTooltip(labelTip);
+
         if (helpText == null) {
             return label;
         }
