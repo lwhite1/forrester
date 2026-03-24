@@ -21,11 +21,13 @@ class TutorialDialogFxTest {
 
     private SirTutorialDialog sirDialog;
     private SupplyChainTutorialDialog supplyChainDialog;
+    private CldTutorialDialog cldDialog;
 
     @Start
     void start(Stage stage) {
         sirDialog = new SirTutorialDialog();
         supplyChainDialog = new SupplyChainTutorialDialog();
+        cldDialog = new CldTutorialDialog();
 
         // Show a dummy stage so TestFX has something to anchor to
         stage.setScene(new Scene(new StackPane(), 100, 100));
@@ -89,6 +91,34 @@ class TutorialDialogFxTest {
     }
 
     @Test
+    @DisplayName("CLD tutorial has 7 tabs")
+    void cldDialogHasSevenTabs(FxRobot robot) {
+        TabPane tabs = (TabPane) cldDialog.getScene().getRoot();
+        assertThat(tabs.getTabs()).hasSize(7);
+    }
+
+    @Test
+    @DisplayName("CLD tutorial tab titles follow numbered sequence")
+    void cldDialogTabTitles(FxRobot robot) {
+        TabPane tabs = (TabPane) cldDialog.getScene().getRoot();
+        assertThat(tabs.getTabs().stream().map(Tab::getText).toList())
+                .containsExactly(
+                        "1. The Idea",
+                        "2. Variables",
+                        "3. Causal Links",
+                        "4. Polarity",
+                        "5. Feedback Loops",
+                        "6. Explore",
+                        "7. Key Takeaways");
+    }
+
+    @Test
+    @DisplayName("CLD tutorial has correct window title")
+    void cldDialogTitle(FxRobot robot) {
+        assertThat(cldDialog.getTitle()).contains("Causal Loop Diagrams");
+    }
+
+    @Test
     @DisplayName("Tabs are not closeable")
     void tabsNotCloseable(FxRobot robot) {
         TabPane sirTabs = (TabPane) sirDialog.getScene().getRoot();
@@ -97,6 +127,10 @@ class TutorialDialogFxTest {
 
         TabPane scTabs = (TabPane) supplyChainDialog.getScene().getRoot();
         assertThat(scTabs.getTabClosingPolicy())
+                .isEqualTo(TabPane.TabClosingPolicy.UNAVAILABLE);
+
+        TabPane cldTabs = (TabPane) cldDialog.getScene().getRoot();
+        assertThat(cldTabs.getTabClosingPolicy())
                 .isEqualTo(TabPane.TabClosingPolicy.UNAVAILABLE);
     }
 }

@@ -19,12 +19,13 @@ import systems.courant.sd.app.canvas.ModelCanvas;
 import systems.courant.sd.app.canvas.ModelEditListener;
 import systems.courant.sd.app.canvas.ModelEditor;
 import systems.courant.sd.app.canvas.PropertiesPanel;
+import systems.courant.sd.app.canvas.dialogs.CldTutorialDialog;
+import systems.courant.sd.app.canvas.dialogs.KeyboardShortcutsDialog;
 import systems.courant.sd.app.canvas.dialogs.QuickstartDialog;
+import systems.courant.sd.app.canvas.dialogs.SdConceptsDialog;
 import systems.courant.sd.app.canvas.dialogs.SirTutorialDialog;
 import systems.courant.sd.app.canvas.dialogs.SupplyChainTutorialDialog;
 import systems.courant.sd.app.canvas.dialogs.TutorialChooserDialog;
-import systems.courant.sd.app.canvas.dialogs.KeyboardShortcutsDialog;
-import systems.courant.sd.app.canvas.dialogs.SdConceptsDialog;
 import systems.courant.sd.app.canvas.StatusBar;
 import systems.courant.sd.app.canvas.UndoHistoryPopup;
 import systems.courant.sd.app.canvas.UndoManager;
@@ -385,6 +386,13 @@ public class ModelWindow {
                         SupplyChainTutorialDialog::new);
                 canvas.requestFocus();
             });
+            chooser.setOnCldTutorial(() -> {
+                showEditor();
+                fileController.newModel();
+                helpWindows.showOrBring(CldTutorialDialog.class,
+                        CldTutorialDialog::new);
+                canvas.requestFocus();
+            });
             chooser.show();
         });
         startScreen.setOnOpenExample((name, path) -> {
@@ -639,6 +647,9 @@ public class ModelWindow {
         commandRegistry.add("Tutorial: Supply Chain", "Help",
                 () -> helpWindows.showOrBring(SupplyChainTutorialDialog.class,
                         SupplyChainTutorialDialog::new));
+        commandRegistry.add("Tutorial: Causal Loop Diagrams", "Help",
+                () -> helpWindows.showOrBring(CldTutorialDialog.class,
+                        CldTutorialDialog::new));
         commandRegistry.add("SD Concepts", "Help",
                 () -> helpWindows.showOrBring(SdConceptsDialog.class,
                         SdConceptsDialog::new));
