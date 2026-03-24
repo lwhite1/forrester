@@ -59,11 +59,26 @@ public class QuickstartDialog extends AbstractTutorialDialog {
 
     private TextFlow placeElementsTab() {
         return new TextFlow(
+                bold("Name your model\n\n"),
+                plain("Before adding elements, give the model a name and description. "
+                        + "Go to "),
+                bold("File \u2192 Model Properties"),
+                plain(" and enter:\n\n"),
+                plain("  Name:        "),
+                mono("Coffee Cooling"),
+                plain("\n"),
+                plain("  Description: "),
+                mono("Newton's law of cooling \u2014 coffee approaching room temperature"),
+                plain("\n\n"),
+                plain("This helps identify your model later in file listings and reports.\n\n"),
+
                 bold("Place a Stock\n\n"),
                 plain("Press "),
                 mono("2"),
                 plain(" (or click the Stock button in the toolbar), then click on the canvas.\n"),
-                plain("Double-click the stock and name it: "),
+                plain("Double-click the stock to select it. In the "),
+                bold("Properties panel"),
+                plain(" on the right, name it: "),
                 mono("Coffee Temperature"),
                 plain("\n"),
                 plain("Set the initial value to "),
@@ -117,7 +132,9 @@ public class QuickstartDialog extends AbstractTutorialDialog {
                         + "flow indicator and name it "),
                 mono("Cooling"),
                 plain(".\n\n"),
-                plain("Set the equation to:\n\n"),
+                plain("In the "),
+                bold("Properties panel"),
+                plain(" on the right, set the equation to:\n\n"),
                 mono("  Discrepancy * Cooling_Rate\n\n"),
                 plain("In the Properties panel, set the "),
                 bold("Time Unit"),
