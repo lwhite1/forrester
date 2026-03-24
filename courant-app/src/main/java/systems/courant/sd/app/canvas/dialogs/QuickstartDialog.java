@@ -119,6 +119,13 @@ public class QuickstartDialog extends AbstractTutorialDialog {
                 plain(".\n\n"),
                 plain("Set the equation to:\n\n"),
                 mono("  Discrepancy * Cooling_Rate\n\n"),
+                plain("In the Properties panel, set the "),
+                bold("Time Unit"),
+                plain(" for this flow to "),
+                mono("Minute"),
+                plain(". This tells the simulation that the cooling rate is per minute "
+                        + "\u2014 matching the simulation time step you will set in the "
+                        + "next tab. Without this, the model will produce incorrect results.\n\n"),
                 plain("This is the key feedback equation. When the coffee is hot, the "
                         + "discrepancy is large, so cooling is fast. As the coffee approaches "
                         + "room temperature, the discrepancy shrinks, and cooling slows. "
