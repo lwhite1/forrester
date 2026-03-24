@@ -19,6 +19,8 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 
+import javafx.collections.FXCollections;
+
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -288,22 +290,36 @@ public class FormFieldBuilder {
     }
 
     public ComboBox<String> createUnitComboBox(String currentValue) {
-        ComboBox<String> box = new ComboBox<>();
-        box.getItems().addAll(COMMON_UNITS);
-        box.setEditable(true);
-        box.setValue(currentValue != null ? currentValue : "");
-        box.setMaxWidth(Double.MAX_VALUE);
-        GridPane.setHgrow(box, Priority.ALWAYS);
-        return box;
+        return createFilterableComboBox(COMMON_UNITS, currentValue);
     }
 
     public ComboBox<String> createTimeUnitComboBox(String currentValue) {
-        ComboBox<String> box = new ComboBox<>();
-        box.getItems().addAll(TIME_UNITS);
+        return createFilterableComboBox(TIME_UNITS, currentValue);
+    }
+
+    private ComboBox<String> createFilterableComboBox(List<String> allItems, String currentValue) {
+        ComboBox<String> box = new ComboBox<>(FXCollections.observableArrayList(allItems));
         box.setEditable(true);
         box.setValue(currentValue != null ? currentValue : "");
         box.setMaxWidth(Double.MAX_VALUE);
         GridPane.setHgrow(box, Priority.ALWAYS);
+
+        box.getEditor().textProperty().addListener((obs, oldText, newText) -> {
+            if (newText == null || newText.isEmpty()) {
+                box.setItems(FXCollections.observableArrayList(allItems));
+                return;
+            }
+            String lower = newText.toLowerCase();
+            List<String> filtered = allItems.stream()
+                    .filter(item -> item.toLowerCase().startsWith(lower))
+                    .toList();
+            box.setItems(FXCollections.observableArrayList(
+                    filtered.isEmpty() ? allItems : filtered));
+            if (!box.isShowing() && box.isFocused() && !filtered.isEmpty()) {
+                box.show();
+            }
+        });
+
         return box;
     }
 
