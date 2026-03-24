@@ -108,6 +108,24 @@ public class VariableForm implements ElementForm {
             return;
         }
         ctx.getCanvas().applyMutation(() -> ctx.getEditor().setVariableEquation(ctx.getElementName(), equation));
+        autoFillUnitIfBlank(equation);
+    }
+
+    private void autoFillUnitIfBlank(String equation) {
+        Optional<VariableDef> varOpt = ctx.getEditor().getVariableByName(ctx.getElementName());
+        if (varOpt.isEmpty()) {
+            return;
+        }
+        String currentUnit = varOpt.get().unit();
+        if (currentUnit != null && !currentUnit.isBlank()) {
+            return;
+        }
+        String inferred = dimAnalysis.inferVariableUnit(equation);
+        if (inferred != null) {
+            ctx.getCanvas().applyMutation(
+                    () -> ctx.getEditor().setVariableUnit(ctx.getElementName(), inferred));
+            unitBox.setValue(inferred);
+        }
     }
 
     private void commitSubscripts(List<String> subscripts) {
