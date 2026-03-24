@@ -83,8 +83,9 @@ public class PropertiesPanel extends VBox {
         propertyGrid.setPadding(new Insets(8));
 
         ColumnConstraints labelCol = new ColumnConstraints();
-        labelCol.setMinWidth(70);
-        labelCol.setHgrow(Priority.NEVER);
+        labelCol.setMinWidth(90);
+        labelCol.setPrefWidth(110);
+        labelCol.setHgrow(Priority.SOMETIMES);
         ColumnConstraints fieldCol = new ColumnConstraints();
         fieldCol.setHgrow(Priority.ALWAYS);
         propertyGrid.getColumnConstraints().addAll(labelCol, fieldCol);
