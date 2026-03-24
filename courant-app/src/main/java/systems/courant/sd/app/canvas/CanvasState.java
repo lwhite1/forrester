@@ -44,6 +44,7 @@ public class CanvasState {
     private List<String> drawOrderCache;
     private String viewName = DEFAULT_VIEW_NAME;
     private CldLoopInfo cldLoopInfo;
+    private final Map<String, String> loopNames = new LinkedHashMap<>();
 
     /**
      * Loads element positions and types from a ViewDef, clearing any previous state.
@@ -54,6 +55,8 @@ public class CanvasState {
         sizes.clear();
         selection.clear();
         cldLoopInfo = null;
+        loopNames.clear();
+        loopNames.putAll(view.loopNames());
         viewName = view.name();
 
         synchronized (drawOrderLock) {
@@ -252,6 +255,20 @@ public class CanvasState {
         this.cldLoopInfo = loopInfo;
     }
 
+    /** Returns the mutable loop names map (loop label → custom name). */
+    public Map<String, String> getLoopNames() {
+        return loopNames;
+    }
+
+    /** Sets a custom name for a loop, or removes it if the name is blank. */
+    public void setLoopName(String loopLabel, String customName) {
+        if (customName == null || customName.isBlank()) {
+            loopNames.remove(loopLabel);
+        } else {
+            loopNames.put(loopLabel, customName);
+        }
+    }
+
     /**
      * Returns true if positions map contains the named element.
      */
@@ -334,7 +351,8 @@ public class CanvasState {
                 placements.add(new ElementPlacement(name, type, pos.x(), pos.y()));
             }
         }
-        return new ViewDef(viewName, placements, List.of(), List.of());
+        return new ViewDef(viewName, placements, List.of(), List.of(),
+                Map.copyOf(loopNames));
     }
 
     /**
