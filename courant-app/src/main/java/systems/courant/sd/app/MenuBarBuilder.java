@@ -133,10 +133,14 @@ final class MenuBarBuilder {
         MenuItem pasteItem = registry.toMenuItem("Paste");
         MenuItem selectAllItem = registry.toMenuItem("Select All");
 
+        MenuItem subscriptDimItem = registry.toMenuItem("Subscript Dimensions",
+                "Subscript Dimensions\u2026");
+
         editMenu.getItems().addAll(undoItem, redoItem, undoHistoryItem,
                 new SeparatorMenuItem(),
                 cutItem, copyItem, pasteItem,
-                new SeparatorMenuItem(), selectAllItem);
+                new SeparatorMenuItem(), selectAllItem,
+                new SeparatorMenuItem(), subscriptDimItem);
         editMenu.setDisable(true);
         editorOnlyItems.add(editMenu);
 

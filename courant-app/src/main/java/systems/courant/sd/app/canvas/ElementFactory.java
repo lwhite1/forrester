@@ -109,7 +109,7 @@ final class ElementFactory {
             nextStockId = parseIdSuffix(name, "Stock ") + 1;
         }
         stocks.add(new StockDef(name, template.comment(), template.initialValue(),
-                template.unit(), template.negativeValuePolicy()));
+                template.unit(), template.negativeValuePolicy(), template.subscripts()));
         nameIndex.add(name);
         return name;
     }
@@ -122,7 +122,7 @@ final class ElementFactory {
         String matUnit = template.materialUnit() != null
                 ? template.materialUnit() : inferMaterialUnit(source, sink);
         flows.add(new FlowDef(name, template.comment(), template.equation(),
-                template.timeUnit(), matUnit, source, sink, List.of()));
+                template.timeUnit(), matUnit, source, sink, template.subscripts()));
         nameIndex.add(name);
         return name;
     }

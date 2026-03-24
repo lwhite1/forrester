@@ -25,6 +25,7 @@ import systems.courant.sd.app.canvas.dialogs.QuickstartDialog;
 import systems.courant.sd.app.canvas.dialogs.SdConceptsDialog;
 import systems.courant.sd.app.canvas.dialogs.SirTutorialDialog;
 import systems.courant.sd.app.canvas.dialogs.SupplyChainTutorialDialog;
+import systems.courant.sd.app.canvas.dialogs.SubscriptDefinitionDialog;
 import systems.courant.sd.app.canvas.dialogs.TutorialChooserDialog;
 import systems.courant.sd.app.canvas.StatusBar;
 import systems.courant.sd.app.canvas.UndoHistoryPopup;
@@ -33,6 +34,7 @@ import systems.courant.sd.app.canvas.dialogs.ValidationDialog;
 import systems.courant.sd.app.canvas.ZoomOverlay;
 import systems.courant.sd.model.def.ElementType;
 import systems.courant.sd.model.def.ModelDefinition;
+import systems.courant.sd.model.def.SubscriptDef;
 import systems.courant.sd.model.def.ValidationResult;
 import systems.courant.sd.model.def.ViewDef;
 import systems.courant.sd.model.graph.AutoLayout;
@@ -547,6 +549,8 @@ public class ModelWindow {
                     canvas.elements().selectAll(); canvas.requestFocus(); },
                 new KeyCodeCombination(KeyCode.A,
                         KeyCombination.SHORTCUT_DOWN));
+        commandRegistry.add("Subscript Dimensions", "Edit",
+                this::openSubscriptDimensionsDialog);
 
         // -- Layout --
         commandRegistry.add("Align Top", "Layout",
@@ -669,6 +673,23 @@ public class ModelWindow {
                     "A visual System Dynamics modeling environment.\nVersion "
                             + AppVersion.get());
             about.showAndWait();
+        });
+    }
+
+    private void openSubscriptDimensionsDialog() {
+        var dialog = new SubscriptDefinitionDialog(editor.getSubscripts());
+        dialog.initOwner(stage);
+        dialog.showAndWait().ifPresent(result -> {
+            canvas.undo().saveUndoState("Edit subscript dimensions");
+            // Replace all subscript definitions
+            List<SubscriptDef> current = new ArrayList<>(editor.getSubscripts());
+            for (SubscriptDef old : current) {
+                editor.removeSubscript(old.name());
+            }
+            for (SubscriptDef def : result) {
+                editor.addSubscript(def);
+            }
+            canvas.requestFocus();
         });
     }
 

@@ -422,7 +422,7 @@ public class ModelEditor {
         checkFxThread();
         return updateInList(stocks, name, StockDef::name,
                 s -> new StockDef(name, s.comment(), value,
-                        s.unit(), s.negativeValuePolicy()));
+                        s.unit(), s.negativeValuePolicy(), s.subscripts()));
     }
 
     /** @return true if the stock was found and updated */
@@ -433,7 +433,7 @@ public class ModelEditor {
         }
         return updateInList(stocks, name, StockDef::name,
                 s -> new StockDef(name, s.comment(), s.initialValue(),
-                        unit, s.negativeValuePolicy()));
+                        unit, s.negativeValuePolicy(), s.subscripts()));
     }
 
     /** @return true if the stock was found and updated */
@@ -441,7 +441,7 @@ public class ModelEditor {
         checkFxThread();
         return updateInList(stocks, name, StockDef::name,
                 s -> new StockDef(name, s.comment(), s.initialValue(),
-                        s.unit(), policy));
+                        s.unit(), policy, s.subscripts()));
     }
 
     /** @return true if the flow was found and updated */
@@ -478,7 +478,7 @@ public class ModelEditor {
         checkFxThread();
         return updateInList(stocks, name, StockDef::name,
                 s -> new StockDef(name, comment, s.initialValue(),
-                        s.unit(), s.negativeValuePolicy()));
+                        s.unit(), s.negativeValuePolicy(), s.subscripts()));
     }
 
     /** @return true if the flow was found and updated */
@@ -494,6 +494,54 @@ public class ModelEditor {
         checkFxThread();
         return updateInList(variables, name, VariableDef::name,
                 a -> new VariableDef(a.name(), comment, a.equation(), a.unit(), a.subscripts()));
+    }
+
+    // ── Subscript assignment ─────────────────────────────────────────────
+
+    /** @return true if the stock was found and updated */
+    public boolean setStockSubscripts(String name, List<String> newSubscripts) {
+        checkFxThread();
+        return updateInList(stocks, name, StockDef::name,
+                s -> new StockDef(name, s.comment(), s.initialValue(),
+                        s.unit(), s.negativeValuePolicy(), newSubscripts));
+    }
+
+    /** @return true if the flow was found and updated */
+    public boolean setFlowSubscripts(String name, List<String> newSubscripts) {
+        checkFxThread();
+        return updateInList(flows, name, FlowDef::name,
+                f -> new FlowDef(f.name(), f.comment(), f.equation(),
+                        f.timeUnit(), f.materialUnit(), f.source(), f.sink(), newSubscripts));
+    }
+
+    /** @return true if the variable was found and updated */
+    public boolean setVariableSubscripts(String name, List<String> newSubscripts) {
+        checkFxThread();
+        return updateInList(variables, name, VariableDef::name,
+                a -> new VariableDef(a.name(), a.comment(), a.equation(), a.unit(), newSubscripts));
+    }
+
+    // ── Subscript definition management ─────────────────────────────────
+
+    public void addSubscript(SubscriptDef def) {
+        checkFxThread();
+        subscripts.add(def);
+    }
+
+    public boolean updateSubscript(String oldName, SubscriptDef updated) {
+        checkFxThread();
+        for (int i = 0; i < subscripts.size(); i++) {
+            if (subscripts.get(i).name().equals(oldName)) {
+                subscripts.set(i, updated);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean removeSubscript(String name) {
+        checkFxThread();
+        return subscripts.removeIf(s -> s.name().equals(name));
     }
 
     /** @return true if the lookup table was found and updated */

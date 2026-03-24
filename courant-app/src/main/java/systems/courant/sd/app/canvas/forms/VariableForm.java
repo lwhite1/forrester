@@ -6,6 +6,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import systems.courant.sd.app.canvas.EquationAutoComplete;
@@ -60,6 +61,9 @@ public class VariableForm implements ElementForm {
         fields.addFieldRow(row++, "Unit", unitBox,
                 "The unit of measurement");
 
+        row = fields.addSubscriptRow(row, ctx.getEditor().getSubscripts(),
+                v.subscripts(), this::commitSubscripts);
+
         return row;
     }
 
@@ -104,6 +108,15 @@ public class VariableForm implements ElementForm {
             return;
         }
         ctx.getCanvas().applyMutation(() -> ctx.getEditor().setVariableEquation(ctx.getElementName(), equation));
+    }
+
+    private void commitSubscripts(List<String> subscripts) {
+        Optional<VariableDef> varOpt = ctx.getEditor().getVariableByName(ctx.getElementName());
+        if (varOpt.isEmpty() || varOpt.get().subscripts().equals(subscripts)) {
+            return;
+        }
+        ctx.getCanvas().applyMutation(
+                () -> ctx.getEditor().setVariableSubscripts(ctx.getElementName(), subscripts));
     }
 
     private void commitUnit(ComboBox<String> box) {

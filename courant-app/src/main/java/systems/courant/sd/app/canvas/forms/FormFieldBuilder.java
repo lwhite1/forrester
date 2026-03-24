@@ -21,6 +21,7 @@ import javafx.util.Duration;
 
 import javafx.collections.FXCollections;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -28,6 +29,7 @@ import systems.courant.sd.app.canvas.EquationField;
 import systems.courant.sd.app.canvas.EquationTemplates;
 import systems.courant.sd.app.canvas.ModelEditor;
 import systems.courant.sd.app.canvas.Styles;
+import systems.courant.sd.model.def.SubscriptDef;
 
 /**
  * UI builder utility that creates and arranges form fields in the property grid.
@@ -274,6 +276,46 @@ public class FormFieldBuilder {
         box.setMaxWidth(Double.MAX_VALUE);
         GridPane.setHgrow(box, Priority.ALWAYS);
         return box;
+    }
+
+    /**
+     * Adds a subscript assignment row with one checkbox per defined dimension.
+     * If no subscript dimensions are defined in the model, nothing is added and
+     * {@code startRow} is returned unchanged — keeping the form free of subscript
+     * UI for users who don't use this feature.
+     *
+     * @return the next available row index
+     */
+    public int addSubscriptRow(int startRow, List<SubscriptDef> modelSubscripts,
+                               List<String> currentSubscripts,
+                               Consumer<List<String>> onChanged) {
+        if (modelSubscripts == null || modelSubscripts.isEmpty()) {
+            return startRow;
+        }
+        javafx.scene.layout.FlowPane checkboxPane = new javafx.scene.layout.FlowPane(8, 4);
+        for (SubscriptDef dim : modelSubscripts) {
+            javafx.scene.control.CheckBox cb = new javafx.scene.control.CheckBox(dim.name());
+            cb.setSelected(currentSubscripts != null && currentSubscripts.contains(dim.name()));
+            cb.setStyle("-fx-font-size: 11px;");
+            cb.selectedProperty().addListener((obs, wasSelected, isSelected) -> {
+                if (!ctx.isUpdatingFields()) {
+                    List<String> checked = new ArrayList<>();
+                    for (var node : checkboxPane.getChildren()) {
+                        if (node instanceof javafx.scene.control.CheckBox box
+                                && box.isSelected()) {
+                            checked.add(box.getText());
+                        }
+                    }
+                    onChanged.accept(checked);
+                }
+            });
+            checkboxPane.getChildren().add(cb);
+        }
+        checkboxPane.setMaxWidth(Double.MAX_VALUE);
+        GridPane.setHgrow(checkboxPane, Priority.ALWAYS);
+        addFieldRow(startRow, "Subscripts", checkboxPane,
+                "Dimensions this element is arrayed over");
+        return startRow + 1;
     }
 
     public void addComboCommitHandlers(ComboBox<String> box, Consumer<ComboBox<String>> handler) {
