@@ -6,6 +6,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import systems.courant.sd.app.canvas.renderers.ElementRenderer;
@@ -71,6 +72,9 @@ public class StockForm implements ElementForm {
                 + "'Clamp to Zero' prevents negative values (common for physical "
                 + "quantities like population or inventory).\n"
                 + "'Allow' permits negatives (e.g., bank balances, temperature deltas).");
+
+        row = fields.addSubscriptRow(row, ctx.getEditor().getSubscripts(),
+                stock.subscripts(), this::commitSubscripts);
 
         return row;
     }
@@ -140,6 +144,15 @@ public class StockForm implements ElementForm {
      * Maps the stored policy string to a display value.
      * Null and "CLAMP_TO_ZERO" both display as "Clamp to Zero" (the engine default).
      */
+    private void commitSubscripts(List<String> subscripts) {
+        Optional<StockDef> stockOpt = ctx.getEditor().getStockByName(ctx.getElementName());
+        if (stockOpt.isEmpty() || stockOpt.get().subscripts().equals(subscripts)) {
+            return;
+        }
+        ctx.getCanvas().applyMutation(
+                () -> ctx.getEditor().setStockSubscripts(ctx.getElementName(), subscripts));
+    }
+
     private static String policyDisplayValue(String policy) {
         if ("ALLOW".equals(policy)) {
             return "Allow";

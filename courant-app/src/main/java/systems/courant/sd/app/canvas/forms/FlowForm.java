@@ -7,6 +7,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import systems.courant.sd.app.canvas.EquationAutoComplete;
@@ -78,6 +79,9 @@ public class FlowForm implements ElementForm {
         fields.addReadOnlyRow(row++, "Sink", sinkLabel,
                 "The stock this flow fills. (cloud) = unlimited external sink.");
 
+        row = fields.addSubscriptRow(row, ctx.getEditor().getSubscripts(),
+                flow.subscripts(), this::commitSubscripts);
+
         return row;
     }
 
@@ -136,6 +140,15 @@ public class FlowForm implements ElementForm {
         }
         ctx.getCanvas().applyMutation(
                 () -> ctx.getEditor().setFlowMaterialUnit(ctx.getElementName(), resolved));
+    }
+
+    private void commitSubscripts(List<String> subscripts) {
+        Optional<FlowDef> flowOpt = ctx.getEditor().getFlowByName(ctx.getElementName());
+        if (flowOpt.isEmpty() || flowOpt.get().subscripts().equals(subscripts)) {
+            return;
+        }
+        ctx.getCanvas().applyMutation(
+                () -> ctx.getEditor().setFlowSubscripts(ctx.getElementName(), subscripts));
     }
 
     private void commitTimeUnit(ComboBox<String> box) {
