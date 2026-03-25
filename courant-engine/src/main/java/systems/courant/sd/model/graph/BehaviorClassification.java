@@ -32,7 +32,7 @@ public final class BehaviorClassification {
     private static final double FLAT_THRESHOLD = 0.01;
 
     /** Fraction of derivative-sign changes relative to series length for oscillation. */
-    private static final double OSCILLATION_THRESHOLD = 0.15;
+    private static final double OSCILLATION_THRESHOLD = 0.05;
 
     private BehaviorClassification() {
     }
@@ -152,7 +152,7 @@ public final class BehaviorClassification {
             double avgD2 = average(d2);
             double avgStep = range / clean.length;
             double d2Magnitude = avgStep > 0 ? Math.abs(avgD2) / avgStep : 0;
-            if (d2Magnitude < 0.1) {
+            if (d2Magnitude < 0.05) {
                 return Mode.LINEAR_GROWTH;
             }
             if (avgD2 > 0) {
@@ -166,13 +166,22 @@ public final class BehaviorClassification {
             double avgD2 = average(d2);
             double avgStep = range / clean.length;
             double d2Magnitude = avgStep > 0 ? Math.abs(avgD2) / avgStep : 0;
-            if (d2Magnitude < 0.1) {
+            if (d2Magnitude < 0.05) {
                 return Mode.LINEAR_DECLINE;
             }
-            if (avgD2 < 0) {
-                return Mode.EXPONENTIAL_DECAY;
+            if (avgD2 > 0) {
+                // Decelerating decline — approaching an asymptote.
+                // If final value is near zero relative to start, it's exponential decay;
+                // otherwise it's goal-seeking toward a nonzero equilibrium.
+                double first = clean[0];
+                double last = clean[clean.length - 1];
+                if (first != 0 && Math.abs(last / first) < 0.1) {
+                    return Mode.EXPONENTIAL_DECAY;
+                }
+                return Mode.GOAL_SEEKING;
             }
-            return Mode.GOAL_SEEKING;
+            // Accelerating decline — rate of decrease is increasing
+            return Mode.EXPONENTIAL_DECAY;
         }
 
         // Fallback

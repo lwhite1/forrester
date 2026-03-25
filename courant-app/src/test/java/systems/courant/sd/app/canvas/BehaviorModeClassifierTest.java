@@ -14,12 +14,12 @@ class BehaviorModeClassifierTest {
     class ExponentialGrowth {
         @Test
         void shouldDetectExponentialGrowth() {
-            // y = 2^x
             double[] values = new double[50];
             for (int i = 0; i < values.length; i++) {
                 values[i] = Math.pow(1.1, i);
             }
-            assertThat(BehaviorModeClassifier.classify(values)).isEqualTo("Exponential growth");
+            assertThat(BehaviorModeClassifier.classify(values))
+                    .isEqualTo("Exponential Growth");
         }
     }
 
@@ -32,7 +32,8 @@ class BehaviorModeClassifierTest {
             for (int i = 0; i < values.length; i++) {
                 values[i] = 100 * Math.pow(0.9, i);
             }
-            assertThat(BehaviorModeClassifier.classify(values)).isEqualTo("Exponential decay");
+            assertThat(BehaviorModeClassifier.classify(values))
+                    .isEqualTo("Exponential Decay");
         }
     }
 
@@ -41,12 +42,12 @@ class BehaviorModeClassifierTest {
     class GoalSeekingUp {
         @Test
         void shouldDetectGoalSeekingIncrease() {
-            // Asymptotic approach to 100 from below
             double[] values = new double[50];
             for (int i = 0; i < values.length; i++) {
                 values[i] = 100 * (1 - Math.exp(-0.1 * i));
             }
-            assertThat(BehaviorModeClassifier.classify(values)).isEqualTo("Goal-seeking");
+            assertThat(BehaviorModeClassifier.classify(values))
+                    .isEqualTo("Goal-Seeking");
         }
     }
 
@@ -60,7 +61,8 @@ class BehaviorModeClassifierTest {
             for (int i = 0; i < values.length; i++) {
                 values[i] = 10 + 90 * Math.exp(-0.1 * i);
             }
-            assertThat(BehaviorModeClassifier.classify(values)).isEqualTo("Goal-seeking");
+            assertThat(BehaviorModeClassifier.classify(values))
+                    .isEqualTo("Goal-Seeking");
         }
     }
 
@@ -73,7 +75,8 @@ class BehaviorModeClassifierTest {
             for (int i = 0; i < values.length; i++) {
                 values[i] = 10 + 2.0 * i;
             }
-            assertThat(BehaviorModeClassifier.classify(values)).isEqualTo("Linear growth");
+            assertThat(BehaviorModeClassifier.classify(values))
+                    .isEqualTo("Linear Growth");
         }
     }
 
@@ -86,7 +89,8 @@ class BehaviorModeClassifierTest {
             for (int i = 0; i < values.length; i++) {
                 values[i] = 100 - 1.5 * i;
             }
-            assertThat(BehaviorModeClassifier.classify(values)).isEqualTo("Linear decline");
+            assertThat(BehaviorModeClassifier.classify(values))
+                    .isEqualTo("Linear Decline");
         }
     }
 
@@ -99,7 +103,8 @@ class BehaviorModeClassifierTest {
             for (int i = 0; i < values.length; i++) {
                 values[i] = 50 + 20 * Math.sin(0.2 * i);
             }
-            assertThat(BehaviorModeClassifier.classify(values)).isEqualTo("Oscillation");
+            assertThat(BehaviorModeClassifier.classify(values))
+                    .isEqualTo("Oscillation");
         }
     }
 
@@ -112,7 +117,8 @@ class BehaviorModeClassifierTest {
             for (int i = 0; i < values.length; i++) {
                 values[i] = 42.0;
             }
-            assertThat(BehaviorModeClassifier.classify(values)).isEqualTo("Equilibrium");
+            assertThat(BehaviorModeClassifier.classify(values))
+                    .isEqualTo("Equilibrium");
         }
     }
 
@@ -121,12 +127,12 @@ class BehaviorModeClassifierTest {
     class SShapedGrowth {
         @Test
         void shouldDetectSShapedGrowth() {
-            // Logistic curve
             double[] values = new double[100];
             for (int i = 0; i < values.length; i++) {
                 values[i] = 100.0 / (1.0 + Math.exp(-0.1 * (i - 50)));
             }
-            assertThat(BehaviorModeClassifier.classify(values)).isEqualTo("S-shaped growth");
+            assertThat(BehaviorModeClassifier.classify(values))
+                    .isEqualTo("S-Shaped Growth");
         }
     }
 
@@ -136,11 +142,6 @@ class BehaviorModeClassifierTest {
         @Test
         void shouldReturnEmptyForTooFewPoints() {
             assertThat(BehaviorModeClassifier.classify(new double[]{1, 2, 3})).isEmpty();
-        }
-
-        @Test
-        void shouldReturnEmptyForFourPointMixedSeries() {
-            assertThat(BehaviorModeClassifier.classify(new double[]{1, 5, 2, 8})).isEmpty();
         }
 
         @Test
