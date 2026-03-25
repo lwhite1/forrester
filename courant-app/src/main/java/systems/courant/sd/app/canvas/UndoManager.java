@@ -342,19 +342,21 @@ public class UndoManager implements AutoCloseable {
         if (raw != null) {
             return raw;
         }
-        // Block on the future with a bounded timeout instead of spin-waiting.
-        // The raw snapshot fast-path above handles most cases; this covers
-        // entries whose raw snapshot was already consumed.
+        // Block on the future until compression completes. Most calls are
+        // served by the raw snapshot fast-path above; this covers entries
+        // whose raw snapshot was already consumed. Use a generous timeout
+        // (5 seconds) so that large models can finish compressing rather than
+        // crashing, while still preventing indefinite hangs.
         CompressedData data;
         try {
-            data = entry.future().get(100, TimeUnit.MILLISECONDS);
+            data = entry.future().get(5, TimeUnit.SECONDS);
         } catch (ExecutionException e) {
             throw new IllegalStateException("Undo compression failed", e.getCause());
         } catch (java.util.concurrent.CancellationException e) {
             throw new IllegalStateException("Undo entry was cancelled", e);
         } catch (TimeoutException e) {
             throw new IllegalStateException(
-                    "Undo decompression timed out — compression did not complete within 100 ms");
+                    "Undo decompression timed out — compression did not complete within 5 s", e);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new IllegalStateException("Undo decompression interrupted", e);
