@@ -326,6 +326,19 @@ class CopyPasteControllerTest {
                     "Population[Region, Age]", editor).equation();
             assertThat(result).isEqualTo("Population[Region, Age]");
         }
+
+        @Test
+        void shouldHandleWhitespaceBetweenTokenAndSubscriptBracket() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .stock("Stock", 100, null)
+                    .build();
+            editor.loadFrom(def);
+
+            String result = CopyPasteController.clearDanglingReferences(
+                    "Stock [Region] * Rate", editor).equation();
+            assertThat(result).isEqualTo("Stock [Region] * 0");
+        }
     }
 
     @Nested

@@ -392,9 +392,14 @@ public final class CopyPasteController {
 
             // Consume subscript brackets as part of the reference (e.g. Stock[Region])
             // so that subscript names are not independently checked and replaced.
+            // Skip optional whitespace before the bracket (e.g. "Stock [Region]").
             String suffix = "";
-            if (i < len && equation.charAt(i) == '[') {
-                int close = equation.indexOf(']', i);
+            int bracketPos = i;
+            while (bracketPos < len && Character.isWhitespace(equation.charAt(bracketPos))) {
+                bracketPos++;
+            }
+            if (bracketPos < len && equation.charAt(bracketPos) == '[') {
+                int close = equation.indexOf(']', bracketPos);
                 if (close >= 0) {
                     suffix = equation.substring(i, close + 1);
                     i = close + 1;
