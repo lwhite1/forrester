@@ -256,17 +256,10 @@ final class MenuBarBuilder {
 
         MenuItem contextHelpItem = registry.toMenuItem("Context Help");
 
-        Menu tutorialsMenu = new Menu("Tutorials");
         MenuItem gettingStartedItem = registry.toMenuItem("Getting Started",
                 "Getting Started\u2026");
-        MenuItem sirTutorialItem = registry.toMenuItem(
-                "Tutorial: SIR Epidemic", "SIR Epidemic\u2026");
-        MenuItem supplyChainItem = registry.toMenuItem(
-                "Tutorial: Supply Chain", "Supply Chain\u2026");
-        MenuItem cldTutorialItem = registry.toMenuItem(
-                "Tutorial: Causal Loop Diagrams", "Causal Loop Diagrams\u2026");
-        tutorialsMenu.getItems().addAll(gettingStartedItem, sirTutorialItem,
-                supplyChainItem, cldTutorialItem);
+        MenuItem curriculumItem = registry.toMenuItem("Tutorial Curriculum",
+                "Tutorial Curriculum\u2026");
 
         MenuItem sdConceptsItem = registry.toMenuItem("SD Concepts");
         MenuItem sdTerminologyItem = registry.toMenuItem("SD Terminology");
@@ -276,7 +269,7 @@ final class MenuBarBuilder {
 
         helpMenu.getItems().addAll(contextHelpItem,
                 new SeparatorMenuItem(),
-                tutorialsMenu,
+                gettingStartedItem, curriculumItem,
                 new SeparatorMenuItem(), sdConceptsItem, sdTerminologyItem,
                 exprLangItem,
                 new SeparatorMenuItem(), shortcutsItem,
