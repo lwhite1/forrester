@@ -51,7 +51,7 @@ public class Delay3 implements Formula, Resettable {
     private final double delayTime;
     private final LongSupplier currentStep;
     private final double[] dtHolder;
-    private final double explicitInitial;
+    private final DoubleSupplier initialValueSupplier;
     private final boolean hasExplicitInitial;
 
     private double stage1;
@@ -63,7 +63,8 @@ public class Delay3 implements Formula, Resettable {
     private long lastStep = -1;
 
     private Delay3(DoubleSupplier input, double delayTime, LongSupplier currentStep,
-                   double[] dtHolder, double explicitInitial, boolean hasExplicitInitial) {
+                   double[] dtHolder, DoubleSupplier initialValueSupplier,
+                   boolean hasExplicitInitial) {
         Preconditions.checkNotNull(input, "input supplier must not be null");
         Preconditions.checkNotNull(currentStep, "currentStep supplier must not be null");
         Preconditions.checkArgument(delayTime > 0,
@@ -72,7 +73,7 @@ public class Delay3 implements Formula, Resettable {
         this.delayTime = delayTime;
         this.currentStep = currentStep;
         this.dtHolder = dtHolder;
-        this.explicitInitial = explicitInitial;
+        this.initialValueSupplier = initialValueSupplier;
         this.hasExplicitInitial = hasExplicitInitial;
     }
 
@@ -85,7 +86,7 @@ public class Delay3 implements Formula, Resettable {
      * @return a new Delay3 formula
      */
     public static Delay3 of(DoubleSupplier input, double delayTime, LongSupplier currentStep) {
-        return new Delay3(input, delayTime, currentStep, UNIT_DT, 0, false);
+        return new Delay3(input, delayTime, currentStep, UNIT_DT, () -> 0.0, false);
     }
 
     /**
@@ -93,7 +94,7 @@ public class Delay3 implements Formula, Resettable {
      */
     public static Delay3 of(DoubleSupplier input, double delayTime,
                             double[] dtHolder, LongSupplier currentStep) {
-        return new Delay3(input, delayTime, currentStep, dtHolder, 0, false);
+        return new Delay3(input, delayTime, currentStep, dtHolder, () -> 0.0, false);
     }
 
     /**
@@ -107,7 +108,7 @@ public class Delay3 implements Formula, Resettable {
      */
     public static Delay3 of(DoubleSupplier input, double delayTime, double initialValue,
                             LongSupplier currentStep) {
-        return new Delay3(input, delayTime, currentStep, UNIT_DT, initialValue, true);
+        return new Delay3(input, delayTime, currentStep, UNIT_DT, () -> initialValue, true);
     }
 
     /**
@@ -115,6 +116,15 @@ public class Delay3 implements Formula, Resettable {
      */
     public static Delay3 of(DoubleSupplier input, double delayTime, double initialValue,
                             double[] dtHolder, LongSupplier currentStep) {
+        return new Delay3(input, delayTime, currentStep, dtHolder, () -> initialValue, true);
+    }
+
+    /**
+     * Creates a DELAY3 formula with a deferred initial value and runtime DT support.
+     */
+    public static Delay3 of(DoubleSupplier input, double delayTime, DoubleSupplier initialValue,
+                            double[] dtHolder, LongSupplier currentStep) {
+        Preconditions.checkNotNull(initialValue, "initialValue supplier must not be null");
         return new Delay3(input, delayTime, currentStep, dtHolder, initialValue, true);
     }
 
@@ -145,7 +155,7 @@ public class Delay3 implements Formula, Resettable {
         long step = currentStep.getAsLong();
         if (!initialized) {
             double inputAtInit = input.getAsDouble();
-            double init = hasExplicitInitial ? explicitInitial : inputAtInit;
+            double init = hasExplicitInitial ? initialValueSupplier.getAsDouble() : inputAtInit;
             double stageTime = delayTime / 3.0;
             stage1 = init * stageTime;
             stage2 = init * stageTime;

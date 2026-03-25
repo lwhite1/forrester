@@ -45,7 +45,7 @@ public class Smooth implements Formula, Resettable {
     private final DoubleSupplier smoothingTime;
     private final LongSupplier currentStep;
     private final double[] dtHolder;
-    private final double explicitInitial;
+    private final DoubleSupplier initialValueSupplier;
     private final boolean hasExplicitInitial;
 
     private double smoothed;
@@ -55,7 +55,8 @@ public class Smooth implements Formula, Resettable {
     private boolean warnedNonPositive;
 
     private Smooth(DoubleSupplier input, DoubleSupplier smoothingTime, LongSupplier currentStep,
-                   double[] dtHolder, double explicitInitial, boolean hasExplicitInitial) {
+                   double[] dtHolder, DoubleSupplier initialValueSupplier,
+                   boolean hasExplicitInitial) {
         Preconditions.checkNotNull(input, "input supplier must not be null");
         Preconditions.checkNotNull(smoothingTime, "smoothingTime supplier must not be null");
         Preconditions.checkNotNull(currentStep, "currentStep supplier must not be null");
@@ -63,7 +64,7 @@ public class Smooth implements Formula, Resettable {
         this.smoothingTime = smoothingTime;
         this.currentStep = currentStep;
         this.dtHolder = dtHolder;
-        this.explicitInitial = explicitInitial;
+        this.initialValueSupplier = initialValueSupplier;
         this.hasExplicitInitial = hasExplicitInitial;
     }
 
@@ -77,7 +78,7 @@ public class Smooth implements Formula, Resettable {
      */
     public static Smooth of(DoubleSupplier input, DoubleSupplier smoothingTime,
                             LongSupplier currentStep) {
-        return new Smooth(input, smoothingTime, currentStep, UNIT_DT, 0, false);
+        return new Smooth(input, smoothingTime, currentStep, UNIT_DT, () -> 0.0, false);
     }
 
     /**
@@ -91,7 +92,7 @@ public class Smooth implements Formula, Resettable {
      */
     public static Smooth of(DoubleSupplier input, DoubleSupplier smoothingTime,
                             double[] dtHolder, LongSupplier currentStep) {
-        return new Smooth(input, smoothingTime, currentStep, dtHolder, 0, false);
+        return new Smooth(input, smoothingTime, currentStep, dtHolder, () -> 0.0, false);
     }
 
     /**
@@ -107,7 +108,7 @@ public class Smooth implements Formula, Resettable {
                             LongSupplier currentStep) {
         Preconditions.checkArgument(smoothingTime > 0,
                 "smoothingTime must be positive, but got %s", smoothingTime);
-        return new Smooth(input, () -> smoothingTime, currentStep, UNIT_DT, 0, false);
+        return new Smooth(input, () -> smoothingTime, currentStep, UNIT_DT, () -> 0.0, false);
     }
 
     /**
@@ -121,7 +122,7 @@ public class Smooth implements Formula, Resettable {
      */
     public static Smooth of(DoubleSupplier input, DoubleSupplier smoothingTime,
                             double initialValue, LongSupplier currentStep) {
-        return new Smooth(input, smoothingTime, currentStep, UNIT_DT, initialValue, true);
+        return new Smooth(input, smoothingTime, currentStep, UNIT_DT, () -> initialValue, true);
     }
 
     /**
@@ -136,6 +137,18 @@ public class Smooth implements Formula, Resettable {
      */
     public static Smooth of(DoubleSupplier input, DoubleSupplier smoothingTime,
                             double initialValue, double[] dtHolder, LongSupplier currentStep) {
+        return new Smooth(input, smoothingTime, currentStep, dtHolder, () -> initialValue, true);
+    }
+
+    /**
+     * Creates a SMOOTH formula with a deferred initial value and runtime DT support.
+     * The initial value supplier is evaluated lazily at simulation start, allowing
+     * references to model elements that may not be initialized at compile time.
+     */
+    public static Smooth of(DoubleSupplier input, DoubleSupplier smoothingTime,
+                            DoubleSupplier initialValue, double[] dtHolder,
+                            LongSupplier currentStep) {
+        Preconditions.checkNotNull(initialValue, "initialValue supplier must not be null");
         return new Smooth(input, smoothingTime, currentStep, dtHolder, initialValue, true);
     }
 
@@ -152,7 +165,7 @@ public class Smooth implements Formula, Resettable {
                             LongSupplier currentStep) {
         Preconditions.checkArgument(smoothingTime > 0,
                 "smoothingTime must be positive, but got %s", smoothingTime);
-        return new Smooth(input, () -> smoothingTime, currentStep, UNIT_DT, initialValue, true);
+        return new Smooth(input, () -> smoothingTime, currentStep, UNIT_DT, () -> initialValue, true);
     }
 
     /**
@@ -181,7 +194,7 @@ public class Smooth implements Formula, Resettable {
         long step = currentStep.getAsLong();
         if (!initialized) {
             double inputAtInit = input.getAsDouble();
-            smoothed = hasExplicitInitial ? explicitInitial : inputAtInit;
+            smoothed = hasExplicitInitial ? initialValueSupplier.getAsDouble() : inputAtInit;
             lastInputVal = inputAtInit;
             initialized = true;
             lastStep = step;

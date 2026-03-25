@@ -20,7 +20,7 @@ public class SampleIfTrue implements Formula, Resettable {
 
     private final DoubleSupplier condition;
     private final DoubleSupplier input;
-    private final double initialValue;
+    private final DoubleSupplier initialValueSupplier;
     private final LongSupplier currentStep;
 
     private double heldValue;
@@ -30,13 +30,15 @@ public class SampleIfTrue implements Formula, Resettable {
     private long lastStep = -1;
 
     private SampleIfTrue(DoubleSupplier condition, DoubleSupplier input,
-                          double initialValue, LongSupplier currentStep) {
+                          DoubleSupplier initialValueSupplier, LongSupplier currentStep) {
         Preconditions.checkNotNull(condition, "condition supplier must not be null");
         Preconditions.checkNotNull(input, "input supplier must not be null");
+        Preconditions.checkNotNull(initialValueSupplier,
+                "initialValueSupplier must not be null");
         Preconditions.checkNotNull(currentStep, "currentStep supplier must not be null");
         this.condition = condition;
         this.input = input;
-        this.initialValue = initialValue;
+        this.initialValueSupplier = initialValueSupplier;
         this.currentStep = currentStep;
     }
 
@@ -51,6 +53,14 @@ public class SampleIfTrue implements Formula, Resettable {
      */
     public static SampleIfTrue of(DoubleSupplier condition, DoubleSupplier input,
                                    double initialValue, LongSupplier currentStep) {
+        return new SampleIfTrue(condition, input, () -> initialValue, currentStep);
+    }
+
+    /**
+     * Creates a SAMPLE IF TRUE formula with a deferred initial value.
+     */
+    public static SampleIfTrue of(DoubleSupplier condition, DoubleSupplier input,
+                                   DoubleSupplier initialValue, LongSupplier currentStep) {
         return new SampleIfTrue(condition, input, initialValue, currentStep);
     }
 
@@ -74,8 +84,9 @@ public class SampleIfTrue implements Formula, Resettable {
                 lastInputVal = input.getAsDouble();
                 heldValue = lastInputVal;
             } else {
-                lastInputVal = initialValue;
-                heldValue = initialValue;
+                double initVal = initialValueSupplier.getAsDouble();
+                lastInputVal = initVal;
+                heldValue = initVal;
             }
         } else if (step > lastStep) {
             long delta = step - lastStep;
