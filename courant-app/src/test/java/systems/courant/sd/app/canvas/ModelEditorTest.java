@@ -96,6 +96,26 @@ class ModelEditorTest {
         }
 
         @Test
+        void shouldReplaceNonEmptyListWithNewContents() {
+            ModelDefinition def1 = new ModelDefinitionBuilder()
+                    .name("First")
+                    .stock("A", 10, "u")
+                    .stock("B", 20, "u")
+                    .build();
+            editor.loadFrom(def1);
+            assertThat(editor.getStocks()).hasSize(2);
+
+            ModelDefinition def2 = new ModelDefinitionBuilder()
+                    .name("Second")
+                    .stock("X", 5, "u")
+                    .build();
+            editor.loadFrom(def2);
+
+            assertThat(editor.getStocks()).hasSize(1);
+            assertThat(editor.getStocks().get(0).name()).isEqualTo("X");
+        }
+
+        @Test
         void shouldLoadSubscriptDefinitions() {
             ModelDefinition def = new ModelDefinitionBuilder()
                     .name("Subscripted")
