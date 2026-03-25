@@ -249,6 +249,26 @@ class DemoClassGeneratorTest {
     }
 
     @Test
+    void shouldNotTreatNcsaLicenseAsNonCommercial() {
+        ModelDefinition def = new ModelDefinitionBuilder()
+                .name("Test")
+                .stock("S", 100.0, "people")
+                .defaultSimulation("Day", 10.0, "Day")
+                .build();
+
+        ModelMetadata metadata = ModelMetadata.builder()
+                .license("NCSA")
+                .build();
+
+        String source = generator.generate(def, metadata, "TestDemo",
+                "systems.courant.sd.demo", "test.xmile",
+                List.of(), List.of());
+
+        assertThat(source).contains("Copyright (c) 2025 Courant Systems");
+        assertThat(source).doesNotContain("THIRD-PARTY-LICENSES");
+    }
+
+    @Test
     void shouldEmitCourantLicenseHeaderForNonNCLicense() {
         ModelDefinition def = new ModelDefinitionBuilder()
                 .name("Test")

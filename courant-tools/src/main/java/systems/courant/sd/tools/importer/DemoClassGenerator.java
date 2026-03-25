@@ -75,7 +75,7 @@ public class DemoClassGenerator {
 
     private void emitLicenseHeader(StringBuilder sb, ModelMetadata metadata) {
         String license = metadata.license();
-        if (license != null && license.contains("NC")) {
+        if (license != null && license.contains("-NC")) {
             sb.append("/*\n");
             sb.append(" * Copyright (c) original author(s). See model metadata for attribution.\n");
             sb.append(" * Licensed under CC-BY-NC-SA-4.0. See THIRD-PARTY-LICENSES for details.\n");
