@@ -99,12 +99,8 @@ final class DashboardDockManager {
         }
     }
 
-    /** Close the floating dashboard stage if currently popped out. */
+    /** Close the floating dashboard stage if currently popped out, restoring the panel to its tab. */
     void closePopout() {
-        if (dashboardStage != null) {
-            dashboardStage.setOnHidden(null);
-            dashboardStage.close();
-            dashboardStage = null;
-        }
+        dock();
     }
 }
