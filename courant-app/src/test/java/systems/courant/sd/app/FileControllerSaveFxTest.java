@@ -63,7 +63,7 @@ class FileControllerSaveFxTest {
     }
 
     @Test
-    @DisplayName("saveToChosenFile with .mdl clears dirty flag but does not change currentFile (#1139)")
+    @DisplayName("saveToChosenFile with .mdl preserves dirty flag and does not change currentFile (#1370)")
     void shouldClearDirtyAfterVensimExport(FxRobot robot, @TempDir Path tempDir) throws Exception {
         loadTeacupModel();
 
@@ -76,14 +76,14 @@ class FileControllerSaveFxTest {
         Platform.runLater(() -> window.getFileController().saveToChosenFile(mdlFile));
         WaitForAsyncUtils.waitForFxEvents();
 
-        assertThat(window.isDirty()).isFalse();
+        assertThat(window.isDirty()).isTrue();
         assertThat(window.getCurrentFile()).isEqualTo(previousFile);
         assertThat(Files.exists(mdlFile.toPath())).isTrue();
         assertThat(Files.size(mdlFile.toPath())).isGreaterThan(0);
     }
 
     @Test
-    @DisplayName("saveToChosenFile with .xmile clears dirty flag but does not change currentFile (#1139)")
+    @DisplayName("saveToChosenFile with .xmile preserves dirty flag and does not change currentFile (#1370)")
     void shouldClearDirtyAfterXmileExport(FxRobot robot, @TempDir Path tempDir) throws Exception {
         loadTeacupModel();
 
@@ -96,14 +96,14 @@ class FileControllerSaveFxTest {
         Platform.runLater(() -> window.getFileController().saveToChosenFile(xmileFile));
         WaitForAsyncUtils.waitForFxEvents();
 
-        assertThat(window.isDirty()).isFalse();
+        assertThat(window.isDirty()).isTrue();
         assertThat(window.getCurrentFile()).isEqualTo(previousFile);
         assertThat(Files.exists(xmileFile.toPath())).isTrue();
         assertThat(Files.size(xmileFile.toPath())).isGreaterThan(0);
     }
 
     @Test
-    @DisplayName("saveToChosenFile with .stmx clears dirty flag but does not change currentFile (#1139)")
+    @DisplayName("saveToChosenFile with .stmx preserves dirty flag and does not change currentFile (#1370)")
     void shouldClearDirtyAfterStmxExport(FxRobot robot, @TempDir Path tempDir) throws Exception {
         loadTeacupModel();
 
@@ -116,7 +116,7 @@ class FileControllerSaveFxTest {
         Platform.runLater(() -> window.getFileController().saveToChosenFile(stmxFile));
         WaitForAsyncUtils.waitForFxEvents();
 
-        assertThat(window.isDirty()).isFalse();
+        assertThat(window.isDirty()).isTrue();
         assertThat(window.getCurrentFile()).isEqualTo(previousFile);
     }
 
@@ -139,7 +139,7 @@ class FileControllerSaveFxTest {
     }
 
     @Test
-    @DisplayName("window title drops dirty indicator after export")
+    @DisplayName("window title retains dirty indicator after non-JSON export (#1370)")
     void shouldUpdateTitleAfterExport(FxRobot robot, @TempDir Path tempDir) throws Exception {
         loadTeacupModel();
 
@@ -151,7 +151,7 @@ class FileControllerSaveFxTest {
         Platform.runLater(() -> window.getFileController().saveToChosenFile(mdlFile));
         WaitForAsyncUtils.waitForFxEvents();
 
-        assertThat(stage.getTitle()).doesNotContain("\u2022");
+        assertThat(stage.getTitle()).contains("\u2022");
     }
 
     @Test

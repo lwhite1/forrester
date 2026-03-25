@@ -51,6 +51,7 @@ public final class CanvasContextMenuController {
         void traceDownstream(String elementName);
         void showWhereUsed(String elementName);
         void showUses(String elementName);
+        void convertVariableToComment(String variableName);
     }
 
     private final ModuleNavigationController navController;
@@ -124,6 +125,17 @@ public final class CanvasContextMenuController {
 
             menu.getItems().addAll(new SeparatorMenuItem(),
                     traceUpItem, traceDownItem, whereUsedItem, usesItem);
+        }
+
+        if (type == ElementType.AUX) {
+            MenuItem convertItem = new MenuItem("Convert to Comment");
+            convertItem.setOnAction(e -> {
+                callbacks.saveUndoState("Convert to comment");
+                callbacks.convertVariableToComment(elementName);
+                callbacks.redraw();
+                callbacks.fireStatusChanged();
+            });
+            menu.getItems().addAll(new SeparatorMenuItem(), convertItem);
         }
 
         menu.getItems().addAll(new SeparatorMenuItem(),

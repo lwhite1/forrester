@@ -215,6 +215,20 @@ public final class CanvasElementController {
         }
     }
 
+    void convertVariableToComment(String name) {
+        if (canvas.editor == null) {
+            return;
+        }
+        if (canvas.editor.convertVariableToComment(name)) {
+            canvas.canvasState().setType(name, systems.courant.sd.model.def.ElementType.COMMENT);
+            double[] size = systems.courant.sd.app.canvas.renderers.ElementRenderer
+                    .computeCommentSize(canvas.editor.getCommentByName(name).text());
+            canvas.canvasState().setSize(name, size[0], size[1]);
+            canvas.regenerateAndRedraw();
+            canvas.fireStatusChanged();
+        }
+    }
+
     // --- Context menu wrappers ---
 
     public void showElementContextMenu(String elementName, double screenX, double screenY) {

@@ -237,10 +237,10 @@ final class FileController {
                     return;
                 }
             }
-            // Non-JSON exports are "export" operations — do not update currentFile,
-            // so that Ctrl+S continues to save in native JSON format.
-            dirty = false;
-            updateTitle.run();
+            // Non-JSON exports are "export" operations — do not update currentFile
+            // or clear the dirty flag. The native JSON file is still unsaved,
+            // so Ctrl+S continues to save in JSON format and the dirty indicator
+            // correctly reflects that the JSON file is stale.
             fireLogEvent.accept(l -> l.onModelSaved(name));
         } catch (IOException ex) {
             showError.accept("Failed to save file: " + ex.getMessage());

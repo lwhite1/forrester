@@ -32,7 +32,7 @@ public final class BehaviorClassification {
     private static final double FLAT_THRESHOLD = 0.01;
 
     /** Fraction of derivative-sign changes relative to series length for oscillation. */
-    private static final double OSCILLATION_THRESHOLD = 0.15;
+    private static final double OSCILLATION_THRESHOLD = 0.05;
 
     private BehaviorClassification() {
     }
@@ -156,7 +156,7 @@ public final class BehaviorClassification {
             double avgD2 = average(d2);
             double avgStep = range / clean.length;
             double d2Magnitude = avgStep > 0 ? Math.abs(avgD2) / avgStep : 0;
-            if (d2Magnitude < 0.1) {
+            if (d2Magnitude < 0.05) {
                 return Mode.LINEAR_GROWTH;
             }
             if (avgD2 > 0) {
@@ -170,7 +170,7 @@ public final class BehaviorClassification {
             double avgD2 = average(d2);
             double avgStep = range / clean.length;
             double d2Magnitude = avgStep > 0 ? Math.abs(avgD2) / avgStep : 0;
-            if (d2Magnitude < 0.1) {
+            if (d2Magnitude < 0.05) {
                 return Mode.LINEAR_DECLINE;
             }
             if (avgD2 > 0) {
@@ -178,12 +178,12 @@ public final class BehaviorClassification {
                 // Exponential decay approaches zero, so the final value is small
                 // relative to the total range of the series.
                 double last = clean[clean.length - 1];
-                if (Math.abs(last) < range * 0.15) {
+                if (Math.abs(last) < range * 0.1) {
                     return Mode.EXPONENTIAL_DECAY;
                 }
                 return Mode.GOAL_SEEKING;
             }
-            // Accelerating decline
+            // Accelerating decline — rate of decrease is increasing
             return Mode.EXPONENTIAL_DECAY;
         }
 
