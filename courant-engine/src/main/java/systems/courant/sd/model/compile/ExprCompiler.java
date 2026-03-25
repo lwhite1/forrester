@@ -202,19 +202,18 @@ public class ExprCompiler {
             case "INITIAL" -> {
                 requireArgs(name, args, 1);
                 DoubleSupplier a = compileExpr(args.get(0));
-                double[] cached = {Double.NaN};
-                boolean[] initialized = {false};
-                Resettable reset = () -> {
-                    cached[0] = Double.NaN;
-                    initialized[0] = false;
-                };
+                // Use volatile to ensure thread-safe lazy initialization.
+                // Double.NaN serves as the sentinel (not-yet-computed).
+                var holder = new Object() { volatile double value = Double.NaN; };
+                Resettable reset = () -> holder.value = Double.NaN;
                 resettables.add(reset);
                 yield () -> {
-                    if (!initialized[0]) {
-                        cached[0] = a.getAsDouble();
-                        initialized[0] = true;
+                    double v = holder.value;
+                    if (Double.isNaN(v)) {
+                        v = a.getAsDouble();
+                        holder.value = v;
                     }
-                    return cached[0];
+                    return v;
                 };
             }
             case "SMOOTH" -> compileSmooth(args);
