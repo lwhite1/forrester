@@ -32,7 +32,9 @@ final class HelpWindowManager {
             return (T) existing;
         }
         T window = factory.get();
-        window.initOwner(owner);
+        if (window.getOwner() == null) {
+            window.initOwner(owner);
+        }
         window.show();
         windows.put(type, window);
         return window;
@@ -50,7 +52,9 @@ final class HelpWindowManager {
             return existing;
         }
         Stage window = factory.get();
-        window.initOwner(owner);
+        if (window.getOwner() == null) {
+            window.initOwner(owner);
+        }
         window.show();
         windows.put(key, window);
         return window;
