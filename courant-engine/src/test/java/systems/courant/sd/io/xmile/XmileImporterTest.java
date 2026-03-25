@@ -338,6 +338,27 @@ class XmileImporterTest {
         }
 
         @Test
+        void shouldPreserveMixedCaseTimeUnits() {
+            String xmile = """
+                    <?xml version="1.0" encoding="UTF-8"?>
+                    <xmile xmlns="http://docs.oasis-open.org/xmile/ns/XMILE/v1.0" version="1.0">
+                      <header><name>Test</name></header>
+                      <sim_specs time_units="kWh">
+                        <start>0</start><stop>10</stop><dt>1</dt>
+                      </sim_specs>
+                      <model><variables>
+                        <aux name="x"><eqn>1</eqn></aux>
+                      </variables></model>
+                    </xmile>
+                    """;
+
+            ImportResult result = importer.importModel(xmile, "Test");
+            var sim = result.definition().defaultSimulation();
+            assertThat(sim.timeStep()).isEqualTo("KWh");
+            assertThat(sim.durationUnit()).isEqualTo("KWh");
+        }
+
+        @Test
         void shouldPreserveNonZeroInitialTime() {
             String xmile = """
                     <?xml version="1.0" encoding="UTF-8"?>
