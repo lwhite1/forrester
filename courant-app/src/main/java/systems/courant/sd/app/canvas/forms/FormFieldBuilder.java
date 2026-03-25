@@ -347,6 +347,9 @@ public class FormFieldBuilder {
         GridPane.setHgrow(box, Priority.ALWAYS);
 
         box.getEditor().textProperty().addListener((obs, oldText, newText) -> {
+            if (ctx.isUpdatingFields()) {
+                return;
+            }
             if (newText == null || newText.isEmpty()) {
                 box.setItems(FXCollections.observableArrayList(allItems));
                 return;
