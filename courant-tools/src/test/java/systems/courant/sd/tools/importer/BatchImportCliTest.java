@@ -173,6 +173,32 @@ class BatchImportCliTest {
     }
 
     @Nested
+    @DisplayName("downloadToTemp redirect safety (#1376)")
+    class DownloadRedirectSafety {
+
+        @Test
+        void shouldHaveReasonableMaxRedirectLimit() {
+            assertThat(BatchImportCli.MAX_REDIRECTS)
+                    .as("max redirect hops should be positive and bounded")
+                    .isBetween(1, 10);
+        }
+
+        @Test
+        void shouldStillRejectPrivateAddressInInitialUrl() {
+            assertThatThrownBy(() -> BatchImportCli.downloadToTemp("http://127.0.0.1/model.mdl"))
+                    .isInstanceOf(IOException.class)
+                    .hasMessageContaining("private/reserved");
+        }
+
+        @Test
+        void shouldStillRejectLocalhostInInitialUrl() {
+            assertThatThrownBy(() -> BatchImportCli.downloadToTemp("http://localhost/model.mdl"))
+                    .isInstanceOf(IOException.class)
+                    .hasMessageContaining("private/reserved");
+        }
+    }
+
+    @Nested
     @DisplayName("parseArgs error paths (#333)")
     class ParseArgsErrorPaths {
 
