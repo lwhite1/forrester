@@ -141,6 +141,11 @@ final class CanvasCallbacks implements InlineEditController.Callbacks,
     }
 
     @Override
+    public void convertVariableToComment(String variableName) {
+        canvas.elements().convertVariableToComment(variableName);
+    }
+
+    @Override
     public void drillInto(String moduleName) {
         canvas.navigation().drillInto(moduleName);
     }
