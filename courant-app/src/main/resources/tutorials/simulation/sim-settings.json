@@ -1,0 +1,18 @@
+{
+  "id": "sim-settings",
+  "title": "Simulation Settings & Execution",
+  "description": "Configure time step, duration, DT, and integration method. Understand how simulation settings affect accuracy and performance.",
+  "difficulty": "beginner",
+  "estimatedMinutes": 15,
+  "model": "introductory/coffee-cooling.json",
+  "recommendedPrerequisites": ["first-model"],
+  "steps": [
+    { "title": "The Simulation Loop", "content": "sim-settings/01-the-simulation-loop.md" },
+    { "title": "Time Step & Duration", "content": "sim-settings/02-time-step-duration.md" },
+    { "title": "DT — Sub-stepping", "content": "sim-settings/03-dt-sub-stepping.md" },
+    { "title": "INITIAL TIME & FINAL TIME", "content": "sim-settings/04-initial-final-time.md" },
+    { "title": "Running a Simulation", "content": "sim-settings/05-running.md" },
+    { "title": "Key Takeaways", "content": "sim-settings/06-key-takeaways.md" }
+  ],
+  "nextTutorial": "reading-results"
+}

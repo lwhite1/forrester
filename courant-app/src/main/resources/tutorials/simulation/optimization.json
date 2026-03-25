@@ -1,0 +1,19 @@
+{
+  "id": "optimization",
+  "title": "Optimization",
+  "description": "Find the best parameter values to achieve a goal. Learn to define objective functions, decision variables, and constraints.",
+  "difficulty": "advanced",
+  "estimatedMinutes": 20,
+  "model": "introductory/coffee-cooling.json",
+  "recommendedPrerequisites": ["monte-carlo"],
+  "steps": [
+    { "title": "What is Optimization?", "content": "optimization/01-what-is-optimization.md" },
+    { "title": "Decision Variables", "content": "optimization/02-decision-variables.md" },
+    { "title": "Objective Functions", "content": "optimization/03-objective-functions.md" },
+    { "title": "Constraints", "content": "optimization/04-constraints.md" },
+    { "title": "Running the Optimizer", "content": "optimization/05-running.md" },
+    { "title": "Interpreting Results", "content": "optimization/06-interpreting.md" },
+    { "title": "Key Takeaways", "content": "optimization/07-key-takeaways.md" }
+  ],
+  "nextTutorial": "calibration"
+}

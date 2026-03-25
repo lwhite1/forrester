@@ -1,0 +1,19 @@
+{
+  "id": "calibration",
+  "title": "Calibration",
+  "description": "Fit model parameters to historical data. Learn to set up reference data, define payoff functions, and evaluate goodness of fit.",
+  "difficulty": "advanced",
+  "estimatedMinutes": 20,
+  "model": null,
+  "recommendedPrerequisites": ["optimization"],
+  "steps": [
+    { "title": "What is Calibration?", "content": "calibration/01-what-is-calibration.md" },
+    { "title": "Reference Data", "content": "calibration/02-reference-data.md" },
+    { "title": "Payoff Functions", "content": "calibration/03-payoff-functions.md" },
+    { "title": "Running Calibration", "content": "calibration/04-running.md" },
+    { "title": "Evaluating Fit", "content": "calibration/05-evaluating-fit.md" },
+    { "title": "Pitfalls", "content": "calibration/06-pitfalls.md" },
+    { "title": "Key Takeaways", "content": "calibration/07-key-takeaways.md" }
+  ],
+  "nextTutorial": "putting-together"
+}

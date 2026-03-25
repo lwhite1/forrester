@@ -36,21 +36,21 @@
           "name": "Core Simulation",
           "description": "Simulation settings, execution, and reading results",
           "recommendedPrerequisites": ["modeling-foundations"],
-          "tutorials": []
+          "tutorials": ["sim-settings", "reading-results"]
         },
         {
           "id": "sim-exploration",
           "name": "Exploration & Sensitivity",
           "description": "Parameter sweeps, multi-sweeps, and Monte Carlo analysis",
           "recommendedPrerequisites": ["sim-core"],
-          "tutorials": []
+          "tutorials": ["parameter-sweeps", "multi-sweeps", "monte-carlo"]
         },
         {
           "id": "sim-optimization",
           "name": "Optimization & Calibration",
           "description": "Optimization, calibration, and full workflow",
           "recommendedPrerequisites": ["sim-exploration"],
-          "tutorials": []
+          "tutorials": ["optimization", "calibration", "putting-together"]
         }
       ]
     }

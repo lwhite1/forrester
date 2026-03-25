@@ -1,0 +1,18 @@
+{
+  "id": "putting-together",
+  "title": "Putting It All Together",
+  "description": "Walk through the full SD workflow: build, validate, sweep, calibrate, optimize, and present findings.",
+  "difficulty": "advanced",
+  "estimatedMinutes": 20,
+  "model": null,
+  "recommendedPrerequisites": ["calibration"],
+  "steps": [
+    { "title": "The Full Workflow", "content": "putting-together/01-the-full-workflow.md" },
+    { "title": "Build & Validate", "content": "putting-together/02-build-validate.md" },
+    { "title": "Explore & Calibrate", "content": "putting-together/03-explore-calibrate.md" },
+    { "title": "Analyze & Optimize", "content": "putting-together/04-analyze-optimize.md" },
+    { "title": "Present & Communicate", "content": "putting-together/05-present.md" },
+    { "title": "What You've Learned", "content": "putting-together/06-what-youve-learned.md" }
+  ],
+  "nextTutorial": null
+}

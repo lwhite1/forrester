@@ -102,11 +102,10 @@ class CurriculumBrowserDialogFxTest {
     }
 
     @Test
-    @DisplayName("simulation tiers have no tutorial children yet")
-    void emptyTiersHaveNoChildren(FxRobot robot) {
-        // Core Simulation tier (1st tier of simulation-tools track) should be empty
+    @DisplayName("simulation core tier has two tutorial children")
+    void simCoreTierHasTutorials(FxRobot robot) {
         TreeItem<Object> simCore = tree().getRoot().getChildren().get(1)
                 .getChildren().getFirst();
-        assertThat(simCore.getChildren()).isEmpty();
+        assertThat(simCore.getChildren()).hasSize(2);
     }
 }

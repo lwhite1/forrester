@@ -1,0 +1,18 @@
+{
+  "id": "reading-results",
+  "title": "Reading Results & Time Series",
+  "description": "Interpret simulation output using charts, dashboards, and CSV export. Learn to compare runs and identify behavior patterns.",
+  "difficulty": "beginner",
+  "estimatedMinutes": 15,
+  "model": "introductory/coffee-cooling.json",
+  "recommendedPrerequisites": ["sim-settings"],
+  "steps": [
+    { "title": "The Chart Tab", "content": "reading-results/01-the-chart-tab.md" },
+    { "title": "Adding Variables", "content": "reading-results/02-adding-variables.md" },
+    { "title": "Reading Time Series", "content": "reading-results/03-reading-time-series.md" },
+    { "title": "Comparing Runs", "content": "reading-results/04-comparing-runs.md" },
+    { "title": "Exporting Data", "content": "reading-results/05-exporting-data.md" },
+    { "title": "Key Takeaways", "content": "reading-results/06-key-takeaways.md" }
+  ],
+  "nextTutorial": "parameter-sweeps"
+}

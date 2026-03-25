@@ -1,0 +1,18 @@
+{
+  "id": "multi-sweeps",
+  "title": "Multi-Parameter Sweeps",
+  "description": "Sweep multiple parameters simultaneously to explore interaction effects and build scenario matrices.",
+  "difficulty": "intermediate",
+  "estimatedMinutes": 15,
+  "model": "introductory/coffee-cooling.json",
+  "recommendedPrerequisites": ["parameter-sweeps"],
+  "steps": [
+    { "title": "Why Multiple Parameters?", "content": "multi-sweeps/01-why-multiple.md" },
+    { "title": "Setting Up", "content": "multi-sweeps/02-setting-up.md" },
+    { "title": "Combinatorial Explosion", "content": "multi-sweeps/03-combinatorial.md" },
+    { "title": "Interaction Effects", "content": "multi-sweeps/04-interaction-effects.md" },
+    { "title": "Scenario Matrices", "content": "multi-sweeps/05-scenario-matrices.md" },
+    { "title": "Key Takeaways", "content": "multi-sweeps/06-key-takeaways.md" }
+  ],
+  "nextTutorial": "monte-carlo"
+}
