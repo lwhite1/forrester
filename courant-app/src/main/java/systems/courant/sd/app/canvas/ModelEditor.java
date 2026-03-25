@@ -126,28 +126,17 @@ public class ModelEditor {
         checkFxThread();
         queryFacade.modelName = definition.name();
         queryFacade.modelComment = definition.comment() != null ? definition.comment() : "";
-        stocks.clear();
-        flows.clear();
-        variables.clear();
-        modules.clear();
-        lookupTables.clear();
-        cldVariables.clear();
-        causalLinks.clear();
-        comments.clear();
-        subscripts.clear();
-        referenceDatasets.clear();
+        replaceContents(stocks, definition.stocks());
+        replaceContents(flows, definition.flows());
+        replaceContents(variables, definition.variables());
+        replaceContents(modules, definition.modules());
+        replaceContents(lookupTables, definition.lookupTables());
+        replaceContents(cldVariables, definition.cldVariables());
+        replaceContents(causalLinks, definition.causalLinks());
+        replaceContents(comments, definition.comments());
+        replaceContents(subscripts, definition.subscripts());
+        replaceContents(referenceDatasets, definition.referenceDatasets());
         nameIndex.clear();
-
-        stocks.addAll(definition.stocks());
-        flows.addAll(definition.flows());
-        variables.addAll(definition.variables());
-        modules.addAll(definition.modules());
-        lookupTables.addAll(definition.lookupTables());
-        cldVariables.addAll(definition.cldVariables());
-        causalLinks.addAll(definition.causalLinks());
-        comments.addAll(definition.comments());
-        subscripts.addAll(definition.subscripts());
-        referenceDatasets.addAll(definition.referenceDatasets());
         queryFacade.simulationSettings = definition.defaultSimulation();
         queryFacade.metadata = definition.metadata();
 
@@ -163,6 +152,27 @@ public class ModelEditor {
     }
 
     // ── Element creation ─────────────────────────────────────────────────
+
+    /**
+     * Replaces the contents of a list without creating an intermediate empty state
+     * visible to snapshot iterators on background threads. New elements are appended
+     * first, then old elements are removed, so concurrent readers see either the old
+     * contents, a union of old and new, or the new contents — never an empty list
+     * (unless the new contents are themselves empty).
+     */
+    private static <T> void replaceContents(List<T> list, List<? extends T> newContents) {
+        int oldSize = list.size();
+        if (oldSize == 0) {
+            if (!newContents.isEmpty()) {
+                list.addAll(newContents);
+            }
+        } else if (newContents.isEmpty()) {
+            list.clear();
+        } else {
+            list.addAll(newContents);
+            list.subList(0, oldSize).clear();
+        }
+    }
 
     /** @return the name of the created stock */
     public String addStock() {
