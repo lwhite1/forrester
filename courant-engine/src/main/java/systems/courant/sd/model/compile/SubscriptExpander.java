@@ -375,12 +375,15 @@ public class SubscriptExpander {
                 sb.append('|');
             }
             String quoted = Pattern.quote(sorted.get(i));
-            // Match backtick-quoted form first, then unquoted with word boundaries
+            // Match backtick-quoted form first, then unquoted with word boundaries.
+            // Use (?<!\w)(?<!\w ) and (?!\w)(?! \w) to prevent matching variable
+            // name substrings when names contain spaces (e.g. "birth rate" inside
+            // "adjusted birth rate").
             sb.append("`").append(quoted).append("`");
             sb.append("|");
-            sb.append("(?<![\\w])");
+            sb.append("(?<![\\w])(?<!\\w )");
             sb.append(quoted);
-            sb.append("(?![\\w])");
+            sb.append("(?![\\w])(?! \\w)");
         }
         return Pattern.compile(sb.toString());
     }
