@@ -1,8 +1,6 @@
 package systems.courant.sd.model.compile;
 
 import systems.courant.sd.Simulation;
-import systems.courant.sd.event.EventHandler;
-import systems.courant.sd.event.TimeStepEvent;
 import systems.courant.sd.measure.Quantity;
 import systems.courant.sd.measure.TimeUnit;
 import systems.courant.sd.measure.UnitRegistry;
@@ -231,24 +229,6 @@ public class CompiledModel {
     }
 
     private void installStepSync(Simulation sim) {
-        sim.addEventHandler(new StepSyncHandler(stepHolder, sim));
-    }
-
-    /**
-     * Event handler that synchronizes the compiled model's step counter with the simulation.
-     */
-    private static class StepSyncHandler implements EventHandler {
-        private final long[] stepHolder;
-        private final Simulation sim;
-
-        StepSyncHandler(long[] stepHolder, Simulation sim) {
-            this.stepHolder = stepHolder;
-            this.sim = sim;
-        }
-
-        @Override
-        public void handleTimeStepEvent(TimeStepEvent event) {
-            stepHolder[0] = sim.getCurrentStep();
-        }
+        sim.addPreStepCallback(() -> stepHolder[0] = sim.getCurrentStep());
     }
 }

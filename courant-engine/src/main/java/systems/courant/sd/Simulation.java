@@ -82,6 +82,7 @@ public class Simulation {
 
     private final List<EventHandler> eventHandlers = new ArrayList<>();
 
+    private final List<Runnable> preStepCallbacks = new ArrayList<>();
 
     public Simulation(Model model, TimeUnit timeStep, Quantity duration) {
         this(model, timeStep, duration, LocalDateTime.now());
@@ -114,6 +115,18 @@ public class Simulation {
 
     public void removeEventHandler(EventHandler handler) {
         eventHandlers.remove(handler);
+    }
+
+    /**
+     * Adds a callback that runs at the start of every simulation step, regardless of
+     * {@link #setSavePer(long) savePer}. Use this for computation-critical sync that must
+     * happen on every step, not just recorded steps.
+     *
+     * @param callback the callback to invoke before each step's calculations
+     */
+    public void addPreStepCallback(Runnable callback) {
+        Preconditions.checkNotNull(callback, "callback must not be null");
+        preStepCallbacks.add(callback);
     }
 
     /**
@@ -252,6 +265,10 @@ public class Simulation {
                 }
 
                 flowMap.clear();
+
+                for (Runnable cb : preStepCallbacks) {
+                    cb.run();
+                }
 
                 boolean shouldRecord = currentStep % savePer == 0
                         || currentStep == totalSteps;
