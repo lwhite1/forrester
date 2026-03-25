@@ -209,6 +209,9 @@ public class LoopNavigatorBar extends HBox {
         content.setStyle("-fx-background-color: white;");
 
         List<String> path = loop.path();
+        if (path.isEmpty()) {
+            return;
+        }
         if (isSFGroup) {
             // S&F feedback group: plain list of stocks (no polarity)
             for (String stock : path) {
