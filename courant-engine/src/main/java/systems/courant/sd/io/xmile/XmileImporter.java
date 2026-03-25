@@ -699,6 +699,6 @@ public class XmileImporter implements ModelImporter {
             return s;
         }
         return s.substring(0, 1).toUpperCase(Locale.ROOT)
-                + s.substring(1).toLowerCase(Locale.ROOT);
+                + s.substring(1);
     }
 }
