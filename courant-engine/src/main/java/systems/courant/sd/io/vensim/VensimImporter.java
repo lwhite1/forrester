@@ -603,6 +603,20 @@ public class VensimImporter implements ModelImporter {
                 if (!Files.isRegularFile(csvPath)) {
                     continue;
                 }
+                // Resolve symlinks to prevent symlink-based path traversal
+                try {
+                    Path realCsvPath = csvPath.toRealPath();
+                    Path realBaseDir = baseDir.toRealPath();
+                    if (!realCsvPath.startsWith(realBaseDir)) {
+                        warnings.add("Rejected companion CSV path '" + filePath
+                                + "': resolves outside model directory via symlink");
+                        continue;
+                    }
+                } catch (IOException e) {
+                    warnings.add("Failed to resolve companion CSV path '" + filePath
+                            + "': " + e.getMessage());
+                    continue;
+                }
                 try {
                     ReferenceDataset dataset = ReferenceDataCsvReader.read(csvPath, filePath);
                     builder.referenceDataset(dataset);
