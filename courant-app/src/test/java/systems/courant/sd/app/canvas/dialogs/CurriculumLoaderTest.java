@@ -28,7 +28,7 @@ class CurriculumLoaderTest {
     @Test
     @DisplayName("second track is simulation tools")
     void secondTrackIsSimulationTools() {
-        assertThat(tracks.get(1).id()).isEqualTo("simulation-tools");
+        assertThat(tracks.get(1).id()).isEqualTo("simulation");
     }
 
     @Test
