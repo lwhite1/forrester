@@ -749,6 +749,34 @@ public class ModelEditor {
         return true;
     }
 
+    /**
+     * Converts a variable to a comment element. The comment text is set to
+     * "name: equation" to preserve the variable's information.
+     *
+     * @return true if the variable was found and converted
+     */
+    public boolean convertVariableToComment(String name) {
+        checkFxThread();
+
+        Optional<VariableDef> opt = getVariableByName(name);
+        if (opt.isEmpty()) {
+            return false;
+        }
+        VariableDef variable = opt.get();
+
+        String text = name + ": " + (variable.equation() != null ? variable.equation() : "");
+        if (variable.comment() != null && !variable.comment().isBlank()) {
+            text += "\n" + variable.comment();
+        }
+
+        variables.removeIf(v -> v.name().equals(name));
+        comments.add(new CommentDef(name, text));
+
+        fireElementRemoved(name);
+        fireElementAdded(name, ElementType.COMMENT.name());
+        return true;
+    }
+
     // ── Query delegations (read-only) ────────────────────────────────────
 
     public boolean hasElement(String name) { return queryFacade.hasElement(name); }
