@@ -777,6 +777,30 @@ class VensimExporterTest {
         }
 
         @Test
+        void shouldNotReverseUserAuthoredIfWithUnparenthesizedCondition() {
+            // User wrote: IF(x == 0, 0, a / x) — no parens around x in condition
+            String expr = "IF(x == 0, 0, (a) / (x))";
+            String result = VensimExporter.reverseXidzZidz(expr);
+            assertThat(result).isEqualTo(expr);
+        }
+
+        @Test
+        void shouldNotReverseUserAuthoredIfWithUnparenthesizedDivision() {
+            // User wrote: IF((x) == 0, 0, a / x) — no parens around division operands
+            String expr = "IF((x) == 0, 0, a / x)";
+            String result = VensimExporter.reverseXidzZidz(expr);
+            assertThat(result).isEqualTo(expr);
+        }
+
+        @Test
+        void shouldNotReverseUserAuthoredIfWithFullyUnparenthesizedForm() {
+            // Completely unparenthesized — clearly user-authored
+            String expr = "IF(x == 0, 0, a / x)";
+            String result = VensimExporter.reverseXidzZidz(expr);
+            assertThat(result).isEqualTo(expr);
+        }
+
+        @Test
         void shouldReverseXidzInFullExpressionPipeline() {
             String result = VensimExporter.toVensimExpr(
                     "IF((b) == 0, 0, (a) / (b))");
