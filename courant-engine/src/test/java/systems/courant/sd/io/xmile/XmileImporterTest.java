@@ -1009,4 +1009,45 @@ class XmileImporterTest {
             assertThat(result.definition().stocks().get(0).name()).isEqualTo("Temp\u00e9rature");
         }
     }
+
+    @Nested
+    @DisplayName("capitalizeFirst")
+    class CapitalizeFirst {
+
+        @Test
+        @DisplayName("should capitalize first letter and preserve rest")
+        void shouldCapitalizeFirstAndPreserveRest() {
+            assertThat(XmileImporter.capitalizeFirst("day")).isEqualTo("Day");
+        }
+
+        @Test
+        @DisplayName("should preserve mixed case after first character")
+        void shouldPreserveMixedCase() {
+            assertThat(XmileImporter.capitalizeFirst("kWh")).isEqualTo("KWh");
+        }
+
+        @Test
+        @DisplayName("should handle single character")
+        void shouldHandleSingleCharacter() {
+            assertThat(XmileImporter.capitalizeFirst("d")).isEqualTo("D");
+        }
+
+        @Test
+        @DisplayName("should return null for null input")
+        void shouldReturnNullForNull() {
+            assertThat(XmileImporter.capitalizeFirst(null)).isNull();
+        }
+
+        @Test
+        @DisplayName("should return empty for empty input")
+        void shouldReturnEmptyForEmpty() {
+            assertThat(XmileImporter.capitalizeFirst("")).isEmpty();
+        }
+
+        @Test
+        @DisplayName("should handle already capitalized input")
+        void shouldHandleAlreadyCapitalized() {
+            assertThat(XmileImporter.capitalizeFirst("Month")).isEqualTo("Month");
+        }
+    }
 }
