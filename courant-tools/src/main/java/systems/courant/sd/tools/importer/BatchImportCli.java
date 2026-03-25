@@ -40,6 +40,7 @@ public class BatchImportCli {
     private static final Logger log = LoggerFactory.getLogger(BatchImportCli.class);
     private static final Duration DOWNLOAD_TIMEOUT = Duration.ofSeconds(30);
     private static final long MAX_DOWNLOAD_BYTES = 10 * 1024 * 1024; // 10 MB
+    static final int MAX_REDIRECTS = 5;
 
     public static void main(String[] args) {
         System.exit(new BatchImportCli().run(args));
@@ -293,18 +294,36 @@ public class BatchImportCli {
         Path tempFile = tempDir.resolve(fileName);
 
         try (HttpClient client = HttpClient.newBuilder()
-                .followRedirects(HttpClient.Redirect.NORMAL)
+                .followRedirects(HttpClient.Redirect.NEVER)
                 .connectTimeout(DOWNLOAD_TIMEOUT)
                 .build()) {
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(uri)
-                    .header("User-Agent", "Courant-SD-Importer/1.0")
-                    .timeout(DOWNLOAD_TIMEOUT)
-                    .GET()
-                    .build();
-            HttpResponse<InputStream> response = client.send(request,
-                    HttpResponse.BodyHandlers.ofInputStream());
+            URI currentUri = uri;
+            HttpResponse<InputStream> response = null;
+            for (int redirects = 0; redirects <= MAX_REDIRECTS; redirects++) {
+                HttpRequest request = HttpRequest.newBuilder()
+                        .uri(currentUri)
+                        .header("User-Agent", "Courant-SD-Importer/1.0")
+                        .timeout(DOWNLOAD_TIMEOUT)
+                        .GET()
+                        .build();
+                response = client.send(request,
+                        HttpResponse.BodyHandlers.ofInputStream());
+                int status = response.statusCode();
+                if (status >= 300 && status < 400) {
+                    response.body().close();
+                    String location = response.headers().firstValue("Location")
+                            .orElseThrow(() -> new IOException(
+                                    "HTTP " + status + " redirect with no Location header"));
+                    currentUri = currentUri.resolve(location);
+                    rejectPrivateAddress(currentUri);
+                    continue;
+                }
+                break;
+            }
 
+            if (response.statusCode() >= 300 && response.statusCode() < 400) {
+                throw new IOException("Too many redirects for " + url);
+            }
             if (response.statusCode() != 200) {
                 throw new IOException("HTTP " + response.statusCode() + " for " + url);
             }
