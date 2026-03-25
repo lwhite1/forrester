@@ -345,6 +345,63 @@ class SubscriptExpanderTest {
         }
     }
 
+    @Nested
+    @DisplayName("Spaced name substring matching (#1375)")
+    class SpacedNameSubstringMatching {
+
+        @Test
+        @DisplayName("should not match 'birth rate' inside 'adjusted birth rate'")
+        void shouldNotMatchShorterNameInsideLongerSpacedName() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Spaced Substring")
+                    .subscript("Region", List.of("A", "B"))
+                    .stock("birth rate", 100, "Person/Year", List.of("Region"))
+                    .variable("net", "adjusted birth rate + birth rate", "Person/Year",
+                            List.of("Region"))
+                    .build();
+
+            ModelDefinition expanded = SubscriptExpander.expand(def);
+
+            // "birth rate" should be expanded but "adjusted birth rate" should NOT be
+            assertThat(expanded.variables().get(0).equation())
+                    .isEqualTo("adjusted birth rate + birth rate[A]");
+        }
+
+        @Test
+        @DisplayName("should not match 'birth rate' inside 'birth rate adjustment'")
+        void shouldNotMatchShorterNameAtStartOfLongerName() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Suffix Match")
+                    .subscript("Region", List.of("X"))
+                    .stock("birth rate", 50, "Person/Year", List.of("Region"))
+                    .variable("net", "birth rate adjustment + birth rate", "Person/Year",
+                            List.of("Region"))
+                    .build();
+
+            ModelDefinition expanded = SubscriptExpander.expand(def);
+
+            assertThat(expanded.variables().get(0).equation())
+                    .isEqualTo("birth rate adjustment + birth rate[X]");
+        }
+
+        @Test
+        @DisplayName("should still match standalone spaced name in expression")
+        void shouldMatchStandaloneSpacedName() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Standalone")
+                    .subscript("Region", List.of("A"))
+                    .stock("birth rate", 100, "Person/Year", List.of("Region"))
+                    .variable("total", "birth rate * 2", "Person/Year",
+                            List.of("Region"))
+                    .build();
+
+            ModelDefinition expanded = SubscriptExpander.expand(def);
+
+            assertThat(expanded.variables().get(0).equation())
+                    .isEqualTo("birth rate[A] * 2");
+        }
+    }
+
     @Test
     void shouldThrowOnUnknownSubscriptDimension() {
         ModelDefinition def = new ModelDefinitionBuilder()
