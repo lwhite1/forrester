@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -151,6 +152,9 @@ public class CsvSubscriber implements EventHandler, Closeable {
                     csvWriter.close();
                 } catch (IOException e) {
                     logger.error("Failed to close CSV writer", e);
+                    csvWriter = null;
+                    throw new UncheckedIOException(
+                            "Failed to flush CSV output — data may be truncated", e);
                 }
                 csvWriter = null;
             }
