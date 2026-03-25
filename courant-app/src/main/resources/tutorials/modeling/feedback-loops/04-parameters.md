@@ -1,6 +1,6 @@
 ## Place three Parameters
 
-Press `4` to switch to the Variable tool. Create three constants:
+Press `6` to switch to the Variable tool. Create three constants:
 
 1. `Contact_Rate` = `8` (contacts per person per day)
 2. `Infectivity` = `0.10` (probability of transmission per contact)

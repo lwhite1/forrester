@@ -9,13 +9,13 @@ This helps identify your model later in file listings and reports.
 
 ## Place a Stock
 
-Press `2` (or click the Stock button in the toolbar), then click on the canvas.
+Press `4` (or click the Stock button in the toolbar), then click on the canvas.
 Double-click the stock to select it. In the **Properties panel** on the right, name it: `Coffee Temperature`
 Set the initial value to `100` (degrees Celsius).
 
 ## Place two Variables as parameters
 
-Press `4` to switch to the Variable tool.
+Press `6` to switch to the Variable tool.
 
 Click the canvas to the right of the stock. Name it `Room Temperature`, value `18`.
 Click again below. Name it `Cooling Rate`, value `0.10`.
@@ -24,7 +24,7 @@ The cooling rate means the coffee loses 10% of the temperature difference each m
 
 ## Place a Variable
 
-Press `4`. Click between the stock and the constants. Name it `Discrepancy`.
+Press `6`. Click between the stock and the constants. Name it `Discrepancy`.
 When prompted for the equation, type:
 
   `Coffee_Temperature - Room_Temperature`

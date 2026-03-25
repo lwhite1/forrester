@@ -1,6 +1,6 @@
 ## Create the Infection flow
 
-Press `3` to switch to the Flow tool.
+Press `5` to switch to the Flow tool.
 
 1. Click the **Susceptible** stock (source)
 2. Click the **Infectious** stock (sink)
@@ -14,7 +14,7 @@ This is the standard mass-action infection rate. The fraction at the end is the 
 
 ## Create the Recovery flow
 
-Press `3` again.
+Press `5` again.
 
 1. Click the **Infectious** stock (source)
 2. Click the **Recovered** stock (sink)

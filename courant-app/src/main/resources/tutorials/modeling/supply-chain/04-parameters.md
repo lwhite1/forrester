@@ -1,6 +1,6 @@
 ## Place four Parameters
 
-Press `4` to switch to the Variable tool. Create:
+Press `6` to switch to the Variable tool. Create:
 
 1. `Customer_Demand` = `20` (units per day)
 2. `Target_Inventory` = `200` (units — same as initial inventory)

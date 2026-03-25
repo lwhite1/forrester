@@ -1,6 +1,6 @@
 ## Place two Stocks
 
-Press `2` to switch to the Stock tool. Place two stocks on the canvas:
+Press `4` to switch to the Stock tool. Place two stocks on the canvas:
 
 1. **Inventory** — initial value `200` (units in the warehouse)
 2. **Supply Line** — initial value `0` (units on order but not yet delivered)

@@ -1,6 +1,6 @@
 ## Create a Flow
 
-Press `3` to switch to the Flow tool.
+Press `5` to switch to the Flow tool.
 
 1. Click the **Coffee Temperature** stock — this is the source
 2. Click an empty area nearby — a cloud appears (heat dissipates)
