@@ -175,11 +175,10 @@ public final class BehaviorClassification {
             }
             if (avgD2 > 0) {
                 // Decelerating decline — distinguish decay (→0) from goal-seeking (→non-zero).
-                // Exponential decay approaches zero, so the final value is a small
-                // fraction of the initial value.
-                double first = clean[0];
+                // Exponential decay approaches zero, so the final value is small
+                // relative to the total range of the series.
                 double last = clean[clean.length - 1];
-                if (first != 0 && Math.abs(last / first) < 0.2) {
+                if (Math.abs(last) < range * 0.15) {
                     return Mode.EXPONENTIAL_DECAY;
                 }
                 return Mode.GOAL_SEEKING;
