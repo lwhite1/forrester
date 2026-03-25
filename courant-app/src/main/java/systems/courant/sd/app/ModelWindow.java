@@ -20,10 +20,10 @@ import systems.courant.sd.app.canvas.ModelEditListener;
 import systems.courant.sd.app.canvas.ModelEditor;
 import systems.courant.sd.app.canvas.PropertiesPanel;
 import systems.courant.sd.app.canvas.dialogs.ContentTutorialDialog;
+import systems.courant.sd.app.canvas.dialogs.CurriculumBrowserDialog;
 import systems.courant.sd.app.canvas.dialogs.KeyboardShortcutsDialog;
 import systems.courant.sd.app.canvas.dialogs.SdConceptsDialog;
 import systems.courant.sd.app.canvas.dialogs.SubscriptDefinitionDialog;
-import systems.courant.sd.app.canvas.dialogs.TutorialChooserDialog;
 import systems.courant.sd.app.canvas.dialogs.TutorialContentLoader;
 import systems.courant.sd.app.canvas.StatusBar;
 import systems.courant.sd.app.canvas.UndoHistoryPopup;
@@ -369,30 +369,7 @@ public class ModelWindow {
             // If user cancelled the file chooser, still show the editor
             canvas.requestFocus();
         });
-        startScreen.setOnTutorials(() -> {
-            TutorialChooserDialog chooser = new TutorialChooserDialog();
-            chooser.setOnGettingStarted(() -> {
-                showEditor();
-                fileController.newModel();
-                showContentTutorial("modeling/first-model.json");
-            });
-            chooser.setOnSirTutorial(() -> {
-                showEditor();
-                fileController.newModel();
-                showContentTutorial("modeling/feedback-loops.json");
-            });
-            chooser.setOnSupplyChainTutorial(() -> {
-                showEditor();
-                fileController.newModel();
-                showContentTutorial("modeling/supply-chain.json");
-            });
-            chooser.setOnCldTutorial(() -> {
-                showEditor();
-                fileController.newModel();
-                showContentTutorial("modeling/cld-basics.json");
-            });
-            chooser.show();
-        });
+        startScreen.setOnTutorials(() -> showCurriculumBrowser());
         startScreen.setOnOpenExample((name, path) -> {
             showEditor();
             fileController.openExample(name, path);
@@ -640,12 +617,8 @@ public class ModelWindow {
                 new KeyCodeCombination(KeyCode.F1));
         commandRegistry.add("Getting Started", "Help",
                 () -> showContentTutorial("modeling/first-model.json"));
-        commandRegistry.add("Tutorial: SIR Epidemic", "Help",
-                () -> showContentTutorial("modeling/feedback-loops.json"));
-        commandRegistry.add("Tutorial: Supply Chain", "Help",
-                () -> showContentTutorial("modeling/supply-chain.json"));
-        commandRegistry.add("Tutorial: Causal Loop Diagrams", "Help",
-                () -> showContentTutorial("modeling/cld-basics.json"));
+        commandRegistry.add("Tutorial Curriculum", "Help",
+                () -> showCurriculumBrowser());
         commandRegistry.add("SD Concepts", "Help",
                 () -> helpWindows.showOrBring(SdConceptsDialog.class,
                         SdConceptsDialog::new));
@@ -810,6 +783,18 @@ public class ModelWindow {
             }
 
         };
+    }
+
+    private void showCurriculumBrowser() {
+        helpWindows.showOrBring("curriculum-browser", () -> {
+            CurriculumBrowserDialog browser = new CurriculumBrowserDialog();
+            browser.setOnLaunchTutorial(jsonPath -> {
+                showEditor();
+                fileController.newModel();
+                showContentTutorial(jsonPath);
+            });
+            return browser;
+        });
     }
 
     private void showContentTutorial(String jsonPath) {
