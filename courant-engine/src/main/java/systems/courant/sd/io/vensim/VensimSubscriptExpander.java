@@ -181,11 +181,7 @@ final class VensimSubscriptExpander {
         parts.add(expression.substring(start));
 
         if (parts.size() == expectedCount) {
-            boolean allNumeric = parts.stream()
-                    .allMatch(p -> NUMERIC_PATTERN.matcher(p.strip()).matches());
-            if (allNumeric) {
-                return parts;
-            }
+            return parts;
         }
         return null;
     }
