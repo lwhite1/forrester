@@ -66,7 +66,8 @@ final class ElementCascadeManager {
 
         boolean found = renameInList(stocks, oldName, newName, StockDef::name,
                 (s, n) -> new StockDef(n, s.comment(), s.initialValue(),
-                        s.unit(), s.negativeValuePolicy()))
+                        s.initialExpression(), s.unit(), s.negativeValuePolicy(),
+                        s.subscripts()))
                 || renameInList(flows, oldName, newName, FlowDef::name,
                 (f, n) -> new FlowDef(n, f.comment(), f.equation(),
                         f.timeUnit(), f.materialUnit(), f.source(), f.sink(), f.subscripts()))
