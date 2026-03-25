@@ -622,7 +622,7 @@ public final class HelpContent {
      * Post-processes a TextFlow to annotate glossary terms in plain text nodes
      * with tooltips and hyperlinks. Only the first occurrence of each term is annotated.
      */
-    static void annotateGlossaryTerms(TextFlow flow, Consumer<String> onNavigate) {
+    public static void annotateGlossaryTerms(TextFlow flow, Consumer<String> onNavigate) {
         Map<String, Glossary.Entry> lookupMap = Glossary.instance().lookupMap();
         if (lookupMap.isEmpty()) {
             return;
@@ -692,7 +692,9 @@ public final class HelpContent {
             tip.setWrapText(true);
             tip.setMaxWidth(350);
             Tooltip.install(link, tip);
-            link.setOnAction(e -> onNavigate.accept(entry.term()));
+            if (onNavigate != null) {
+                link.setOnAction(e -> onNavigate.accept(entry.term()));
+            }
             nodes.add(link);
 
             lastEnd = matcher.end();

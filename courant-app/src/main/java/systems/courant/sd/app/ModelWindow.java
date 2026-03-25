@@ -639,6 +639,16 @@ public class ModelWindow {
                             + AppVersion.get());
             about.showAndWait();
         });
+
+        // Wire tutorial dialog callbacks for glossary and model opening
+        ContentTutorialDialog.setGlossaryNavigator(term -> {
+            showGlossary();
+            contextHelpDialog.showGlossaryTerm(term);
+        });
+        ContentTutorialDialog.setModelOpener(modelPath -> {
+            showEditor();
+            fileController.openExample(null, modelPath);
+        });
     }
 
     private void openSubscriptDimensionsDialog() {
