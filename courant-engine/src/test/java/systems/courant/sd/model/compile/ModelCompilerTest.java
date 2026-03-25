@@ -779,6 +779,37 @@ class ModelCompilerTest {
     }
 
     @Nested
+    @DisplayName("SMOOTH initial value references model elements (issue #1364)")
+    class SmoothInitialValueDeferred {
+
+        @Test
+        void shouldUseDeferredInitialValueReferencingStock() {
+            // SMOOTH initial value references a stock — must be deferred to simulation
+            // start, not evaluated at compile time when holders are uninitialized.
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Deferred Init")
+                    .stock("Level", 50, "Thing")
+                    .variable("SmoothedLevel", "SMOOTH(Level, 5, Level)", "Thing")
+                    .flow("Drain", "SmoothedLevel * 0.1", "Day", "Level", null)
+                    .defaultSimulation("Day", 10, "Day")
+                    .build();
+
+            CompiledModel compiled = compiler.compile(def);
+            // Run the simulation — the SMOOTH should start at Level's initial value (50)
+            Simulation sim = compiled.createSimulation();
+            sim.execute();
+
+            // If initial was wrongly evaluated at compile time (0.0), the SMOOTH starts
+            // far below the stock and the drain starts near 0, leaving the stock high.
+            // With correct deferral, SMOOTH starts at 50, so drain starts at 5.0/step.
+            Stock level = findStock(compiled.getModel(), "Level");
+            assertThat(level.getValue())
+                    .as("SMOOTH initial=Level should start at 50, not 0")
+                    .isLessThan(40.0);
+        }
+    }
+
+    @Nested
     @DisplayName("savePer does not affect numerical accuracy (issue #1363)")
     class SavePerAccuracy {
 

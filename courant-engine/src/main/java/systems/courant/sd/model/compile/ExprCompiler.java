@@ -661,13 +661,7 @@ public class ExprCompiler {
         double[] dtH = context.getDtHolder();
         Smooth smooth;
         if (args.size() == 3) {
-            double initial = evaluateAtCompileTime(args.get(2), "SMOOTH initialValue");
-            if (Double.isNaN(initial)) {
-                String msg = "SMOOTH initialValue evaluated to NaN at compile time; using 0.0";
-                logger.warn(msg);
-                context.addWarning(msg);
-                initial = 0.0;
-            }
+            DoubleSupplier initial = compileInitialValue(args.get(2), "SMOOTH initialValue");
             smooth = Smooth.of(input, smoothingTime, initial, dtH, context.getCurrentStep());
         } else {
             smooth = Smooth.of(input, smoothingTime, dtH, context.getCurrentStep());
@@ -680,13 +674,7 @@ public class ExprCompiler {
         requireArgs("SMOOTHI", args, 3);
         DoubleSupplier input = compileExpr(args.get(0));
         DoubleSupplier smoothingTime = compileExpr(args.get(1));
-        double initial = evaluateAtCompileTime(args.get(2), "SMOOTHI initialValue");
-        if (Double.isNaN(initial)) {
-            String msg = "SMOOTHI initialValue evaluated to NaN at compile time; using 0.0";
-            logger.warn(msg);
-            context.addWarning(msg);
-            initial = 0.0;
-        }
+        DoubleSupplier initial = compileInitialValue(args.get(2), "SMOOTHI initialValue");
         double[] dtH = context.getDtHolder();
         Smooth smooth = Smooth.of(input, smoothingTime, initial, dtH, context.getCurrentStep());
         resettables.add(smooth);
@@ -703,13 +691,7 @@ public class ExprCompiler {
         double[] dtH = context.getDtHolder();
         Smooth3 smooth3;
         if (args.size() == 3) {
-            double initial = evaluateAtCompileTime(args.get(2), "SMOOTH3 initialValue");
-            if (Double.isNaN(initial)) {
-                String msg = "SMOOTH3 initialValue evaluated to NaN at compile time; using 0.0";
-                logger.warn(msg);
-                context.addWarning(msg);
-                initial = 0.0;
-            }
+            DoubleSupplier initial = compileInitialValue(args.get(2), "SMOOTH3 initialValue");
             smooth3 = Smooth3.of(input, smoothingTime, initial, dtH, context.getCurrentStep());
         } else {
             smooth3 = Smooth3.of(input, smoothingTime, dtH, context.getCurrentStep());
@@ -722,13 +704,7 @@ public class ExprCompiler {
         requireArgs("SMOOTH3I", args, 3);
         DoubleSupplier input = compileExpr(args.get(0));
         DoubleSupplier smoothingTime = compileExpr(args.get(1));
-        double initial = evaluateAtCompileTime(args.get(2), "SMOOTH3I initialValue");
-        if (Double.isNaN(initial)) {
-            String msg = "SMOOTH3I initialValue evaluated to NaN at compile time; using 0.0";
-            logger.warn(msg);
-            context.addWarning(msg);
-            initial = 0.0;
-        }
+        DoubleSupplier initial = compileInitialValue(args.get(2), "SMOOTH3I initialValue");
         double[] dtH = context.getDtHolder();
         Smooth3 smooth3 = Smooth3.of(input, smoothingTime, initial, dtH, context.getCurrentStep());
         resettables.add(smooth3);
@@ -757,13 +733,7 @@ public class ExprCompiler {
         double[] dtH = context.getDtHolder();
         Delay1 delay1;
         if (args.size() == 3) {
-            double initial = evaluateAtCompileTime(args.get(2), "DELAY1 initialValue");
-            if (Double.isNaN(initial)) {
-                String msg = "DELAY1 initialValue evaluated to NaN at compile time; using 0.0";
-                logger.warn(msg);
-                context.addWarning(msg);
-                initial = 0.0;
-            }
+            DoubleSupplier initial = compileInitialValue(args.get(2), "DELAY1 initialValue");
             delay1 = Delay1.of(input, delayTime, initial, dtH, context.getCurrentStep());
         } else {
             delay1 = Delay1.of(input, delayTime, dtH, context.getCurrentStep());
@@ -794,13 +764,7 @@ public class ExprCompiler {
         double[] dtH = context.getDtHolder();
         Delay3 delay3;
         if (args.size() == 3) {
-            double initial = evaluateAtCompileTime(args.get(2), "DELAY3 initialValue");
-            if (Double.isNaN(initial)) {
-                String msg = "DELAY3 initialValue evaluated to NaN at compile time; using 0.0";
-                logger.warn(msg);
-                context.addWarning(msg);
-                initial = 0.0;
-            }
+            DoubleSupplier initial = compileInitialValue(args.get(2), "DELAY3 initialValue");
             delay3 = Delay3.of(input, delayTime, initial, dtH, context.getCurrentStep());
         } else {
             delay3 = Delay3.of(input, delayTime, dtH, context.getCurrentStep());
@@ -1028,13 +992,7 @@ public class ExprCompiler {
         requireArgs("SAMPLE_IF_TRUE", args, 3);
         DoubleSupplier condition = compileExpr(args.get(0));
         DoubleSupplier input = compileExpr(args.get(1));
-        double initial = evaluateAtCompileTime(args.get(2), "SAMPLE_IF_TRUE initialValue");
-        if (Double.isNaN(initial)) {
-            String msg = "SAMPLE_IF_TRUE initialValue evaluated to NaN at compile time; using 0.0";
-            logger.warn(msg);
-            context.addWarning(msg);
-            initial = 0.0;
-        }
+        DoubleSupplier initial = compileInitialValue(args.get(2), "SAMPLE_IF_TRUE initialValue");
         SampleIfTrue sampler = SampleIfTrue.of(condition, input, initial,
                 context.getCurrentStep());
         resettables.add(sampler);
@@ -1181,6 +1139,28 @@ public class ExprCompiler {
             double elseVal = elseExpr.getAsDouble();
             return condVal != 0 ? thenVal : elseVal;
         };
+    }
+
+    /**
+     * Compiles an initial-value expression. If the expression is a compile-time constant,
+     * returns a supplier wrapping that constant. Otherwise, returns the compiled expression
+     * as a supplier — deferring evaluation to simulation start when all model elements
+     * are initialized through holder indirection.
+     */
+    private DoubleSupplier compileInitialValue(Expr expr, String paramDescription) {
+        try {
+            double constant = evaluateConstant(expr, paramDescription);
+            if (Double.isNaN(constant)) {
+                String msg = paramDescription + " evaluated to NaN; using 0.0";
+                logger.warn(msg);
+                context.addWarning(msg);
+                return () -> 0.0;
+            }
+            return () -> constant;
+        } catch (CompilationException e) {
+            // Defer evaluation to simulation start when holders are filled
+            return compileExpr(expr);
+        }
     }
 
     /**

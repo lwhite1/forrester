@@ -1300,7 +1300,7 @@ class ExprCompilerTest {
         }
 
         @Test
-        void shouldWarnWhenInitialValueIsNotCompileTimeConstant() {
+        void shouldDeferNonConstantInitialValueWithoutWarning() {
             context.addVariable("normal_price",
                     new systems.courant.sd.model.Variable("normal_price",
                             ItemUnits.PEOPLE, () -> 50.0));
@@ -1308,11 +1308,13 @@ class ExprCompilerTest {
                     new systems.courant.sd.model.Variable("input",
                             ItemUnits.PEOPLE, () -> 100.0));
 
-            compiler.compile("SMOOTHI(input, 5, normal_price)");
+            Formula formula = compiler.compile("SMOOTHI(input, 5, normal_price)");
+            // No warning — non-constant initial values are now properly deferred
             assertThat(context.getWarnings())
-                    .anyMatch(w -> w.contains("SMOOTHI initialValue")
-                            && w.contains("not a compile-time constant")
-                            && w.contains("uninitialized variables"));
+                    .noneMatch(w -> w.contains("SMOOTHI initialValue"));
+            // Initial value should be 50 (from normal_price), not 0
+            step[0] = 0;
+            assertThat(formula.getCurrentValue()).isCloseTo(50.0, within(0.01));
         }
     }
 
