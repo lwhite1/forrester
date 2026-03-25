@@ -57,12 +57,12 @@ class CurriculumLoaderTest {
     }
 
     @Test
-    @DisplayName("advanced tier has five tutorials")
-    void advancedTierHasFiveTutorials() {
+    @DisplayName("advanced tier has six tutorials")
+    void advancedTierHasSixTutorials() {
         CurriculumLoader.Tier advanced = tracks.getFirst().tiers().get(2);
         assertThat(advanced.tutorialIds()).containsExactly(
-                "aging-chains", "exogenous-inputs", "model-testing",
-                "reference-modes", "multi-sector");
+                "aging-chains", "subscripts", "exogenous-inputs",
+                "model-testing", "reference-modes", "multi-sector");
     }
 
     @Test

@@ -15,5 +15,5 @@
     { "title": "Experiment", "content": "aging-chains/06-experiment.md" },
     { "title": "Key Takeaways", "content": "aging-chains/07-key-takeaways.md" }
   ],
-  "nextTutorial": "exogenous-inputs"
+  "nextTutorial": "subscripts"
 }

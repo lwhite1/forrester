@@ -1,0 +1,19 @@
+{
+  "id": "subscripts",
+  "title": "Subscripts & Arrays",
+  "description": "Disaggregate models using subscripts. Learn subscript ranges, multi-dimensional arrays, broadcasting, and bracket notation.",
+  "difficulty": "advanced",
+  "estimatedMinutes": 25,
+  "model": "demographics/POP.json",
+  "recommendedPrerequisites": ["aging-chains"],
+  "steps": [
+    { "title": "Why Disaggregate?", "content": "subscripts/01-why-disaggregate.md" },
+    { "title": "Defining Subscripts", "content": "subscripts/02-defining-subscripts.md" },
+    { "title": "Subscripted Elements", "content": "subscripts/03-subscripted-elements.md" },
+    { "title": "Bracket Notation", "content": "subscripts/04-bracket-notation.md" },
+    { "title": "Multi-Dimensional Arrays", "content": "subscripts/05-multi-dimensional.md" },
+    { "title": "Experiment", "content": "subscripts/06-experiment.md" },
+    { "title": "Key Takeaways", "content": "subscripts/07-key-takeaways.md" }
+  ],
+  "nextTutorial": "exogenous-inputs"
+}

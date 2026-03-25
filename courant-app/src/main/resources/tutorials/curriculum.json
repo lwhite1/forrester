@@ -23,7 +23,7 @@
           "name": "Advanced Techniques",
           "description": "Aging chains, subscripts, and model testing",
           "recommendedPrerequisites": ["modeling-intermediate"],
-          "tutorials": ["aging-chains", "exogenous-inputs", "model-testing", "reference-modes", "multi-sector"]
+          "tutorials": ["aging-chains", "subscripts", "exogenous-inputs", "model-testing", "reference-modes", "multi-sector"]
         }
       ]
     },
