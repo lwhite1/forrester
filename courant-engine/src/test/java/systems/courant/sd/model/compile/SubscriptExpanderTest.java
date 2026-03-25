@@ -139,6 +139,29 @@ class SubscriptExpanderTest {
         }
 
         @Test
+        void shouldNotMatchSubscriptedNameInsideLongerNonSubscriptedName() {
+            // "birth rate" is subscripted; "adjusted birth rate" is not.
+            // The regex must not match "birth rate" inside "adjusted birth rate".
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Substring Bug")
+                    .subscript("Region", List.of("North", "South"))
+                    .stock("Pop", 100, "Person", List.of("Region"))
+                    .variable("birth rate", "0.02", "1/Year", List.of("Region"))
+                    .constant("adjusted birth rate", 0.03, "1/Year")
+                    .flow("inflow", "Pop * adjusted birth rate", "Year",
+                            null, "Pop", List.of("Region"))
+                    .build();
+
+            ModelDefinition expanded = SubscriptExpander.expand(def);
+
+            // "adjusted birth rate" is not subscripted, so it must NOT be rewritten
+            assertThat(expanded.flows().get(0).equation())
+                    .isEqualTo("Pop[North] * adjusted birth rate");
+            assertThat(expanded.flows().get(1).equation())
+                    .isEqualTo("Pop[South] * adjusted birth rate");
+        }
+
+        @Test
         void shouldNotRewriteBuiltinFunctionCallMatchingSubscriptedName() {
             // "SIN" is both a subscripted element and a built-in function name.
             // The function call SIN(angle) must not be rewritten to SIN[A](angle).

@@ -46,7 +46,8 @@ public class SubscriptExpander {
         }
 
         Map<String, Integer> dimensionCounts = collectDimensionCounts(def);
-        Pattern namePattern = buildNamePattern(subscriptedNames);
+        Set<String> allNames = collectAllNames(def);
+        Pattern namePattern = buildNamePattern(allNames);
 
         return def.toBuilder()
                 .clearStocks().clearFlows().clearVariables()
@@ -102,6 +103,20 @@ public class SubscriptExpander {
             }
         }
         return counts;
+    }
+
+    private static Set<String> collectAllNames(ModelDefinition def) {
+        Set<String> names = new HashSet<>();
+        for (StockDef s : def.stocks()) {
+            names.add(s.name());
+        }
+        for (FlowDef f : def.flows()) {
+            names.add(f.name());
+        }
+        for (VariableDef v : def.variables()) {
+            names.add(v.name());
+        }
+        return names;
     }
 
     private static List<StockDef> expandStocks(ModelDefinition def,
