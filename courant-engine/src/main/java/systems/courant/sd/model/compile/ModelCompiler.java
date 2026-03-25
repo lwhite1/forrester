@@ -4,6 +4,7 @@ import systems.courant.sd.measure.Quantity;
 import systems.courant.sd.measure.TimeUnit;
 import systems.courant.sd.measure.Unit;
 import systems.courant.sd.measure.UnitRegistry;
+import systems.courant.sd.measure.Units;
 import systems.courant.sd.model.Flow;
 import systems.courant.sd.model.LookupTable;
 import systems.courant.sd.model.Model;
@@ -233,24 +234,44 @@ public class ModelCompiler {
 
         compileFormulas(innerDef, moduleContext, resettables, auxHolders, flowHolders);
 
-        // Output bindings
+        // Output bindings — resolve from variables, stocks, or flows
         for (Map.Entry<String, String> binding : mDef.outputBindings().entrySet()) {
             String portName = binding.getKey();
             String alias = binding.getValue();
-            Variable moduleVar = moduleContext.getVariables().get(portName);
-            if (moduleVar == null) {
-                throw new CompilationException(
-                        "Module '" + mDef.instanceName()
-                                + "' output binding references unknown port: " + portName,
-                        portName);
-            }
-            Variable aliasVar = new Variable(alias, moduleVar.getUnit(),
-                    moduleVar::getValue);
+            Variable aliasVar = resolveOutputBinding(
+                    mDef.instanceName(), portName, alias, moduleContext);
             parentContext.addVariable(alias, aliasVar);
             parentModel.addVariable(aliasVar);
         }
 
         parentModel.addModule(module);
+    }
+
+    /**
+     * Resolves an output binding port name to a Variable wrapper.
+     * Checks variables, then stocks, then flows in the module context.
+     */
+    private Variable resolveOutputBinding(String moduleName, String portName,
+                                          String alias, CompilationContext moduleContext) {
+        Variable moduleVar = moduleContext.getVariables().get(portName);
+        if (moduleVar != null) {
+            return new Variable(alias, moduleVar.getUnit(), moduleVar::getValue);
+        }
+        Stock stock = moduleContext.getStocks().get(portName);
+        if (stock != null) {
+            return new Variable(alias, stock.getUnit(), stock::getValue);
+        }
+        Flow flow = moduleContext.getFlows().get(portName);
+        if (flow != null) {
+            Unit flowUnit = flow.getMaterialUnit() != null
+                    ? flow.getMaterialUnit() : Units.DIMENSIONLESS;
+            return new Variable(alias, flowUnit,
+                    () -> flow.flowPerTimeUnit(flow.getTimeUnit()).getValue());
+        }
+        throw new CompilationException(
+                "Module '" + moduleName
+                        + "' output binding references unknown port: " + portName,
+                portName);
     }
 
     private void injectSimulationConstants(ModelDefinition def, CompilationContext context) {

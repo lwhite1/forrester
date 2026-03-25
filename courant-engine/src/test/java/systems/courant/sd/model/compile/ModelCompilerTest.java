@@ -463,6 +463,50 @@ class ModelCompilerTest {
         }
 
         @Test
+        void shouldCompileStockOutputBinding() {
+            ModelDefinition innerModule = new ModelDefinitionBuilder()
+                    .name("Tank")
+                    .stock("Level", 75, "Gallon")
+                    .build();
+
+            ModelDefinition outer = new ModelDefinitionBuilder()
+                    .name("Monitor")
+                    .module("tank", innerModule,
+                            java.util.Map.of(),
+                            java.util.Map.of("Level", "TankLevel"))
+                    .defaultSimulation("Day", 1, "Day")
+                    .build();
+
+            CompiledModel compiled = compiler.compile(outer);
+            assertThat(compiled.getModel().getVariable("TankLevel")).isPresent();
+            Variable level = compiled.getModel().getVariable("TankLevel").orElseThrow();
+            assertThat(level.getValue()).isCloseTo(75.0, within(0.01));
+        }
+
+        @Test
+        void shouldCompileFlowOutputBinding() {
+            ModelDefinition innerModule = new ModelDefinitionBuilder()
+                    .name("Pipe")
+                    .stock("Tank", 100, "Gallon")
+                    .variable("rate", "10", "Gallon")
+                    .flow("Drain", "rate", "Day", "Tank", null)
+                    .build();
+
+            ModelDefinition outer = new ModelDefinitionBuilder()
+                    .name("Monitor")
+                    .module("pipe", innerModule,
+                            java.util.Map.of(),
+                            java.util.Map.of("Drain", "DrainRate"))
+                    .defaultSimulation("Day", 1, "Day")
+                    .build();
+
+            CompiledModel compiled = compiler.compile(outer);
+            assertThat(compiled.getModel().getVariable("DrainRate")).isPresent();
+            Variable drain = compiled.getModel().getVariable("DrainRate").orElseThrow();
+            assertThat(drain.getValue()).isCloseTo(10.0, within(0.01));
+        }
+
+        @Test
         void shouldThrowForBadOutputBinding() {
             ModelDefinition innerModule = new ModelDefinitionBuilder()
                     .name("Inner")
