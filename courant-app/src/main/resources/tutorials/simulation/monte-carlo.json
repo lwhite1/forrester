@@ -1,0 +1,19 @@
+{
+  "id": "monte-carlo",
+  "title": "Monte Carlo Analysis",
+  "description": "Run hundreds of simulations with randomly sampled parameters. Learn to configure distributions, interpret confidence bands, and assess risk.",
+  "difficulty": "intermediate",
+  "estimatedMinutes": 20,
+  "model": "introductory/coffee-cooling.json",
+  "recommendedPrerequisites": ["multi-sweeps"],
+  "steps": [
+    { "title": "What is Monte Carlo?", "content": "monte-carlo/01-what-is-monte-carlo.md" },
+    { "title": "Distributions", "content": "monte-carlo/02-distributions.md" },
+    { "title": "Running the Analysis", "content": "monte-carlo/03-running.md" },
+    { "title": "Confidence Bands", "content": "monte-carlo/04-confidence-bands.md" },
+    { "title": "Sample Size", "content": "monte-carlo/05-sample-size.md" },
+    { "title": "Experiment", "content": "monte-carlo/06-experiment.md" },
+    { "title": "Key Takeaways", "content": "monte-carlo/07-key-takeaways.md" }
+  ],
+  "nextTutorial": "optimization"
+}
