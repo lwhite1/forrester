@@ -3063,6 +3063,64 @@ class VensimImporterTest {
             java.nio.file.Files.deleteIfExists(modelDir);
             java.nio.file.Files.deleteIfExists(tempDir);
         }
+
+        @Test
+        void shouldRejectSymlinkBasedPathTraversal() throws IOException {
+            var tempDir = java.nio.file.Files.createTempDirectory("vensim-test");
+            var modelDir = tempDir.resolve("model");
+            java.nio.file.Files.createDirectories(modelDir);
+            var secretFile = tempDir.resolve("secret.csv");
+            java.nio.file.Files.writeString(secretFile, "time,value\n0,1\n");
+
+            // Create a symlink inside modelDir pointing to the secret file outside
+            var symlink = modelDir.resolve("link.csv");
+            try {
+                java.nio.file.Files.createSymbolicLink(symlink, secretFile);
+            } catch (UnsupportedOperationException | IOException e) {
+                // Symlinks may not be supported or require elevated privileges
+                java.nio.file.Files.deleteIfExists(secretFile);
+                java.nio.file.Files.deleteIfExists(modelDir);
+                java.nio.file.Files.deleteIfExists(tempDir);
+                return; // Skip test on platforms that don't support symlinks
+            }
+
+            String mdl = """
+                    x = GET DIRECT DATA('link.csv', 'Sheet', 'A', 'B')
+                    \t~\t
+                    \t~\t
+                    \t|
+
+                    INITIAL TIME = 0
+                    \t~\tYear
+                    \t~\t
+                    \t|
+
+                    FINAL TIME = 10
+                    \t~\tYear
+                    \t~\t
+                    \t|
+
+                    TIME STEP = 1
+                    \t~\tYear
+                    \t~\t
+                    \t|
+                    """;
+
+            var mdlPath = modelDir.resolve("test.mdl");
+            java.nio.file.Files.writeString(mdlPath, mdl);
+
+            ImportResult result = importer.importModel(mdlPath);
+
+            // Should warn about the symlink-based traversal
+            assertThat(result.warnings()).anyMatch(w -> w.contains("outside model directory"));
+
+            // Cleanup
+            java.nio.file.Files.deleteIfExists(symlink);
+            java.nio.file.Files.deleteIfExists(secretFile);
+            java.nio.file.Files.deleteIfExists(mdlPath);
+            java.nio.file.Files.deleteIfExists(modelDir);
+            java.nio.file.Files.deleteIfExists(tempDir);
+        }
     }
 
     @Nested
