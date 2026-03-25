@@ -694,7 +694,7 @@ public class XmileImporter implements ModelImporter {
         return result;
     }
 
-    private static String capitalizeFirst(String s) {
+    static String capitalizeFirst(String s) {
         if (s == null || s.isEmpty()) {
             return s;
         }
