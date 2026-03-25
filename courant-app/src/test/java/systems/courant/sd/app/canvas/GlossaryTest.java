@@ -78,6 +78,24 @@ class GlossaryTest {
         }
 
         @Test
+        @DisplayName("should find Connector by Info Link alias")
+        void shouldFindConnectorByInfoLinkAlias() {
+            Optional<Glossary.Entry> entry = Glossary.instance().lookup("Info Link");
+            assertThat(entry).isPresent();
+            assertThat(entry.get().term()).isEqualTo("Connector");
+            assertThat(entry.get().courantTerm()).isEqualTo("Info Link");
+        }
+
+        @Test
+        @DisplayName("should have courantTerm on entries with Courant-specific names")
+        void shouldHaveCourantTermWhereApplicable() {
+            Glossary glossary = Glossary.instance();
+            assertThat(glossary.lookup("Connector").get().courantTerm()).isEqualTo("Info Link");
+            assertThat(glossary.lookup("Auxiliary").get().courantTerm()).isEqualTo("Variable");
+            assertThat(glossary.lookup("Constant").get().courantTerm()).isEqualTo("Variable");
+        }
+
+        @Test
         @DisplayName("should be case-insensitive")
         void shouldBeCaseInsensitive() {
             assertThat(Glossary.instance().lookup("stock")).isPresent();

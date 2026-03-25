@@ -102,6 +102,15 @@ public final class GlossaryPane extends VBox {
         termText.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
         TextFlow heading = new TextFlow(termText);
 
+        // Courant term
+        if (entry.courantTerm() != null && !entry.courantTerm().isEmpty()) {
+            Text courantLabel = new Text("  In Courant: ");
+            courantLabel.setStyle("-fx-fill: #0066cc;");
+            Text courantText = new Text(entry.courantTerm());
+            courantText.setStyle("-fx-fill: #0066cc; -fx-font-weight: bold;");
+            heading.getChildren().addAll(courantLabel, courantText);
+        }
+
         // Aliases
         if (!entry.aliases().isEmpty()) {
             Text aliasLabel = new Text("  Also: ");

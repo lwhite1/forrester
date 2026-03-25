@@ -98,7 +98,7 @@ public class SdConceptsDialog extends AbstractTutorialDialog {
                         + "an outflow to a cloud means it leaves the model.\n\n"),
                 bold("Flow equations"),
                 plain(" define how fast material moves. They typically depend on stocks, "
-                        + "variables, and constants. For example, a death rate flow might be:\n\n"),
+                        + "variables, and parameters. For example, a death rate flow might be:\n\n"),
                 plain("  deaths = population * mortality_rate\n\n"),
                 plain("The diamond symbol on the diagram represents the flow valve, "
                         + "which controls the rate. The thick pipe shows the path material travels.")
