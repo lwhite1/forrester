@@ -130,7 +130,11 @@ public final class BehaviorClassification {
             int peakIdx = findPeakIndex(clean);
             boolean risesFirst = peakIdx > 0 && peakIdx < clean.length - 1;
             if (risesFirst && clean[peakIdx] > clean[0] && clean[peakIdx] > clean[clean.length - 1]) {
-                return Mode.OVERSHOOT_AND_COLLAPSE;
+                // Require the overshoot to be significant relative to the range
+                double overshoot = clean[peakIdx] - Math.max(clean[0], clean[clean.length - 1]);
+                if (overshoot > range * 0.15) {
+                    return Mode.OVERSHOOT_AND_COLLAPSE;
+                }
             }
         }
 
@@ -170,12 +174,11 @@ public final class BehaviorClassification {
                 return Mode.LINEAR_DECLINE;
             }
             if (avgD2 > 0) {
-                // Decelerating decline — approaching an asymptote.
-                // If final value is near zero relative to start, it's exponential decay;
-                // otherwise it's goal-seeking toward a nonzero equilibrium.
-                double first = clean[0];
+                // Decelerating decline — distinguish decay (→0) from goal-seeking (→non-zero).
+                // Exponential decay approaches zero, so the final value is small
+                // relative to the total range of the series.
                 double last = clean[clean.length - 1];
-                if (first != 0 && Math.abs(last / first) < 0.1) {
+                if (Math.abs(last) < range * 0.1) {
                     return Mode.EXPONENTIAL_DECAY;
                 }
                 return Mode.GOAL_SEEKING;

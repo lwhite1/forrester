@@ -43,6 +43,18 @@ class BehaviorClassificationTest {
         }
 
         @Test
+        @DisplayName("should classify goal-seeking decrease toward non-zero target")
+        void shouldClassifyGoalSeekingDecrease() {
+            // Approaches 50 from 100: f(t) = 50 + 50*e^(-0.3t)
+            double[] values = new double[20];
+            for (int i = 0; i < values.length; i++) {
+                values[i] = 50 + 50 * Math.exp(-0.3 * i);
+            }
+            assertThat(BehaviorClassification.classify(values))
+                    .isEqualTo(Mode.GOAL_SEEKING);
+        }
+
+        @Test
         @DisplayName("should classify goal-seeking behavior")
         void shouldClassifyGoalSeeking() {
             // Asymptotic approach: 100 * (1 - e^(-t))
@@ -90,6 +102,15 @@ class BehaviorClassificationTest {
             }
             assertThat(BehaviorClassification.classify(values))
                     .isEqualTo(Mode.OVERSHOOT_AND_COLLAPSE);
+        }
+
+        @Test
+        @DisplayName("should not classify trivial peak as overshoot and collapse")
+        void shouldNotClassifyTrivialOvershootAsCollapse() {
+            // Slight bump then decline — too small to be meaningful overshoot
+            double[] values = {10, 11, 10.5, 10, 9, 8, 7, 6, 5, 4};
+            assertThat(BehaviorClassification.classify(values))
+                    .isNotEqualTo(Mode.OVERSHOOT_AND_COLLAPSE);
         }
 
         @Test
