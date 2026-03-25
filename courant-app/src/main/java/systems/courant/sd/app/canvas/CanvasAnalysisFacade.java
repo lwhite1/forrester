@@ -264,7 +264,7 @@ public final class CanvasAnalysisFacade {
             if (issue.elementName() != null) {
                 issues.merge(issue.elementName(), issue.severity(),
                         (existing, incoming) ->
-                                existing == Severity.ERROR ? existing : incoming);
+                                existing.compareTo(incoming) <= 0 ? existing : incoming);
                 details.computeIfAbsent(issue.elementName(), k -> new ArrayList<>()).add(issue);
             }
         }
