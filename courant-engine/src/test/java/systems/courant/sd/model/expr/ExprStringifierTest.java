@@ -211,4 +211,11 @@ class ExprStringifierTest {
             Locale.setDefault(original);
         }
     }
+
+    @Test
+    @DisplayName("TRUE and FALSE are quoted as reserved words")
+    void shouldQuoteTrueAndFalse() {
+        assertThat(ExprStringifier.stringify(new Expr.Ref("TRUE"))).isEqualTo("`TRUE`");
+        assertThat(ExprStringifier.stringify(new Expr.Ref("FALSE"))).isEqualTo("`FALSE`");
+    }
 }
