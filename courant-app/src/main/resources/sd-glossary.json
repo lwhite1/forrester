@@ -16,22 +16,25 @@
   {
     "term": "Auxiliary",
     "aliases": ["Converter", "Variable"],
+    "courantTerm": "Variable",
     "definition": "An intermediate variable used to compute values that feed into flows or other auxiliaries. Auxiliaries do not accumulate.",
-    "relevance": "Auxiliaries break complex equations into understandable pieces and make model logic transparent.",
+    "relevance": "Auxiliaries break complex equations into understandable pieces and make model logic transparent. In Courant, both auxiliaries and constants are represented as Variable elements.",
     "related": ["Flow", "Constant", "Connector"]
   },
   {
     "term": "Constant",
     "aliases": ["Parameter"],
+    "courantTerm": "Variable",
     "definition": "A model element whose value does not change during a simulation run. Constants represent fixed assumptions or parameters.",
-    "relevance": "Constants capture assumptions that can be varied across scenarios, sensitivity analyses, or optimization runs.",
+    "relevance": "Constants capture assumptions that can be varied across scenarios, sensitivity analyses, or optimization runs. In Courant, constants are Variable elements whose equation is a single numeric literal.",
     "related": ["Auxiliary", "Parameter Sweep", "Sensitivity Analysis"]
   },
   {
     "term": "Connector",
-    "aliases": ["Information Link", "Causal Arrow"],
+    "aliases": ["Information Link", "Info Link", "Causal Arrow"],
+    "courantTerm": "Info Link",
     "definition": "An arrow indicating that one variable's value is used in the equation of another. Connectors carry information, not material.",
-    "relevance": "Connectors make the causal structure of a model explicit, showing which variables influence which equations.",
+    "relevance": "Connectors make the causal structure of a model explicit, showing which variables influence which equations. In Courant, these are called Info Links.",
     "related": ["Auxiliary", "Flow", "Causal Loop Diagram"]
   },
   {

@@ -30,6 +30,7 @@ public final class Glossary {
     public record Entry(
             String term,
             List<String> aliases,
+            String courantTerm,
             String definition,
             String relevance,
             List<String> related
@@ -38,12 +39,14 @@ public final class Glossary {
         public Entry(
                 @JsonProperty("term") String term,
                 @JsonProperty("aliases") List<String> aliases,
+                @JsonProperty("courantTerm") String courantTerm,
                 @JsonProperty("definition") String definition,
                 @JsonProperty("relevance") String relevance,
                 @JsonProperty("related") List<String> related
         ) {
             this.term = term;
             this.aliases = aliases != null ? List.copyOf(aliases) : List.of();
+            this.courantTerm = courantTerm;
             this.definition = definition;
             this.relevance = relevance;
             this.related = related != null ? List.copyOf(related) : List.of();
