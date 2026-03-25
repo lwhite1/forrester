@@ -39,7 +39,7 @@ class BehaviorClassificationTest {
                 values[i] = 100 * Math.exp(-0.2 * i);
             }
             assertThat(BehaviorClassification.classify(values))
-                    .isIn(Mode.EXPONENTIAL_DECAY, Mode.GOAL_SEEKING);
+                    .isEqualTo(Mode.EXPONENTIAL_DECAY);
         }
 
         @Test
