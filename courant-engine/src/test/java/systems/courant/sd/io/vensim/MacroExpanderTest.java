@@ -298,6 +298,28 @@ class MacroExpanderTest {
         }
 
         @Test
+        void shouldWarnWhenExpansionExceedsMaxPasses() {
+            // A simple identity macro whose body has no nested calls,
+            // but deeply nested invocations require >10 passes to fully expand
+            MacroDef wrap = new MacroDef(
+                    "WRAP",
+                    List.of("x"),
+                    List.of("output"),
+                    List.of(eq("output", "x"))
+            );
+
+            // 11 levels of nesting: WRAP(WRAP(WRAP(...WRAP(42)...)))
+            String expr = "42";
+            for (int i = 0; i < 11; i++) {
+                expr = "WRAP(" + expr + ")";
+            }
+            List<MdlEquation> equations = List.of(eq("y", expr));
+            MacroExpander.ExpansionResult result = MacroExpander.expand(equations, List.of(wrap));
+
+            assertThat(result.warnings()).anyMatch(w -> w.contains("incomplete after 10 passes"));
+        }
+
+        @Test
         void shouldHandleNoMatchingCalls() {
             MacroDef macro = new MacroDef(
                     "UNUSED",

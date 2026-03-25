@@ -54,9 +54,10 @@ public final class MacroExpander {
         Map<String, Integer> instantiationCounters = new HashMap<>();
 
         int maxPasses = 10;
+        boolean anyExpanded = false;
         for (int pass = 0; pass < maxPasses; pass++) {
             List<MdlEquation> nextResult = new ArrayList<>();
-            boolean anyExpanded = false;
+            anyExpanded = false;
 
             for (MdlEquation eq : result) {
                 if (eq.expression().isEmpty()) {
@@ -89,6 +90,11 @@ public final class MacroExpander {
             if (!anyExpanded) {
                 break;
             }
+        }
+
+        if (anyExpanded) {
+            warnings.add("Macro expansion incomplete after " + maxPasses
+                    + " passes — some macro calls may remain unexpanded");
         }
 
         return new ExpansionResult(result, warnings);
