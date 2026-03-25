@@ -1,0 +1,19 @@
+{
+  "id": "reference-modes",
+  "title": "Reference Modes & Model Building Process",
+  "description": "Learn the systematic SD modeling process: problem articulation, dynamic hypothesis, formulation, testing, and policy design.",
+  "difficulty": "advanced",
+  "estimatedMinutes": 20,
+  "model": null,
+  "recommendedPrerequisites": ["model-testing"],
+  "steps": [
+    { "title": "The Modeling Process", "content": "reference-modes/01-the-process.md" },
+    { "title": "Problem Articulation", "content": "reference-modes/02-problem-articulation.md" },
+    { "title": "Reference Modes", "content": "reference-modes/03-reference-modes.md" },
+    { "title": "Dynamic Hypothesis", "content": "reference-modes/04-dynamic-hypothesis.md" },
+    { "title": "Formulation & Testing", "content": "reference-modes/05-formulation-testing.md" },
+    { "title": "Policy Design", "content": "reference-modes/06-policy-design.md" },
+    { "title": "Key Takeaways", "content": "reference-modes/07-key-takeaways.md" }
+  ],
+  "nextTutorial": "multi-sector"
+}

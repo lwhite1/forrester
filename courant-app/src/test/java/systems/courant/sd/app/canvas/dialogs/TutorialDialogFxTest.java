@@ -21,7 +21,7 @@ class TutorialDialogFxTest {
 
     private ContentTutorialDialog quickstartDialog;
     private ContentTutorialDialog sirDialog;
-    private ContentTutorialDialog supplyChainDialog;
+    private ContentTutorialDialog delaysDialog;
     private ContentTutorialDialog cldDialog;
 
     @Start
@@ -30,8 +30,8 @@ class TutorialDialogFxTest {
                 TutorialContentLoader.load("modeling/first-model.json"));
         sirDialog = new ContentTutorialDialog(
                 TutorialContentLoader.load("modeling/feedback-loops.json"));
-        supplyChainDialog = new ContentTutorialDialog(
-                TutorialContentLoader.load("modeling/supply-chain.json"));
+        delaysDialog = new ContentTutorialDialog(
+                TutorialContentLoader.load("modeling/delays.json"));
         cldDialog = new ContentTutorialDialog(
                 TutorialContentLoader.load("modeling/cld-basics.json"));
 
@@ -83,15 +83,15 @@ class TutorialDialogFxTest {
 
     @Test
     @DisplayName("Supply chain tutorial has 7 tabs")
-    void supplyChainDialogHasSevenTabs(FxRobot robot) {
-        TabPane tabs = (TabPane) supplyChainDialog.getScene().getRoot();
+    void delaysDialogHasSevenTabs(FxRobot robot) {
+        TabPane tabs = (TabPane) delaysDialog.getScene().getRoot();
         assertThat(tabs.getTabs()).hasSize(7);
     }
 
     @Test
     @DisplayName("Supply chain tutorial tab titles follow numbered sequence")
-    void supplyChainDialogTabTitles(FxRobot robot) {
-        TabPane tabs = (TabPane) supplyChainDialog.getScene().getRoot();
+    void delaysDialogTabTitles(FxRobot robot) {
+        TabPane tabs = (TabPane) delaysDialog.getScene().getRoot();
         assertThat(tabs.getTabs().stream().map(Tab::getText).toList())
                 .containsExactly(
                         "1. The Idea",
@@ -104,9 +104,9 @@ class TutorialDialogFxTest {
     }
 
     @Test
-    @DisplayName("Supply chain tutorial has correct window title")
-    void supplyChainDialogTitle(FxRobot robot) {
-        assertThat(supplyChainDialog.getTitle()).contains("Supply Chain");
+    @DisplayName("Delays tutorial has correct window title")
+    void delaysDialogTitle(FxRobot robot) {
+        assertThat(delaysDialog.getTitle()).contains("Delays");
     }
 
     @Test
@@ -148,7 +148,7 @@ class TutorialDialogFxTest {
         assertThat(sirTabs.getTabClosingPolicy())
                 .isEqualTo(TabPane.TabClosingPolicy.UNAVAILABLE);
 
-        TabPane scTabs = (TabPane) supplyChainDialog.getScene().getRoot();
+        TabPane scTabs = (TabPane) delaysDialog.getScene().getRoot();
         assertThat(scTabs.getTabClosingPolicy())
                 .isEqualTo(TabPane.TabClosingPolicy.UNAVAILABLE);
 
@@ -162,7 +162,7 @@ class TutorialDialogFxTest {
     void allDialogsProvideTutorialId(FxRobot robot) {
         assertThat(quickstartDialog.resolvedTutorialId()).isEqualTo("first-model");
         assertThat(sirDialog.resolvedTutorialId()).isEqualTo("feedback-loops");
-        assertThat(supplyChainDialog.resolvedTutorialId()).isEqualTo("supply-chain");
+        assertThat(delaysDialog.resolvedTutorialId()).isEqualTo("delays");
         assertThat(cldDialog.resolvedTutorialId()).isEqualTo("cld-basics");
     }
 }

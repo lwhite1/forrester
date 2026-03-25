@@ -1,0 +1,19 @@
+{
+  "id": "modules",
+  "title": "Modules & Hierarchical Models",
+  "description": "Decompose complex models into reusable modules. Learn about ports, input/output bindings, and hierarchical organization.",
+  "difficulty": "intermediate",
+  "estimatedMinutes": 20,
+  "model": null,
+  "recommendedPrerequisites": ["multi-stock"],
+  "steps": [
+    { "title": "Why Modules?", "content": "modules/01-why-modules.md" },
+    { "title": "Module Basics", "content": "modules/02-module-basics.md" },
+    { "title": "Input Bindings", "content": "modules/03-input-bindings.md" },
+    { "title": "Output Bindings", "content": "modules/04-output-bindings.md" },
+    { "title": "Composing Modules", "content": "modules/05-composing-modules.md" },
+    { "title": "When to Use Modules", "content": "modules/06-when-to-use.md" },
+    { "title": "Key Takeaways", "content": "modules/07-key-takeaways.md" }
+  ],
+  "nextTutorial": "aging-chains"
+}

@@ -1,0 +1,19 @@
+{
+  "id": "model-testing",
+  "title": "Model Testing & Validation",
+  "description": "Build confidence in your models through extreme condition tests, behavior reproduction, and sensitivity analysis.",
+  "difficulty": "advanced",
+  "estimatedMinutes": 20,
+  "model": null,
+  "recommendedPrerequisites": ["exogenous-inputs"],
+  "steps": [
+    { "title": "Why Test Models?", "content": "model-testing/01-why-test.md" },
+    { "title": "Structure Tests", "content": "model-testing/02-structure-tests.md" },
+    { "title": "Extreme Conditions", "content": "model-testing/03-extreme-conditions.md" },
+    { "title": "Behavior Reproduction", "content": "model-testing/04-behavior-reproduction.md" },
+    { "title": "Sensitivity Analysis", "content": "model-testing/05-sensitivity-analysis.md" },
+    { "title": "Building Confidence", "content": "model-testing/06-building-confidence.md" },
+    { "title": "Key Takeaways", "content": "model-testing/07-key-takeaways.md" }
+  ],
+  "nextTutorial": "reference-modes"
+}

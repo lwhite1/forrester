@@ -1,0 +1,19 @@
+{
+  "id": "multi-stock",
+  "title": "Multi-Stock Systems",
+  "description": "Build models with coupled stocks, cascading flows, and interacting feedback loops. Explore predator-prey dynamics and SIR variants.",
+  "difficulty": "intermediate",
+  "estimatedMinutes": 25,
+  "model": "ecology/predator-prey.json",
+  "recommendedPrerequisites": ["delays"],
+  "steps": [
+    { "title": "Beyond One Stock", "content": "multi-stock/01-beyond-one-stock.md" },
+    { "title": "Coupled Stocks", "content": "multi-stock/02-coupled-stocks.md" },
+    { "title": "Predator-Prey", "content": "multi-stock/03-predator-prey.md" },
+    { "title": "Cascading Flows", "content": "multi-stock/04-cascading-flows.md" },
+    { "title": "System Boundaries", "content": "multi-stock/05-system-boundaries.md" },
+    { "title": "Experiment", "content": "multi-stock/06-experiment.md" },
+    { "title": "Key Takeaways", "content": "multi-stock/07-key-takeaways.md" }
+  ],
+  "nextTutorial": "modules"
+}

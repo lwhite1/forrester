@@ -38,26 +38,31 @@ class CurriculumLoaderTest {
     }
 
     @Test
-    @DisplayName("foundations tier has three tutorials")
-    void foundationsTierHasThreeTutorials() {
+    @DisplayName("foundations tier has five tutorials")
+    void foundationsTierHasFiveTutorials() {
         CurriculumLoader.Tier foundations = tracks.getFirst().tiers().getFirst();
         assertThat(foundations.id()).isEqualTo("modeling-foundations");
         assertThat(foundations.tutorialIds()).containsExactly(
-                "first-model", "feedback-loops", "cld-basics");
+                "intro-concepts", "first-model", "stocks-flows",
+                "feedback-loops", "cld-basics");
     }
 
     @Test
-    @DisplayName("intermediate tier has one tutorial")
-    void intermediateTierHasOneTutorial() {
+    @DisplayName("intermediate tier has five tutorials")
+    void intermediateTierHasFiveTutorials() {
         CurriculumLoader.Tier intermediate = tracks.getFirst().tiers().get(1);
-        assertThat(intermediate.tutorialIds()).containsExactly("supply-chain");
+        assertThat(intermediate.tutorialIds()).containsExactly(
+                "delays", "table-functions", "units-dimensional",
+                "multi-stock", "modules");
     }
 
     @Test
-    @DisplayName("advanced tier is empty")
-    void advancedTierIsEmpty() {
+    @DisplayName("advanced tier has six tutorials")
+    void advancedTierHasSixTutorials() {
         CurriculumLoader.Tier advanced = tracks.getFirst().tiers().get(2);
-        assertThat(advanced.tutorialIds()).isEmpty();
+        assertThat(advanced.tutorialIds()).containsExactly(
+                "aging-chains", "subscripts", "exogenous-inputs",
+                "model-testing", "reference-modes", "multi-sector");
     }
 
     @Test

@@ -78,7 +78,7 @@ class TutorialContentLoaderTest {
         @Test
         @DisplayName("should load next tutorial reference")
         void shouldLoadNextTutorial() {
-            assertThat(content.nextTutorial()).isEqualTo("feedback-loops");
+            assertThat(content.nextTutorial()).isEqualTo("stocks-flows");
         }
     }
 
@@ -96,11 +96,11 @@ class TutorialContentLoaderTest {
         }
 
         @Test
-        @DisplayName("supply-chain loads with 7 steps")
-        void supplyChainLoadsCorrectly() {
+        @DisplayName("delays loads with 7 steps")
+        void delaysLoadsCorrectly() {
             TutorialContent content =
-                    TutorialContentLoader.load("modeling/supply-chain.json");
-            assertThat(content.id()).isEqualTo("supply-chain");
+                    TutorialContentLoader.load("modeling/delays.json");
+            assertThat(content.id()).isEqualTo("delays");
             assertThat(content.steps()).hasSize(7);
         }
 

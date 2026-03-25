@@ -14,5 +14,5 @@
     { "title": "Experiment", "content": "first-model/05-experiment.md" },
     { "title": "Next Steps", "content": "first-model/06-next-steps.md" }
   ],
-  "nextTutorial": "feedback-loops"
+  "nextTutorial": "stocks-flows"
 }

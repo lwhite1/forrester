@@ -1,0 +1,19 @@
+{
+  "id": "delays",
+  "title": "Delays",
+  "description": "Understand material and information delays in dynamic systems. Explore DELAY1, DELAY3, and pipeline delays to see how delayed responses create oscillation and overshoot.",
+  "difficulty": "intermediate",
+  "estimatedMinutes": 25,
+  "model": "supply-chain/inventory-oscillation.json",
+  "recommendedPrerequisites": ["feedback-loops"],
+  "steps": [
+    { "title": "The Idea", "content": "delays/01-the-idea.md" },
+    { "title": "Stocks", "content": "delays/02-stocks.md" },
+    { "title": "Flows", "content": "delays/03-flows.md" },
+    { "title": "Parameters", "content": "delays/04-parameters.md" },
+    { "title": "Simulate", "content": "delays/05-simulate.md" },
+    { "title": "Experiment", "content": "delays/06-experiment.md" },
+    { "title": "Key Takeaways", "content": "delays/07-key-takeaways.md" }
+  ],
+  "nextTutorial": "table-functions"
+}

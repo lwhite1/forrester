@@ -97,15 +97,15 @@ class TutorialProgressTrackingFxTest {
         }
 
         @Test
-        @DisplayName("supply-chain completes as 'supply-chain'")
-        void supplyChainCompletesCorrectly(FxRobot robot) {
+        @DisplayName("delays completes as 'delays'")
+        void delaysCompletesCorrectly(FxRobot robot) {
             robot.interact(() -> {
-                ContentTutorialDialog dialog = loadDialog("modeling/supply-chain.json");
+                ContentTutorialDialog dialog = loadDialog("modeling/delays.json");
                 TabPane tabPane = (TabPane) dialog.getScene().getRoot();
                 tabPane.getSelectionModel().selectLast();
             });
 
-            assertThat(TutorialProgressStore.isCompleted("supply-chain")).isTrue();
+            assertThat(TutorialProgressStore.isCompleted("delays")).isTrue();
         }
 
         @Test

@@ -1,0 +1,19 @@
+{
+  "id": "aging-chains",
+  "title": "Aging Chains & Co-flows",
+  "description": "Model populations that age through cohorts. Learn aging chain structures, co-flows for tracking attributes, and conveyor patterns.",
+  "difficulty": "advanced",
+  "estimatedMinutes": 25,
+  "model": "demographics/AGECHAIN.json",
+  "recommendedPrerequisites": ["modules"],
+  "steps": [
+    { "title": "The Aging Problem", "content": "aging-chains/01-the-aging-problem.md" },
+    { "title": "Chain Structure", "content": "aging-chains/02-chain-structure.md" },
+    { "title": "Building a Chain", "content": "aging-chains/03-building-a-chain.md" },
+    { "title": "Co-flows", "content": "aging-chains/04-co-flows.md" },
+    { "title": "Conveyor Patterns", "content": "aging-chains/05-conveyor-patterns.md" },
+    { "title": "Experiment", "content": "aging-chains/06-experiment.md" },
+    { "title": "Key Takeaways", "content": "aging-chains/07-key-takeaways.md" }
+  ],
+  "nextTutorial": "subscripts"
+}

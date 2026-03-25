@@ -1,0 +1,19 @@
+{
+  "id": "exogenous-inputs",
+  "title": "Exogenous Inputs & Data",
+  "description": "Drive models with external signals using TIME, STEP, PULSE, and RAMP functions. Learn when to use exogenous inputs and their limitations.",
+  "difficulty": "advanced",
+  "estimatedMinutes": 20,
+  "model": null,
+  "recommendedPrerequisites": ["modules"],
+  "steps": [
+    { "title": "Endogenous vs. Exogenous", "content": "exogenous-inputs/01-endogenous-vs-exogenous.md" },
+    { "title": "The TIME Variable", "content": "exogenous-inputs/02-time-variable.md" },
+    { "title": "STEP Function", "content": "exogenous-inputs/03-step-function.md" },
+    { "title": "PULSE and RAMP", "content": "exogenous-inputs/04-pulse-and-ramp.md" },
+    { "title": "Combining Inputs", "content": "exogenous-inputs/05-combining-inputs.md" },
+    { "title": "When to Use Exogenous Inputs", "content": "exogenous-inputs/06-when-to-use.md" },
+    { "title": "Key Takeaways", "content": "exogenous-inputs/07-key-takeaways.md" }
+  ],
+  "nextTutorial": "model-testing"
+}

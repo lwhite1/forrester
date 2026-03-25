@@ -15,5 +15,5 @@
     { "title": "Explore", "content": "cld-basics/06-explore.md" },
     { "title": "Key Takeaways", "content": "cld-basics/07-key-takeaways.md" }
   ],
-  "nextTutorial": null
+  "nextTutorial": "delays"
 }
