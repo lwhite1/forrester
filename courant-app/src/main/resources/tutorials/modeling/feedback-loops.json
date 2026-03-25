@@ -4,7 +4,7 @@
   "description": "Model infectious disease spread with reinforcing and balancing feedback. Explore S-shaped growth and parameter sweeps.",
   "difficulty": "beginner",
   "estimatedMinutes": 20,
-  "model": "epidemiology/sir-basic.json",
+  "model": "epidemiology/sir-epidemic.json",
   "recommendedPrerequisites": ["first-model"],
   "steps": [
     { "title": "The Idea", "content": "feedback-loops/01-the-idea.md" },

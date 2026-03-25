@@ -1,6 +1,6 @@
 ## Create the Shipments flow (outflow from Inventory)
 
-Press `5` for the Flow tool.
+Press `3` for the Flow tool.
 
 1. Click **Inventory** (source)
 2. Click an empty area to the left (cloud — products go to customers)

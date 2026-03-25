@@ -9,21 +9,21 @@
           "name": "Foundations",
           "description": "Core concepts and your first models",
           "recommendedPrerequisites": [],
-          "tutorials": ["first-model", "feedback-loops", "cld-basics"]
+          "tutorials": ["intro-concepts", "first-model", "stocks-flows", "feedback-loops", "cld-basics"]
         },
         {
           "id": "modeling-intermediate",
           "name": "Building Realistic Models",
           "description": "Delays, non-linearity, and multi-stock systems",
           "recommendedPrerequisites": ["modeling-foundations"],
-          "tutorials": ["supply-chain"]
+          "tutorials": ["delays", "table-functions", "units-dimensional", "multi-stock", "modules"]
         },
         {
           "id": "modeling-advanced",
           "name": "Advanced Techniques",
           "description": "Aging chains, subscripts, and model testing",
           "recommendedPrerequisites": ["modeling-intermediate"],
-          "tutorials": []
+          "tutorials": ["aging-chains", "exogenous-inputs", "model-testing", "reference-modes", "multi-sector"]
         }
       ]
     },

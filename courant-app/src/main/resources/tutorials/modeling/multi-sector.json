@@ -1,0 +1,19 @@
+{
+  "id": "multi-sector",
+  "title": "Multi-Sector Models",
+  "description": "Build large-scale models by coupling multiple sectors. Learn sector decomposition, module composition, and managing complexity.",
+  "difficulty": "advanced",
+  "estimatedMinutes": 25,
+  "model": "economics/MARKET.json",
+  "recommendedPrerequisites": ["reference-modes"],
+  "steps": [
+    { "title": "What is a Sector?", "content": "multi-sector/01-what-is-a-sector.md" },
+    { "title": "Sector Decomposition", "content": "multi-sector/02-sector-decomposition.md" },
+    { "title": "Coupling Sectors", "content": "multi-sector/03-coupling-sectors.md" },
+    { "title": "A Market Model", "content": "multi-sector/04-a-market-model.md" },
+    { "title": "Managing Complexity", "content": "multi-sector/05-managing-complexity.md" },
+    { "title": "Experiment", "content": "multi-sector/06-experiment.md" },
+    { "title": "Key Takeaways", "content": "multi-sector/07-key-takeaways.md" }
+  ],
+  "nextTutorial": null
+}

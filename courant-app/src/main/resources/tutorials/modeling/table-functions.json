@@ -1,0 +1,19 @@
+{
+  "id": "table-functions",
+  "title": "Table Functions & Non-linearity",
+  "description": "Use lookup tables to model non-linear relationships. Learn graphical functions, saturation effects, and S-shaped responses.",
+  "difficulty": "intermediate",
+  "estimatedMinutes": 20,
+  "model": "introductory/goal-seeking.json",
+  "recommendedPrerequisites": ["delays"],
+  "steps": [
+    { "title": "Beyond Linear", "content": "table-functions/01-beyond-linear.md" },
+    { "title": "What is a Lookup Table?", "content": "table-functions/02-what-is-a-lookup.md" },
+    { "title": "Creating a Table", "content": "table-functions/03-creating-a-table.md" },
+    { "title": "Saturation Effects", "content": "table-functions/04-saturation-effects.md" },
+    { "title": "S-Shaped Responses", "content": "table-functions/05-s-shaped-responses.md" },
+    { "title": "Best Practices", "content": "table-functions/06-best-practices.md" },
+    { "title": "Key Takeaways", "content": "table-functions/07-key-takeaways.md" }
+  ],
+  "nextTutorial": "units-dimensional"
+}

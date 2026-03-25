@@ -1,0 +1,19 @@
+{
+  "id": "intro-concepts",
+  "title": "What is System Dynamics?",
+  "description": "Understand mental models, feedback thinking, and the endogenous perspective that makes System Dynamics unique.",
+  "difficulty": "beginner",
+  "estimatedMinutes": 15,
+  "model": null,
+  "recommendedPrerequisites": [],
+  "steps": [
+    { "title": "Why Model?", "content": "intro-concepts/01-why-model.md" },
+    { "title": "Mental Models", "content": "intro-concepts/02-mental-models.md" },
+    { "title": "Feedback Thinking", "content": "intro-concepts/03-feedback-thinking.md" },
+    { "title": "Stocks & Flows", "content": "intro-concepts/04-stocks-and-flows.md" },
+    { "title": "The Endogenous View", "content": "intro-concepts/05-endogenous-view.md" },
+    { "title": "Where SD is Used", "content": "intro-concepts/06-where-sd-is-used.md" },
+    { "title": "Next Steps", "content": "intro-concepts/07-next-steps.md" }
+  ],
+  "nextTutorial": "first-model"
+}

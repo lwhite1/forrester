@@ -1,0 +1,19 @@
+{
+  "id": "stocks-flows",
+  "title": "Stocks & Flows in Depth",
+  "description": "Master the fundamental building blocks of System Dynamics. Explore conservation, units, initial values, and integration using bathtub and exponential growth models.",
+  "difficulty": "beginner",
+  "estimatedMinutes": 25,
+  "model": "introductory/bathtub.json",
+  "recommendedPrerequisites": ["first-model"],
+  "steps": [
+    { "title": "Why Stocks Matter", "content": "stocks-flows/01-why-stocks-matter.md" },
+    { "title": "The Bathtub", "content": "stocks-flows/02-the-bathtub.md" },
+    { "title": "Conservation", "content": "stocks-flows/03-conservation.md" },
+    { "title": "Units & Dimensions", "content": "stocks-flows/04-units-and-dimensions.md" },
+    { "title": "Initial Values", "content": "stocks-flows/05-initial-values.md" },
+    { "title": "Exponential Growth", "content": "stocks-flows/06-exponential-growth.md" },
+    { "title": "Key Takeaways", "content": "stocks-flows/07-key-takeaways.md" }
+  ],
+  "nextTutorial": "feedback-loops"
+}

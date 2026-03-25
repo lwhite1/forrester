@@ -55,11 +55,11 @@ class CurriculumBrowserDialogFxTest {
     }
 
     @Test
-    @DisplayName("foundations tier has three tutorial children")
-    void foundationsTierHasThreeTutorials(FxRobot robot) {
+    @DisplayName("foundations tier has five tutorial children")
+    void foundationsTierHasFiveTutorials(FxRobot robot) {
         TreeItem<Object> foundations = tree().getRoot().getChildren().getFirst()
                 .getChildren().getFirst();
-        assertThat(foundations.getChildren()).hasSize(3);
+        assertThat(foundations.getChildren()).hasSize(5);
     }
 
     @Test
@@ -70,7 +70,8 @@ class CurriculumBrowserDialogFxTest {
         assertThat(foundations.getChildren().stream()
                 .map(item -> ((CurriculumBrowserDialog.TutorialEntry) item.getValue()).tutorialId())
                 .toList())
-                .containsExactly("first-model", "feedback-loops", "cld-basics");
+                .containsExactly("intro-concepts", "first-model", "stocks-flows",
+                        "feedback-loops", "cld-basics");
     }
 
     @Test
@@ -97,15 +98,15 @@ class CurriculumBrowserDialogFxTest {
         robot.interact(() -> ((javafx.scene.control.Button)
                 dialog.getScene().lookup("#launchTutorialButton")).fire());
 
-        assertThat(captured[0]).isEqualTo("modeling/first-model.json");
+        assertThat(captured[0]).isEqualTo("modeling/intro-concepts.json");
     }
 
     @Test
-    @DisplayName("empty tiers have no tutorial children")
+    @DisplayName("simulation tiers have no tutorial children yet")
     void emptyTiersHaveNoChildren(FxRobot robot) {
-        // Advanced tier (3rd tier of modeling track) should be empty
-        TreeItem<Object> advanced = tree().getRoot().getChildren().getFirst()
-                .getChildren().get(2);
-        assertThat(advanced.getChildren()).isEmpty();
+        // Core Simulation tier (1st tier of simulation-tools track) should be empty
+        TreeItem<Object> simCore = tree().getRoot().getChildren().get(1)
+                .getChildren().getFirst();
+        assertThat(simCore.getChildren()).isEmpty();
     }
 }

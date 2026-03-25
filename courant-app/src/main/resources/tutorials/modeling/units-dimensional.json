@@ -1,0 +1,18 @@
+{
+  "id": "units-dimensional",
+  "title": "Units & Dimensional Analysis",
+  "description": "Ensure dimensional consistency in your models. Learn unit checking, common unit errors, and how to use Courant's validation tools.",
+  "difficulty": "intermediate",
+  "estimatedMinutes": 15,
+  "model": null,
+  "recommendedPrerequisites": ["delays"],
+  "steps": [
+    { "title": "Why Units Matter", "content": "units-dimensional/01-why-units-matter.md" },
+    { "title": "Stocks vs. Flows", "content": "units-dimensional/02-stocks-vs-flows.md" },
+    { "title": "Dimensional Consistency", "content": "units-dimensional/03-dimensional-consistency.md" },
+    { "title": "Common Errors", "content": "units-dimensional/04-common-errors.md" },
+    { "title": "Using the Validator", "content": "units-dimensional/05-using-the-validator.md" },
+    { "title": "Key Takeaways", "content": "units-dimensional/06-key-takeaways.md" }
+  ],
+  "nextTutorial": "multi-stock"
+}
