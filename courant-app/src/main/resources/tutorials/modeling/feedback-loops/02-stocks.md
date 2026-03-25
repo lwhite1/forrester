@@ -1,6 +1,6 @@
 ## Place three Stocks
 
-Press `2` (or click the Stock button in the toolbar), then click on the canvas three times, arranging them left to right:
+Press `4` (or click the Stock button in the toolbar), then click on the canvas three times, arranging them left to right:
 
 1. **Susceptible** — initial value `990`
 2. **Infectious** — initial value `10`

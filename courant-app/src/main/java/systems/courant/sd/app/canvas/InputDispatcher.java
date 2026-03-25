@@ -48,13 +48,13 @@ final class InputDispatcher {
 
     private static final Map<KeyCode, CanvasToolBar.Tool> DIGIT_TO_TOOL = Map.ofEntries(
             Map.entry(KeyCode.DIGIT1, CanvasToolBar.Tool.SELECT),
-            Map.entry(KeyCode.DIGIT2, CanvasToolBar.Tool.PLACE_STOCK),
-            Map.entry(KeyCode.DIGIT3, CanvasToolBar.Tool.PLACE_FLOW),
-            Map.entry(KeyCode.DIGIT4, CanvasToolBar.Tool.PLACE_VARIABLE),
-            Map.entry(KeyCode.DIGIT5, CanvasToolBar.Tool.PLACE_MODULE),
-            Map.entry(KeyCode.DIGIT6, CanvasToolBar.Tool.PLACE_LOOKUP),
-            Map.entry(KeyCode.DIGIT7, CanvasToolBar.Tool.PLACE_CLD_VARIABLE),
-            Map.entry(KeyCode.DIGIT8, CanvasToolBar.Tool.PLACE_CAUSAL_LINK),
+            Map.entry(KeyCode.DIGIT2, CanvasToolBar.Tool.PLACE_CLD_VARIABLE),
+            Map.entry(KeyCode.DIGIT3, CanvasToolBar.Tool.PLACE_CAUSAL_LINK),
+            Map.entry(KeyCode.DIGIT4, CanvasToolBar.Tool.PLACE_STOCK),
+            Map.entry(KeyCode.DIGIT5, CanvasToolBar.Tool.PLACE_FLOW),
+            Map.entry(KeyCode.DIGIT6, CanvasToolBar.Tool.PLACE_VARIABLE),
+            Map.entry(KeyCode.DIGIT7, CanvasToolBar.Tool.PLACE_LOOKUP),
+            Map.entry(KeyCode.DIGIT8, CanvasToolBar.Tool.PLACE_MODULE),
             Map.entry(KeyCode.DIGIT9, CanvasToolBar.Tool.PLACE_COMMENT)
     );
 
