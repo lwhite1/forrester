@@ -311,15 +311,10 @@ class VensimExporterTest {
     class NameDenormalization {
 
         @Test
-        void shouldReplaceUnderscoresWithSpacesForNonVensimNames() {
-            // Names without spaces (XMILE/native): underscores are word separators
+        void shouldPreserveUnderscoresInNames() {
+            // Underscores are always preserved (may originate from XMILE or user input)
             assertThat(VensimExporter.denormalizeName("Population_Growth"))
-                    .isEqualTo("Population Growth");
-        }
-
-        @Test
-        void shouldPreserveUnderscoresWhenNameHasSpaces() {
-            // Names with spaces (Vensim display-name format): underscores are literal
+                    .isEqualTo("Population_Growth");
             assertThat(VensimExporter.denormalizeName("Net_Flow Rate"))
                     .isEqualTo("Net_Flow Rate");
             assertThat(VensimExporter.denormalizeName("Population Growth"))
@@ -341,8 +336,7 @@ class VensimExporterTest {
         @Test
         void shouldStripLeadingUnderscoreFromDigitPrefixedNames() {
             assertThat(VensimExporter.denormalizeName("_2nd_Batch"))
-                    .isEqualTo("2nd Batch");
-            // Vensim display-name format preserves spaces
+                    .isEqualTo("2nd_Batch");
             assertThat(VensimExporter.denormalizeName("_2nd Batch"))
                     .isEqualTo("2nd Batch");
         }
@@ -350,7 +344,7 @@ class VensimExporterTest {
         @Test
         void shouldPreserveLeadingUnderscoreForNonDigitNames() {
             assertThat(VensimExporter.denormalizeName("_internal"))
-                    .isEqualTo(" internal");
+                    .isEqualTo("_internal");
         }
     }
 
@@ -453,7 +447,7 @@ class VensimExporterTest {
             String mdl = VensimExporter.toVensim(def);
 
             assertThat(mdl).contains("Population=\n\t0");
-            assertThat(mdl).contains("Birth Rate=\n\t0");
+            assertThat(mdl).contains("Birth_Rate=\n\t0");
             assertThat(mdl).contains("The total population");
             assertThat(mdl).contains("Rate of births");
         }
@@ -487,7 +481,7 @@ class VensimExporterTest {
             // Verify sketch section has element placements and connector
             assertThat(mdl).contains("*CLD");
             assertThat(mdl).contains("10,1,Population,200,200");
-            assertThat(mdl).contains("10,2,Birth Rate,100,100");
+            assertThat(mdl).contains("10,2,Birth_Rate,100,100");
             assertThat(mdl).contains("1,4,2,1");
 
             // Re-import — sketch with no flow valves + no stocks → CLD mode
@@ -730,7 +724,7 @@ class VensimExporterTest {
 
             String mdl = VensimExporter.toVensim(def);
 
-            assertThat(mdl).contains("growth rate[Region]=");
+            assertThat(mdl).contains("growth_rate[Region]=");
         }
 
         @Test
@@ -745,7 +739,7 @@ class VensimExporterTest {
 
             String mdl = VensimExporter.toVensim(def);
 
-            assertThat(mdl).contains("Population[Region,Age Group]= INTEG");
+            assertThat(mdl).contains("Population[Region,Age_Group]= INTEG");
         }
     }
 
@@ -883,9 +877,9 @@ class VensimExporterTest {
             String mdl = VensimExporter.toVensim(def);
 
             // The LOOKUP call should be inlined as table-call syntax
-            assertThat(mdl).contains("effect table(Time) * factor");
+            assertThat(mdl).contains("effect_table(Time) * factor");
             // The lookup table should still be emitted as a standalone block
-            assertThat(mdl).contains("effect table(");
+            assertThat(mdl).contains("effect_table(");
             assertThat(mdl).contains("(0,0)");
         }
 
