@@ -299,7 +299,7 @@ public class BatchImportCli {
                 .build()) {
             URI currentUri = uri;
             HttpResponse<InputStream> response = null;
-            for (int redirects = 0; redirects <= MAX_REDIRECTS; redirects++) {
+            for (int redirects = 0; redirects < MAX_REDIRECTS; redirects++) {
                 HttpRequest request = HttpRequest.newBuilder()
                         .uri(currentUri)
                         .header("User-Agent", "Courant-SD-Importer/1.0")
@@ -315,6 +315,13 @@ public class BatchImportCli {
                             .orElseThrow(() -> new IOException(
                                     "HTTP " + status + " redirect with no Location header"));
                     currentUri = currentUri.resolve(location);
+                    String redirectScheme = currentUri.getScheme();
+                    if (redirectScheme == null
+                            || !(redirectScheme.equalsIgnoreCase("http")
+                                 || redirectScheme.equalsIgnoreCase("https"))) {
+                        throw new IOException(
+                                "Redirect to disallowed scheme: " + currentUri);
+                    }
                     rejectPrivateAddress(currentUri);
                     continue;
                 }
