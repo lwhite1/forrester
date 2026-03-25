@@ -159,7 +159,7 @@ class ModelWindowImportExportFxTest {
         ImportResult reimported = new VensimImporter().importModel(mdlFile);
         assertThat(reimported.definition().stocks()).hasSize(1);
         assertThat(reimported.definition().stocks().getFirst().name())
-                .isEqualTo("Teacup Temperature");
+                .isEqualTo("Teacup_Temperature");
     }
 
     @Test

@@ -687,12 +687,10 @@ public final class VensimExporter {
     }
 
     /**
-     * Denormalizes a Courant name back to Vensim name format.
+     * Denormalizes a Courant display name back to Vensim name format.
      *
-     * <p>If the name already contains spaces (i.e. it came from VensimImporter's
-     * {@code normalizeDisplayName} which preserves spaces), underscores are treated
-     * as literal characters and preserved. Otherwise (XMILE import, native Courant
-     * names), underscores are treated as word separators and replaced with spaces.
+     * <p>Underscores are always preserved — names may originate from XMILE
+     * or user input where underscores are literal, not word separators.
      *
      * <p>Leading underscore digit-prefix escapes (e.g. {@code _2nd}) are always
      * removed regardless of format.
@@ -706,11 +704,6 @@ public final class VensimExporter {
         if (stripped.length() >= 2 && stripped.charAt(0) == '_'
                 && Character.isDigit(stripped.charAt(1))) {
             stripped = stripped.substring(1);
-        }
-        // If the name already contains spaces (Vensim display-name format),
-        // underscores are literal — preserve them. Otherwise replace with spaces.
-        if (!stripped.contains(" ")) {
-            return stripped.replace('_', ' ');
         }
         return stripped;
     }
@@ -738,7 +731,13 @@ public final class VensimExporter {
                     break;
                 }
                 String quotedName = expr.substring(i + 1, closeQuote);
-                String denormed = denormalizeName(quotedName);
+                // Quoted names in expressions are equation identifiers (normalized):
+                // underscores represent spaces and digit-prefix escapes need stripping
+                String denormed = quotedName.replace('_', ' ');
+                if (quotedName.length() >= 2 && quotedName.charAt(0) == '_'
+                        && Character.isDigit(quotedName.charAt(1))) {
+                    denormed = denormed.stripLeading();
+                }
                 result.append('"').append(denormed).append('"');
                 i = closeQuote + 1;
             } else if (Character.isLetter(c) || c == '_') {
