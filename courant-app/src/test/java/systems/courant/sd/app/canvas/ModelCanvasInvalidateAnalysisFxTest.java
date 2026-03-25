@@ -2,6 +2,8 @@ package systems.courant.sd.app.canvas;
 
 import systems.courant.sd.model.def.ElementType;
 import systems.courant.sd.model.def.ModelDefinition;
+import systems.courant.sd.model.def.ValidationIssue.Severity;
+import systems.courant.sd.model.def.VariableDef;
 import systems.courant.sd.model.def.ViewDef;
 
 import javafx.scene.Scene;
@@ -16,6 +18,7 @@ import org.testfx.framework.junit5.Start;
 
 import org.testfx.util.WaitForAsyncUtils;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -129,6 +132,26 @@ class ModelCanvasInvalidateAnalysisFxTest {
         // invalidateAnalysis should not throw
         assertThat(canvas.analysis().getLastValidationResult()).isNotNull();
         assertThat(canvas.analysis().getLastValidationResult().issues()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("severity merge should keep ERROR when WARNING arrives after (#1371)")
+    void shouldKeepErrorWhenWarningArrivesAfter() {
+        CountingModelEditor editor = new CountingModelEditor();
+        // Add a variable with an unparseable equation (ERROR) and no unit (WARNING)
+        editor.addVariableFrom(
+                new VariableDef("badVar", null, "###INVALID###", "", List.of()),
+                "###INVALID###");
+        CanvasState state = new CanvasState();
+        state.addElement("badVar", ElementType.AUX, 100, 200);
+        canvas.setModel(editor, state.toViewDef());
+
+        WaitForAsyncUtils.waitForFxEvents();
+
+        Severity severity = canvas.analysis().elementIssues().get("badVar");
+        assertThat(severity)
+                .as("element with both ERROR and WARNING should retain ERROR")
+                .isEqualTo(Severity.ERROR);
     }
 
     @Test
