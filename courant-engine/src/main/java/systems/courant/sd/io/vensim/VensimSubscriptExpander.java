@@ -3,7 +3,6 @@ package systems.courant.sd.io.vensim;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 /**
  * Expands subscripted Vensim variables into per-label scalar variables.
@@ -17,9 +16,6 @@ import java.util.regex.Pattern;
  * ~250 lines of subscript expansion logic into a single-responsibility unit.
  */
 final class VensimSubscriptExpander {
-
-    private static final Pattern NUMERIC_PATTERN = Pattern.compile(
-            "^[+-]?(\\d+\\.?\\d*|\\.\\d+)([eE][+-]?\\d+)?$");
 
     private VensimSubscriptExpander() {
     }

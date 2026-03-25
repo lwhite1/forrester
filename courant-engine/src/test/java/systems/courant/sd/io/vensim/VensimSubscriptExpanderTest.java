@@ -63,8 +63,11 @@ class VensimSubscriptExpanderTest {
         @Test
         @DisplayName("should not split commas inside parentheses")
         void shouldNotSplitCommasInsideParens() {
-            assertThat(VensimSubscriptExpander.splitSubscriptValues(
-                    "IF(a>b, 1, 0)", 3)).isNull();
+            // With expectedCount=1, verifies the whole expression is returned as one part
+            // (i.e., commas inside parens are not treated as top-level separators)
+            List<String> result = VensimSubscriptExpander.splitSubscriptValues(
+                    "IF(a>b, 1, 0)", 1);
+            assertThat(result).containsExactly("IF(a>b, 1, 0)");
         }
 
         @Test
