@@ -134,25 +134,33 @@ public class CsvSubscriber implements EventHandler, Closeable {
      */
     @Override
     public void handleSimulationEndEvent(SimulationEndEvent event) {
-        close();
+        try {
+            close();
+        } catch (IOException e) {
+            throw new CsvOutputException("Failed to flush CSV output on simulation end", e);
+        }
         logger.info("Ending simulation");
     }
 
     /**
      * Closes the underlying CSV writer, flushing any buffered data.
+     *
+     * @throws IOException if flushing or closing the writer fails
      */
     @Override
-    public void close() {
+    public void close() throws IOException {
         synchronized (lock) {
             closed = true;
             if (csvWriter != null) {
                 try {
                     csvWriter.flush();
-                    csvWriter.close();
-                } catch (IOException e) {
-                    logger.error("Failed to close CSV writer", e);
+                } finally {
+                    try {
+                        csvWriter.close();
+                    } finally {
+                        csvWriter = null;
+                    }
                 }
-                csvWriter = null;
             }
         }
     }
