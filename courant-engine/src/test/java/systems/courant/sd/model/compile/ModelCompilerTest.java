@@ -779,6 +779,39 @@ class ModelCompilerTest {
     }
 
     @Nested
+    @DisplayName("savePer does not affect numerical accuracy (issue #1363)")
+    class SavePerAccuracy {
+
+        @Test
+        void shouldProduceSameResultsRegardlessOfSavePer() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("SavePer SMOOTH")
+                    .stock("Level", 100, "Thing")
+                    .variable("SmoothedLevel", "SMOOTH(Level, 5)", "Thing")
+                    .flow("Drain", "SmoothedLevel * 0.1", "Day", "Level", null)
+                    .defaultSimulation("Day", 20, "Day")
+                    .build();
+
+            // Run with savePer=1
+            CompiledModel compiled = compiler.compile(def);
+            Simulation sim1 = compiled.createSimulation();
+            sim1.execute();
+            double finalLevel1 = findStock(compiled.getModel(), "Level").getValue();
+
+            // Reset and run with savePer=5
+            compiled.reset();
+            Simulation sim2 = compiled.createSimulation();
+            sim2.setSavePer(5);
+            sim2.execute();
+            double finalLevel2 = findStock(compiled.getModel(), "Level").getValue();
+
+            assertThat(finalLevel2)
+                    .as("savePer should only affect recording, not numerical accuracy")
+                    .isCloseTo(finalLevel1, within(1e-9));
+        }
+    }
+
+    @Nested
     @DisplayName("Subscript expansion and dependency graph ordering")
     class SubscriptDependencyGraph {
 
