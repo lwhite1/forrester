@@ -14,12 +14,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
-import systems.courant.sd.app.canvas.controllers.CausalLinkCreationController;
 import systems.courant.sd.app.canvas.controllers.CausalLinkDragController;
 import systems.courant.sd.app.canvas.controllers.ConnectionRerouteController;
 import systems.courant.sd.app.canvas.controllers.DragController;
-import systems.courant.sd.app.canvas.controllers.FlowCreationController;
-import systems.courant.sd.app.canvas.controllers.InfoLinkCreationController;
 import systems.courant.sd.app.canvas.controllers.InlineEditController;
 import systems.courant.sd.app.canvas.controllers.MarqueeController;
 import systems.courant.sd.app.canvas.controllers.ReattachController;
@@ -28,6 +25,10 @@ import systems.courant.sd.app.canvas.controllers.ResizeController;
 /**
  * Routes mouse, keyboard, and scroll events to the appropriate interaction
  * controllers. Manages pan state, cursor updates, and hover tracking.
+ *
+ * <p>Connection-tool behavior (flow, causal link, info link creation) is
+ * delegated to {@link ConnectionToolHandler}. New connection tools can be
+ * added there without modifying this class.</p>
  */
 final class InputDispatcher {
 
@@ -62,11 +63,9 @@ final class InputDispatcher {
     private final MarqueeController marqueeController;
     private final ResizeController resizeController;
     private final ReattachController reattachController;
-    private final FlowCreationController flowCreation;
-    private final CausalLinkCreationController causalLinkCreation;
-    private final InfoLinkCreationController infoLinkCreation;
     private final ConnectionRerouteController rerouteController;
     private final InlineEditController inlineEdit;
+    private final ConnectionToolHandler connectionHandler;
 
     private final CausalLinkDragController causalLinkDrag = new CausalLinkDragController();
     private final PanController panController = new PanController();
@@ -89,20 +88,16 @@ final class InputDispatcher {
                     MarqueeController marqueeController,
                     ResizeController resizeController,
                     ReattachController reattachController,
-                    FlowCreationController flowCreation,
-                    CausalLinkCreationController causalLinkCreation,
-                    InfoLinkCreationController infoLinkCreation,
                     ConnectionRerouteController rerouteController,
-                    InlineEditController inlineEdit) {
+                    InlineEditController inlineEdit,
+                    ConnectionToolHandler connectionHandler) {
         this.dragController = dragController;
         this.marqueeController = marqueeController;
         this.resizeController = resizeController;
         this.reattachController = reattachController;
-        this.flowCreation = flowCreation;
-        this.causalLinkCreation = causalLinkCreation;
-        this.infoLinkCreation = infoLinkCreation;
         this.rerouteController = rerouteController;
         this.inlineEdit = inlineEdit;
+        this.connectionHandler = connectionHandler;
     }
 
     String getHoveredElement() {
@@ -147,44 +142,20 @@ final class InputDispatcher {
         lastMouseY = event.getY();
 
         Viewport viewport = canvas.viewport();
-        CanvasState canvasState = canvas.canvasState();
+        double worldX = viewport.toWorldX(event.getX());
+        double worldY = viewport.toWorldY(event.getY());
 
-        if (flowCreation.isPending()) {
-            flowCreation.updateRubberBand(
-                    viewport.toWorldX(event.getX()),
-                    viewport.toWorldY(event.getY()));
-            canvas.requestRedraw();
-            event.consume();
-        }
+        // Delegate rubber-band updates to connection handler
+        connectionHandler.updateRubberBands(worldX, worldY, canvas);
 
-        if (causalLinkCreation.isPending()) {
-            causalLinkCreation.updateRubberBand(
-                    viewport.toWorldX(event.getX()),
-                    viewport.toWorldY(event.getY()));
-            canvas.requestRedraw();
-            event.consume();
-        }
-
-        if (infoLinkCreation.isPending()) {
-            double wx = viewport.toWorldX(event.getX());
-            double wy = viewport.toWorldY(event.getY());
-            infoLinkCreation.updateRubberBand(wx, wy);
-            infoLinkCreation.updateHoveredPort(wx, wy, canvasState, canvas.getEditor());
-            canvas.requestRedraw();
-            event.consume();
-        }
-
-        // Update hovered port for highlight even when not pending
-        if (canvas.getActiveTool() == CanvasToolBar.Tool.PLACE_INFO_LINK
-                && !infoLinkCreation.isPending()) {
-            double wx = viewport.toWorldX(event.getX());
-            double wy = viewport.toWorldY(event.getY());
-            infoLinkCreation.updateHoveredPort(wx, wy, canvasState, canvas.getEditor());
+        // Update hovered port for info link highlight (when pending or just hovering)
+        if (canvas.getActiveTool() == CanvasToolBar.Tool.PLACE_INFO_LINK) {
+            canvas.getInfoLinkCreation().updateHoveredPort(
+                    worldX, worldY, canvas.canvasState(), canvas.getEditor());
         }
 
         // Update hover highlight
-        double worldX = viewport.toWorldX(event.getX());
-        double worldY = viewport.toWorldY(event.getY());
+        CanvasState canvasState = canvas.canvasState();
         boolean hideAux = canvas.isHideVariables();
         String hit = HitTester.hitTest(canvasState, worldX, worldY, hideAux);
 
@@ -261,7 +232,9 @@ final class InputDispatcher {
         if (handleSelectModeInteractions(event, canvas, activeTool, worldX, worldY)) {
             return;
         }
-        if (handleConnectionToolClick(event, canvas, activeTool, worldX, worldY)) {
+        if (connectionHandler.handleClick(activeTool, worldX, worldY, canvas)) {
+            updateCursor(canvas);
+            event.consume();
             return;
         }
         if (handlePlacementToolClick(event, canvas, activeTool, worldX, worldY)) {
@@ -276,7 +249,7 @@ final class InputDispatcher {
                                       double worldX, double worldY) {
         if (event.getClickCount() != 2
                 || activeTool != CanvasToolBar.Tool.SELECT
-                || flowCreation.isPending()) {
+                || connectionHandler.isAnyPending()) {
             return false;
         }
         CanvasState canvasState = canvas.canvasState();
@@ -297,7 +270,7 @@ final class InputDispatcher {
     private boolean handleSelectModeInteractions(MouseEvent event, ModelCanvas canvas,
                                                  CanvasToolBar.Tool activeTool,
                                                  double worldX, double worldY) {
-        if (activeTool != CanvasToolBar.Tool.SELECT || flowCreation.isPending()) {
+        if (activeTool != CanvasToolBar.Tool.SELECT || connectionHandler.isAnyPending()) {
             return false;
         }
         CanvasState canvasState = canvas.canvasState();
@@ -360,27 +333,11 @@ final class InputDispatcher {
         return false;
     }
 
-    private boolean handleConnectionToolClick(MouseEvent event, ModelCanvas canvas,
-                                              CanvasToolBar.Tool activeTool,
-                                              double worldX, double worldY) {
-        if (activeTool == CanvasToolBar.Tool.PLACE_FLOW) {
-            canvas.elements().handleFlowClick(worldX, worldY);
-        } else if (activeTool == CanvasToolBar.Tool.PLACE_CAUSAL_LINK) {
-            canvas.elements().handleCausalLinkClick(worldX, worldY);
-        } else if (activeTool == CanvasToolBar.Tool.PLACE_INFO_LINK) {
-            canvas.elements().handleInfoLinkClick(worldX, worldY);
-        } else {
-            return false;
-        }
-        updateCursor(canvas);
-        event.consume();
-        return true;
-    }
-
     private boolean handlePlacementToolClick(MouseEvent event, ModelCanvas canvas,
                                              CanvasToolBar.Tool activeTool,
                                              double worldX, double worldY) {
-        if (activeTool == CanvasToolBar.Tool.SELECT) {
+        if (activeTool == CanvasToolBar.Tool.SELECT
+                || connectionHandler.isConnectionTool(activeTool)) {
             return false;
         }
         CanvasState canvasState = canvas.canvasState();
@@ -711,11 +668,12 @@ final class InputDispatcher {
         if (code == KeyCode.ESCAPE) {
             handleEscape(canvas);
             event.consume();
-        } else if (code == KeyCode.ENTER && isConnectionTool(canvas.getActiveTool())) {
-            handleConnectionEnter(canvas);
+        } else if (code == KeyCode.ENTER && connectionHandler.isConnectionTool(canvas.getActiveTool())) {
+            connectionHandler.handleEnter(canvas.getActiveTool(), canvas);
+            updateCursor(canvas);
             event.consume();
-        } else if (code == KeyCode.TAB && isConnectionTool(canvas.getActiveTool())) {
-            handleConnectionTab(canvas, event.isShiftDown());
+        } else if (code == KeyCode.TAB && connectionHandler.isConnectionTool(canvas.getActiveTool())) {
+            connectionHandler.handleTab(canvas, event.isShiftDown());
             event.consume();
         } else if (code == KeyCode.SPACE) {
             panController.onSpacePressed();
@@ -755,82 +713,6 @@ final class InputDispatcher {
         }
     }
 
-    private static boolean isConnectionTool(CanvasToolBar.Tool tool) {
-        return tool == CanvasToolBar.Tool.PLACE_FLOW
-                || tool == CanvasToolBar.Tool.PLACE_CAUSAL_LINK
-                || tool == CanvasToolBar.Tool.PLACE_INFO_LINK;
-    }
-
-    /**
-     * Performs a connection click at the selected element's center, enabling
-     * fully keyboard-driven connection creation (Enter to confirm source/target).
-     */
-    private void handleConnectionEnter(ModelCanvas canvas) {
-        CanvasState canvasState = canvas.canvasState();
-        Set<String> selection = canvasState.getSelection();
-
-        if (selection.isEmpty()) {
-            return;
-        }
-
-        String selected = selection.iterator().next();
-        double worldX = canvasState.getX(selected);
-        double worldY = canvasState.getY(selected);
-
-        if (Double.isNaN(worldX) || Double.isNaN(worldY)) {
-            return;
-        }
-
-        CanvasToolBar.Tool activeTool = canvas.getActiveTool();
-        if (activeTool == CanvasToolBar.Tool.PLACE_FLOW) {
-            canvas.elements().handleFlowClick(worldX, worldY);
-        } else if (activeTool == CanvasToolBar.Tool.PLACE_CAUSAL_LINK) {
-            canvas.elements().handleCausalLinkClick(worldX, worldY);
-        } else if (activeTool == CanvasToolBar.Tool.PLACE_INFO_LINK) {
-            canvas.elements().handleInfoLinkClick(worldX, worldY);
-        }
-        updateCursor(canvas);
-    }
-
-    /**
-     * Cycles element selection forward (Tab) or backward (Shift+Tab),
-     * enabling keyboard navigation to choose connection endpoints.
-     */
-    private void handleConnectionTab(ModelCanvas canvas, boolean reverse) {
-        CanvasState canvasState = canvas.canvasState();
-        List<String> drawOrder = canvasState.getDrawOrder();
-        if (drawOrder.isEmpty()) {
-            return;
-        }
-
-        Set<String> selection = canvasState.getSelection();
-        String current = selection.isEmpty() ? null : selection.iterator().next();
-
-        int currentIndex = current != null ? drawOrder.indexOf(current) : -1;
-        int nextIndex;
-        if (reverse) {
-            nextIndex = currentIndex <= 0 ? drawOrder.size() - 1 : currentIndex - 1;
-        } else {
-            nextIndex = currentIndex < 0 || currentIndex >= drawOrder.size() - 1
-                    ? 0 : currentIndex + 1;
-        }
-
-        String next = drawOrder.get(nextIndex);
-        canvasState.select(next);
-
-        // Update rubber-band to point at the newly selected element
-        double worldX = canvasState.getX(next);
-        double worldY = canvasState.getY(next);
-        if (!Double.isNaN(worldX) && !Double.isNaN(worldY)) {
-            flowCreation.updateRubberBand(worldX, worldY);
-            causalLinkCreation.updateRubberBand(worldX, worldY);
-            infoLinkCreation.updateRubberBand(worldX, worldY);
-        }
-
-        canvas.requestRedraw();
-        canvas.fireStatusChanged();
-    }
-
     private void handleEscape(ModelCanvas canvas) {
         if (canvas.analysis().isTraceActive()) {
             canvas.analysis().clearTrace();
@@ -847,15 +729,8 @@ final class InputDispatcher {
         } else if (rerouteController.isActive()) {
             rerouteController.cancel();
             canvas.requestRedraw();
-        } else if (flowCreation.isPending()) {
-            flowCreation.cancel();
-            canvas.requestRedraw();
-        } else if (causalLinkCreation.isPending()) {
-            causalLinkCreation.cancel();
-            canvas.requestRedraw();
-        } else if (infoLinkCreation.isPending()) {
-            infoLinkCreation.cancel();
-            canvas.requestRedraw();
+        } else if (connectionHandler.cancelPending(canvas)) {
+            // handled by connectionHandler
         } else if (canvas.getActiveTool() != CanvasToolBar.Tool.SELECT) {
             canvas.resetToolToSelect();
         } else if (canvas.getSelectedConnection() != null) {
@@ -879,9 +754,6 @@ final class InputDispatcher {
             return;
         }
 
-        Viewport viewport = canvas.viewport();
-        CanvasState canvasState = canvas.canvasState();
-        ModelEditor editor = canvas.getEditor();
         CanvasToolBar.Tool activeTool = canvas.getActiveTool();
 
         Cursor cursor;
@@ -895,11 +767,12 @@ final class InputDispatcher {
             cursor = Cursor.CROSSHAIR;
         } else if (panController.isSpaceDown()) {
             cursor = Cursor.MOVE;
-        } else if (flowCreation.isPending() || infoLinkCreation.isPending()
+        } else if (connectionHandler.isAnyPending()
                 || activeTool != CanvasToolBar.Tool.SELECT) {
             cursor = Cursor.CROSSHAIR;
-        } else if (editor != null) {
-            cursor = computeSelectCursor(viewport, canvasState, editor, canvas.isHideVariables());
+        } else if (canvas.getEditor() != null) {
+            cursor = computeSelectCursor(canvas.viewport(), canvas.canvasState(),
+                    canvas.getEditor(), canvas.isHideVariables());
         } else {
             cursor = Cursor.DEFAULT;
         }
