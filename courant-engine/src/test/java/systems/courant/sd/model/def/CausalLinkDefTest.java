@@ -55,4 +55,48 @@ class CausalLinkDefTest {
         assertThat(Polarity.NEGATIVE.symbol()).isEqualTo("-");
         assertThat(Polarity.UNKNOWN.symbol()).isEqualTo("?");
     }
+
+    @Test
+    void shouldDefaultBiasToZero() {
+        assertThat(new CausalLinkDef("A", "B").bias()).isEqualTo(0.0);
+        assertThat(new CausalLinkDef("A", "B", Polarity.POSITIVE).bias()).isEqualTo(0.0);
+        assertThat(new CausalLinkDef("A", "B", Polarity.POSITIVE, "note").bias()).isEqualTo(0.0);
+        assertThat(new CausalLinkDef("A", "B", Polarity.POSITIVE, null, 50.0).bias()).isEqualTo(0.0);
+    }
+
+    @Test
+    void shouldReportHasBias() {
+        assertThat(new CausalLinkDef("A", "B").hasBias()).isFalse();
+        assertThat(new CausalLinkDef("A", "B", Polarity.UNKNOWN, null, Double.NaN, 10.0).hasBias()).isTrue();
+        assertThat(new CausalLinkDef("A", "B", Polarity.UNKNOWN, null, Double.NaN, 0.0).hasBias()).isFalse();
+    }
+
+    @Test
+    void shouldReturnCopyWithBias() {
+        CausalLinkDef link = new CausalLinkDef("A", "B", Polarity.POSITIVE, "note", 50.0);
+        CausalLinkDef withBias = link.withBias(30.0);
+
+        assertThat(withBias.bias()).isEqualTo(30.0);
+        assertThat(withBias.strength()).isEqualTo(50.0);
+        assertThat(withBias.polarity()).isEqualTo(Polarity.POSITIVE);
+        assertThat(withBias.comment()).isEqualTo("note");
+    }
+
+    @Test
+    void shouldReturnCopyWithStrengthAndBias() {
+        CausalLinkDef link = new CausalLinkDef("A", "B");
+        CausalLinkDef updated = link.withStrengthAndBias(80.0, -20.0);
+
+        assertThat(updated.strength()).isEqualTo(80.0);
+        assertThat(updated.bias()).isEqualTo(-20.0);
+    }
+
+    @Test
+    void shouldPreserveBiasInWithStrength() {
+        CausalLinkDef link = new CausalLinkDef("A", "B", Polarity.UNKNOWN, null, 50.0, 25.0);
+        CausalLinkDef updated = link.withStrength(100.0);
+
+        assertThat(updated.strength()).isEqualTo(100.0);
+        assertThat(updated.bias()).isEqualTo(25.0);
+    }
 }

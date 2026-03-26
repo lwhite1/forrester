@@ -583,7 +583,8 @@ public class ModelEditor {
         for (int i = 0; i < causalLinks.size(); i++) {
             CausalLinkDef link = causalLinks.get(i);
             if (link.from().equals(from) && link.to().equals(to)) {
-                causalLinks.set(i, new CausalLinkDef(from, to, polarity, link.comment(), link.strength()));
+                causalLinks.set(i, new CausalLinkDef(from, to, polarity, link.comment(),
+                        link.strength(), link.bias()));
                 return true;
             }
         }
@@ -597,6 +598,20 @@ public class ModelEditor {
             CausalLinkDef link = causalLinks.get(i);
             if (link.from().equals(from) && link.to().equals(to)) {
                 causalLinks.set(i, link.withStrength(strength));
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** @return true if the causal link was found and its strength and bias updated */
+    public boolean setCausalLinkStrengthAndBias(String from, String to,
+                                                 double strength, double bias) {
+        checkFxThread();
+        for (int i = 0; i < causalLinks.size(); i++) {
+            CausalLinkDef link = causalLinks.get(i);
+            if (link.from().equals(from) && link.to().equals(to)) {
+                causalLinks.set(i, link.withStrengthAndBias(strength, bias));
                 return true;
             }
         }

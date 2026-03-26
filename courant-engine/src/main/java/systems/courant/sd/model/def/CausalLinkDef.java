@@ -10,13 +10,15 @@ package systems.courant.sd.model.def;
  * @param polarity the direction of influence (positive, negative, or unknown)
  * @param comment optional annotation (e.g., "after a delay")
  * @param strength curve strength override ({@code NaN} = auto-computed curvature)
+ * @param bias control point offset along the chord direction ({@code 0.0} = centered)
  */
 public record CausalLinkDef(
         String from,
         String to,
         Polarity polarity,
         String comment,
-        double strength
+        double strength,
+        double bias
 ) {
 
     public enum Polarity {
@@ -78,7 +80,28 @@ public record CausalLinkDef(
     }
 
     /**
-     * Creates a causal link with default (auto) curve strength.
+     * Returns true if this link has a non-zero bias (apex shifted along chord).
+     */
+    public boolean hasBias() {
+        return bias != 0.0;
+    }
+
+    /**
+     * Creates a causal link with default (auto) curve strength and no bias.
+     *
+     * @param from     the source variable name
+     * @param to       the target variable name
+     * @param polarity the direction of influence
+     * @param comment  optional annotation
+     * @param strength curve strength override
+     */
+    public CausalLinkDef(String from, String to, Polarity polarity, String comment,
+                          double strength) {
+        this(from, to, polarity, comment, strength, 0.0);
+    }
+
+    /**
+     * Creates a causal link with default (auto) curve strength and no bias.
      *
      * @param from     the source variable name
      * @param to       the target variable name
@@ -86,7 +109,7 @@ public record CausalLinkDef(
      * @param comment  optional annotation
      */
     public CausalLinkDef(String from, String to, Polarity polarity, String comment) {
-        this(from, to, polarity, comment, Double.NaN);
+        this(from, to, polarity, comment, Double.NaN, 0.0);
     }
 
     /**
@@ -97,7 +120,7 @@ public record CausalLinkDef(
      * @param polarity the direction of influence
      */
     public CausalLinkDef(String from, String to, Polarity polarity) {
-        this(from, to, polarity, null, Double.NaN);
+        this(from, to, polarity, null, Double.NaN, 0.0);
     }
 
     /**
@@ -107,13 +130,27 @@ public record CausalLinkDef(
      * @param to   the target variable name
      */
     public CausalLinkDef(String from, String to) {
-        this(from, to, Polarity.UNKNOWN, null, Double.NaN);
+        this(from, to, Polarity.UNKNOWN, null, Double.NaN, 0.0);
     }
 
     /**
-     * Returns a copy of this link with a different strength value.
+     * Returns a copy of this link with a different strength value, preserving bias.
      */
     public CausalLinkDef withStrength(double newStrength) {
-        return new CausalLinkDef(from, to, polarity, comment, newStrength);
+        return new CausalLinkDef(from, to, polarity, comment, newStrength, bias);
+    }
+
+    /**
+     * Returns a copy of this link with a different bias value, preserving strength.
+     */
+    public CausalLinkDef withBias(double newBias) {
+        return new CausalLinkDef(from, to, polarity, comment, strength, newBias);
+    }
+
+    /**
+     * Returns a copy of this link with both strength and bias replaced.
+     */
+    public CausalLinkDef withStrengthAndBias(double newStrength, double newBias) {
+        return new CausalLinkDef(from, to, polarity, comment, newStrength, newBias);
     }
 }

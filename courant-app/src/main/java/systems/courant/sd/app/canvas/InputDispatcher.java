@@ -478,16 +478,16 @@ final class InputDispatcher {
         }
 
         if (causalLinkDrag.isActive()) {
-            double strength = causalLinkDrag.drag(
+            CausalLinkDragController.DragResult result = causalLinkDrag.drag(
                     viewport.toWorldX(event.getX()),
                     viewport.toWorldY(event.getY()));
             ModelEditor editor = canvas.getEditor();
             if (editor != null) {
                 canvas.saveUndoStateTentative("Adjust curve");
-                editor.setCausalLinkStrength(
+                editor.setCausalLinkStrengthAndBias(
                         causalLinkDrag.getFromName(),
                         causalLinkDrag.getToName(),
-                        strength);
+                        result.strength(), result.bias());
             }
             canvas.requestRedraw();
             event.consume();
