@@ -416,15 +416,17 @@ public final class CausalLinkGeometry {
     }
 
     /**
-     * Loop-aware control point. Uses per-loop centroids for intra-loop edges
-     * (k=0.6) and the global centroid for cross-loop edges (k=0.25).
+     * Loop-aware control point. Uses a stable perpendicular direction that
+     * depends only on the two endpoints (not on the graph centroid), so that
+     * adding, removing, or moving other variables never shifts existing links.
+     * Loop-aware bulge factors (same-loop vs cross-loop) still apply.
      */
     public static ControlPoint controlPoint(double fromX, double fromY,
                                              double toX, double toY,
                                              String fromName, String toName,
                                              List<CausalLinkDef> allLinks,
                                              LoopContext loopCtx) {
-        if (loopCtx == null || Double.isNaN(loopCtx.globalCentroidX())) {
+        if (loopCtx == null) {
             return controlPoint(fromX, fromY, toX, toY, fromName, toName, allLinks);
         }
 
@@ -443,46 +445,15 @@ public final class CausalLinkGeometry {
             return new ControlPoint(midX, midY);
         }
 
+        // Perpendicular direction — stable, depends only on the two endpoints
         boolean canonical = fromName.compareTo(toName) < 0;
         double cdx = canonical ? dx : -dx;
         double cdy = canonical ? dy : -dy;
         double perpX = -cdy / chordLen;
         double perpY = cdx / chordLen;
 
-        double[] centroid = loopCtx.centroidFor(fromName, toName);
-        double k = loopCtx.bulgeFactorFor(fromName, toName);
-
-        double outDx = midX - centroid[0];
-        double outDy = midY - centroid[1];
-        double outDist = Math.sqrt(outDx * outDx + outDy * outDy);
-
-        double finalDirX;
-        double finalDirY;
-
-        if (outDist < 1) {
-            finalDirX = perpX;
-            finalDirY = perpY;
-        } else {
-            double outNx = outDx / outDist;
-            double outNy = outDy / outDist;
-
-            double dot = outNx * perpX + outNy * perpY;
-            if (dot < 0) {
-                perpX = -perpX;
-                perpY = -perpY;
-                dot = -dot;
-            }
-
-            double w = Math.min(1, dot);
-            finalDirX = perpX * (1 - w) + outNx * w;
-            finalDirY = perpY * (1 - w) + outNy * w;
-            double finalLen = Math.sqrt(finalDirX * finalDirX + finalDirY * finalDirY);
-            if (finalLen > 0.001) {
-                finalDirX /= finalLen;
-                finalDirY /= finalLen;
-            }
-        }
-
+        // Loop-aware bulge factor (same-loop edges curve more)
+        double k = loopCtx != null ? loopCtx.bulgeFactorFor(fromName, toName) : 0.35;
         double bulge = k * chordLen;
         bulge = Math.min(bulge, 120);
 
@@ -495,23 +466,20 @@ public final class CausalLinkGeometry {
         int direction = curveDirection(fromName, toName, allLinks);
 
         return new ControlPoint(
-                midX + finalDirX * bulge * direction,
-                midY + finalDirY * bulge * direction
+                midX + perpX * bulge * direction,
+                midY + perpY * bulge * direction
         );
     }
 
     /**
-     * Loop-aware self-loop geometry. Uses the loop-specific centroid for
-     * radial direction and 1.5 × node radius for offset distance.
+     * Loop-aware self-loop geometry. Uses a stable upward direction so that
+     * adding, removing, or moving other variables never shifts existing
+     * self-loops.
      */
     public static double[] selfLoopPoints(double cx, double cy,
                                            double halfW, double halfH,
                                            LoopContext loopCtx, String nodeName) {
-        if (loopCtx == null) {
-            return selfLoopPoints(cx, cy, halfW, halfH);
-        }
-        double[] centroid = loopCtx.selfLoopCentroid(nodeName);
-        return selfLoopPoints(cx, cy, halfW, halfH, centroid[0], centroid[1]);
+        return selfLoopPoints(cx, cy, halfW, halfH);
     }
 
     /**
