@@ -326,6 +326,49 @@ class ModelDefinitionSerializerTest {
     }
 
     @Test
+    void shouldRoundTripCausalLinkBias() {
+        ModelDefinition def = new ModelDefinitionBuilder()
+                .name("Test")
+                .cldVariable("A")
+                .cldVariable("B")
+                .causalLink(new CausalLinkDef("A", "B",
+                        CausalLinkDef.Polarity.POSITIVE, null, 60.0, 25.0))
+                .build();
+
+        ModelDefinition roundTripped = serializer.fromJson(serializer.toJson(def));
+        CausalLinkDef link = roundTripped.causalLinks().get(0);
+        assertThat(link.strength()).isEqualTo(60.0);
+        assertThat(link.bias()).isEqualTo(25.0);
+    }
+
+    @Test
+    void shouldDefaultBiasWhenAbsentInJson() {
+        String json = """
+                {
+                  "name": "Test",
+                  "cldVariables": [{"name": "A"}, {"name": "B"}],
+                  "causalLinks": [{"from": "A", "to": "B", "polarity": "POSITIVE", "strength": 50.0}]
+                }
+                """;
+        ModelDefinition def = serializer.fromJson(json);
+        assertThat(def.causalLinks().get(0).bias()).isEqualTo(0.0);
+    }
+
+    @Test
+    void shouldOmitBiasWhenZero() {
+        ModelDefinition def = new ModelDefinitionBuilder()
+                .name("Test")
+                .cldVariable("A")
+                .cldVariable("B")
+                .causalLink(new CausalLinkDef("A", "B",
+                        CausalLinkDef.Polarity.POSITIVE, null, 50.0, 0.0))
+                .build();
+
+        String json = serializer.toJson(def);
+        assertThat(json).doesNotContain("\"bias\"");
+    }
+
+    @Test
     void shouldRoundTripMixedSfAndCldModel() {
         ModelDefinition def = new ModelDefinitionBuilder()
                 .name("Mixed")

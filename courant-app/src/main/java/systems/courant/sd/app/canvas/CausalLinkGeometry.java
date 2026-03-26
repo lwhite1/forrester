@@ -91,9 +91,14 @@ public final class CausalLinkGeometry {
         // and the reciprocal curves the other way.
         int direction = curveDirection(fromName, toName, allLinks);
 
+        // Bias shifts the control point along the chord direction
+        double bias = findBias(fromName, toName, allLinks);
+        double chordUnitX = dx / dist;
+        double chordUnitY = dy / dist;
+
         return new ControlPoint(
-                midX + perpX * bulge * direction,
-                midY + perpY * bulge * direction
+                midX + chordUnitX * bias + perpX * bulge * direction,
+                midY + chordUnitY * bias + perpY * bulge * direction
         );
     }
 
@@ -108,6 +113,19 @@ public final class CausalLinkGeometry {
             }
         }
         return Double.NaN;
+    }
+
+    /**
+     * Finds the bias for a specific causal link, or 0 if none.
+     */
+    static double findBias(String fromName, String toName,
+                                    List<CausalLinkDef> allLinks) {
+        for (CausalLinkDef link : allLinks) {
+            if (link.from().equals(fromName) && link.to().equals(toName)) {
+                return link.bias();
+            }
+        }
+        return 0.0;
     }
 
     /**
@@ -223,9 +241,14 @@ public final class CausalLinkGeometry {
 
         int direction = curveDirection(fromName, toName, allLinks);
 
+        // Bias shifts the control point along the chord direction
+        double bias = findBias(fromName, toName, allLinks);
+        double chordUnitX = dx / chordLen;
+        double chordUnitY = dy / chordLen;
+
         return new ControlPoint(
-                midX + finalDirX * bulge * direction,
-                midY + finalDirY * bulge * direction
+                midX + chordUnitX * bias + finalDirX * bulge * direction,
+                midY + chordUnitY * bias + finalDirY * bulge * direction
         );
     }
 
@@ -465,9 +488,14 @@ public final class CausalLinkGeometry {
 
         int direction = curveDirection(fromName, toName, allLinks);
 
+        // Bias shifts the control point along the chord direction
+        double bias = findBias(fromName, toName, allLinks);
+        double chordUnitX = dx / chordLen;
+        double chordUnitY = dy / chordLen;
+
         return new ControlPoint(
-                midX + perpX * bulge * direction,
-                midY + perpY * bulge * direction
+                midX + chordUnitX * bias + perpX * bulge * direction,
+                midY + chordUnitY * bias + perpY * bulge * direction
         );
     }
 

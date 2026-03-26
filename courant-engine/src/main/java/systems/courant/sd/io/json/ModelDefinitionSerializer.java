@@ -479,6 +479,9 @@ public class ModelDefinitionSerializer {
             if (link.hasStrength()) {
                 node.put("strength", link.strength());
             }
+            if (link.hasBias()) {
+                node.put("bias", link.bias());
+            }
             arr.add(node);
         }
         return arr;
@@ -718,12 +721,15 @@ public class ModelDefinitionSerializer {
                 }
                 double strength = n.has("strength")
                         ? n.get("strength").asDouble() : Double.NaN;
+                double bias = n.has("bias")
+                        ? n.get("bias").asDouble() : 0.0;
                 causalLinks.add(new CausalLinkDef(
                         requiredText(n, "from"),
                         requiredText(n, "to"),
                         polarity,
                         textOrNull(n, "comment"),
-                        strength));
+                        strength,
+                        bias));
             }
         }
         return causalLinks;

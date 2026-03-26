@@ -312,6 +312,68 @@ class CausalLinkGeometryTest {
     }
 
     @Nested
+    class BiasControlPoint {
+
+        @Test
+        void shouldShiftControlPointAlongChordWithBias() {
+            // Horizontal chord: A at (0,0), B at (200,0)
+            List<CausalLinkDef> linksNoBias = List.of(new CausalLinkDef("A", "B"));
+            List<CausalLinkDef> linksWithBias = List.of(
+                    new CausalLinkDef("A", "B", CausalLinkDef.Polarity.UNKNOWN,
+                            null, Double.NaN, 30.0));
+
+            CausalLinkGeometry.ControlPoint cpAuto = CausalLinkGeometry.controlPoint(
+                    0, 0, 200, 0, "A", "B", linksNoBias);
+            CausalLinkGeometry.ControlPoint cpBias = CausalLinkGeometry.controlPoint(
+                    0, 0, 200, 0, "A", "B", linksWithBias);
+
+            // Bias=30 on a horizontal chord should shift X by 30
+            assertThat(cpBias.x()).isCloseTo(cpAuto.x() + 30,
+                    org.assertj.core.data.Offset.offset(0.01));
+            // Y (perpendicular) should be unchanged
+            assertThat(cpBias.y()).isCloseTo(cpAuto.y(),
+                    org.assertj.core.data.Offset.offset(0.01));
+        }
+
+        @Test
+        void shouldWorkWithLoopContextOverload() {
+            CanvasState state = new CanvasState();
+            state.loadFrom(new ViewDef("test", List.of(
+                    new ElementPlacement("A", ElementType.CLD_VARIABLE, 0, 0),
+                    new ElementPlacement("B", ElementType.CLD_VARIABLE, 200, 0)
+            ), List.of(), List.of()));
+
+            List<CausalLinkDef> linksNoBias = List.of(new CausalLinkDef("A", "B"));
+            List<CausalLinkDef> linksWithBias = List.of(
+                    new CausalLinkDef("A", "B", CausalLinkDef.Polarity.UNKNOWN,
+                            null, Double.NaN, 40.0));
+
+            CausalLinkGeometry.LoopContext ctx = CausalLinkGeometry.loopContext(state);
+
+            CausalLinkGeometry.ControlPoint cpAuto = CausalLinkGeometry.controlPoint(
+                    0, 0, 200, 0, "A", "B", linksNoBias, ctx);
+            CausalLinkGeometry.ControlPoint cpBias = CausalLinkGeometry.controlPoint(
+                    0, 0, 200, 0, "A", "B", linksWithBias, ctx);
+
+            assertThat(cpBias.x()).isCloseTo(cpAuto.x() + 40,
+                    org.assertj.core.data.Offset.offset(0.01));
+        }
+
+        @Test
+        void shouldDefaultToZeroBias() {
+            // Links without explicit bias should have bias=0 (no shift)
+            List<CausalLinkDef> links = List.of(new CausalLinkDef("A", "B"));
+
+            CausalLinkGeometry.ControlPoint cp = CausalLinkGeometry.controlPoint(
+                    0, 0, 200, 0, "A", "B", links);
+
+            // Midpoint X is 100 — control point X should be at 100 (no bias shift)
+            assertThat(cp.x()).isCloseTo(100,
+                    org.assertj.core.data.Offset.offset(0.01));
+        }
+    }
+
+    @Nested
     class GraphCentroidComputation {
 
         @Test

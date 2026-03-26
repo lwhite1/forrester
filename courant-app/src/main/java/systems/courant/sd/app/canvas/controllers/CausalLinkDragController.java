@@ -11,8 +11,9 @@ import java.util.List;
 /**
  * Controller for dragging the curvature handle on a selected causal link.
  * The handle appears at the midpoint (t=0.5) of the quadratic Bézier curve.
- * Dragging it adjusts the link's strength value by projecting the drag
- * position onto the same direction axis the renderer uses.
+ * Dragging it adjusts both the link's strength (perpendicular offset) and
+ * bias (parallel offset along the chord), giving the user full 2D control
+ * over the curve shape.
  */
 public final class CausalLinkDragController {
 
@@ -22,13 +23,22 @@ public final class CausalLinkDragController {
     /** Visual radius of the drawn handle. */
     public static final double HANDLE_RADIUS = 5;
 
+    /**
+     * Result of a drag operation: perpendicular strength and parallel bias.
+     */
+    public record DragResult(double strength, double bias) {
+    }
+
     private boolean active;
     private String fromName;
     private String toName;
 
-    // Direction unit vector and chord midpoint, captured at drag start
+    // Direction unit vector (perpendicular) and chord midpoint, captured at drag start
     private double dirX;
     private double dirY;
+    // Chord unit vector (parallel), captured at drag start
+    private double chordUnitX;
+    private double chordUnitY;
     private double midX;
     private double midY;
 
@@ -85,9 +95,8 @@ public final class CausalLinkDragController {
 
     /**
      * Begins a handle drag for the given causal link.
-     * Derives the projection axis from the auto-computed control point
-     * (the same algorithm the renderer uses), so the drag direction
-     * matches what the user sees on screen.
+     * Derives the perpendicular projection axis from the auto-computed control
+     * point, and the parallel axis from the chord direction.
      */
     public void start(ConnectionId connection, CanvasState state,
                       List<CausalLinkDef> allLinks,
@@ -104,10 +113,22 @@ public final class CausalLinkDragController {
         this.midX = (fromX + toX) / 2;
         this.midY = (fromY + toY) / 2;
 
+        // Chord unit vector (raw direction from source to target)
+        double cdx = toX - fromX;
+        double cdy = toY - fromY;
+        double chordLen = Math.sqrt(cdx * cdx + cdy * cdy);
+        if (chordLen >= 1) {
+            this.chordUnitX = cdx / chordLen;
+            this.chordUnitY = cdy / chordLen;
+        } else {
+            this.chordUnitX = 1;
+            this.chordUnitY = 0;
+        }
+
         // Compute the auto control point using the same algorithm as the renderer,
-        // temporarily ignoring any existing strength override so we get the
+        // temporarily ignoring any existing user overrides so we get the
         // natural direction vector.
-        List<CausalLinkDef> autoLinks = stripStrength(fromName, toName, allLinks);
+        List<CausalLinkDef> autoLinks = stripUserOverrides(fromName, toName, allLinks);
         CausalLinkGeometry.ControlPoint autoCP = CausalLinkGeometry.controlPoint(
                 fromX, fromY, toX, toY, fromName, toName, autoLinks, loopCtx);
 
@@ -117,15 +138,12 @@ public final class CausalLinkDragController {
 
         if (aDist < 0.001) {
             // Degenerate — fall back to simple perpendicular
-            double dx = toX - fromX;
-            double dy = toY - fromY;
-            double dist = Math.sqrt(dx * dx + dy * dy);
-            if (dist < 1) {
+            if (chordLen < 1) {
                 this.dirX = 0;
                 this.dirY = -1;
             } else {
-                this.dirX = -dy / dist;
-                this.dirY = dx / dist;
+                this.dirX = -cdy / chordLen;
+                this.dirY = cdx / chordLen;
             }
         } else {
             this.dirX = ax / aDist;
@@ -134,16 +152,18 @@ public final class CausalLinkDragController {
     }
 
     /**
-     * Updates the strength based on the current drag position.
-     * Projects the drag point onto the direction axis derived at start.
-     * Negative values reverse the curve direction.
+     * Updates strength and bias based on the current drag position.
+     * Decomposes the drag displacement into perpendicular (strength) and
+     * parallel (bias) components.
      *
-     * @return the computed strength value
+     * @return the computed strength and bias values
      */
-    public double drag(double worldX, double worldY) {
+    public DragResult drag(double worldX, double worldY) {
         double dx = worldX - midX;
         double dy = worldY - midY;
-        return dx * dirX + dy * dirY;
+        double strength = dx * dirX + dy * dirY;
+        double bias = dx * chordUnitX + dy * chordUnitY;
+        return new DragResult(strength, bias);
     }
 
     /**
@@ -168,15 +188,16 @@ public final class CausalLinkDragController {
     }
 
     /**
-     * Returns a copy of the link list with the strength stripped from the
-     * specific link, so we can compute the auto control point direction.
+     * Returns a copy of the link list with user overrides (strength and bias)
+     * stripped from the specific link, so we can compute the auto control
+     * point direction.
      */
-    private static List<CausalLinkDef> stripStrength(String from, String to,
-                                                      List<CausalLinkDef> allLinks) {
+    private static List<CausalLinkDef> stripUserOverrides(String from, String to,
+                                                            List<CausalLinkDef> allLinks) {
         return allLinks.stream()
                 .map(link -> {
                     if (link.from().equals(from) && link.to().equals(to)
-                            && link.hasStrength()) {
+                            && (link.hasStrength() || link.hasBias())) {
                         return new CausalLinkDef(link.from(), link.to(),
                                 link.polarity(), link.comment());
                     }
