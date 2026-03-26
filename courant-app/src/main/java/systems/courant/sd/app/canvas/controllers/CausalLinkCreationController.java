@@ -9,7 +9,7 @@ import systems.courant.sd.app.canvas.ModelEditor;
  * Two-click state machine for causal link creation.
  * First click sets the source variable, second click sets the target and creates the link.
  */
-public class CausalLinkCreationController {
+public class CausalLinkCreationController implements CreationController {
 
     /**
      * Immutable snapshot of the causal link creation state, used by the renderer for rubber-band drawing.

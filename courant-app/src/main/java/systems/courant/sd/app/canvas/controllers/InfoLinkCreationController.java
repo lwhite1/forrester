@@ -18,7 +18,7 @@ import systems.courant.sd.app.canvas.ModelEditor;
  *   <li>Output port → Element: creates an output binding</li>
  * </ul>
  */
-public class InfoLinkCreationController {
+public class InfoLinkCreationController implements CreationController {
 
     /**
      * Immutable snapshot of the info link creation state, used by the renderer.

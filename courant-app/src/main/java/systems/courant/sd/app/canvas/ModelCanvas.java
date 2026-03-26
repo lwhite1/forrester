@@ -109,10 +109,21 @@ public class ModelCanvas extends Canvas {
                 this::fireStatusChanged);
         this.undoFacade = new CanvasUndoFacade(this);
         this.elements = new CanvasElementController(this);
+        var connectionHandler = new ConnectionToolHandler(java.util.List.of(
+                new ConnectionToolHandler.Registration(
+                        CanvasToolBar.Tool.PLACE_FLOW, flowCreation,
+                        (c, coords) -> c.elements().handleFlowClick(coords[0], coords[1])),
+                new ConnectionToolHandler.Registration(
+                        CanvasToolBar.Tool.PLACE_CAUSAL_LINK, causalLinkCreation,
+                        (c, coords) -> c.elements().handleCausalLinkClick(coords[0], coords[1])),
+                new ConnectionToolHandler.Registration(
+                        CanvasToolBar.Tool.PLACE_INFO_LINK, infoLinkCreation,
+                        (c, coords) -> c.elements().handleInfoLinkClick(coords[0], coords[1]))
+        ));
         this.inputDispatcher = new InputDispatcher(
                 dragController, marqueeController, resizeController,
-                reattachController, flowCreation, causalLinkCreation,
-                infoLinkCreation, rerouteController, inlineEdit);
+                reattachController, rerouteController, inlineEdit,
+                connectionHandler);
 
         setFocusTraversable(true);
 
@@ -360,6 +371,10 @@ public class ModelCanvas extends Canvas {
 
     public CanvasState canvasState() {
         return canvasState;
+    }
+
+    InfoLinkCreationController getInfoLinkCreation() {
+        return infoLinkCreation;
     }
 
     public Viewport viewport() {

@@ -9,7 +9,7 @@ import systems.courant.sd.app.canvas.ModelEditor;
  * Two-click state machine for flow creation.
  * First click sets the source (stock or cloud), second click sets the sink and creates the flow.
  */
-public class FlowCreationController {
+public class FlowCreationController implements CreationController {
 
     /**
      * Immutable snapshot of the flow creation state, used by the renderer for rubber-band drawing.
