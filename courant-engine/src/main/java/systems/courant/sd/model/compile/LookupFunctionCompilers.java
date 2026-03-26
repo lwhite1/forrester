@@ -20,7 +20,7 @@ final class LookupFunctionCompilers {
         r.register("LOOKUP_AREA", LookupFunctionCompilers::compileLookupArea);
     }
 
-    static DoubleSupplier compileLookup(String name, List<Expr> args, ExprCompiler c) {
+    private static DoubleSupplier compileLookup(String name, List<Expr> args, ExprCompiler c) {
         c.requireArgs("LOOKUP", args, 2);
         if (!(args.get(0) instanceof Expr.Ref ref)) {
             throw new CompilationException(
