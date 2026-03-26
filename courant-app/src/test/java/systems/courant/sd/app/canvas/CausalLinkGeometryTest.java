@@ -111,7 +111,7 @@ class CausalLinkGeometryTest {
 
         @Test
         void shouldUseLargerBulgeForSameLoopEdge() {
-            // A → B → A (same loop), k=0.6
+            // A → B → A (same loop), k=0.45
             List<CausalLinkDef> links = List.of(
                     new CausalLinkDef("A", "B"),
                     new CausalLinkDef("B", "A"));
@@ -129,7 +129,7 @@ class CausalLinkGeometryTest {
             CausalLinkGeometry.ControlPoint cpOld = CausalLinkGeometry.controlPoint(
                     0, 0, 200, 0, "A", "B", links, 100, 0);
 
-            // Same-loop curve (k=0.6) should have larger offset than default (k=0.35)
+            // Same-loop curve (k=0.45) should have larger offset than default (k=0.35)
             double loopOffset = Math.abs(cpLoop.y());
             double oldOffset = Math.abs(cpOld.y());
             assertThat(loopOffset).isGreaterThan(oldOffset);
@@ -162,7 +162,7 @@ class CausalLinkGeometryTest {
         @Test
         void shouldUseSameLoopBulgeWhenAllInOneSCC() {
             // A→B→A and B→C→B merge into one SCC {A,B,C}
-            // All intra-SCC edges get k=0.6
+            // All intra-SCC edges get k=0.45
             List<CausalLinkDef> links = List.of(
                     new CausalLinkDef("A", "B"),
                     new CausalLinkDef("B", "A"),
