@@ -1,7 +1,7 @@
 package systems.courant.sd.io.xmile;
 
+import systems.courant.sd.io.AbstractModelImporter;
 import systems.courant.sd.io.ImportResult;
-import systems.courant.sd.io.ModelImporter;
 import systems.courant.sd.model.def.VariableDef;
 import systems.courant.sd.model.def.FlowDef;
 import systems.courant.sd.model.def.LookupTableDef;
@@ -28,11 +28,6 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.nio.charset.Charset;
-import java.nio.charset.CharacterCodingException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -60,38 +55,14 @@ import java.util.regex.Pattern;
  * ModelDefinition def = result.definition();
  * }</pre>
  */
-public class XmileImporter implements ModelImporter {
+public class XmileImporter extends AbstractModelImporter {
 
     private static final Logger log = LoggerFactory.getLogger(XmileImporter.class);
 
-    private static final Pattern NUMERIC_PATTERN = Pattern.compile(
-            "^[+-]?(\\d+\\.?\\d*|\\.\\d+)([eE][+-]?\\d+)?$");
-    private static final long MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+    // NUMERIC_PATTERN and MAX_FILE_SIZE inherited from AbstractModelImporter
     private static final Set<String> UNSUPPORTED_ELEMENTS = Set.of(
             XmileConstants.GROUP, XmileConstants.MACRO,
             XmileConstants.EVENT_POSTER);
-
-    @Override
-    public ImportResult importModel(Path path) throws IOException {
-        long size = Files.size(path);
-        if (size > MAX_FILE_SIZE) {
-            throw new IOException("File exceeds maximum allowed size of "
-                    + (MAX_FILE_SIZE / (1024 * 1024)) + " MB: " + path);
-        }
-        String content;
-        try {
-            content = Files.readString(path, StandardCharsets.UTF_8);
-        } catch (CharacterCodingException e) {
-            content = Files.readString(path, Charset.forName("windows-1252"));
-        }
-        Path fileName = path.getFileName();
-        String modelName = fileName != null ? fileName.toString() : path.toString();
-        int dotPos = modelName.lastIndexOf('.');
-        if (dotPos > 0) {
-            modelName = modelName.substring(0, dotPos);
-        }
-        return importModel(content, modelName);
-    }
 
     @Override
     public ImportResult importModel(String content, String modelName) {
@@ -656,9 +627,7 @@ public class XmileImporter implements ModelImporter {
         return defaultValue;
     }
 
-    private static boolean isNumericLiteral(String expr) {
-        return expr != null && NUMERIC_PATTERN.matcher(expr.strip()).matches();
-    }
+
 
     static Optional<double[]> parseCommaSeparated(String text) {
         if (text == null || text.isBlank()) {

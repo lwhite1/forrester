@@ -2,6 +2,7 @@ package systems.courant.sd.io.vensim;
 
 import systems.courant.sd.io.ExportUtils;
 import systems.courant.sd.io.FormatUtils;
+import systems.courant.sd.io.ModelExporter;
 import systems.courant.sd.model.def.VariableDef;
 import systems.courant.sd.model.def.CausalLinkDef;
 import systems.courant.sd.model.def.CldVariableDef;
@@ -48,7 +49,7 @@ import java.util.regex.Pattern;
  * VensimExporter.toFile(modelDefinition, Path.of("model.mdl"));
  * }</pre>
  */
-public final class VensimExporter {
+public final class VensimExporter implements ModelExporter {
 
     private static final Logger logger = LoggerFactory.getLogger(VensimExporter.class);
 
@@ -79,7 +80,17 @@ public final class VensimExporter {
     private static final Pattern LOOKUP_AREA_EXPORT_PATTERN = Pattern.compile(
             "(?i)\\bLOOKUP_AREA\\s*\\(");
 
-    private VensimExporter() {
+    public VensimExporter() {
+    }
+
+    @Override
+    public String export(ModelDefinition definition) {
+        return toVensim(definition);
+    }
+
+    @Override
+    public void exportToFile(ModelDefinition definition, Path path) throws IOException {
+        toFile(definition, path);
     }
 
     /**
@@ -93,7 +104,7 @@ public final class VensimExporter {
         sb.append("{UTF-8}\n");
 
         // Build name map for expression denormalization (normalized → display name)
-        Map<String, String> nameMap = buildNameMap(def);
+        Map<String, String> nameMap = ExportUtils.buildNameMap(def);
 
         // Collect lookup names referenced by variables (embedded as WITH LOOKUP)
         Set<String> embeddedLookupNames = ExportUtils.collectEmbeddedLookupNames(def);
@@ -798,46 +809,6 @@ public final class VensimExporter {
             }
         }
         return result.toString();
-    }
-
-    /**
-     * Builds a mapping from normalized (equation-form) names to display names
-     * for all elements in the model. This allows expression denormalization to
-     * preserve the original underscore/space distinction.
-     */
-    private static Map<String, String> buildNameMap(ModelDefinition def) {
-        Map<String, String> map = new HashMap<>();
-        for (StockDef s : def.stocks()) {
-            putDisplayName(map, s.name());
-        }
-        for (FlowDef f : def.flows()) {
-            putDisplayName(map, f.name());
-        }
-        for (VariableDef v : def.variables()) {
-            putDisplayName(map, v.name());
-        }
-        for (LookupTableDef l : def.lookupTables()) {
-            putDisplayName(map, l.name());
-        }
-        for (CldVariableDef c : def.cldVariables()) {
-            putDisplayName(map, c.name());
-        }
-        for (SubscriptDef s : def.subscripts()) {
-            putDisplayName(map, s.name());
-            for (String label : s.labels()) {
-                putDisplayName(map, label);
-            }
-        }
-        return map;
-    }
-
-    private static void putDisplayName(Map<String, String> map, String displayName) {
-        if (displayName == null || displayName.isBlank()) {
-            return;
-        }
-        // Convert display name to equation-form (spaces → underscores)
-        String normalized = displayName.strip().replace(' ', '_');
-        map.put(normalized, displayName);
     }
 
     /**

@@ -1,10 +1,16 @@
 package systems.courant.sd.io;
 
+import systems.courant.sd.model.def.CldVariableDef;
+import systems.courant.sd.model.def.FlowDef;
 import systems.courant.sd.model.def.LookupTableDef;
 import systems.courant.sd.model.def.ModelDefinition;
+import systems.courant.sd.model.def.StockDef;
+import systems.courant.sd.model.def.SubscriptDef;
 import systems.courant.sd.model.def.VariableDef;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -92,5 +98,49 @@ public final class ExportUtils {
             }
         }
         return Optional.empty();
+    }
+
+    /**
+     * Builds a mapping from normalized (equation-form) names to display names
+     * for all elements in the model. This allows expression denormalization to
+     * preserve the original underscore/space distinction. Useful for any
+     * exporter that needs to translate internal names back to display format.
+     */
+    public static Map<String, String> buildNameMap(ModelDefinition def) {
+        Map<String, String> map = new HashMap<>();
+        for (StockDef s : def.stocks()) {
+            putDisplayName(map, s.name());
+        }
+        for (FlowDef f : def.flows()) {
+            putDisplayName(map, f.name());
+        }
+        for (VariableDef v : def.variables()) {
+            putDisplayName(map, v.name());
+        }
+        for (LookupTableDef l : def.lookupTables()) {
+            putDisplayName(map, l.name());
+        }
+        for (CldVariableDef c : def.cldVariables()) {
+            putDisplayName(map, c.name());
+        }
+        for (SubscriptDef s : def.subscripts()) {
+            putDisplayName(map, s.name());
+            for (String label : s.labels()) {
+                putDisplayName(map, label);
+            }
+        }
+        return map;
+    }
+
+    /**
+     * Adds a display name → normalized name mapping. The normalized form
+     * replaces spaces with underscores (equation-form).
+     */
+    public static void putDisplayName(Map<String, String> map, String displayName) {
+        if (displayName == null || displayName.isBlank()) {
+            return;
+        }
+        String normalized = displayName.strip().replace(' ', '_');
+        map.put(normalized, displayName);
     }
 }

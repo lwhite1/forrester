@@ -1,8 +1,8 @@
 package systems.courant.sd.io.vensim;
 
+import systems.courant.sd.io.AbstractModelImporter;
 import systems.courant.sd.io.FormatUtils;
 import systems.courant.sd.io.ImportResult;
-import systems.courant.sd.io.ModelImporter;
 import systems.courant.sd.io.ReferenceDataCsvReader;
 import systems.courant.sd.model.def.ReferenceDataset;
 import systems.courant.sd.model.def.VariableDef;
@@ -17,9 +17,6 @@ import systems.courant.sd.model.def.StockDef;
 import systems.courant.sd.model.def.ViewDef;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.charset.CharacterCodingException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -50,18 +47,16 @@ import java.util.regex.Pattern;
  * ModelDefinition def = result.definition();
  * }</pre>
  */
-public class VensimImporter implements ModelImporter {
+public class VensimImporter extends AbstractModelImporter {
 
     private static final Pattern INTEG_PATTERN = Pattern.compile(
             "(?i)^INTEG\\s*\\(");
-    private static final Pattern NUMERIC_PATTERN = Pattern.compile(
-            "^[+-]?(\\d+\\.?\\d*|\\.\\d+)([eE][+-]?\\d+)?$");
     private static final Set<String> SYSTEM_VAR_KEYS = Set.of(
             "INITIAL TIME", "FINAL TIME", "TIME STEP", "SAVEPER");
     private static final Pattern SUBSCRIPT_NAME_PATTERN = Pattern.compile(
             "^(.+?)\\[(.+?)\\]$");
     private static final Set<String> CONTROL_GROUPS = Set.of(".Control");
-    private static final long MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+    // MAX_FILE_SIZE inherited from AbstractModelImporter
 
     @Override
     public ImportResult importModel(Path path) throws IOException {
@@ -70,21 +65,11 @@ public class VensimImporter implements ModelImporter {
             throw new IOException("File exceeds maximum allowed size of "
                     + (MAX_FILE_SIZE / (1024 * 1024)) + " MB: " + path);
         }
-        String content;
-        try {
-            content = Files.readString(path, StandardCharsets.UTF_8);
-        } catch (CharacterCodingException e) {
-            content = Files.readString(path, Charset.forName("windows-1252"));
-        }
+        String content = readFileContent(path);
         if (content.indexOf('\0') >= 0) {
             throw new IOException("File appears to be binary, not a valid Vensim .mdl file: " + path);
         }
-        Path fileName = path.getFileName();
-        String modelName = fileName != null ? fileName.toString() : path.toString();
-        int dotPos = modelName.lastIndexOf('.');
-        if (dotPos > 0) {
-            modelName = modelName.substring(0, dotPos);
-        }
+        String modelName = extractModelName(path);
         return importModel(content, modelName, path.getParent());
     }
 
@@ -1067,10 +1052,6 @@ public class VensimImporter implements ModelImporter {
                         lookupNames, subscriptDimensions);
         warnings.addAll(tr.warnings());
         return InitialValueResult.ofExpression(tr.expression());
-    }
-
-    private static boolean isNumericLiteral(String expr) {
-        return expr != null && NUMERIC_PATTERN.matcher(expr.strip()).matches();
     }
 
     private static boolean isSystemVar(String name) {

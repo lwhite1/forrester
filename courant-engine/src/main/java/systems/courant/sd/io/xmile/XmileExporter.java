@@ -2,6 +2,7 @@ package systems.courant.sd.io.xmile;
 
 import systems.courant.sd.io.ExportUtils;
 import systems.courant.sd.io.FormatUtils;
+import systems.courant.sd.io.ModelExporter;
 import systems.courant.sd.model.def.VariableDef;
 import systems.courant.sd.model.def.FlowDef;
 import systems.courant.sd.model.def.LookupTableDef;
@@ -48,11 +49,21 @@ import java.util.StringJoiner;
  * XmileExporter.toFile(modelDefinition, Path.of("model.xmile"));
  * }</pre>
  */
-public final class XmileExporter {
+public final class XmileExporter implements ModelExporter {
 
     private static final int MAX_MODULE_DEPTH = 50;
 
-    private XmileExporter() {
+    public XmileExporter() {
+    }
+
+    @Override
+    public String export(ModelDefinition definition) {
+        return toXmile(definition);
+    }
+
+    @Override
+    public void exportToFile(ModelDefinition definition, Path path) throws IOException {
+        toFile(definition, path);
     }
 
     /**
