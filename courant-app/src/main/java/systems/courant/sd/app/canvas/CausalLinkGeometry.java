@@ -453,7 +453,7 @@ public final class CausalLinkGeometry {
         double perpY = cdx / chordLen;
 
         // Loop-aware bulge factor (same-loop edges curve more)
-        double k = loopCtx != null ? loopCtx.bulgeFactorFor(fromName, toName) : 0.35;
+        double k = loopCtx.bulgeFactorFor(fromName, toName);
         double bulge = k * chordLen;
         bulge = Math.min(bulge, 120);
 
