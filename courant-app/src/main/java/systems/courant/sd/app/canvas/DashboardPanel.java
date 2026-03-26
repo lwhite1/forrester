@@ -12,7 +12,6 @@ import systems.courant.sd.sweep.SweepResult;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
-import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
@@ -43,6 +42,10 @@ import systems.courant.sd.app.canvas.dialogs.CalibrateDialog;
  * Dashboard panel that displays results from simulation, parameter sweep,
  * Monte Carlo, and optimization runs. Results are shown in separate tabs,
  * created on demand.
+ *
+ * <p>Tab lifecycle is managed by {@link ResultTabManager}, so adding a new
+ * result type requires only a new {@code showXxxResult()} method — no
+ * additional fields or close-handler branches.</p>
  */
 public class DashboardPanel extends VBox {
 
@@ -59,15 +62,7 @@ public class DashboardPanel extends VBox {
     private final TabPane resultTabs;
     private final StackPane placeholder;
     private final HBox staleBanner;
-    private Tab simulationTab;
-    private Tab sweepTab;
-    private Tab monteCarloTab;
-    private Tab optimizationTab;
-    private Tab calibrationTab;
-    private Tab multiSweepTab;
-    private Tab sensitivityTab;
-    private Tab dominanceTab;
-    private Tab phasePlotTab;
+    private final ResultTabManager tabManager;
     static final double STALE_DOT_RADIUS = 4.0;
     static final Color STALE_DOT_COLOR = Color.web("#F59E0B");
 
@@ -124,6 +119,8 @@ public class DashboardPanel extends VBox {
         resultTabs.setTabClosingPolicy(TabPane.TabClosingPolicy.SELECTED_TAB);
         resultTabs.setVisible(false);
         resultTabs.setManaged(false);
+
+        tabManager = new ResultTabManager(resultTabs, this::hideTabs);
 
         VBox.setVgrow(placeholder, javafx.scene.layout.Priority.ALWAYS);
         VBox.setVgrow(resultTabs, javafx.scene.layout.Priority.ALWAYS);
@@ -214,15 +211,16 @@ public class DashboardPanel extends VBox {
         unbindCursors();
         simulationCursor = pane.cursorTimeStepProperty();
         bindCursors();
-        simulationTab = ensureTab(simulationTab, "Simulation", pane);
-        resultTabs.getSelectionModel().select(simulationTab);
+        showTabs();
+        Tab simTab = tabManager.ensureTab("Simulation", pane);
+        resultTabs.getSelectionModel().select(simTab);
 
         // Phase plot tab (available when 2+ variables exist)
         List<String> varNames = PhasePlotPane.getVariableNames(result);
         if (varNames.size() >= 2) {
             PhasePlotPane phasePlot = new PhasePlotPane(result, ghosts);
-            phasePlotTab = ensureTab(phasePlotTab, "Phase Plot", phasePlot);
-            resultTabs.getSelectionModel().select(simulationTab);
+            tabManager.ensureTab("Phase Plot", phasePlot);
+            resultTabs.getSelectionModel().select(simTab);
         }
 
         // Build ghost entry for next run's overlay
@@ -242,45 +240,51 @@ public class DashboardPanel extends VBox {
         clearStale();
         this.lastSweepResult = result;
         SweepResultPane pane = new SweepResultPane(result, paramName, timeStepLabel);
-        sweepTab = ensureTab(sweepTab, "Sweep", pane);
-        resultTabs.getSelectionModel().select(sweepTab);
+        showTabs();
+        Tab tab = tabManager.ensureTab("Sweep", pane);
+        resultTabs.getSelectionModel().select(tab);
     }
 
     public void showMonteCarloResult(MonteCarloResult result) {
         clearStale();
         this.lastMonteCarloResult = result;
         MonteCarloResultPane pane = new MonteCarloResultPane(result);
-        monteCarloTab = ensureTab(monteCarloTab, "Monte Carlo", pane);
-        resultTabs.getSelectionModel().select(monteCarloTab);
+        showTabs();
+        Tab tab = tabManager.ensureTab("Monte Carlo", pane);
+        resultTabs.getSelectionModel().select(tab);
     }
 
     public void showOptimizationResult(OptimizationResult result) {
         clearStale();
         this.lastOptimizationResult = result;
         OptimizationResultPane pane = new OptimizationResultPane(result, timeStepLabel);
-        optimizationTab = ensureTab(optimizationTab, "Optimization", pane);
-        resultTabs.getSelectionModel().select(optimizationTab);
+        showTabs();
+        Tab tab = tabManager.ensureTab("Optimization", pane);
+        resultTabs.getSelectionModel().select(tab);
     }
 
     public void showCalibrationResult(OptimizationResult result,
                                       List<CalibrateDialog.FitTarget> fitTargets) {
         clearStale();
         CalibrationResultPane pane = new CalibrationResultPane(result, fitTargets, timeStepLabel);
-        calibrationTab = ensureTab(calibrationTab, "Calibration", pane);
-        resultTabs.getSelectionModel().select(calibrationTab);
+        showTabs();
+        Tab tab = tabManager.ensureTab("Calibration", pane);
+        resultTabs.getSelectionModel().select(tab);
     }
 
     public void showMultiSweepResult(MultiSweepResult result) {
         clearStale();
         MultiSweepResultPane pane = new MultiSweepResultPane(result, timeStepLabel);
-        multiSweepTab = ensureTab(multiSweepTab, "Multi-Sweep", pane);
-        resultTabs.getSelectionModel().select(multiSweepTab);
+        showTabs();
+        Tab tab = tabManager.ensureTab("Multi-Sweep", pane);
+        resultTabs.getSelectionModel().select(tab);
     }
 
     public void showSensitivity(SensitivityPane pane) {
         clearStale();
-        sensitivityTab = ensureTab(sensitivityTab, "Sensitivity", pane);
-        resultTabs.getSelectionModel().select(sensitivityTab);
+        showTabs();
+        Tab tab = tabManager.ensureTab("Sensitivity", pane);
+        resultTabs.getSelectionModel().select(tab);
     }
 
     /**
@@ -299,8 +303,9 @@ public class DashboardPanel extends VBox {
         unbindCursors();
         dominanceCursor = pane.cursorTimeStepProperty();
         bindCursors();
-        dominanceTab = ensureTab(dominanceTab, "Loop Dominance", pane);
-        resultTabs.getSelectionModel().select(dominanceTab);
+        showTabs();
+        Tab tab = tabManager.ensureTab("Loop Dominance", pane);
+        resultTabs.getSelectionModel().select(tab);
     }
 
     /**
@@ -376,41 +381,6 @@ public class DashboardPanel extends VBox {
         return lastSensitivityImpacts;
     }
 
-    private Tab ensureTab(Tab existing, String title, Node content) {
-        showTabs();
-        if (existing != null && resultTabs.getTabs().contains(existing)) {
-            existing.setContent(content);
-            return existing;
-        }
-        Tab tab = new Tab(title, content);
-        tab.setOnClosed(e -> {
-            if (tab == simulationTab) {
-                simulationTab = null;
-            } else if (tab == sweepTab) {
-                sweepTab = null;
-            } else if (tab == monteCarloTab) {
-                monteCarloTab = null;
-            } else if (tab == optimizationTab) {
-                optimizationTab = null;
-            } else if (tab == calibrationTab) {
-                calibrationTab = null;
-            } else if (tab == multiSweepTab) {
-                multiSweepTab = null;
-            } else if (tab == sensitivityTab) {
-                sensitivityTab = null;
-            } else if (tab == dominanceTab) {
-                dominanceTab = null;
-            } else if (tab == phasePlotTab) {
-                phasePlotTab = null;
-            }
-            if (resultTabs.getTabs().isEmpty()) {
-                hideTabs();
-            }
-        });
-        resultTabs.getTabs().add(tab);
-        return tab;
-    }
-
     void clearRunHistory() {
         runHistory.clear();
     }
@@ -444,16 +414,7 @@ public class DashboardPanel extends VBox {
         if (dashboardTab != null) {
             dashboardTab.setGraphic(null);
         }
-        resultTabs.getTabs().clear();
-        simulationTab = null;
-        sweepTab = null;
-        monteCarloTab = null;
-        optimizationTab = null;
-        calibrationTab = null;
-        multiSweepTab = null;
-        sensitivityTab = null;
-        phasePlotTab = null;
-        dominanceTab = null;
+        tabManager.clear();
         hideTabs();
     }
 
