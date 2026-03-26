@@ -155,14 +155,18 @@ public final class CausalLinkDragController {
      * Updates strength and bias based on the current drag position.
      * Decomposes the drag displacement into perpendicular (strength) and
      * parallel (bias) components.
+     * <p>
+     * The 2× multiplier compensates for the Bézier midpoint formula:
+     * B(0.5) = (mid + CP) / 2, so the control point must be set at twice
+     * the desired offset for the handle (at t=0.5) to track the mouse.
      *
      * @return the computed strength and bias values
      */
     public DragResult drag(double worldX, double worldY) {
         double dx = worldX - midX;
         double dy = worldY - midY;
-        double strength = dx * dirX + dy * dirY;
-        double bias = dx * chordUnitX + dy * chordUnitY;
+        double strength = 2 * (dx * dirX + dy * dirY);
+        double bias = 2 * (dx * chordUnitX + dy * chordUnitY);
         return new DragResult(strength, bias);
     }
 
