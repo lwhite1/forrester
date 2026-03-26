@@ -111,7 +111,7 @@ class CausalLinkGeometryTest {
 
         @Test
         void shouldUseLargerBulgeForSameLoopEdge() {
-            // A → B → A (same loop), k=0.6
+            // A → B → A (same loop), k=0.45
             List<CausalLinkDef> links = List.of(
                     new CausalLinkDef("A", "B"),
                     new CausalLinkDef("B", "A"));
@@ -129,7 +129,7 @@ class CausalLinkGeometryTest {
             CausalLinkGeometry.ControlPoint cpOld = CausalLinkGeometry.controlPoint(
                     0, 0, 200, 0, "A", "B", links, 100, 0);
 
-            // Same-loop curve (k=0.6) should have larger offset than default (k=0.35)
+            // Same-loop curve (k=0.45) should have larger offset than default (k=0.35)
             double loopOffset = Math.abs(cpLoop.y());
             double oldOffset = Math.abs(cpOld.y());
             assertThat(loopOffset).isGreaterThan(oldOffset);
@@ -162,7 +162,7 @@ class CausalLinkGeometryTest {
         @Test
         void shouldUseSameLoopBulgeWhenAllInOneSCC() {
             // A→B→A and B→C→B merge into one SCC {A,B,C}
-            // All intra-SCC edges get k=0.6
+            // All intra-SCC edges get k=0.45
             List<CausalLinkDef> links = List.of(
                     new CausalLinkDef("A", "B"),
                     new CausalLinkDef("B", "A"),
@@ -219,6 +219,95 @@ class CausalLinkGeometryTest {
 
             assertThat(ctx.globalCentroidX()).isCloseTo(100, org.assertj.core.data.Offset.offset(1.0));
             assertThat(ctx.loopCentroids()).isNotEmpty();
+        }
+    }
+
+    @Nested
+    class LinkStability {
+
+        @Test
+        void shouldNotChangeLinksWhenUnconnectedVariableAdded() {
+            // Set up A→B link with two variables
+            List<CausalLinkDef> links = List.of(new CausalLinkDef("A", "B"));
+
+            CanvasState state1 = new CanvasState();
+            state1.loadFrom(new ViewDef("test", List.of(
+                    new ElementPlacement("A", ElementType.CLD_VARIABLE, 0, 0),
+                    new ElementPlacement("B", ElementType.CLD_VARIABLE, 200, 0)
+            ), List.of(), List.of()));
+
+            CausalLinkGeometry.LoopContext ctx1 = CausalLinkGeometry.loopContext(state1);
+            CausalLinkGeometry.ControlPoint cp1 = CausalLinkGeometry.controlPoint(
+                    0, 0, 200, 0, "A", "B", links, ctx1);
+
+            // Add an unconnected variable C near the link
+            CanvasState state2 = new CanvasState();
+            state2.loadFrom(new ViewDef("test", List.of(
+                    new ElementPlacement("A", ElementType.CLD_VARIABLE, 0, 0),
+                    new ElementPlacement("B", ElementType.CLD_VARIABLE, 200, 0),
+                    new ElementPlacement("C", ElementType.CLD_VARIABLE, 100, 50)
+            ), List.of(), List.of()));
+
+            CausalLinkGeometry.LoopContext ctx2 = CausalLinkGeometry.loopContext(state2);
+            CausalLinkGeometry.ControlPoint cp2 = CausalLinkGeometry.controlPoint(
+                    0, 0, 200, 0, "A", "B", links, ctx2);
+
+            // Link position must not change
+            assertThat(cp2.x()).isEqualTo(cp1.x());
+            assertThat(cp2.y()).isEqualTo(cp1.y());
+        }
+
+        @Test
+        void shouldNotChangeLinksWhenDistantVariableMoves() {
+            // A→B link; variable C exists but is not connected to A or B
+            List<CausalLinkDef> links = List.of(new CausalLinkDef("A", "B"));
+
+            CanvasState state1 = new CanvasState();
+            state1.loadFrom(new ViewDef("test", List.of(
+                    new ElementPlacement("A", ElementType.CLD_VARIABLE, 0, 0),
+                    new ElementPlacement("B", ElementType.CLD_VARIABLE, 200, 0),
+                    new ElementPlacement("C", ElementType.CLD_VARIABLE, 300, 300)
+            ), List.of(), List.of()));
+
+            CausalLinkGeometry.LoopContext ctx1 = CausalLinkGeometry.loopContext(state1);
+            CausalLinkGeometry.ControlPoint cp1 = CausalLinkGeometry.controlPoint(
+                    0, 0, 200, 0, "A", "B", links, ctx1);
+
+            // Move C to a very different position
+            CanvasState state2 = new CanvasState();
+            state2.loadFrom(new ViewDef("test", List.of(
+                    new ElementPlacement("A", ElementType.CLD_VARIABLE, 0, 0),
+                    new ElementPlacement("B", ElementType.CLD_VARIABLE, 200, 0),
+                    new ElementPlacement("C", ElementType.CLD_VARIABLE, -500, -500)
+            ), List.of(), List.of()));
+
+            CausalLinkGeometry.LoopContext ctx2 = CausalLinkGeometry.loopContext(state2);
+            CausalLinkGeometry.ControlPoint cp2 = CausalLinkGeometry.controlPoint(
+                    0, 0, 200, 0, "A", "B", links, ctx2);
+
+            // Link position must not change — C is not an endpoint
+            assertThat(cp2.x()).isEqualTo(cp1.x());
+            assertThat(cp2.y()).isEqualTo(cp1.y());
+        }
+
+        @Test
+        void shouldPreserveUserStrengthOverride() {
+            // Link with user-defined strength should be completely stable
+            List<CausalLinkDef> links = List.of(new CausalLinkDef("A", "B").withStrength(60));
+
+            CausalLinkGeometry.LoopContext ctx1 = new CausalLinkGeometry.LoopContext(
+                    null, Map.of(), 100, 100);
+            CausalLinkGeometry.ControlPoint cp1 = CausalLinkGeometry.controlPoint(
+                    0, 0, 200, 0, "A", "B", links, ctx1);
+
+            // Different centroid — should not matter
+            CausalLinkGeometry.LoopContext ctx2 = new CausalLinkGeometry.LoopContext(
+                    null, Map.of(), 500, -300);
+            CausalLinkGeometry.ControlPoint cp2 = CausalLinkGeometry.controlPoint(
+                    0, 0, 200, 0, "A", "B", links, ctx2);
+
+            assertThat(cp2.x()).isEqualTo(cp1.x());
+            assertThat(cp2.y()).isEqualTo(cp1.y());
         }
     }
 
