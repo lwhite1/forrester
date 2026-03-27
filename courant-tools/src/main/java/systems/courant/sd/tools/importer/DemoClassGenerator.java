@@ -23,9 +23,6 @@ import static systems.courant.sd.tools.importer.JavaSourceEscaper.escapeString;
  */
 public class DemoClassGenerator {
 
-    private static final String INDENT = "        ";
-    private static final String INDENT2 = "                ";
-
     private final int copyrightYear;
 
     /**
@@ -59,322 +56,328 @@ public class DemoClassGenerator {
     public String generate(ModelDefinition definition, ModelMetadata metadata,
                            String className, String packageName, String sourceFileName,
                            List<String> importWarnings, List<String> validationErrors) {
-        StringBuilder sb = new StringBuilder(4096);
+        JavaCodeBuilder cb = new JavaCodeBuilder();
 
-        emitLicenseHeader(sb, metadata);
-        emitPackage(sb, packageName);
-        emitImports(sb, definition);
-        emitClassJavadoc(sb, sourceFileName, metadata, importWarnings, validationErrors);
-        emitClassOpen(sb, className);
-        emitMainMethod(sb, className);
-        emitRunMethod(sb, definition, metadata);
-        emitClassClose(sb);
+        emitLicenseHeader(cb, metadata);
+        emitPackage(cb, packageName);
+        emitImports(cb, definition);
+        emitClassJavadoc(cb, sourceFileName, metadata, importWarnings, validationErrors);
+        cb.line("public class " + className + " {");
+        cb.blankLine();
+        cb.indent();
+        emitMainMethod(cb, className);
+        emitRunMethod(cb, definition, metadata);
+        cb.dedent();
+        cb.line("}");
 
-        return sb.toString();
+        return cb.toString();
     }
 
-    private void emitLicenseHeader(StringBuilder sb, ModelMetadata metadata) {
+    private void emitLicenseHeader(JavaCodeBuilder cb, ModelMetadata metadata) {
         String license = metadata.license();
         if (license != null && license.contains("-NC")) {
-            sb.append("/*\n");
-            sb.append(" * Copyright (c) original author(s). See model metadata for attribution.\n");
-            sb.append(" * Licensed under CC-BY-NC-SA-4.0. See THIRD-PARTY-LICENSES for details.\n");
-            sb.append(" */\n");
+            cb.raw("/*\n");
+            cb.raw(" * Copyright (c) original author(s). See model metadata for attribution.\n");
+            cb.raw(" * Licensed under CC-BY-NC-SA-4.0. See THIRD-PARTY-LICENSES for details.\n");
+            cb.raw(" */\n");
         } else {
-            sb.append("/*\n");
-            sb.append(" * Copyright (c) ").append(copyrightYear).append(" Courant Systems\n");
-            sb.append(" * Licensed under CC-BY-SA-4.0. See LICENSE in this module for details.\n");
-            sb.append(" */\n");
+            cb.raw("/*\n");
+            cb.raw(" * Copyright (c) " + copyrightYear + " Courant Systems\n");
+            cb.raw(" * Licensed under CC-BY-SA-4.0. See LICENSE in this module for details.\n");
+            cb.raw(" */\n");
         }
     }
 
-    private void emitPackage(StringBuilder sb, String packageName) {
-        sb.append("package ").append(packageName).append(";\n\n");
+    private void emitPackage(JavaCodeBuilder cb, String packageName) {
+        cb.line("package " + packageName + ";");
+        cb.blankLine();
     }
 
-    private void emitImports(StringBuilder sb, ModelDefinition definition) {
-        sb.append("import systems.courant.sd.Simulation;\n");
-        sb.append("import systems.courant.sd.model.ModelMetadata;\n");
-        sb.append("import systems.courant.sd.model.compile.ModelCompiler;\n");
-        sb.append("import systems.courant.sd.model.def.ModelDefinitionBuilder;\n");
+    private void emitImports(JavaCodeBuilder cb, ModelDefinition definition) {
+        cb.line("import systems.courant.sd.Simulation;");
+        cb.line("import systems.courant.sd.model.ModelMetadata;");
+        cb.line("import systems.courant.sd.model.compile.ModelCompiler;");
+        cb.line("import systems.courant.sd.model.def.ModelDefinitionBuilder;");
 
         if (!definition.variables().isEmpty()) {
-            sb.append("import systems.courant.sd.model.def.VariableDef;\n");
+            cb.line("import systems.courant.sd.model.def.VariableDef;");
         }
         if (!definition.flows().isEmpty()) {
-            sb.append("import systems.courant.sd.model.def.FlowDef;\n");
+            cb.line("import systems.courant.sd.model.def.FlowDef;");
         }
         if (!definition.lookupTables().isEmpty()) {
-            sb.append("import systems.courant.sd.model.def.LookupTableDef;\n");
+            cb.line("import systems.courant.sd.model.def.LookupTableDef;");
         }
         if (!definition.stocks().isEmpty()) {
-            sb.append("import systems.courant.sd.model.def.StockDef;\n");
+            cb.line("import systems.courant.sd.model.def.StockDef;");
         }
         boolean needsList = needsListImport(definition);
         boolean needsSimSettings = needsFullSimulationConstructor(definition.defaultSimulation());
         if (!definition.modules().isEmpty()) {
-            sb.append("import systems.courant.sd.model.def.ModelDefinition;\n");
-            sb.append("import systems.courant.sd.model.def.ModuleInstanceDef;\n");
-            sb.append("import systems.courant.sd.model.def.SimulationSettings;\n");
-            sb.append("\n");
-            sb.append("import java.util.List;\n");
-            sb.append("import java.util.Map;\n");
+            cb.line("import systems.courant.sd.model.def.ModelDefinition;");
+            cb.line("import systems.courant.sd.model.def.ModuleInstanceDef;");
+            cb.line("import systems.courant.sd.model.def.SimulationSettings;");
+            cb.blankLine();
+            cb.line("import java.util.List;");
+            cb.line("import java.util.Map;");
         } else {
             if (needsSimSettings) {
-                sb.append("import systems.courant.sd.model.def.SimulationSettings;\n");
+                cb.line("import systems.courant.sd.model.def.SimulationSettings;");
             }
             if (needsList) {
-                sb.append("\n");
-                sb.append("import java.util.List;\n");
+                cb.blankLine();
+                cb.line("import java.util.List;");
             }
         }
 
-        sb.append('\n');
+        cb.blankLine();
     }
 
-    private void emitClassJavadoc(StringBuilder sb, String sourceFileName,
+    private void emitClassJavadoc(JavaCodeBuilder cb, String sourceFileName,
                                   ModelMetadata metadata,
                                   List<String> importWarnings,
                                   List<String> validationErrors) {
-        sb.append("/**\n");
-        sb.append(" * Imported from: ").append(escapeHtml(sourceFileName)).append('\n');
+        cb.raw("/**\n");
+        cb.raw(" * Imported from: " + escapeHtml(sourceFileName) + "\n");
         if (metadata.source() != null) {
-            sb.append(" * Source: ").append(escapeHtml(metadata.source())).append('\n');
+            cb.raw(" * Source: " + escapeHtml(metadata.source()) + "\n");
         }
         if (metadata.license() != null) {
-            sb.append(" * License: ").append(escapeHtml(metadata.license())).append('\n');
+            cb.raw(" * License: " + escapeHtml(metadata.license()) + "\n");
         }
         if (metadata.author() != null) {
-            sb.append(" * Author: ").append(escapeHtml(metadata.author())).append('\n');
+            cb.raw(" * Author: " + escapeHtml(metadata.author()) + "\n");
         }
-        sb.append(" *\n");
-        sb.append(" * <p>Auto-generated by courant-tools ImportPipeline.\n");
+        cb.raw(" *\n");
+        cb.raw(" * <p>Auto-generated by courant-tools ImportPipeline.\n");
 
         if (!importWarnings.isEmpty()) {
-            sb.append(" *\n");
-            sb.append(" * <p>Import warnings:\n");
-            sb.append(" * <ul>\n");
+            cb.raw(" *\n");
+            cb.raw(" * <p>Import warnings:\n");
+            cb.raw(" * <ul>\n");
             for (String w : importWarnings) {
-                sb.append(" *   <li>").append(escapeHtml(w)).append("</li>\n");
+                cb.raw(" *   <li>" + escapeHtml(w) + "</li>\n");
             }
-            sb.append(" * </ul>\n");
+            cb.raw(" * </ul>\n");
         }
         if (!validationErrors.isEmpty()) {
-            sb.append(" *\n");
-            sb.append(" * <p>Validation errors (model may need manual fixes):\n");
-            sb.append(" * <ul>\n");
+            cb.raw(" *\n");
+            cb.raw(" * <p>Validation errors (model may need manual fixes):\n");
+            cb.raw(" * <ul>\n");
             for (String e : validationErrors) {
-                sb.append(" *   <li>").append(escapeHtml(e)).append("</li>\n");
+                cb.raw(" *   <li>" + escapeHtml(e) + "</li>\n");
             }
-            sb.append(" * </ul>\n");
+            cb.raw(" * </ul>\n");
         }
 
-        sb.append(" */\n");
+        cb.raw(" */\n");
     }
 
-    private void emitClassOpen(StringBuilder sb, String className) {
-        sb.append("public class ").append(className).append(" {\n\n");
+    private void emitMainMethod(JavaCodeBuilder cb, String className) {
+        cb.line("public static void main(String[] args) {");
+        cb.indent();
+        cb.line("new " + className + "().run();");
+        cb.dedent();
+        cb.line("}");
+        cb.blankLine();
     }
 
-    private void emitMainMethod(StringBuilder sb, String className) {
-        sb.append("    public static void main(String[] args) {\n");
-        sb.append("        new ").append(className).append("().run();\n");
-        sb.append("    }\n\n");
-    }
-
-    private void emitRunMethod(StringBuilder sb, ModelDefinition definition,
+    private void emitRunMethod(JavaCodeBuilder cb, ModelDefinition definition,
                                ModelMetadata metadata) {
-        sb.append("    public void run() {\n");
-        sb.append(INDENT).append("var builder = new ModelDefinitionBuilder()\n");
-        sb.append(INDENT2).append(".name(").append(escapeString(definition.name())).append(")");
+        cb.line("public void run() {");
+        cb.indent();
+        String chainIndent = cb.indentAt(2);
+
+        cb.line("var builder = new ModelDefinitionBuilder()");
+        cb.raw(chainIndent + ".name(" + escapeString(definition.name()) + ")");
 
         if (definition.defaultSimulation() != null) {
-            emitDefaultSimulation(sb, definition.defaultSimulation(), INDENT2);
+            emitDefaultSimulation(cb, definition.defaultSimulation(), chainIndent);
         }
-        sb.append(";\n\n");
+        cb.raw(";\n");
+        cb.blankLine();
 
         // Stocks
         if (!definition.stocks().isEmpty()) {
-            sb.append(INDENT).append("// Stocks\n");
+            cb.line("// Stocks");
             for (StockDef stock : definition.stocks()) {
-                emitStockDef(sb, stock, INDENT, "builder");
+                emitStockDef(cb, stock, "builder");
             }
-            sb.append('\n');
+            cb.blankLine();
         }
 
         // Constants (literal-valued variables)
         List<VariableDef> literals = definition.variables().stream()
                 .filter(VariableDef::isLiteral).toList();
         if (!literals.isEmpty()) {
-            sb.append(INDENT).append("// Constants\n");
+            cb.line("// Constants");
             for (VariableDef constant : literals) {
                 if (constant.subscripts().isEmpty()) {
-                    sb.append(INDENT).append("builder.constant(")
-                            .append(escapeString(constant.name())).append(", ")
-                            .append(constant.literalValue()).append(", ")
-                            .append(escapeString(constant.unit()))
-                            .append(");\n");
+                    cb.line("builder.constant("
+                            + escapeString(constant.name()) + ", "
+                            + constant.literalValue() + ", "
+                            + escapeString(constant.unit())
+                            + ");");
                 } else {
                     // Use full VariableDef constructor to preserve subscripts
-                    emitVariableDef(sb, constant, INDENT, "builder");
+                    emitVariableDef(cb, constant, "builder");
                 }
             }
-            sb.append('\n');
+            cb.blankLine();
         }
 
         // Lookup tables
         if (!definition.lookupTables().isEmpty()) {
-            sb.append(INDENT).append("// Lookup tables\n");
+            cb.line("// Lookup tables");
             for (LookupTableDef table : definition.lookupTables()) {
-                emitLookupTableDef(sb, table, INDENT, "builder");
+                emitLookupTableDef(cb, table, "builder");
             }
-            sb.append('\n');
+            cb.blankLine();
         }
 
         // Variables (non-literal only; literals were emitted as constants above)
         List<VariableDef> formulas = definition.variables().stream()
                 .filter(a -> !a.isLiteral()).toList();
         if (!formulas.isEmpty()) {
-            sb.append(INDENT).append("// Variables\n");
+            cb.line("// Variables");
             for (VariableDef v : formulas) {
-                emitVariableDef(sb, v, INDENT, "builder");
+                emitVariableDef(cb, v, "builder");
             }
-            sb.append('\n');
+            cb.blankLine();
         }
 
         // Flows
         if (!definition.flows().isEmpty()) {
-            sb.append(INDENT).append("// Flows\n");
+            cb.line("// Flows");
             for (FlowDef flow : definition.flows()) {
-                emitFlowDef(sb, flow, INDENT, "builder");
+                emitFlowDef(cb, flow, "builder");
             }
-            sb.append('\n');
+            cb.blankLine();
         }
 
         // Modules
         if (!definition.modules().isEmpty()) {
-            sb.append(INDENT).append("// Modules\n");
+            cb.line("// Modules");
             for (ModuleInstanceDef module : definition.modules()) {
-                emitModuleInstance(sb, module);
+                emitModuleInstance(cb, module, "builder");
             }
-            sb.append('\n');
+            cb.blankLine();
         }
 
         // Compile and set metadata
-        sb.append(INDENT).append("var definition = builder.build();\n");
-        sb.append(INDENT).append("var compiled = new ModelCompiler().compile(definition);\n\n");
+        cb.line("var definition = builder.build();");
+        cb.line("var compiled = new ModelCompiler().compile(definition);");
+        cb.blankLine();
 
-        sb.append(INDENT).append("compiled.getModel().setMetadata(ModelMetadata.builder()\n");
+        cb.raw(cb.currentIndent() + "compiled.getModel().setMetadata(ModelMetadata.builder()\n");
         if (metadata.author() != null) {
-            sb.append(INDENT2).append(".author(").append(escapeString(metadata.author())).append(")\n");
+            cb.raw(chainIndent + ".author(" + escapeString(metadata.author()) + ")\n");
         }
         if (metadata.source() != null) {
-            sb.append(INDENT2).append(".source(").append(escapeString(metadata.source())).append(")\n");
+            cb.raw(chainIndent + ".source(" + escapeString(metadata.source()) + ")\n");
         }
         if (metadata.license() != null) {
-            sb.append(INDENT2).append(".license(").append(escapeString(metadata.license())).append(")\n");
+            cb.raw(chainIndent + ".license(" + escapeString(metadata.license()) + ")\n");
         }
         if (metadata.url() != null) {
-            sb.append(INDENT2).append(".url(").append(escapeString(metadata.url())).append(")\n");
+            cb.raw(chainIndent + ".url(" + escapeString(metadata.url()) + ")\n");
         }
-        sb.append(INDENT2).append(".build());\n\n");
+        cb.raw(chainIndent + ".build());\n");
+        cb.blankLine();
 
         // Create and run simulation
-        sb.append(INDENT).append("Simulation sim = compiled.createSimulation();\n");
-        sb.append(INDENT).append("sim.execute();\n");
+        cb.line("Simulation sim = compiled.createSimulation();");
+        cb.line("sim.execute();");
 
-        sb.append("    }\n");
+        cb.dedent();
+        cb.line("}");
     }
 
-    private void emitModuleInstance(StringBuilder sb, ModuleInstanceDef module) {
-        emitModuleInstance(sb, module, INDENT, "builder");
-    }
-
-    private void emitModuleInstance(StringBuilder sb, ModuleInstanceDef module,
-                                    String indent, String parentBuilderName) {
-        // Generate the inner module definition inline
+    private void emitModuleInstance(JavaCodeBuilder cb, ModuleInstanceDef module,
+                                    String parentBuilderName) {
         String varName = JavaSourceEscaper.toValidIdentifier(module.instanceName()) + "Def";
         ModelDefinition inner = module.definition();
 
-        sb.append(indent).append("{\n");
-        String blockIndent = indent + "    ";
-        String chainIndent = indent + "            ";
-        sb.append(blockIndent).append("var innerBuilder = new ModelDefinitionBuilder()\n");
-        sb.append(chainIndent).append(".name(").append(escapeString(inner.name())).append(")");
+        cb.line("{");
+        cb.indent();
+        String chainIndent = cb.indentAt(2);
+        cb.line("var innerBuilder = new ModelDefinitionBuilder()");
+        cb.raw(chainIndent + ".name(" + escapeString(inner.name()) + ")");
         if (inner.defaultSimulation() != null) {
-            emitDefaultSimulation(sb, inner.defaultSimulation(), chainIndent);
+            emitDefaultSimulation(cb, inner.defaultSimulation(), chainIndent);
         }
-        sb.append(";\n");
+        cb.raw(";\n");
 
         // Emit inner stocks, constants, lookups, auxes, flows
         for (StockDef stock : inner.stocks()) {
-            emitStockDef(sb, stock, blockIndent, "innerBuilder");
+            emitStockDef(cb, stock, "innerBuilder");
         }
         for (VariableDef constant : inner.variables().stream().filter(VariableDef::isLiteral).toList()) {
             if (constant.subscripts().isEmpty()) {
-                sb.append(blockIndent).append("innerBuilder.constant(")
-                        .append(escapeString(constant.name())).append(", ")
-                        .append(constant.literalValue()).append(", ")
-                        .append(escapeString(constant.unit()))
-                        .append(");\n");
+                cb.line("innerBuilder.constant("
+                        + escapeString(constant.name()) + ", "
+                        + constant.literalValue() + ", "
+                        + escapeString(constant.unit())
+                        + ");");
             } else {
-                emitVariableDef(sb, constant, blockIndent, "innerBuilder");
+                emitVariableDef(cb, constant, "innerBuilder");
             }
         }
         for (LookupTableDef table : inner.lookupTables()) {
-            emitLookupTableDef(sb, table, blockIndent, "innerBuilder");
+            emitLookupTableDef(cb, table, "innerBuilder");
         }
         for (VariableDef v : inner.variables().stream().filter(a -> !a.isLiteral()).toList()) {
-            emitVariableDef(sb, v, blockIndent, "innerBuilder");
+            emitVariableDef(cb, v, "innerBuilder");
         }
         for (FlowDef flow : inner.flows()) {
-            emitFlowDef(sb, flow, blockIndent, "innerBuilder");
+            emitFlowDef(cb, flow, "innerBuilder");
         }
         // Nested modules (#273)
         for (ModuleInstanceDef nestedModule : inner.modules()) {
-            emitModuleInstance(sb, nestedModule, blockIndent, "innerBuilder");
+            emitModuleInstance(cb, nestedModule, "innerBuilder");
         }
 
-        sb.append(blockIndent).append("ModelDefinition ").append(varName)
-                .append(" = innerBuilder.build();\n");
+        cb.line("ModelDefinition " + varName + " = innerBuilder.build();");
 
         // Emit bindings
-        sb.append(blockIndent).append(parentBuilderName).append(".module(new ModuleInstanceDef(\n");
-        sb.append(chainIndent).append(escapeString(module.instanceName())).append(",\n");
-        sb.append(chainIndent).append(varName).append(",\n");
-        emitMapLiteral(sb, module.inputBindings(), chainIndent);
-        sb.append(",\n");
-        emitMapLiteral(sb, module.outputBindings(), chainIndent);
-        sb.append("));\n");
-        sb.append(indent).append("}\n");
+        cb.raw(cb.currentIndent() + parentBuilderName + ".module(new ModuleInstanceDef(\n");
+        cb.raw(chainIndent + escapeString(module.instanceName()) + ",\n");
+        cb.raw(chainIndent + varName + ",\n");
+        emitMapLiteral(cb, module.inputBindings(), chainIndent);
+        cb.raw(",\n");
+        emitMapLiteral(cb, module.outputBindings(), chainIndent);
+        cb.raw("));\n");
+        cb.dedent();
+        cb.line("}");
     }
 
     private static boolean needsFullSimulationConstructor(SimulationSettings sim) {
         return sim != null && (sim.strictMode() || sim.savePer() != 1 || sim.initialTime() != 0.0);
     }
 
-    private void emitDefaultSimulation(StringBuilder sb, SimulationSettings sim, String indent) {
+    private void emitDefaultSimulation(JavaCodeBuilder cb, SimulationSettings sim,
+                                       String chainIndent) {
         if (needsFullSimulationConstructor(sim)) {
-            sb.append("\n").append(indent)
-                    .append(".defaultSimulation(new SimulationSettings(")
-                    .append(escapeString(sim.timeStep())).append(", ")
-                    .append(sim.duration()).append(", ")
-                    .append(escapeString(sim.durationUnit())).append(", ")
-                    .append(sim.dt()).append(", ")
-                    .append(sim.strictMode()).append(", ")
-                    .append(sim.savePer()).append(", ")
-                    .append(sim.initialTime())
-                    .append("))");
+            cb.raw("\n" + chainIndent
+                    + ".defaultSimulation(new SimulationSettings("
+                    + escapeString(sim.timeStep()) + ", "
+                    + sim.duration() + ", "
+                    + escapeString(sim.durationUnit()) + ", "
+                    + sim.dt() + ", "
+                    + sim.strictMode() + ", "
+                    + sim.savePer() + ", "
+                    + sim.initialTime()
+                    + "))");
         } else {
-            sb.append("\n").append(indent)
-                    .append(".defaultSimulation(")
-                    .append(escapeString(sim.timeStep())).append(", ")
-                    .append(sim.duration()).append(", ")
-                    .append(escapeString(sim.durationUnit()));
+            cb.raw("\n" + chainIndent
+                    + ".defaultSimulation("
+                    + escapeString(sim.timeStep()) + ", "
+                    + sim.duration() + ", "
+                    + escapeString(sim.durationUnit()));
             if (sim.dt() != 1.0) {
-                sb.append(", ").append(sim.dt());
+                cb.raw(", " + sim.dt());
             }
-            sb.append(")");
+            cb.raw(")");
         }
     }
 
@@ -382,26 +385,26 @@ public class DemoClassGenerator {
      * Emits a StockDef constructor call, using the canonical constructor when initialExpression
      * or subscripts are present, and the backward-compatible constructor otherwise.
      */
-    private void emitStockDef(StringBuilder sb, StockDef stock, String indent, String builderName) {
+    private void emitStockDef(JavaCodeBuilder cb, StockDef stock, String builderName) {
         if (stock.initialExpression() != null || !stock.subscripts().isEmpty()) {
             // Use canonical 7-arg constructor to preserve initialExpression and subscripts
-            sb.append(indent).append(builderName).append(".stock(new StockDef(")
-                    .append(escapeString(stock.name())).append(", ")
-                    .append(escapeString(stock.comment())).append(", ")
-                    .append(formatDoubleForSource(stock.initialValue())).append(", ")
-                    .append(escapeString(stock.initialExpression())).append(", ")
-                    .append(escapeString(stock.unit())).append(", ")
-                    .append(escapeString(stock.negativeValuePolicy())).append(", ")
-                    .append(emitStringList(stock.subscripts()))
-                    .append("));\n");
+            cb.line(builderName + ".stock(new StockDef("
+                    + escapeString(stock.name()) + ", "
+                    + escapeString(stock.comment()) + ", "
+                    + formatDoubleForSource(stock.initialValue()) + ", "
+                    + escapeString(stock.initialExpression()) + ", "
+                    + escapeString(stock.unit()) + ", "
+                    + escapeString(stock.negativeValuePolicy()) + ", "
+                    + emitStringList(stock.subscripts())
+                    + "));");
         } else {
-            sb.append(indent).append(builderName).append(".stock(new StockDef(")
-                    .append(escapeString(stock.name())).append(", ")
-                    .append(escapeString(stock.comment())).append(", ")
-                    .append(formatDoubleForSource(stock.initialValue())).append(", ")
-                    .append(escapeString(stock.unit())).append(", ")
-                    .append(escapeString(stock.negativeValuePolicy()))
-                    .append("));\n");
+            cb.line(builderName + ".stock(new StockDef("
+                    + escapeString(stock.name()) + ", "
+                    + escapeString(stock.comment()) + ", "
+                    + formatDoubleForSource(stock.initialValue()) + ", "
+                    + escapeString(stock.unit()) + ", "
+                    + escapeString(stock.negativeValuePolicy())
+                    + "));");
         }
     }
 
@@ -409,22 +412,22 @@ public class DemoClassGenerator {
      * Emits a VariableDef constructor call, using the canonical constructor when subscripts
      * are present.
      */
-    private void emitVariableDef(StringBuilder sb, VariableDef v, String indent, String builderName) {
+    private void emitVariableDef(JavaCodeBuilder cb, VariableDef v, String builderName) {
         if (!v.subscripts().isEmpty()) {
-            sb.append(indent).append(builderName).append(".variable(new VariableDef(")
-                    .append(escapeString(v.name())).append(", ")
-                    .append(escapeString(v.comment())).append(", ")
-                    .append(escapeString(v.equation())).append(", ")
-                    .append(escapeString(v.unit())).append(", ")
-                    .append(emitStringList(v.subscripts()))
-                    .append("));\n");
+            cb.line(builderName + ".variable(new VariableDef("
+                    + escapeString(v.name()) + ", "
+                    + escapeString(v.comment()) + ", "
+                    + escapeString(v.equation()) + ", "
+                    + escapeString(v.unit()) + ", "
+                    + emitStringList(v.subscripts())
+                    + "));");
         } else {
-            sb.append(indent).append(builderName).append(".variable(new VariableDef(")
-                    .append(escapeString(v.name())).append(", ")
-                    .append(escapeString(v.comment())).append(", ")
-                    .append(escapeString(v.equation())).append(", ")
-                    .append(escapeString(v.unit()))
-                    .append("));\n");
+            cb.line(builderName + ".variable(new VariableDef("
+                    + escapeString(v.name()) + ", "
+                    + escapeString(v.comment()) + ", "
+                    + escapeString(v.equation()) + ", "
+                    + escapeString(v.unit())
+                    + "));");
         }
     }
 
@@ -432,44 +435,43 @@ public class DemoClassGenerator {
      * Emits a FlowDef constructor call, using the canonical constructor when subscripts
      * are present.
      */
-    private void emitFlowDef(StringBuilder sb, FlowDef flow, String indent, String builderName) {
+    private void emitFlowDef(JavaCodeBuilder cb, FlowDef flow, String builderName) {
         if (!flow.subscripts().isEmpty()) {
-            sb.append(indent).append(builderName).append(".flow(new FlowDef(")
-                    .append(escapeString(flow.name())).append(", ")
-                    .append(escapeString(flow.comment())).append(", ")
-                    .append(escapeString(flow.equation())).append(", ")
-                    .append(escapeString(flow.timeUnit())).append(", ")
-                    .append(escapeString(flow.source())).append(", ")
-                    .append(escapeString(flow.sink())).append(", ")
-                    .append(emitStringList(flow.subscripts()))
-                    .append("));\n");
+            cb.line(builderName + ".flow(new FlowDef("
+                    + escapeString(flow.name()) + ", "
+                    + escapeString(flow.comment()) + ", "
+                    + escapeString(flow.equation()) + ", "
+                    + escapeString(flow.timeUnit()) + ", "
+                    + escapeString(flow.source()) + ", "
+                    + escapeString(flow.sink()) + ", "
+                    + emitStringList(flow.subscripts())
+                    + "));");
         } else {
-            sb.append(indent).append(builderName).append(".flow(new FlowDef(")
-                    .append(escapeString(flow.name())).append(", ")
-                    .append(escapeString(flow.comment())).append(", ")
-                    .append(escapeString(flow.equation())).append(", ")
-                    .append(escapeString(flow.timeUnit())).append(", ")
-                    .append(escapeString(flow.source())).append(", ")
-                    .append(escapeString(flow.sink()))
-                    .append("));\n");
+            cb.line(builderName + ".flow(new FlowDef("
+                    + escapeString(flow.name()) + ", "
+                    + escapeString(flow.comment()) + ", "
+                    + escapeString(flow.equation()) + ", "
+                    + escapeString(flow.timeUnit()) + ", "
+                    + escapeString(flow.source()) + ", "
+                    + escapeString(flow.sink())
+                    + "));");
         }
     }
 
     /**
      * Emits a LookupTableDef constructor call, including unit when present.
      */
-    private void emitLookupTableDef(StringBuilder sb, LookupTableDef table,
-                                     String indent, String builderName) {
-        sb.append(indent).append(builderName).append(".lookupTable(new LookupTableDef(")
-                .append(escapeString(table.name())).append(", ")
-                .append(escapeString(table.comment())).append(", ")
-                .append(doubleArrayLiteral(table.xValues())).append(", ")
-                .append(doubleArrayLiteral(table.yValues())).append(", ")
-                .append(escapeString(table.interpolation()));
+    private void emitLookupTableDef(JavaCodeBuilder cb, LookupTableDef table, String builderName) {
+        String line = builderName + ".lookupTable(new LookupTableDef("
+                + escapeString(table.name()) + ", "
+                + escapeString(table.comment()) + ", "
+                + doubleArrayLiteral(table.xValues()) + ", "
+                + doubleArrayLiteral(table.yValues()) + ", "
+                + escapeString(table.interpolation());
         if (table.unit() != null) {
-            sb.append(", ").append(escapeString(table.unit()));
+            line += ", " + escapeString(table.unit());
         }
-        sb.append("));\n");
+        cb.line(line + "));");
     }
 
     private static String formatDoubleForSource(double value) {
@@ -494,34 +496,34 @@ public class DemoClassGenerator {
         return sb.toString();
     }
 
-    private void emitMapLiteral(StringBuilder sb, Map<String, String> map, String indent) {
+    private void emitMapLiteral(JavaCodeBuilder cb, Map<String, String> map, String indent) {
         if (map.isEmpty()) {
-            sb.append(indent).append("Map.of()");
+            cb.raw(indent + "Map.of()");
         } else if (map.size() <= 10) {
-            sb.append(indent).append("Map.of(");
+            cb.raw(indent + "Map.of(");
             boolean first = true;
             for (var entry : map.entrySet()) {
                 if (!first) {
-                    sb.append(", ");
+                    cb.raw(", ");
                 }
-                sb.append(escapeString(entry.getKey())).append(", ")
-                        .append(escapeString(entry.getValue()));
+                cb.raw(escapeString(entry.getKey()) + ", "
+                        + escapeString(entry.getValue()));
                 first = false;
             }
-            sb.append(')');
+            cb.raw(")");
         } else {
-            sb.append(indent).append("Map.ofEntries(\n");
+            cb.raw(indent + "Map.ofEntries(\n");
             boolean first = true;
             for (var entry : map.entrySet()) {
                 if (!first) {
-                    sb.append(",\n");
+                    cb.raw(",\n");
                 }
-                sb.append(indent).append("    Map.entry(")
-                        .append(escapeString(entry.getKey())).append(", ")
-                        .append(escapeString(entry.getValue())).append(')');
+                cb.raw(indent + "    Map.entry("
+                        + escapeString(entry.getKey()) + ", "
+                        + escapeString(entry.getValue()) + ")");
                 first = false;
             }
-            sb.append(')');
+            cb.raw(")");
         }
     }
 
@@ -539,9 +541,5 @@ public class DemoClassGenerator {
                    .replace("<", "&lt;")
                    .replace(">", "&gt;")
                    .replace("*/", "&#42;/");
-    }
-
-    private void emitClassClose(StringBuilder sb) {
-        sb.append("}\n");
     }
 }
