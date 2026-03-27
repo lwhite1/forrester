@@ -1,6 +1,6 @@
 package systems.courant.sd.app.canvas;
 
-import systems.courant.sd.model.compile.FunctionDocRegistry;
+import systems.courant.sd.api.ExpressionFacade;
 
 import org.fxmisc.richtext.model.StyleSpans;
 import org.fxmisc.richtext.model.StyleSpansBuilder;
@@ -26,7 +26,7 @@ public final class EquationHighlighter {
     static {
         // Build keyword alternation from the function registry, longest first
         // to prevent partial matches
-        String keywords = FunctionDocRegistry.allNames().stream()
+        String keywords = ExpressionFacade.builtinFunctionNames().stream()
                 .sorted(Comparator.comparingInt(String::length).reversed())
                 .collect(Collectors.joining("|"));
 

@@ -1,9 +1,6 @@
 package systems.courant.sd.app.canvas;
 
-import systems.courant.sd.model.expr.Expr;
-import systems.courant.sd.model.expr.ExprDependencies;
-import systems.courant.sd.model.expr.ExprParser;
-import systems.courant.sd.model.expr.ParseException;
+import systems.courant.sd.api.ExpressionFacade;
 
 import systems.courant.sd.model.def.FlowDef;
 import systems.courant.sd.model.def.StockDef;
@@ -55,15 +52,13 @@ public final class EquationValidator {
         }
 
         // 1. Syntax check
-        Expr expr;
-        try {
-            expr = ExprParser.parse(equation);
-        } catch (ParseException e) {
-            return new Result(false, formatParseError(e), null);
+        var syntaxError = ExpressionFacade.validateSyntax(equation);
+        if (syntaxError.isPresent()) {
+            return new Result(false, syntaxError.get(), null);
         }
 
         // 2. Reference check
-        Set<String> refs = ExprDependencies.extract(expr);
+        Set<String> refs = ExpressionFacade.extractReferences(equation);
         Set<String> knownNames = collectKnownNames(editor);
         List<String> unknowns = new ArrayList<>();
         for (String ref : refs) {
@@ -95,17 +90,6 @@ public final class EquationValidator {
         }
 
         return Result.OK;
-    }
-
-    private static String formatParseError(ParseException e) {
-        String msg = e.getMessage();
-        // Strip the "(at position N)" suffix added by ParseException constructor
-        // for a cleaner display, since position is less useful in a text field
-        int idx = msg.lastIndexOf(" (at position ");
-        if (idx > 0) {
-            return msg.substring(0, idx);
-        }
-        return msg;
     }
 
     private static Set<String> collectKnownNames(ModelEditor editor) {

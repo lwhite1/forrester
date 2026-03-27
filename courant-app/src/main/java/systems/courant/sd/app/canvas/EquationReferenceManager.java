@@ -2,11 +2,7 @@ package systems.courant.sd.app.canvas;
 
 import systems.courant.sd.model.def.VariableDef;
 import systems.courant.sd.model.def.FlowDef;
-import systems.courant.sd.model.expr.ExprParser;
-import systems.courant.sd.model.expr.ExprRenamer;
-import systems.courant.sd.model.expr.ExprStringifier;
-import systems.courant.sd.model.expr.Expr;
-import systems.courant.sd.model.expr.ParseException;
+import systems.courant.sd.api.ExpressionFacade;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -205,18 +201,15 @@ public final class EquationReferenceManager {
         if (equation == null || equation.isBlank()) {
             return equation;
         }
-        try {
-            Expr ast = ExprParser.parse(equation);
-            Expr renamed = ExprRenamer.rename(ast, oldToken, newToken);
-            if (renamed == ast) {
-                return equation;
-            }
-            return ExprStringifier.stringify(renamed);
-        } catch (ParseException e) {
-            log.debug("AST parse failed for equation '{}', falling back to string replacement: {}",
-                    equation, e.getMessage());
-            return replaceTokenByString(equation, oldToken, newToken);
+        // Try AST-based rename first; facade returns original on parse failure
+        if (ExpressionFacade.validateSyntax(equation).isEmpty()) {
+            // Parseable: use AST rename (preserves structure, handles quoted identifiers)
+            return ExpressionFacade.renameReference(equation, oldToken, newToken);
         }
+        // Not parseable: fall back to word-boundary string replacement
+        log.debug("AST parse failed for equation '{}', falling back to string replacement",
+                equation);
+        return replaceTokenByString(equation, oldToken, newToken);
     }
 
     /**

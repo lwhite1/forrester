@@ -1,7 +1,7 @@
 package systems.courant.sd.app.canvas;
 
+import systems.courant.sd.api.ExpressionFacade;
 import systems.courant.sd.model.compile.FunctionDoc;
-import systems.courant.sd.model.compile.FunctionDocRegistry;
 
 import javafx.beans.value.ChangeListener;
 import javafx.event.ActionEvent;
@@ -58,7 +58,7 @@ public final class EquationAutoComplete {
     private static final double POPUP_WIDTH = 360;
     private static final int MIN_PREFIX_LENGTH = 1;
 
-    public static final List<String> BUILT_IN_FUNCTIONS = FunctionDocRegistry.allNames();
+    public static final List<String> BUILT_IN_FUNCTIONS = ExpressionFacade.builtinFunctionNames();
 
     private static final Set<String> FUNCTION_SET = Set.copyOf(BUILT_IN_FUNCTIONS);
 
@@ -286,7 +286,7 @@ public final class EquationAutoComplete {
                         return null; // bare parentheses, no function name
                     }
                     String funcName = text.substring(nameStart, nameEnd).toUpperCase();
-                    if (FunctionDocRegistry.get(funcName).isPresent()) {
+                    if (ExpressionFacade.getFunctionDoc(funcName).isPresent()) {
                         return new FunctionCallContext(funcName, commas);
                     }
                     return null; // not a known function
@@ -333,7 +333,7 @@ public final class EquationAutoComplete {
 
         // Add functions after elements
         for (String funcName : BUILT_IN_FUNCTIONS) {
-            Optional<FunctionDoc> doc = FunctionDocRegistry.get(funcName);
+            Optional<FunctionDoc> doc = ExpressionFacade.getFunctionDoc(funcName);
             String displayName = doc.map(FunctionDoc::signature).orElse(funcName);
             String description = doc.map(FunctionDoc::oneLiner).orElse("");
             result.add(new AutoCompleteSuggestion(
@@ -743,7 +743,7 @@ public final class EquationAutoComplete {
             }
             lastHintContext = ctx;
 
-            Optional<FunctionDoc> docOpt = FunctionDocRegistry.get(ctx.functionName());
+            Optional<FunctionDoc> docOpt = ExpressionFacade.getFunctionDoc(ctx.functionName());
             if (docOpt.isEmpty() || docOpt.get().parameters().isEmpty()) {
                 hideHint();
                 return;
