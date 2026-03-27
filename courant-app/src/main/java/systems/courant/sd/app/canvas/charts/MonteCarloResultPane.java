@@ -5,13 +5,15 @@ import systems.courant.sd.sweep.MonteCarloResult;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.stage.Window;
+
 import java.util.ArrayList;
 import java.util.List;
+
 import systems.courant.sd.app.canvas.ChartUtils;
 import systems.courant.sd.app.canvas.ClipboardExporter;
 
@@ -49,16 +51,20 @@ public class MonteCarloResultPane extends BorderPane {
             varCombo.setValue(allNames.getFirst());
         }
 
-        ContextMenu contextMenu = new ContextMenu();
-        MenuItem saveItem = new MenuItem("Save as PNG...");
-        saveItem.setOnAction(e -> saveChartAsPng());
-        MenuItem exportCsv = new MenuItem("Export CSV (Percentiles)...");
-        exportCsv.setOnAction(e -> exportPercentileCsv());
+        MenuItem saveItem = ChartUtils.createPngMenuItem(this, "montecarlo_chart.png",
+                this::getOwnerWindow);
+        MenuItem exportCsv = ChartUtils.createCsvMenuItem("Export CSV (Percentiles)...",
+                "montecarlo_percentiles.csv", this::getOwnerWindow,
+                file -> {
+                    if (currentVariable == null) {
+                        return;
+                    }
+                    result.writePercentileCsv(file.getAbsolutePath(), currentVariable,
+                            2.5, 25, 50, 75, 97.5);
+                });
         MenuItem copyItem = new MenuItem("Copy to Clipboard (Percentiles)");
         copyItem.setOnAction(e -> ClipboardExporter.copyMonteCarloPercentiles(result, currentVariable));
-        contextMenu.getItems().addAll(saveItem, exportCsv, copyItem);
-        setOnContextMenuRequested(e ->
-                contextMenu.show(this, e.getScreenX(), e.getScreenY()));
+        ChartUtils.attachContextMenu(this, saveItem, exportCsv, copyItem);
     }
 
     private void showVariable(String variableName) {
@@ -70,18 +76,7 @@ public class MonteCarloResultPane extends BorderPane {
         }
     }
 
-    private void saveChartAsPng() {
-        ChartUtils.saveNodeAsPng(fanChartPane, "montecarlo_chart.png",
-                getScene() != null ? getScene().getWindow() : null);
-    }
-
-    private void exportPercentileCsv() {
-        if (currentVariable == null) {
-            return;
-        }
-        ChartUtils.showCsvSaveDialog("Export Percentile CSV", "montecarlo_percentiles.csv",
-                getScene() != null ? getScene().getWindow() : null,
-                file -> result.writePercentileCsv(file.getAbsolutePath(), currentVariable,
-                        2.5, 25, 50, 75, 97.5));
+    private Window getOwnerWindow() {
+        return getScene() != null ? getScene().getWindow() : null;
     }
 }

@@ -12,7 +12,6 @@ import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.layout.BorderPane;
@@ -20,6 +19,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
+import javafx.stage.Window;
 
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
@@ -85,14 +85,30 @@ public class SensitivityPane extends BorderPane {
             content.getChildren().add(buildSummaryText(impacts));
         }
 
-        ContextMenu contextMenu = new ContextMenu();
-        MenuItem saveItem = new MenuItem("Save as PNG...");
-        saveItem.setOnAction(e -> saveChartAsPng(content));
-        MenuItem exportCsv = new MenuItem("Export CSV...");
-        exportCsv.setOnAction(e -> exportCsv());
-        contextMenu.getItems().addAll(saveItem, exportCsv);
-        content.setOnContextMenuRequested(e ->
-                contextMenu.show(content, e.getScreenX(), e.getScreenY()));
+        MenuItem saveItem = ChartUtils.createPngMenuItem(content, "sensitivity_chart.png",
+                this::getOwnerWindow);
+        MenuItem exportCsv = ChartUtils.createCsvMenuItem("Export CSV...",
+                "sensitivity.csv", this::getOwnerWindow, file -> {
+                    if (currentImpacts == null || currentImpacts.isEmpty()) {
+                        return;
+                    }
+                    try (CSVWriter writer = new CSVWriter(new OutputStreamWriter(
+                            Files.newOutputStream(file.toPath()), StandardCharsets.UTF_8))) {
+                        writer.writeNext(new String[]{
+                                "Parameter", "Target Variable", "Impact (%)",
+                                "Min Output", "Max Output", "Baseline Output"});
+                        for (ParameterImpact impact : currentImpacts) {
+                            writer.writeNext(new String[]{
+                                    impact.parameterName(),
+                                    impact.targetVariable(),
+                                    String.valueOf(impact.impactFraction() * 100.0),
+                                    String.valueOf(impact.minOutput()),
+                                    String.valueOf(impact.maxOutput()),
+                                    String.valueOf(impact.baselineOutput())});
+                        }
+                    }
+                });
+        ChartUtils.attachContextMenu(content, saveItem, exportCsv);
 
         setCenter(content);
     }
@@ -149,32 +165,7 @@ public class SensitivityPane extends BorderPane {
         return flow;
     }
 
-    private void saveChartAsPng(VBox content) {
-        ChartUtils.saveNodeAsPng(content, "sensitivity_chart.png",
-                getScene() != null ? getScene().getWindow() : null);
-    }
-
-    private void exportCsv() {
-        if (currentImpacts == null || currentImpacts.isEmpty()) {
-            return;
-        }
-        ChartUtils.showCsvSaveDialog("Export Sensitivity CSV", "sensitivity.csv",
-                getScene() != null ? getScene().getWindow() : null, file -> {
-                    try (CSVWriter writer = new CSVWriter(new OutputStreamWriter(
-                            Files.newOutputStream(file.toPath()), StandardCharsets.UTF_8))) {
-                        writer.writeNext(new String[]{
-                                "Parameter", "Target Variable", "Impact (%)",
-                                "Min Output", "Max Output", "Baseline Output"});
-                        for (ParameterImpact impact : currentImpacts) {
-                            writer.writeNext(new String[]{
-                                    impact.parameterName(),
-                                    impact.targetVariable(),
-                                    String.valueOf(impact.impactFraction() * 100.0),
-                                    String.valueOf(impact.minOutput()),
-                                    String.valueOf(impact.maxOutput()),
-                                    String.valueOf(impact.baselineOutput())});
-                        }
-                    }
-                });
+    private Window getOwnerWindow() {
+        return getScene() != null ? getScene().getWindow() : null;
     }
 }
