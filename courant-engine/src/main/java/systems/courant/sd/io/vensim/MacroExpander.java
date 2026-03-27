@@ -146,7 +146,7 @@ public final class MacroExpander {
         }
 
         int openParen = callMatcher.end() - 1;
-        int closeParen = VensimExprTranslator.findMatchingParen(eq.expression(), openParen);
+        int closeParen = ExprParsingUtils.findMatchingParen(eq.expression(), openParen);
         if (closeParen < 0) {
             return null;
         }

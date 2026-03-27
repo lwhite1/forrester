@@ -488,7 +488,7 @@ class VensimExprTranslatorTest {
         @Test
         void shouldParseFlatCsvLookupData() {
             // Format used by BURNOUT.MDL: x values then y values, no parentheses
-            var result = VensimExprTranslator.parseLookupPoints(
+            var result = NameNormalizationStage.parseLookupPoints(
                     "0,0.2,0.4,0.6,0.8,1,0,0.2,0.4,0.6,0.8,1");
             assertThat(result).isPresent();
             double[][] points = result.get();
@@ -499,7 +499,7 @@ class VensimExprTranslatorTest {
         @Test
         void shouldParseFlatCsvWithNewlines() {
             // As it appears in .mdl files: x values on one line, y on next
-            var result = VensimExprTranslator.parseLookupPoints(
+            var result = NameNormalizationStage.parseLookupPoints(
                     "0, 1, 2, 3, 4, 5,\n1.05, 1, 0.9, 0.7, 0.6, 0.55");
             assertThat(result).isPresent();
             double[][] points = result.get();
@@ -514,7 +514,7 @@ class VensimExprTranslatorTest {
         @Test
         void shouldPreferPairFormatOverFlatCsv() {
             // When (x,y) pairs are present, use that format
-            var result = VensimExprTranslator.parseLookupPoints(
+            var result = NameNormalizationStage.parseLookupPoints(
                     "(0,0),(1,1),(2,4)");
             assertThat(result).isPresent();
             double[][] points = result.get();
@@ -524,13 +524,13 @@ class VensimExprTranslatorTest {
 
         @Test
         void shouldRejectOddNumberOfFlatCsvValues() {
-            var result = VensimExprTranslator.parseLookupPoints("0, 1, 2");
+            var result = NameNormalizationStage.parseLookupPoints("0, 1, 2");
             assertThat(result).isEmpty();
         }
 
         @Test
         void shouldRejectTooFewFlatCsvValues() {
-            var result = VensimExprTranslator.parseLookupPoints("0, 1");
+            var result = NameNormalizationStage.parseLookupPoints("0, 1");
             assertThat(result).isEmpty();
         }
     }
@@ -981,11 +981,11 @@ class VensimExprTranslatorTest {
 
         @Test
         void shouldExtractFirstArgument() {
-            assertThat(VensimExprTranslator.extractFirstArgument(
+            assertThat(ExprParsingUtils.extractFirstArgument(
                     "'file.csv', ',', 'A', 'B2'")).isEqualTo("file.csv");
-            assertThat(VensimExprTranslator.extractFirstArgument(
+            assertThat(ExprParsingUtils.extractFirstArgument(
                     "\"file.xlsx\", 'Sheet'")).isEqualTo("file.xlsx");
-            assertThat(VensimExprTranslator.extractFirstArgument(
+            assertThat(ExprParsingUtils.extractFirstArgument(
                     "single_arg")).isEqualTo("single_arg");
         }
     }
