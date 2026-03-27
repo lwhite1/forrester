@@ -171,16 +171,16 @@ public class ImportPipelineCli implements Closeable {
         CliArgs parsed = new CliArgs();
         for (int i = 0; i < args.length; i++) {
             switch (args[i]) {
-                case "--file" -> { parsed.file = requireValue(args, i); i++; }
-                case "--class-name" -> { parsed.className = requireValue(args, i); i++; }
-                case "--category" -> { parsed.category = requireValue(args, i); i++; }
-                case "--author" -> { parsed.author = requireValue(args, i); i++; }
-                case "--source" -> { parsed.source = requireValue(args, i); i++; }
-                case "--license" -> { parsed.license = requireValue(args, i); i++; }
-                case "--url" -> { parsed.url = requireValue(args, i); i++; }
-                case "--json-name" -> { parsed.jsonName = requireValue(args, i); i++; }
-                case "--output-dir" -> { parsed.outputDir = requireValue(args, i); i++; }
-                case "--metadata-file" -> { parsed.metadataFile = requireValue(args, i); i++; }
+                case "--file" -> { parsed.file = CliArgumentParser.requireValue(args, i); i++; }
+                case "--class-name" -> { parsed.className = CliArgumentParser.requireValue(args, i); i++; }
+                case "--category" -> { parsed.category = CliArgumentParser.requireValue(args, i); i++; }
+                case "--author" -> { parsed.author = CliArgumentParser.requireValue(args, i); i++; }
+                case "--source" -> { parsed.source = CliArgumentParser.requireValue(args, i); i++; }
+                case "--license" -> { parsed.license = CliArgumentParser.requireValue(args, i); i++; }
+                case "--url" -> { parsed.url = CliArgumentParser.requireValue(args, i); i++; }
+                case "--json-name" -> { parsed.jsonName = CliArgumentParser.requireValue(args, i); i++; }
+                case "--output-dir" -> { parsed.outputDir = CliArgumentParser.requireValue(args, i); i++; }
+                case "--metadata-file" -> { parsed.metadataFile = CliArgumentParser.requireValue(args, i); i++; }
                 case "--dry-run" -> parsed.dryRun = true;
                 case "--overwrite" -> parsed.overwrite = true;
                 case "--json-only" -> parsed.jsonOnly = true;
@@ -190,15 +190,6 @@ public class ImportPipelineCli implements Closeable {
             }
         }
         return parsed;
-    }
-
-    private static String requireValue(String[] args, int flagIndex) {
-        int valueIndex = flagIndex + 1;
-        if (valueIndex >= args.length) {
-            throw new IllegalArgumentException(
-                    args[flagIndex] + " requires a value");
-        }
-        return args[valueIndex];
     }
 
     private static void printUsage() {

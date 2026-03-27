@@ -382,8 +382,8 @@ public class BatchImportCli {
         CliArgs parsed = new CliArgs();
         for (int i = 0; i < args.length; i++) {
             switch (args[i]) {
-                case "--manifest" -> { parsed.manifestFile = requireValue(args, i); i++; }
-                case "--output-dir" -> { parsed.outputDir = requireValue(args, i); i++; }
+                case "--manifest" -> { parsed.manifestFile = CliArgumentParser.requireValue(args, i); i++; }
+                case "--output-dir" -> { parsed.outputDir = CliArgumentParser.requireValue(args, i); i++; }
                 case "--json-only" -> parsed.jsonOnly = true;
                 case "--dry-run" -> parsed.dryRun = true;
                 case "--overwrite" -> parsed.overwrite = true;
@@ -393,15 +393,6 @@ public class BatchImportCli {
             }
         }
         return parsed;
-    }
-
-    private static String requireValue(String[] args, int flagIndex) {
-        int valueIndex = flagIndex + 1;
-        if (valueIndex >= args.length) {
-            throw new IllegalArgumentException(
-                    args[flagIndex] + " requires a value");
-        }
-        return args[valueIndex];
     }
 
     private static void printUsage() {
