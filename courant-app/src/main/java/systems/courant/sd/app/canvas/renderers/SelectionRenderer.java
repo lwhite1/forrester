@@ -80,11 +80,11 @@ public final class SelectionRenderer {
         gc.setStroke(ColorPalette.HOVER);
         gc.setLineWidth(3.0);
         gc.setLineDashes();
-        CausalLinkGeometry.strokeQuadCurve(gc, fromX, fromY, cpX, cpY, toX, toY, 1.0);
+        CausalLinkGeometry.strokeArcCurve(gc, fromX, fromY, cpX, cpY, toX, toY, 1.0);
     }
 
     /**
-     * Draws a curved selection highlight for a causal link (quadratic Bézier).
+     * Draws a curved selection highlight for a causal link (circular arc).
      */
     public static void drawConnectionSelectionCurved(GraphicsContext gc,
                                                       double fromX, double fromY,
@@ -93,7 +93,7 @@ public final class SelectionRenderer {
         gc.setStroke(SELECTION_COLOR);
         gc.setLineWidth(3.0);
         gc.setLineDashes(SELECTION_DASH_LENGTH, SELECTION_DASH_GAP);
-        CausalLinkGeometry.strokeQuadCurve(gc, fromX, fromY, cpX, cpY, toX, toY, 1.0);
+        CausalLinkGeometry.strokeArcCurve(gc, fromX, fromY, cpX, cpY, toX, toY, 1.0);
         gc.setLineDashes();
     }
 

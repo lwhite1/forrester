@@ -106,7 +106,7 @@ public final class FeedbackLoopRenderer {
         gc.setLineWidth(EDGE_LINE_WIDTH);
         gc.setLineDashes();
 
-        CausalLinkGeometry.strokeQuadCurve(gc, fromX, fromY, cpX, cpY, toX, toY, 1.0);
+        CausalLinkGeometry.strokeArcCurve(gc, fromX, fromY, cpX, cpY, toX, toY, 1.0);
     }
 
     /**

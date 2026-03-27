@@ -594,15 +594,18 @@ public final class SvgExporter {
             Color curLinkColor = isUnknown ? ColorPalette.CAUSAL_UNKNOWN : ColorPalette.CAUSAL_LINK;
             String dashAttr = isUnknown ? " stroke-dasharray=\"4 3\"" : "";
 
-            // Quadratic Bezier path
+            // Circular-arc cubic Bezier path
+            CausalLinkGeometry.CubicArc arc = CausalLinkGeometry.toCircularArc(
+                    cf.x(), cf.y(), cp.x(), cp.y(), ct.x(), ct.y());
             w.printf(Locale.US,
-                    "  <path d=\"M %.2f %.2f Q %.2f %.2f, %.2f %.2f\" " +
+                    "  <path d=\"M %.2f %.2f C %.2f %.2f, %.2f %.2f, %.2f %.2f\" " +
                     "fill=\"none\" stroke=\"%s\" stroke-width=\"%.1f\"%s/>%n",
-                    cf.x(), cf.y(), cp.x(), cp.y(), ct.x(), ct.y(),
+                    cf.x(), cf.y(), arc.cp1x(), arc.cp1y(),
+                    arc.cp2x(), arc.cp2y(), ct.x(), ct.y(),
                     svgColor(curLinkColor), LayoutMetrics.CAUSAL_LINK_WIDTH, dashAttr);
 
             // Arrowhead oriented along curve tangent at endpoint
-            double[] tan = CausalLinkGeometry.tangent(
+            double[] tan = CausalLinkGeometry.tangentAsArc(
                     cf.x(), cf.y(), cp.x(), cp.y(), ct.x(), ct.y(), 1.0);
             writeSvgArrowheadFromTangent(w, ct.x(), ct.y(), tan[0], tan[1],
                     LayoutMetrics.CAUSAL_ARROWHEAD_LENGTH, LayoutMetrics.CAUSAL_ARROWHEAD_WIDTH,

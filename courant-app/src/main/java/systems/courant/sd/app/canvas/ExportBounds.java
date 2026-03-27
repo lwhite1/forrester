@@ -124,9 +124,9 @@ final class ExportBounds {
 
             CausalLinkGeometry.ControlPoint cp = CausalLinkGeometry.controlPoint(
                     fromX, fromY, toX, toY, fromName, toName, allLinks, loopCtx);
-            double[] labelPt = CausalLinkGeometry.evaluate(
+            double[] labelPt = CausalLinkGeometry.evaluateAsArc(
                     fromX, fromY, cp.x(), cp.y(), toX, toY, POLARITY_LABEL_T);
-            double[] labelTan = CausalLinkGeometry.tangent(
+            double[] labelTan = CausalLinkGeometry.tangentAsArc(
                     fromX, fromY, cp.x(), cp.y(), toX, toY, POLARITY_LABEL_T);
             double tanDist = Math.sqrt(labelTan[0] * labelTan[0] + labelTan[1] * labelTan[1]);
             if (tanDist > 0) {

@@ -42,8 +42,8 @@ public record PolarityLabelLayout(double x, double y, boolean valid) {
             return new PolarityLabelLayout(0, 0, false);
         }
 
-        double[] labelPt = CausalLinkGeometry.evaluate(fromX, fromY, cpX, cpY, toX, toY, LABEL_T);
-        double[] labelTan = CausalLinkGeometry.tangent(fromX, fromY, cpX, cpY, toX, toY, LABEL_T);
+        double[] labelPt = CausalLinkGeometry.evaluateAsArc(fromX, fromY, cpX, cpY, toX, toY, LABEL_T);
+        double[] labelTan = CausalLinkGeometry.tangentAsArc(fromX, fromY, cpX, cpY, toX, toY, LABEL_T);
         double tanDist = Math.sqrt(labelTan[0] * labelTan[0] + labelTan[1] * labelTan[1]);
         if (tanDist <= 0) {
             return new PolarityLabelLayout(0, 0, false);

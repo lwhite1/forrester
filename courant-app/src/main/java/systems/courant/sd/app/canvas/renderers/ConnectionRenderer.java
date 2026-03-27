@@ -152,7 +152,7 @@ public final class ConnectionRenderer {
                                       CausalLinkDef.Polarity polarity,
                                       Color customColor) {
         // Compute arrowhead placement along the curve
-        double[] ah = CausalLinkGeometry.arrowheadPoint(fromX, fromY, cp.x(), cp.y(),
+        double[] ah = CausalLinkGeometry.arrowheadPointArc(fromX, fromY, cp.x(), cp.y(),
                 toX, toY, LayoutMetrics.CAUSAL_ARROWHEAD_LENGTH);
         double tipX = ah[0];
         double tipY = ah[1];
@@ -176,7 +176,7 @@ public final class ConnectionRenderer {
             gc.setLineDashes();
         }
 
-        CausalLinkGeometry.strokeQuadCurve(gc, fromX, fromY, cp.x(), cp.y(), toX, toY, stopT);
+        CausalLinkGeometry.strokeArcCurve(gc, fromX, fromY, cp.x(), cp.y(), toX, toY, stopT);
         gc.setLineDashes();
 
         // Arrowhead oriented along the curve tangent at the tip

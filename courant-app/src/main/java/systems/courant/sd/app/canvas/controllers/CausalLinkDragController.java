@@ -68,7 +68,7 @@ public final class CausalLinkDragController {
         FlowGeometry.Point2D clippedFrom = FlowGeometry.clipToElement(state, from, cp.x(), cp.y());
         FlowGeometry.Point2D clippedTo = FlowGeometry.clipToElement(state, to, cp.x(), cp.y());
 
-        return CausalLinkGeometry.evaluate(
+        return CausalLinkGeometry.evaluateAsArc(
                 clippedFrom.x(), clippedFrom.y(),
                 cp.x(), cp.y(),
                 clippedTo.x(), clippedTo.y(), 0.5);
