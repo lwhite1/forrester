@@ -1,16 +1,12 @@
 package systems.courant.sd.app.canvas.dialogs;
 
-import javafx.beans.binding.Bindings;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonBar;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
@@ -24,7 +20,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import systems.courant.sd.app.canvas.HelpContextResolver;
 import systems.courant.sd.app.canvas.ParameterRowBase;
 import systems.courant.sd.app.canvas.Styles;
 import org.slf4j.Logger;
@@ -37,7 +32,7 @@ import systems.courant.sd.model.def.ReferenceDataset;
  * Dialog for configuring a calibration run: import observed CSV data,
  * map columns to model stocks, set parameter bounds, and choose algorithm.
  */
-public class CalibrateDialog extends Dialog<CalibrateDialog.Config> {
+public class CalibrateDialog extends ValidatingDialog<CalibrateDialog.Config> {
 
     private static final Logger logger = LoggerFactory.getLogger(CalibrateDialog.class);
 
@@ -60,7 +55,6 @@ public class CalibrateDialog extends Dialog<CalibrateDialog.Config> {
     private Label datasetLabel;
     private ComboBox<String> algorithmCombo;
     private TextField maxEvalsField;
-    private Label validationLabel;
     private VBox fitTargetBox;
     private final List<String> stockNames;
 
@@ -68,22 +62,45 @@ public class CalibrateDialog extends Dialog<CalibrateDialog.Config> {
     private final List<FitTargetRow> fitTargetRows = new ArrayList<>();
 
     public CalibrateDialog(List<String> constantNames, List<String> stockNames) {
+        super("Calibrate", "Fit model parameters to observed data");
         this.stockNames = stockNames;
-        HelpContextResolver.addHelpButton(this);
-        setTitle("Calibrate");
-        setHeaderText("Fit model parameters to observed data");
 
         VBox content = new VBox(10,
                 buildObservedDataSection(),
                 buildFitTargetsSection(),
                 buildParametersSection(constantNames),
                 buildSettingsSection(),
-                buildValidationLabel());
+                bindValidation("calibValidationLabel", this::getValidationMessage,
+                        maxEvalsField.textProperty(), paramRows, fieldChangeCounter));
         content.setPadding(new Insets(10));
-        getDialogPane().setContent(content);
-        getDialogPane().setPrefWidth(Styles.screenAwareWidth(Styles.CONFIG_DIALOG_WIDTH));
+        setStandardContent(content);
+    }
 
-        configureButtons();
+    @Override
+    protected Config buildResult() {
+        List<FitTarget> targets = new ArrayList<>();
+        for (FitTargetRow row : fitTargetRows) {
+            String stock = row.stockCombo.getValue();
+            if (stock != null && !stock.isEmpty()) {
+                double[] data = importedDataset.columns().get(row.csvColumn);
+                if (data == null) {
+                    continue;
+                }
+                targets.add(new FitTarget(stock, row.csvColumn, data));
+            }
+        }
+        List<ParamConfig> params = new ArrayList<>();
+        for (ParamRow row : paramRows) {
+            if (row.isValid()) {
+                params.add(row.toConfig());
+            }
+        }
+        return new Config(
+                targets,
+                params,
+                algorithmCombo.getValue(),
+                Integer.parseInt(maxEvalsField.getText().trim())
+        );
     }
 
     private VBox buildObservedDataSection() {
@@ -164,62 +181,6 @@ public class CalibrateDialog extends Dialog<CalibrateDialog.Config> {
         return settingsGrid;
     }
 
-    private Label buildValidationLabel() {
-        validationLabel = new Label();
-        validationLabel.setStyle(Styles.VALIDATION_ERROR);
-        validationLabel.setWrapText(true);
-        validationLabel.setMaxWidth(Double.MAX_VALUE);
-        validationLabel.setId("calibValidationLabel");
-        validationLabel.textProperty().bind(
-                Bindings.createStringBinding(this::getValidationMessage,
-                        maxEvalsField.textProperty(), paramRows, fieldChangeCounter)
-        );
-        return validationLabel;
-    }
-
-    private void configureButtons() {
-        ButtonType okButton = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
-        getDialogPane().getButtonTypes().addAll(okButton, ButtonType.CANCEL);
-
-        getDialogPane().lookupButton(okButton).disableProperty().bind(
-                Bindings.createBooleanBinding(this::isInvalid,
-                        maxEvalsField.textProperty(), paramRows, fieldChangeCounter)
-        );
-
-        setResultConverter(button -> {
-            if (button == okButton) {
-                return buildConfig();
-            }
-            return null;
-        });
-    }
-
-    private Config buildConfig() {
-        List<FitTarget> targets = new ArrayList<>();
-        for (FitTargetRow row : fitTargetRows) {
-            String stock = row.stockCombo.getValue();
-            if (stock != null && !stock.isEmpty()) {
-                double[] data = importedDataset.columns().get(row.csvColumn);
-                if (data == null) {
-                    continue;
-                }
-                targets.add(new FitTarget(stock, row.csvColumn, data));
-            }
-        }
-        List<ParamConfig> params = new ArrayList<>();
-        for (ParamRow row : paramRows) {
-            if (row.isValid()) {
-                params.add(row.toConfig());
-            }
-        }
-        return new Config(
-                targets,
-                params,
-                algorithmCombo.getValue(),
-                Integer.parseInt(maxEvalsField.getText().trim())
-        );
-    }
-
     private void importCsv() {
         FileChooser chooser = new FileChooser();
         chooser.setTitle("Import Observed Data CSV");
@@ -262,10 +223,6 @@ public class CalibrateDialog extends Dialog<CalibrateDialog.Config> {
             fitTargetBox.getChildren().add(row.pane);
         }
         fieldChangeCounter.set(fieldChangeCounter.get() + 1);
-    }
-
-    private boolean isInvalid() {
-        return !getValidationMessage().isEmpty();
     }
 
     private String getValidationMessage() {
