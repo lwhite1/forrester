@@ -5,9 +5,6 @@ import systems.courant.sd.model.def.ModuleInterface;
 import systems.courant.sd.model.def.PortDef;
 
 import javafx.geometry.Insets;
-import javafx.scene.control.ButtonBar;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
@@ -16,7 +13,6 @@ import javafx.scene.layout.VBox;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import systems.courant.sd.app.canvas.HelpContextResolver;
 import systems.courant.sd.app.canvas.Styles;
 
 /**
@@ -24,7 +20,7 @@ import systems.courant.sd.app.canvas.Styles;
  * Shows a grid of port name labels with text fields for binding expressions
  * (inputs) or alias names (outputs).
  */
-public class BindingConfigDialog extends Dialog<BindingConfigDialog.BindingResult> {
+public class BindingConfigDialog extends ValidatingDialog<BindingConfigDialog.BindingResult> {
 
     /**
      * Result containing the configured input and output bindings.
@@ -38,9 +34,8 @@ public class BindingConfigDialog extends Dialog<BindingConfigDialog.BindingResul
     private final Map<String, TextField> outputFields = new HashMap<>();
 
     public BindingConfigDialog(ModuleInstanceDef module) {
-        HelpContextResolver.addHelpButton(this);
-        setTitle("Configure Bindings — " + module.instanceName());
-        setHeaderText("Configure port bindings for module '" + module.instanceName() + "'");
+        super("Configure Bindings — " + module.instanceName(),
+                "Configure port bindings for module '" + module.instanceName() + "'");
 
         ModuleInterface iface = module.definition().moduleInterface();
 
@@ -78,18 +73,13 @@ public class BindingConfigDialog extends Dialog<BindingConfigDialog.BindingResul
         }
 
         getDialogPane().setContent(content);
+    }
 
-        ButtonType okButton = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
-        getDialogPane().getButtonTypes().addAll(okButton, ButtonType.CANCEL);
-
-        setResultConverter(button -> {
-            if (button == okButton) {
-                return new BindingResult(
-                        collectBindings(inputFields),
-                        collectBindings(outputFields));
-            }
-            return null;
-        });
+    @Override
+    protected BindingResult buildResult() {
+        return new BindingResult(
+                collectBindings(inputFields),
+                collectBindings(outputFields));
     }
 
     private GridPane createPortGrid(List<PortDef> ports, Map<String, String> existingBindings,

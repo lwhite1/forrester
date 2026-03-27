@@ -1,25 +1,19 @@
 package systems.courant.sd.app.canvas.dialogs;
 
-import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
-import javafx.scene.control.ButtonBar;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 
 import java.util.List;
-import systems.courant.sd.app.canvas.HelpContextResolver;
-import systems.courant.sd.app.canvas.Styles;
 
 /**
  * Dialog for configuring a parameter sweep: select a constant to sweep,
  * specify start/end/step values, and choose which variable to track.
  */
-public class ParameterSweepDialog extends Dialog<ParameterSweepDialog.Config> {
+public class ParameterSweepDialog extends ValidatingDialog<ParameterSweepDialog.Config> {
 
     public record Config(
             String parameterName,
@@ -38,9 +32,7 @@ public class ParameterSweepDialog extends Dialog<ParameterSweepDialog.Config> {
 
     public ParameterSweepDialog(List<String> constantNames, List<String> trackableNames,
                                 Config previousConfig) {
-        HelpContextResolver.addHelpButton(this);
-        setTitle("Parameter Sweep");
-        setHeaderText("Configure parameter sweep");
+        super("Parameter Sweep", "Configure parameter sweep");
 
         parameterCombo = new ComboBox<>(FXCollections.observableArrayList(constantNames));
         parameterCombo.setId("sweepParameter");
@@ -83,48 +75,25 @@ public class ParameterSweepDialog extends Dialog<ParameterSweepDialog.Config> {
         grid.add(new Label("Track:"), 0, 4);
         grid.add(trackCombo, 1, 4);
 
-        Label validationLabel = new Label();
-        validationLabel.setStyle(Styles.VALIDATION_ERROR);
-        validationLabel.setWrapText(true);
-        validationLabel.setMaxWidth(Double.MAX_VALUE);
-        validationLabel.setId("sweepValidationLabel");
-        validationLabel.textProperty().bind(
-                Bindings.createStringBinding(this::getValidationMessage,
-                        startField.textProperty(), endField.textProperty(),
-                        stepField.textProperty(),
-                        parameterCombo.valueProperty(), trackCombo.valueProperty())
-        );
+        Label validationLabel = bindValidation("sweepValidationLabel",
+                this::getValidationMessage,
+                startField.textProperty(), endField.textProperty(),
+                stepField.textProperty(),
+                parameterCombo.valueProperty(), trackCombo.valueProperty());
         grid.add(validationLabel, 0, 5, 2, 1);
 
-        getDialogPane().setContent(grid);
-        getDialogPane().setPrefWidth(Styles.screenAwareWidth(Styles.CONFIG_DIALOG_WIDTH));
-
-        ButtonType okButton = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
-        getDialogPane().getButtonTypes().addAll(okButton, ButtonType.CANCEL);
-
-        getDialogPane().lookupButton(okButton).disableProperty().bind(
-                Bindings.createBooleanBinding(this::isInvalid,
-                        startField.textProperty(), endField.textProperty(),
-                        stepField.textProperty(),
-                        parameterCombo.valueProperty(), trackCombo.valueProperty())
-        );
-
-        setResultConverter(button -> {
-            if (button == okButton) {
-                return new Config(
-                        parameterCombo.getValue(),
-                        Double.parseDouble(startField.getText().trim()),
-                        Double.parseDouble(endField.getText().trim()),
-                        Double.parseDouble(stepField.getText().trim()),
-                        trackCombo.getValue()
-                );
-            }
-            return null;
-        });
+        setStandardContent(grid);
     }
 
-    private boolean isInvalid() {
-        return !getValidationMessage().isEmpty();
+    @Override
+    protected Config buildResult() {
+        return new Config(
+                parameterCombo.getValue(),
+                Double.parseDouble(startField.getText().trim()),
+                Double.parseDouble(endField.getText().trim()),
+                Double.parseDouble(stepField.getText().trim()),
+                trackCombo.getValue()
+        );
     }
 
     private String getValidationMessage() {

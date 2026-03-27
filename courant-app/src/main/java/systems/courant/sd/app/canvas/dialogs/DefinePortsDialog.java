@@ -5,9 +5,6 @@ import systems.courant.sd.model.def.PortDef;
 
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonBar;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
@@ -20,14 +17,14 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import systems.courant.sd.app.canvas.HelpContextResolver;
+
 import systems.courant.sd.app.canvas.Styles;
 
 /**
  * Dialog for defining a module's input and output ports.
  * Each port has a name and an optional unit. Ports can be added and removed.
  */
-public class DefinePortsDialog extends Dialog<ModuleInterface> {
+public class DefinePortsDialog extends ValidatingDialog<ModuleInterface> {
 
     private final VBox inputPortsBox = new VBox(4);
     private final VBox outputPortsBox = new VBox(4);
@@ -37,9 +34,8 @@ public class DefinePortsDialog extends Dialog<ModuleInterface> {
     private record PortRow(TextField nameField, TextField unitField, HBox container) {}
 
     public DefinePortsDialog(String moduleName, ModuleInterface existing) {
-        HelpContextResolver.addHelpButton(this);
-        setTitle("Define Ports — " + moduleName);
-        setHeaderText("Define input and output ports for module '" + moduleName + "'");
+        super("Define Ports — " + moduleName,
+                "Define input and output ports for module '" + moduleName + "'");
         setResizable(true);
 
         VBox content = new VBox(12);
@@ -97,18 +93,13 @@ public class DefinePortsDialog extends Dialog<ModuleInterface> {
 
         getDialogPane().setContent(scrollPane);
         getDialogPane().setPrefHeight(550);
+    }
 
-        ButtonType okButton = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
-        getDialogPane().getButtonTypes().addAll(okButton, ButtonType.CANCEL);
-
-        setResultConverter(button -> {
-            if (button == okButton) {
-                List<PortDef> inputs = collectPorts(inputRows);
-                List<PortDef> outputs = collectPorts(outputRows);
-                return new ModuleInterface(inputs, outputs);
-            }
-            return null;
-        });
+    @Override
+    protected ModuleInterface buildResult() {
+        List<PortDef> inputs = collectPorts(inputRows);
+        List<PortDef> outputs = collectPorts(outputRows);
+        return new ModuleInterface(inputs, outputs);
     }
 
     private GridPane createColumnHeaders() {

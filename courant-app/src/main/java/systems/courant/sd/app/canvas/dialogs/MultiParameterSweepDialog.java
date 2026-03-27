@@ -2,16 +2,12 @@ package systems.courant.sd.app.canvas.dialogs;
 
 import systems.courant.sd.sweep.ParameterSweep;
 
-import javafx.beans.binding.Bindings;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonBar;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
@@ -21,7 +17,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import systems.courant.sd.app.canvas.HelpContextResolver;
+
 import systems.courant.sd.app.canvas.ParameterRowBase;
 import systems.courant.sd.app.canvas.Styles;
 
@@ -31,7 +27,7 @@ import systems.courant.sd.app.canvas.Styles;
  * shows a live combination count and validates that at least 2 parameters
  * are configured with valid ranges.
  */
-public class MultiParameterSweepDialog extends Dialog<MultiParameterSweepDialog.Config> {
+public class MultiParameterSweepDialog extends ValidatingDialog<MultiParameterSweepDialog.Config> {
 
     public record ParamConfig(String name, double start, double end, double step) {
     }
@@ -51,9 +47,7 @@ public class MultiParameterSweepDialog extends Dialog<MultiParameterSweepDialog.
     }
 
     public MultiParameterSweepDialog(List<String> constantNames, Config previousConfig) {
-        HelpContextResolver.addHelpButton(this);
-        setTitle("Multi-Parameter Sweep");
-        setHeaderText("Configure parameters to sweep (at least 2)");
+        super("Multi-Parameter Sweep", "Configure parameters to sweep (at least 2)");
 
         VBox paramBox = new VBox(6);
         paramBox.setPadding(new Insets(5));
@@ -101,35 +95,16 @@ public class MultiParameterSweepDialog extends Dialog<MultiParameterSweepDialog.
         Label paramsLabel = new Label("Parameters");
         paramsLabel.setStyle(Styles.SECTION_HEADER);
 
-        Label validationLabel = new Label();
-        validationLabel.setStyle(Styles.VALIDATION_ERROR);
-        validationLabel.setWrapText(true);
-        validationLabel.setMaxWidth(Double.MAX_VALUE);
-        validationLabel.setId("multiSweepValidationLabel");
-        validationLabel.textProperty().bind(
-                Bindings.createStringBinding(this::getValidationMessage,
-                        parameterRows, fieldChangeCounter)
-        );
-
-        VBox content = new VBox(10, paramsLabel, paramScroll, validationLabel);
+        VBox content = new VBox(10, paramsLabel, paramScroll,
+                bindValidation("multiSweepValidationLabel", this::getValidationMessage,
+                        parameterRows, fieldChangeCounter));
         content.setPadding(new Insets(10));
-        getDialogPane().setContent(content);
-        getDialogPane().setPrefWidth(Styles.screenAwareWidth(Styles.CONFIG_DIALOG_WIDTH));
+        setStandardContent(content);
+    }
 
-        ButtonType okButton = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
-        getDialogPane().getButtonTypes().addAll(okButton, ButtonType.CANCEL);
-
-        getDialogPane().lookupButton(okButton).disableProperty().bind(
-                Bindings.createBooleanBinding(() -> !getValidationMessage().isEmpty(),
-                        parameterRows, fieldChangeCounter)
-        );
-
-        setResultConverter(button -> {
-            if (button == okButton) {
-                return new Config(getValidParams());
-            }
-            return null;
-        });
+    @Override
+    protected Config buildResult() {
+        return new Config(getValidParams());
     }
 
     private String getValidationMessage() {

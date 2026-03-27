@@ -108,8 +108,7 @@ public class FlowForm implements ElementForm {
     }
 
     private void commitComment(TextArea area) {
-        String text = area.getText().trim();
-        String comment = text.isEmpty() ? null : text;
+        String comment = FormFieldBuilder.normalizeToNull(area.getText());
         Optional<FlowDef> flowOpt = ctx.getEditor().getFlowByName(ctx.getElementName());
         if (flowOpt.isEmpty() || Objects.equals(comment, flowOpt.get().comment())) {
             return;
@@ -150,8 +149,7 @@ public class FlowForm implements ElementForm {
     }
 
     private void commitMaterialUnit(ComboBox<String> box) {
-        String materialUnit = box.getValue() != null ? box.getValue().trim() : "";
-        String resolved = materialUnit.isEmpty() ? null : materialUnit;
+        String resolved = FormFieldBuilder.normalizeToNull(box.getValue());
         Optional<FlowDef> flowOpt = ctx.getEditor().getFlowByName(ctx.getElementName());
         if (flowOpt.isPresent() && Objects.equals(resolved, flowOpt.get().materialUnit())) {
             return;
@@ -170,8 +168,8 @@ public class FlowForm implements ElementForm {
     }
 
     private void commitTimeUnit(ComboBox<String> box) {
-        String timeUnit = box.getValue() != null ? box.getValue().trim() : "";
-        if (timeUnit.isEmpty()) {
+        String timeUnit = FormFieldBuilder.normalizeToNull(box.getValue());
+        if (timeUnit == null) {
             ctx.getEditor().getFlowByName(ctx.getElementName())
                     .ifPresent(flow -> box.setValue(flow.timeUnit()));
             return;

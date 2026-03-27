@@ -1,16 +1,12 @@
 package systems.courant.sd.app.canvas.dialogs;
 
-import javafx.beans.binding.Bindings;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonBar;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
@@ -20,7 +16,7 @@ import javafx.scene.layout.VBox;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import systems.courant.sd.app.canvas.HelpContextResolver;
+
 import systems.courant.sd.app.canvas.ParameterRowBase;
 import systems.courant.sd.app.canvas.Styles;
 import systems.courant.sd.app.canvas.renderers.ElementRenderer;
@@ -29,7 +25,7 @@ import systems.courant.sd.app.canvas.renderers.ElementRenderer;
  * Dialog for configuring a Monte Carlo simulation: add parameters with
  * distribution types, set iteration count, sampling method, and seed.
  */
-public class MonteCarloDialog extends Dialog<MonteCarloDialog.Config> {
+public class MonteCarloDialog extends ValidatingDialog<MonteCarloDialog.Config> {
 
     public enum DistributionType {
         NORMAL, UNIFORM
@@ -61,11 +57,9 @@ public class MonteCarloDialog extends Dialog<MonteCarloDialog.Config> {
 
     public MonteCarloDialog(List<String> constantNames, Map<String, Double> constantValues,
                             Config previousConfig) {
-        HelpContextResolver.addHelpButton(this);
+        super("Monte Carlo Simulation", "Configure Monte Carlo parameters");
         this.constantNames = constantNames;
         this.constantValues = constantValues != null ? constantValues : Map.of();
-        setTitle("Monte Carlo Simulation");
-        setHeaderText("Configure Monte Carlo parameters");
 
         VBox paramBox = new VBox(6);
         paramBox.setPadding(new Insets(5));
@@ -132,52 +126,28 @@ public class MonteCarloDialog extends Dialog<MonteCarloDialog.Config> {
         Label paramsLabel = new Label("Parameters");
         paramsLabel.setStyle(Styles.SECTION_HEADER);
 
-        Label validationLabel = new Label();
-        validationLabel.setStyle(Styles.VALIDATION_ERROR);
-        validationLabel.setWrapText(true);
-        validationLabel.setMaxWidth(Double.MAX_VALUE);
-        validationLabel.setId("mcValidationLabel");
-        validationLabel.textProperty().bind(
-                Bindings.createStringBinding(this::getValidationMessage,
+        VBox content = new VBox(10, paramsLabel, paramScroll, settingsGrid,
+                bindValidation("mcValidationLabel", this::getValidationMessage,
                         iterationsField.textProperty(), seedField.textProperty(),
-                        parameterRows, fieldChangeCounter)
-        );
-
-        VBox content = new VBox(10, paramsLabel, paramScroll, settingsGrid, validationLabel);
+                        parameterRows, fieldChangeCounter));
         content.setPadding(new Insets(10));
-        getDialogPane().setContent(content);
-        getDialogPane().setPrefWidth(Styles.screenAwareWidth(Styles.CONFIG_DIALOG_WIDTH));
-
-        ButtonType okButton = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
-        getDialogPane().getButtonTypes().addAll(okButton, ButtonType.CANCEL);
-
-        getDialogPane().lookupButton(okButton).disableProperty().bind(
-                Bindings.createBooleanBinding(this::isInvalid,
-                        iterationsField.textProperty(), seedField.textProperty(),
-                        parameterRows, fieldChangeCounter)
-        );
-
-        setResultConverter(button -> {
-            if (button == okButton) {
-                List<ParameterConfig> params = new ArrayList<>();
-                for (ParameterRow row : parameterRows) {
-                    if (row.isValid()) {
-                        params.add(row.toConfig());
-                    }
-                }
-                return new Config(
-                        params,
-                        Integer.parseInt(iterationsField.getText().trim()),
-                        samplingCombo.getValue(),
-                        Long.parseLong(seedField.getText().trim())
-                );
-            }
-            return null;
-        });
+        setStandardContent(content);
     }
 
-    private boolean isInvalid() {
-        return !getValidationMessage().isEmpty();
+    @Override
+    protected Config buildResult() {
+        List<ParameterConfig> params = new ArrayList<>();
+        for (ParameterRow row : parameterRows) {
+            if (row.isValid()) {
+                params.add(row.toConfig());
+            }
+        }
+        return new Config(
+                params,
+                Integer.parseInt(iterationsField.getText().trim()),
+                samplingCombo.getValue(),
+                Long.parseLong(seedField.getText().trim())
+        );
     }
 
     private String getValidationMessage() {

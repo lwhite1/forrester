@@ -5,9 +5,16 @@ import systems.courant.sd.app.LastDirectoryStore;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.Node;
 import javafx.scene.SnapshotParameters;
+import javafx.scene.chart.LineChart;
+import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Alert;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.image.WritableImage;
+import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
 
@@ -148,6 +155,83 @@ public final class ChartUtils {
     @FunctionalInterface
     public interface CsvFileWriter {
         void write(File file) throws IOException;
+    }
+
+    /**
+     * Creates a LineChart with standard configuration: no symbols, no animation,
+     * no legend, auto-ranging axes.
+     */
+    public static LineChart<Number, Number> createLineChart(String xLabel, String yLabel) {
+        NumberAxis xAxis = new NumberAxis();
+        xAxis.setLabel(xLabel);
+        NumberAxis yAxis = new NumberAxis();
+        yAxis.setLabel(yLabel);
+        LineChart<Number, Number> chart = new LineChart<>(xAxis, yAxis);
+        chart.setCreateSymbols(false);
+        chart.setAnimated(false);
+        chart.setLegendVisible(false);
+        return chart;
+    }
+
+    /**
+     * Attaches a context menu with the given items to a chart node.
+     */
+    public static void attachContextMenu(Node node, MenuItem... items) {
+        ContextMenu menu = new ContextMenu(items);
+        node.setOnContextMenuRequested(e -> menu.show(node, e.getScreenX(), e.getScreenY()));
+    }
+
+    /**
+     * Creates a "Save as PNG..." menu item for a chart node.
+     */
+    public static MenuItem createPngMenuItem(Node chartNode, String defaultFilename,
+                                              java.util.function.Supplier<Window> owner) {
+        MenuItem item = new MenuItem("Save as PNG...");
+        item.setOnAction(e -> saveNodeAsPng(chartNode, defaultFilename, owner.get()));
+        return item;
+    }
+
+    /**
+     * Creates a CSV export menu item.
+     */
+    public static MenuItem createCsvMenuItem(String label, String defaultFilename,
+                                              java.util.function.Supplier<Window> owner,
+                                              CsvFileWriter writer) {
+        MenuItem item = new MenuItem(label);
+        item.setOnAction(e -> showCsvSaveDialog(label, defaultFilename, owner.get(), writer));
+        return item;
+    }
+
+    /**
+     * Builds a scrollable sidebar with checkboxes to toggle series visibility,
+     * color-coded to match the series colors.
+     */
+    public static ScrollPane buildSeriesToggleSidebar(
+            List<XYChart.Series<Number, Number>> allSeries) {
+        VBox sidebar = new VBox(6);
+        sidebar.setPadding(new javafx.geometry.Insets(10));
+        for (int i = 0; i < allSeries.size(); i++) {
+            XYChart.Series<Number, Number> series = allSeries.get(i);
+            String color = SERIES_COLORS.get(i % SERIES_COLORS.size());
+            CheckBox cb = new CheckBox(series.getName());
+            cb.setSelected(true);
+            cb.setStyle("-fx-text-fill: " + color + ";");
+            cb.selectedProperty().addListener((obs, wasSelected, isSelected) -> {
+                if (series.getNode() != null) {
+                    series.getNode().setVisible(isSelected);
+                }
+                series.getData().forEach(d -> {
+                    if (d.getNode() != null) {
+                        d.getNode().setVisible(isSelected);
+                    }
+                });
+            });
+            sidebar.getChildren().add(cb);
+        }
+        ScrollPane scroll = new ScrollPane(sidebar);
+        scroll.setFitToWidth(true);
+        scroll.setPrefWidth(180);
+        return scroll;
     }
 
     public static String formatNumber(double value) {

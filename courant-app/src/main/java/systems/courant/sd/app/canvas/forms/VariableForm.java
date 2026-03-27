@@ -87,8 +87,7 @@ public class VariableForm implements ElementForm {
     }
 
     private void commitComment(TextArea area) {
-        String text = area.getText().trim();
-        String comment = text.isEmpty() ? null : text;
+        String comment = FormFieldBuilder.normalizeToNull(area.getText());
         Optional<VariableDef> varOpt = ctx.getEditor().getVariableByName(ctx.getElementName());
         if (varOpt.isEmpty() || Objects.equals(comment, varOpt.get().comment())) {
             return;
@@ -138,8 +137,7 @@ public class VariableForm implements ElementForm {
     }
 
     private void commitUnit(ComboBox<String> box) {
-        String raw = box.getValue() != null ? box.getValue().trim() : "";
-        String unit = raw.isEmpty() ? null : raw;
+        String unit = FormFieldBuilder.normalizeToNull(box.getValue());
         Optional<VariableDef> varOpt = ctx.getEditor().getVariableByName(ctx.getElementName());
         if (varOpt.isPresent() && Objects.equals(unit, varOpt.get().unit())) {
             return;
