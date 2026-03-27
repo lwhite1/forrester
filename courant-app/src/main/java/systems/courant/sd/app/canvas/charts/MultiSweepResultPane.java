@@ -7,11 +7,8 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.scene.chart.LineChart;
-import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
@@ -22,10 +19,12 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.stage.Window;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
 import systems.courant.sd.app.canvas.ChartUtils;
 import systems.courant.sd.app.canvas.ClipboardExporter;
 
@@ -39,8 +38,6 @@ public class MultiSweepResultPane extends BorderPane {
 
     private final MultiSweepResult result;
     private final String timeStepLabel;
-    private LineChart<Number, Number> currentChart;
-
     public MultiSweepResultPane(MultiSweepResult result, String timeStepLabel) {
         this.result = result;
         this.timeStepLabel = timeStepLabel;
@@ -92,13 +89,12 @@ public class MultiSweepResultPane extends BorderPane {
 
         table.setItems(FXCollections.observableArrayList(result.getResults()));
 
-        ContextMenu contextMenu = new ContextMenu();
-        MenuItem exportSummary = new MenuItem("Export CSV (Summary)...");
-        exportSummary.setOnAction(e -> exportSummaryCsv());
+        MenuItem exportSummary = ChartUtils.createCsvMenuItem("Export CSV (Summary)...",
+                "multi_sweep_summary.csv", this::getOwnerWindow,
+                file -> result.writeSummaryCsv(file.getAbsolutePath()));
         MenuItem copySummary = new MenuItem("Copy to Clipboard (Summary)");
         copySummary.setOnAction(e -> ClipboardExporter.copyMultiSweepSummary(result));
-        contextMenu.getItems().addAll(exportSummary, copySummary);
-        table.setContextMenu(contextMenu);
+        ChartUtils.attachContextMenu(table, exportSummary, copySummary);
 
         return table;
     }
@@ -153,15 +149,7 @@ public class MultiSweepResultPane extends BorderPane {
     }
 
     private BorderPane buildRunChart(RunResult run) {
-        NumberAxis xAxis = new NumberAxis();
-        xAxis.setLabel(timeStepLabel);
-        NumberAxis yAxis = new NumberAxis();
-        yAxis.setLabel("Value");
-
-        LineChart<Number, Number> chart = new LineChart<>(xAxis, yAxis);
-        chart.setCreateSymbols(false);
-        chart.setAnimated(false);
-        chart.setLegendVisible(false);
+        LineChart<Number, Number> chart = ChartUtils.createLineChart(timeStepLabel, "Value");
 
         List<String> allNames = new ArrayList<>();
         allNames.addAll(run.getStockNames());
@@ -190,43 +178,16 @@ public class MultiSweepResultPane extends BorderPane {
 
         chart.getData().addAll(allSeries);
         ChartUtils.applySeriesColors(allSeries);
-        this.currentChart = chart;
 
-        VBox sidebar = new VBox(6);
-        sidebar.setPadding(new Insets(10));
 
-        for (int i = 0; i < allSeries.size(); i++) {
-            XYChart.Series<Number, Number> series = allSeries.get(i);
-            String color = ChartUtils.SERIES_COLORS.get(i % ChartUtils.SERIES_COLORS.size());
+        ScrollPane sidebarScroll = ChartUtils.buildSeriesToggleSidebar(allSeries);
 
-            CheckBox cb = new CheckBox(series.getName());
-            cb.setSelected(true);
-            cb.setStyle("-fx-text-fill: " + color + ";");
-            cb.selectedProperty().addListener((obs, wasSelected, isSelected) -> {
-                if (series.getNode() != null) {
-                    series.getNode().setVisible(isSelected);
-                }
-                series.getData().forEach(d -> {
-                    if (d.getNode() != null) {
-                        d.getNode().setVisible(isSelected);
-                    }
-                });
-            });
-            sidebar.getChildren().add(cb);
-        }
-
-        ScrollPane sidebarScroll = new ScrollPane(sidebar);
-        sidebarScroll.setFitToWidth(true);
-        sidebarScroll.setPrefWidth(180);
-
-        ContextMenu contextMenu = new ContextMenu();
-        MenuItem saveItem = new MenuItem("Save as PNG...");
-        saveItem.setOnAction(e -> saveChartAsPng());
-        MenuItem exportTs = new MenuItem("Export CSV (Time Series)...");
-        exportTs.setOnAction(e -> exportTimeSeriesCsv());
-        contextMenu.getItems().addAll(saveItem, exportTs);
-        chart.setOnContextMenuRequested(e ->
-                contextMenu.show(chart, e.getScreenX(), e.getScreenY()));
+        MenuItem saveItem = ChartUtils.createPngMenuItem(chart, "multi_sweep_chart.png",
+                this::getOwnerWindow);
+        MenuItem exportTs = ChartUtils.createCsvMenuItem("Export CSV (Time Series)...",
+                "multi_sweep_timeseries.csv", this::getOwnerWindow,
+                file -> result.writeTimeSeriesCsv(file.getAbsolutePath()));
+        ChartUtils.attachContextMenu(chart, saveItem, exportTs);
 
         BorderPane chartPane = new BorderPane();
         chartPane.setCenter(chart);
@@ -234,20 +195,7 @@ public class MultiSweepResultPane extends BorderPane {
         return chartPane;
     }
 
-    private void saveChartAsPng() {
-        ChartUtils.saveNodeAsPng(currentChart, "multi_sweep_chart.png",
-                getScene() != null ? getScene().getWindow() : null);
-    }
-
-    private void exportSummaryCsv() {
-        ChartUtils.showCsvSaveDialog("Export Summary CSV", "multi_sweep_summary.csv",
-                getScene() != null ? getScene().getWindow() : null,
-                file -> result.writeSummaryCsv(file.getAbsolutePath()));
-    }
-
-    private void exportTimeSeriesCsv() {
-        ChartUtils.showCsvSaveDialog("Export Time Series CSV", "multi_sweep_timeseries.csv",
-                getScene() != null ? getScene().getWindow() : null,
-                file -> result.writeTimeSeriesCsv(file.getAbsolutePath()));
+    private Window getOwnerWindow() {
+        return getScene() != null ? getScene().getWindow() : null;
     }
 }

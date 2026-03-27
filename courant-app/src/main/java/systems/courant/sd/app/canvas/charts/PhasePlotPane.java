@@ -7,7 +7,6 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tooltip;
@@ -16,6 +15,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
+import javafx.stage.Window;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -139,19 +139,16 @@ public class PhasePlotPane extends BorderPane {
         String xUnit = units.getOrDefault(xVar, "");
         String yUnit = units.getOrDefault(yVar, "");
 
-        NumberAxis xAxis = new NumberAxis();
-        xAxis.setLabel(xUnit.isEmpty() ? xVar : xVar + " (" + xUnit + ")");
-        xAxis.setForceZeroInRange(false);
+        String xLabel = xUnit.isEmpty() ? xVar : xVar + " (" + xUnit + ")";
+        String yLabel = yUnit.isEmpty() ? yVar : yVar + " (" + yUnit + ")";
 
-        NumberAxis yAxis = new NumberAxis();
-        yAxis.setLabel(yUnit.isEmpty() ? yVar : yVar + " (" + yUnit + ")");
-        yAxis.setForceZeroInRange(false);
-
-        chart = new LineChart<>(xAxis, yAxis);
+        chart = ChartUtils.createLineChart(xLabel, yLabel);
         chart.setId("phasePlotChart");
         chart.setCreateSymbols(true);
-        chart.setAnimated(false);
-        chart.setLegendVisible(false);
+
+        // Phase plots need axes that don't force zero in range
+        ((NumberAxis) chart.getXAxis()).setForceZeroInRange(false);
+        ((NumberAxis) chart.getYAxis()).setForceZeroInRange(false);
 
         // Ghost trajectories (rendered first, behind current)
         for (GhostRun ghost : ghostRuns) {
@@ -162,12 +159,9 @@ public class PhasePlotPane extends BorderPane {
         addCurrentTrajectory(xVar, yVar);
 
         // Context menu for export
-        ContextMenu contextMenu = new ContextMenu();
-        MenuItem saveItem = new MenuItem("Save as PNG...");
-        saveItem.setOnAction(e -> saveChartAsPng());
-        contextMenu.getItems().add(saveItem);
-        chart.setOnContextMenuRequested(e ->
-                contextMenu.show(chart, e.getScreenX(), e.getScreenY()));
+        MenuItem saveItem = ChartUtils.createPngMenuItem(chart, "phase_plot.png",
+                this::getOwnerWindow);
+        ChartUtils.attachContextMenu(chart, saveItem);
 
         setCenter(chart);
     }
@@ -265,8 +259,7 @@ public class PhasePlotPane extends BorderPane {
         }
     }
 
-    private void saveChartAsPng() {
-        ChartUtils.saveNodeAsPng(chart, "phase_plot.png",
-                getScene() != null ? getScene().getWindow() : null);
+    private Window getOwnerWindow() {
+        return getScene() != null ? getScene().getWindow() : null;
     }
 }

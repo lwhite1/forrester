@@ -6,14 +6,13 @@ import systems.courant.sd.sweep.RunResult;
 
 import javafx.geometry.Insets;
 import javafx.scene.chart.LineChart;
-import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
-import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
+import javafx.stage.Window;
 
 import java.util.List;
 import java.util.Map;
@@ -66,16 +65,14 @@ public class CalibrationResultPane extends BorderPane {
         RunResult bestRun = result.getBestRunResult();
         chart = buildChart(bestRun, fitTargets);
 
-        ContextMenu contextMenu = new ContextMenu();
-        MenuItem saveItem = new MenuItem("Save as PNG...");
-        saveItem.setOnAction(e -> saveChartAsPng());
-        MenuItem exportCsv = new MenuItem("Export CSV (Best Run)...");
-        exportCsv.setOnAction(e -> exportBestRunCsv());
+        MenuItem saveItem = ChartUtils.createPngMenuItem(chart, "calibration_chart.png",
+                this::getOwnerWindow);
+        MenuItem exportCsv = ChartUtils.createCsvMenuItem("Export CSV (Best Run)...",
+                "calibration_best_run.csv", this::getOwnerWindow,
+                file -> CsvExportHelper.writeRunResult(file, result.getBestRunResult()));
         MenuItem copyItem = new MenuItem("Copy to Clipboard (Best Run)");
         copyItem.setOnAction(e -> ClipboardExporter.copyCalibrationBestRun(result));
-        contextMenu.getItems().addAll(saveItem, exportCsv, copyItem);
-        chart.setOnContextMenuRequested(e ->
-                contextMenu.show(chart, e.getScreenX(), e.getScreenY()));
+        ChartUtils.attachContextMenu(chart, saveItem, exportCsv, copyItem);
 
         VBox topSection = new VBox(summaryGrid);
         setTop(topSection);
@@ -84,14 +81,7 @@ public class CalibrationResultPane extends BorderPane {
 
     private LineChart<Number, Number> buildChart(RunResult bestRun,
                                                   List<CalibrateDialog.FitTarget> fitTargets) {
-        NumberAxis xAxis = new NumberAxis();
-        xAxis.setLabel(timeStepLabel);
-        NumberAxis yAxis = new NumberAxis();
-        yAxis.setLabel("Value");
-
-        LineChart<Number, Number> lineChart = new LineChart<>(xAxis, yAxis);
-        lineChart.setCreateSymbols(false);
-        lineChart.setAnimated(false);
+        LineChart<Number, Number> lineChart = ChartUtils.createLineChart(timeStepLabel, "Value");
 
         int colorIndex = 0;
         List<String> colors = ChartUtils.SERIES_COLORS;
@@ -140,15 +130,8 @@ public class CalibrationResultPane extends BorderPane {
         }
     }
 
-    private void saveChartAsPng() {
-        ChartUtils.saveNodeAsPng(chart, "calibration_chart.png",
-                getScene() != null ? getScene().getWindow() : null);
-    }
-
-    private void exportBestRunCsv() {
-        ChartUtils.showCsvSaveDialog("Export Best Run CSV", "calibration_best_run.csv",
-                getScene() != null ? getScene().getWindow() : null,
-                file -> CsvExportHelper.writeRunResult(file, result.getBestRunResult()));
+    private Window getOwnerWindow() {
+        return getScene() != null ? getScene().getWindow() : null;
     }
 
     private static Label boldLabel(String text) {

@@ -9,7 +9,6 @@ import javafx.geometry.Insets;
 import javafx.scene.chart.AreaChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
-import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TitledPane;
@@ -18,6 +17,7 @@ import javafx.beans.property.SimpleDoubleProperty;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.Priority;
+import javafx.stage.Window;
 
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
@@ -80,14 +80,28 @@ public final class LoopDominancePane extends VBox {
 
         VBox.setVgrow(chartWithCursor, Priority.ALWAYS);
 
-        ContextMenu contextMenu = new ContextMenu();
-        MenuItem saveItem = new MenuItem("Save as PNG...");
-        saveItem.setOnAction(e -> saveChartAsPng());
-        MenuItem exportCsv = new MenuItem("Export CSV...");
-        exportCsv.setOnAction(e -> exportCsv());
-        contextMenu.getItems().addAll(saveItem, exportCsv);
-        chart.setOnContextMenuRequested(e ->
-                contextMenu.show(chart, e.getScreenX(), e.getScreenY()));
+        MenuItem saveItem = ChartUtils.createPngMenuItem(chart, "loop_dominance_chart.png",
+                this::getOwnerWindow);
+        MenuItem exportCsv = ChartUtils.createCsvMenuItem("Export CSV...",
+                "loop_dominance.csv", this::getOwnerWindow, file -> {
+                    try (CSVWriter writer = new CSVWriter(new OutputStreamWriter(
+                            Files.newOutputStream(file.toPath()), StandardCharsets.UTF_8))) {
+                        List<String> header = new java.util.ArrayList<>();
+                        header.add("Step");
+                        header.addAll(dominance.loopLabels());
+                        writer.writeNext(header.toArray(new String[0]));
+
+                        for (int step = 0; step < dominance.stepCount(); step++) {
+                            String[] row = new String[dominance.loopCount() + 1];
+                            row[0] = String.valueOf(step);
+                            for (int loop = 0; loop < dominance.loopCount(); loop++) {
+                                row[loop + 1] = String.valueOf(dominance.score(loop, step));
+                            }
+                            writer.writeNext(row);
+                        }
+                    }
+                });
+        ChartUtils.attachContextMenu(chart, saveItem, exportCsv);
 
         Label helpText = new Label(
                 "This chart shows which feedback loop is driving the most change at each "
@@ -116,31 +130,8 @@ public final class LoopDominancePane extends VBox {
                 : new SimpleDoubleProperty(Double.NaN);
     }
 
-    private void saveChartAsPng() {
-        ChartUtils.saveNodeAsPng(chart, "loop_dominance_chart.png",
-                getScene() != null ? getScene().getWindow() : null);
-    }
-
-    private void exportCsv() {
-        ChartUtils.showCsvSaveDialog("Export Loop Dominance CSV", "loop_dominance.csv",
-                getScene() != null ? getScene().getWindow() : null, file -> {
-                    try (CSVWriter writer = new CSVWriter(new OutputStreamWriter(
-                            Files.newOutputStream(file.toPath()), StandardCharsets.UTF_8))) {
-                        List<String> header = new java.util.ArrayList<>();
-                        header.add("Step");
-                        header.addAll(dominance.loopLabels());
-                        writer.writeNext(header.toArray(new String[0]));
-
-                        for (int step = 0; step < dominance.stepCount(); step++) {
-                            String[] row = new String[dominance.loopCount() + 1];
-                            row[0] = String.valueOf(step);
-                            for (int loop = 0; loop < dominance.loopCount(); loop++) {
-                                row[loop + 1] = String.valueOf(dominance.score(loop, step));
-                            }
-                            writer.writeNext(row);
-                        }
-                    }
-                });
+    private Window getOwnerWindow() {
+        return getScene() != null ? getScene().getWindow() : null;
     }
 
     private void applyLoopColors(AreaChart<Number, Number> chart,
