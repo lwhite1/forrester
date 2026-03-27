@@ -341,6 +341,9 @@ public class ModelDefinitionSerializer {
                         epNode.put("width", ep.width());
                         epNode.put("height", ep.height());
                     }
+                    if (ep.hasColor()) {
+                        epNode.put("color", ep.color());
+                    }
                     elements.add(epNode);
                 }
                 node.set("elements", elements);
@@ -481,6 +484,9 @@ public class ModelDefinitionSerializer {
             }
             if (link.hasBias()) {
                 node.put("bias", link.bias());
+            }
+            if (link.hasColor()) {
+                node.put("color", link.color());
             }
             arr.add(node);
         }
@@ -723,13 +729,15 @@ public class ModelDefinitionSerializer {
                         ? n.get("strength").asDouble() : Double.NaN;
                 double bias = n.has("bias")
                         ? n.get("bias").asDouble() : 0.0;
+                String linkColor = textOrNull(n, "color");
                 causalLinks.add(new CausalLinkDef(
                         requiredText(n, "from"),
                         requiredText(n, "to"),
                         polarity,
                         textOrNull(n, "comment"),
                         strength,
-                        bias));
+                        bias,
+                        linkColor));
             }
         }
         return causalLinks;
@@ -806,12 +814,13 @@ public class ModelDefinitionSerializer {
             for (JsonNode ep : n.get("elements")) {
                 double w = ep.has("width") ? ep.get("width").asDouble() : 0;
                 double h = ep.has("height") ? ep.get("height").asDouble() : 0;
+                String color = textOrNull(ep, "color");
                 elements.add(new ElementPlacement(
                         requiredText(ep, "name"),
                         ElementType.fromLabel(requiredText(ep, "type")),
                         requiredDouble(ep, "x"),
                         requiredDouble(ep, "y"),
-                        w, h));
+                        w, h, color));
             }
         }
         List<ConnectorRoute> connectors = new ArrayList<>();

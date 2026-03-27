@@ -1,6 +1,7 @@
 package systems.courant.sd.app.canvas.renderers;
 
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
 
 import systems.courant.sd.app.canvas.CanvasState;
 import systems.courant.sd.app.canvas.LayoutMetrics;
@@ -22,7 +23,8 @@ final class FlowRenderer implements ElementTypeRenderer {
                         .map(DelayDetector::equationContainsDelay).orElse(false);
         List<String> subscripts = editor.getElementSubscripts(name);
         double size = LayoutMetrics.FLOW_INDICATOR_SIZE;
+        Color customColor = canvasState.getColor(name).map(Color::web).orElse(null);
         ElementRenderer.drawFlow(gc, name, hasDelay, subscripts,
-                cx - size / 2, cy - size / 2, size, size);
+                cx - size / 2, cy - size / 2, size, size, customColor);
     }
 }

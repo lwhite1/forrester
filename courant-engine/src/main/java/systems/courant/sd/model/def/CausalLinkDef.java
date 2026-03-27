@@ -11,6 +11,7 @@ package systems.courant.sd.model.def;
  * @param comment optional annotation (e.g., "after a delay")
  * @param strength curve strength override ({@code NaN} = auto-computed curvature)
  * @param bias control point offset along the chord direction ({@code 0.0} = centered)
+ * @param color optional custom color as a hex string (e.g. "#FF0000"), or null for default
  */
 public record CausalLinkDef(
         String from,
@@ -18,7 +19,8 @@ public record CausalLinkDef(
         Polarity polarity,
         String comment,
         double strength,
-        double bias
+        double bias,
+        String color
 ) {
 
     public enum Polarity {
@@ -87,70 +89,74 @@ public record CausalLinkDef(
     }
 
     /**
-     * Creates a causal link with default (auto) curve strength and no bias.
-     *
-     * @param from     the source variable name
-     * @param to       the target variable name
-     * @param polarity the direction of influence
-     * @param comment  optional annotation
-     * @param strength curve strength override
+     * Returns true if this link has a custom color.
+     */
+    public boolean hasColor() {
+        return color != null && !color.isBlank();
+    }
+
+    /**
+     * Backward-compatible constructor without color.
      */
     public CausalLinkDef(String from, String to, Polarity polarity, String comment,
-                          double strength) {
-        this(from, to, polarity, comment, strength, 0.0);
+                          double strength, double bias) {
+        this(from, to, polarity, comment, strength, bias, null);
     }
 
     /**
      * Creates a causal link with default (auto) curve strength and no bias.
-     *
-     * @param from     the source variable name
-     * @param to       the target variable name
-     * @param polarity the direction of influence
-     * @param comment  optional annotation
+     */
+    public CausalLinkDef(String from, String to, Polarity polarity, String comment,
+                          double strength) {
+        this(from, to, polarity, comment, strength, 0.0, null);
+    }
+
+    /**
+     * Creates a causal link with default (auto) curve strength and no bias.
      */
     public CausalLinkDef(String from, String to, Polarity polarity, String comment) {
-        this(from, to, polarity, comment, Double.NaN, 0.0);
+        this(from, to, polarity, comment, Double.NaN, 0.0, null);
     }
 
     /**
      * Creates a causal link without a comment.
-     *
-     * @param from     the source variable name
-     * @param to       the target variable name
-     * @param polarity the direction of influence
      */
     public CausalLinkDef(String from, String to, Polarity polarity) {
-        this(from, to, polarity, null, Double.NaN, 0.0);
+        this(from, to, polarity, null, Double.NaN, 0.0, null);
     }
 
     /**
      * Creates a causal link with {@link Polarity#UNKNOWN} polarity and no comment.
-     *
-     * @param from the source variable name
-     * @param to   the target variable name
      */
     public CausalLinkDef(String from, String to) {
-        this(from, to, Polarity.UNKNOWN, null, Double.NaN, 0.0);
+        this(from, to, Polarity.UNKNOWN, null, Double.NaN, 0.0, null);
     }
 
     /**
-     * Returns a copy of this link with a different strength value, preserving bias.
+     * Returns a copy of this link with a different strength value, preserving bias and color.
      */
     public CausalLinkDef withStrength(double newStrength) {
-        return new CausalLinkDef(from, to, polarity, comment, newStrength, bias);
+        return new CausalLinkDef(from, to, polarity, comment, newStrength, bias, color);
     }
 
     /**
-     * Returns a copy of this link with a different bias value, preserving strength.
+     * Returns a copy of this link with a different bias value, preserving strength and color.
      */
     public CausalLinkDef withBias(double newBias) {
-        return new CausalLinkDef(from, to, polarity, comment, strength, newBias);
+        return new CausalLinkDef(from, to, polarity, comment, strength, newBias, color);
     }
 
     /**
-     * Returns a copy of this link with both strength and bias replaced.
+     * Returns a copy of this link with both strength and bias replaced, preserving color.
      */
     public CausalLinkDef withStrengthAndBias(double newStrength, double newBias) {
-        return new CausalLinkDef(from, to, polarity, comment, newStrength, newBias);
+        return new CausalLinkDef(from, to, polarity, comment, newStrength, newBias, color);
+    }
+
+    /**
+     * Returns a copy of this link with a different color, preserving all other fields.
+     */
+    public CausalLinkDef withColor(String newColor) {
+        return new CausalLinkDef(from, to, polarity, comment, strength, bias, newColor);
     }
 }

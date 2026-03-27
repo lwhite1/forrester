@@ -37,6 +37,7 @@ public class CanvasState {
 
     private final Map<String, Position> positions = new LinkedHashMap<>();
     private final Map<String, Size> sizes = new LinkedHashMap<>();
+    private final Map<String, String> colors = new LinkedHashMap<>();
     private final Map<String, ElementType> types = new LinkedHashMap<>();
     private final Set<String> selection = new LinkedHashSet<>();
     private final SequencedSet<String> drawOrder = new LinkedHashSet<>();
@@ -53,6 +54,7 @@ public class CanvasState {
         positions.clear();
         types.clear();
         sizes.clear();
+        colors.clear();
         selection.clear();
         cldLoopInfo = null;
         loopNames.clear();
@@ -65,6 +67,9 @@ public class CanvasState {
             for (ElementPlacement ep : view.elements()) {
                 positions.put(ep.name(), new Position(ep.x(), ep.y()));
                 types.put(ep.name(), ep.type());
+                if (ep.hasColor()) {
+                    colors.put(ep.name(), ep.color());
+                }
                 if (ep.hasCustomSize()) {
                     sizes.put(ep.name(), new Size(ep.width(), ep.height()));
                 } else if (ep.type() == ElementType.CLD_VARIABLE) {
@@ -147,6 +152,27 @@ public class CanvasState {
     public boolean hasCustomSize(String name) {
         Size size = sizes.get(name);
         return size != null && size.width() > 0 && size.height() > 0;
+    }
+
+    /**
+     * Returns the custom color hex string for the named element, or empty if using default.
+     */
+    public Optional<String> getColor(String name) {
+        return Optional.ofNullable(colors.get(name));
+    }
+
+    /**
+     * Sets or clears the custom color for the named element.
+     *
+     * @param name the element name
+     * @param hex  a hex color string (e.g. "#FF0000"), or null to reset to default
+     */
+    public void setColor(String name, String hex) {
+        if (hex == null) {
+            colors.remove(name);
+        } else {
+            colors.put(name, hex);
+        }
     }
 
     /**
@@ -347,11 +373,13 @@ public class CanvasState {
             }
             Position pos = positions.get(name);
             Size size = sizes.get(name);
+            String color = colors.get(name);
             if (size != null && size.width() > 0 && size.height() > 0) {
                 placements.add(new ElementPlacement(
-                        name, type, pos.x(), pos.y(), size.width(), size.height()));
+                        name, type, pos.x(), pos.y(), size.width(), size.height(), color));
             } else {
-                placements.add(new ElementPlacement(name, type, pos.x(), pos.y()));
+                placements.add(new ElementPlacement(
+                        name, type, pos.x(), pos.y(), 0, 0, color));
             }
         }
         return new ViewDef(viewName, placements, List.of(), List.of(), loopNames);
@@ -364,6 +392,7 @@ public class CanvasState {
         positions.remove(name);
         types.remove(name);
         sizes.remove(name);
+        colors.remove(name);
         synchronized (drawOrderLock) {
             drawOrder.remove(name);
             drawOrderCache = null;

@@ -1,6 +1,7 @@
 package systems.courant.sd.app.canvas.renderers;
 
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
 
 import systems.courant.sd.app.canvas.CanvasState;
 import systems.courant.sd.app.canvas.CausalLinkGeometry;
@@ -56,12 +57,14 @@ final class CausalLinkPass implements RenderPass {
             double fromX = canvasState.getX(fromName);
             double fromY = canvasState.getY(fromName);
 
+            Color customColor = link.hasColor() ? Color.web(link.color()) : null;
+
             // Self-loop: use cubic Bézier loop above the element
             if (fromName.equals(toName)) {
                 double halfW = LayoutMetrics.effectiveWidth(canvasState, fromName) / 2;
                 double halfH = LayoutMetrics.effectiveHeight(canvasState, fromName) / 2;
                 double[] loopPts = CausalLinkGeometry.selfLoopPoints(fromX, fromY, halfW, halfH, loopCtx, fromName);
-                ConnectionRenderer.drawCausalLinkSelfLoop(gc, loopPts, link.polarity());
+                ConnectionRenderer.drawCausalLinkSelfLoop(gc, loopPts, link.polarity(), customColor);
                 if (dim) {
                     gc.restore();
                 }
@@ -83,7 +86,7 @@ final class CausalLinkPass implements RenderPass {
                     canvasState, toName, cp.x(), cp.y());
 
             ConnectionRenderer.drawCausalLink(gc, clippedFrom.x(), clippedFrom.y(),
-                    clippedTo.x(), clippedTo.y(), cp, link.polarity());
+                    clippedTo.x(), clippedTo.y(), cp, link.polarity(), customColor);
             if (dim) {
                 gc.restore();
             }

@@ -1,6 +1,7 @@
 package systems.courant.sd.app.canvas.renderers;
 
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
 
 import java.util.List;
 
@@ -33,7 +34,8 @@ final class ModuleRenderer implements ElementTypeRenderer {
                         .map(PortDef::name).toList();
             }
         }
+        Color customColor = canvasState.getColor(name).map(Color::web).orElse(null);
         ElementRenderer.drawModule(gc, name, inputPorts, outputPorts,
-                cx - w / 2, cy - h / 2, w, h);
+                cx - w / 2, cy - h / 2, w, h, customColor);
     }
 }

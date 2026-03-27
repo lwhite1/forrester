@@ -158,15 +158,17 @@ public final class SelectionRenderer {
     }
 
     /**
-     * Draws a circular drag handle for adjusting causal link curvature.
+     * Draws a rectangular drag handle for adjusting causal link curvature,
+     * matching the Vensim-style control point indicator.
      */
     public static void drawCurveHandle(GraphicsContext gc, double x, double y, double radius) {
+        double size = radius * 2;
         gc.setFill(Color.WHITE);
-        gc.fillOval(x - radius, y - radius, radius * 2, radius * 2);
+        gc.fillRect(x - radius, y - radius, size, size);
         gc.setStroke(SELECTION_COLOR);
         gc.setLineWidth(1.5);
         gc.setLineDashes();
-        gc.strokeOval(x - radius, y - radius, radius * 2, radius * 2);
+        gc.strokeRect(x - radius, y - radius, size, size);
     }
 
     private static void drawHandle(GraphicsContext gc, double x, double y) {

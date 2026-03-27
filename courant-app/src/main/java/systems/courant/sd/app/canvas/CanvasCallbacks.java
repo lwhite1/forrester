@@ -179,4 +179,14 @@ final class CanvasCallbacks implements InlineEditController.Callbacks,
     public void showUses(String name) {
         canvas.analysis().showUses(name);
     }
+
+    @Override
+    public void setElementColor(String elementName, String hexColor) {
+        canvas.canvasState().setColor(elementName, hexColor);
+    }
+
+    @Override
+    public void setCausalLinkColor(ConnectionId link, String hexColor) {
+        canvas.getEditor().setCausalLinkColor(link.from(), link.to(), hexColor);
+    }
 }

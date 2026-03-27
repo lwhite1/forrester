@@ -66,20 +66,32 @@ public final class ElementRenderer {
     public static void drawStock(GraphicsContext gc, String name, String unit,
                                  List<String> subscripts,
                                  double x, double y, double width, double height) {
+        drawStock(gc, name, unit, subscripts, x, y, width, height, null);
+    }
+
+    /**
+     * Draws a stock with an optional custom color override for border and text.
+     */
+    public static void drawStock(GraphicsContext gc, String name, String unit,
+                                 List<String> subscripts,
+                                 double x, double y, double width, double height,
+                                 Color customColor) {
         double r = LayoutMetrics.STOCK_CORNER_RADIUS;
+        Color borderColor = customColor != null ? customColor : ColorPalette.STOCK_BORDER;
+        Color textColor = customColor != null ? customColor : ColorPalette.TEXT;
 
         // Fill
         gc.setFill(ColorPalette.STOCK_FILL);
         gc.fillRoundRect(x, y, width, height, r, r);
 
         // Border
-        gc.setStroke(ColorPalette.STOCK_BORDER);
+        gc.setStroke(borderColor);
         gc.setLineWidth(LayoutMetrics.STOCK_BORDER_WIDTH);
         gc.setLineDashes();
         gc.strokeRoundRect(x, y, width, height, r, r);
 
         // Name centered (truncated to fit)
-        gc.setFill(ColorPalette.TEXT);
+        gc.setFill(textColor);
         gc.setFont(LayoutMetrics.STOCK_NAME_FONT);
         gc.setTextAlign(TextAlignment.CENTER);
         gc.setTextBaseline(VPos.CENTER);
@@ -88,7 +100,7 @@ public final class ElementRenderer {
 
         // Unit badge centered below name
         if (unit != null && !unit.isBlank()) {
-            gc.setFill(ColorPalette.BADGE_TEXT);
+            gc.setFill(customColor != null ? customColor : ColorPalette.BADGE_TEXT);
             gc.setFont(LayoutMetrics.UNIT_BADGE_FONT);
             gc.setTextAlign(TextAlignment.CENTER);
             gc.setTextBaseline(VPos.BOTTOM);
@@ -115,9 +127,21 @@ public final class ElementRenderer {
     public static void drawFlow(GraphicsContext gc, String name, boolean hasDelay,
                                 List<String> subscripts,
                                 double x, double y, double width, double height) {
+        drawFlow(gc, name, hasDelay, subscripts, x, y, width, height, null);
+    }
+
+    /**
+     * Draws a flow with an optional custom color override for border and text.
+     */
+    public static void drawFlow(GraphicsContext gc, String name, boolean hasDelay,
+                                List<String> subscripts,
+                                double x, double y, double width, double height,
+                                Color customColor) {
         double cx = x + width / 2;
         double cy = y + height / 2;
         double half = Math.min(width, height) / 2;
+        Color borderColor = customColor != null ? customColor : ColorPalette.AUX_BORDER;
+        Color textColor = customColor != null ? customColor : ColorPalette.TEXT;
 
         // Diamond shape (rotated square with rounded appearance)
         double[] xPoints = {cx, cx + half, cx, cx - half};
@@ -125,13 +149,13 @@ public final class ElementRenderer {
 
         gc.setFill(ColorPalette.ELEMENT_FILL);
         gc.fillPolygon(xPoints, yPoints, 4);
-        gc.setStroke(ColorPalette.AUX_BORDER);
+        gc.setStroke(borderColor);
         gc.setLineWidth(1.5);
         gc.setLineDashes();
         gc.strokePolygon(xPoints, yPoints, 4);
 
         // Name below the diamond (truncated to reasonable width)
-        gc.setFill(ColorPalette.TEXT);
+        gc.setFill(textColor);
         gc.setFont(LayoutMetrics.FLOW_NAME_FONT);
         gc.setTextAlign(TextAlignment.CENTER);
         gc.setTextBaseline(VPos.TOP);
@@ -188,14 +212,26 @@ public final class ElementRenderer {
                                boolean hasDelay, List<String> subscripts,
                                double x, double y, double width, double height,
                                boolean hovered) {
+        drawAux(gc, name, isLiteral, equation, hasDelay, subscripts, x, y, width, height, hovered, null);
+    }
+
+    /**
+     * Draws a variable with an optional custom color override for text.
+     */
+    public static void drawAux(GraphicsContext gc, String name, boolean isLiteral, String equation,
+                               boolean hasDelay, List<String> subscripts,
+                               double x, double y, double width, double height,
+                               boolean hovered, Color customColor) {
         double r = LayoutMetrics.AUX_CORNER_RADIUS;
+        Color textColor = customColor != null ? customColor : ColorPalette.TEXT;
+        Color badgeColor = customColor != null ? customColor : ColorPalette.BADGE_TEXT;
 
         // Fill: hover fill when hovered, subtle gray otherwise
         gc.setFill(hovered ? ColorPalette.HOVER_FILL : ColorPalette.VARIABLE_FILL);
         gc.fillRoundRect(x, y, width, height, r, r);
 
         // Badge top-left: value for literals, "fx" for formulas
-        gc.setFill(ColorPalette.BADGE_TEXT);
+        gc.setFill(badgeColor);
         gc.setFont(LayoutMetrics.BADGE_FONT);
         gc.setTextAlign(TextAlignment.LEFT);
         gc.setTextBaseline(VPos.TOP);
@@ -211,7 +247,7 @@ public final class ElementRenderer {
         }
 
         // Name centered — wrap to two lines if needed
-        gc.setFill(ColorPalette.TEXT);
+        gc.setFill(textColor);
         gc.setFont(LayoutMetrics.AUX_NAME_FONT);
         gc.setTextAlign(TextAlignment.CENTER);
         gc.setTextBaseline(VPos.CENTER);
@@ -237,27 +273,39 @@ public final class ElementRenderer {
     public static void drawModule(GraphicsContext gc, String name,
                                   List<String> inputPorts, List<String> outputPorts,
                                   double x, double y, double width, double height) {
+        drawModule(gc, name, inputPorts, outputPorts, x, y, width, height, null);
+    }
+
+    /**
+     * Draws a module with an optional custom color override for border and text.
+     */
+    public static void drawModule(GraphicsContext gc, String name,
+                                  List<String> inputPorts, List<String> outputPorts,
+                                  double x, double y, double width, double height,
+                                  Color customColor) {
         double r = LayoutMetrics.MODULE_CORNER_RADIUS;
+        Color borderColor = customColor != null ? customColor : ColorPalette.STOCK_BORDER;
+        Color textColor = customColor != null ? customColor : ColorPalette.TEXT;
 
         // Fill
         gc.setFill(ColorPalette.ELEMENT_FILL);
         gc.fillRoundRect(x, y, width, height, r, r);
 
         // Border
-        gc.setStroke(ColorPalette.STOCK_BORDER);
+        gc.setStroke(borderColor);
         gc.setLineWidth(LayoutMetrics.MODULE_BORDER_WIDTH);
         gc.setLineDashes();
         gc.strokeRoundRect(x, y, width, height, r, r);
 
         // Module badge top-left
-        gc.setFill(ColorPalette.BADGE_TEXT);
+        gc.setFill(customColor != null ? customColor : ColorPalette.BADGE_TEXT);
         gc.setFont(LayoutMetrics.BADGE_FONT);
         gc.setTextAlign(TextAlignment.LEFT);
         gc.setTextBaseline(VPos.TOP);
         gc.fillText(BADGE_MODULE, x + 5, y + 3);
 
         // Name centered (truncated to fit)
-        gc.setFill(ColorPalette.TEXT);
+        gc.setFill(textColor);
         gc.setFont(LayoutMetrics.MODULE_NAME_FONT);
         gc.setTextAlign(TextAlignment.CENTER);
         gc.setTextBaseline(VPos.CENTER);
@@ -322,21 +370,32 @@ public final class ElementRenderer {
     public static void drawLookup(GraphicsContext gc, String name,
                                   double x, double y, double width, double height,
                                   boolean hovered) {
+        drawLookup(gc, name, x, y, width, height, hovered, null);
+    }
+
+    /**
+     * Draws a lookup table with an optional custom color override for text.
+     */
+    public static void drawLookup(GraphicsContext gc, String name,
+                                  double x, double y, double width, double height,
+                                  boolean hovered, Color customColor) {
         double r = LayoutMetrics.LOOKUP_CORNER_RADIUS;
+        Color textColor = customColor != null ? customColor : ColorPalette.TEXT;
+        Color badgeColor = customColor != null ? customColor : ColorPalette.BADGE_TEXT;
 
         // Fill: hover fill when hovered, subtle gray otherwise
         gc.setFill(hovered ? ColorPalette.HOVER_FILL : ColorPalette.LOOKUP_FILL);
         gc.fillRoundRect(x, y, width, height, r, r);
 
         // Table badge top-left
-        gc.setFill(ColorPalette.BADGE_TEXT);
+        gc.setFill(badgeColor);
         gc.setFont(LayoutMetrics.BADGE_FONT);
         gc.setTextAlign(TextAlignment.LEFT);
         gc.setTextBaseline(VPos.TOP);
         gc.fillText(BADGE_LOOKUP, x + 4, y + 3);
 
         // Name centered vertically — wrap to two lines if needed
-        gc.setFill(ColorPalette.TEXT);
+        gc.setFill(textColor);
         gc.setFont(LayoutMetrics.LOOKUP_NAME_FONT);
         gc.setTextAlign(TextAlignment.CENTER);
         gc.setTextBaseline(VPos.CENTER);
@@ -352,15 +411,24 @@ public final class ElementRenderer {
      */
     public static void drawComment(GraphicsContext gc, String text,
                                    double x, double y, double width, double height) {
+        drawComment(gc, text, x, y, width, height, null);
+    }
+
+    /**
+     * Draws a comment with an optional custom color override for accent and text.
+     */
+    public static void drawComment(GraphicsContext gc, String text,
+                                   double x, double y, double width, double height,
+                                   Color customColor) {
         double r = LayoutMetrics.COMMENT_CORNER_RADIUS;
 
         // Left accent bar
-        gc.setFill(ColorPalette.COMMENT_ACCENT);
+        gc.setFill(customColor != null ? customColor : ColorPalette.COMMENT_ACCENT);
         gc.fillRect(x, y + r, LayoutMetrics.COMMENT_ACCENT_WIDTH, height - r * 2);
 
         // Text content (word-wrapped, top-left aligned)
         if (text != null && !text.isBlank()) {
-            gc.setFill(ColorPalette.COMMENT_TEXT);
+            gc.setFill(customColor != null ? customColor : ColorPalette.COMMENT_TEXT);
             gc.setFont(LayoutMetrics.COMMENT_TEXT_FONT);
             gc.setTextAlign(TextAlignment.LEFT);
             gc.setTextBaseline(VPos.TOP);
@@ -387,7 +455,16 @@ public final class ElementRenderer {
      */
     public static void drawCldVariable(GraphicsContext gc, String name,
                                        double x, double y, double width, double height) {
-        gc.setFill(ColorPalette.TEXT);
+        drawCldVariable(gc, name, x, y, width, height, null);
+    }
+
+    /**
+     * Draws a CLD variable with an optional custom color override for text.
+     */
+    public static void drawCldVariable(GraphicsContext gc, String name,
+                                       double x, double y, double width, double height,
+                                       Color customColor) {
+        gc.setFill(customColor != null ? customColor : ColorPalette.TEXT);
         gc.setFont(LayoutMetrics.AUX_NAME_FONT);
         gc.setTextAlign(TextAlignment.CENTER);
         gc.setTextBaseline(VPos.CENTER);

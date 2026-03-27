@@ -1,6 +1,7 @@
 package systems.courant.sd.app.canvas.renderers;
 
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
 
 import systems.courant.sd.app.canvas.CanvasState;
 import systems.courant.sd.app.canvas.LayoutMetrics;
@@ -20,6 +21,8 @@ final class StockRenderer implements ElementTypeRenderer {
         double h = LayoutMetrics.effectiveHeight(canvasState, name);
         String unit = editor.getStockUnit(name).orElse(null);
         List<String> subscripts = editor.getElementSubscripts(name);
-        ElementRenderer.drawStock(gc, name, unit, subscripts, cx - w / 2, cy - h / 2, w, h);
+        Color customColor = canvasState.getColor(name).map(Color::web).orElse(null);
+        ElementRenderer.drawStock(gc, name, unit, subscripts, cx - w / 2, cy - h / 2, w, h,
+                customColor);
     }
 }
