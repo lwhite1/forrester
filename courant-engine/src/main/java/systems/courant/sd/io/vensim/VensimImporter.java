@@ -278,12 +278,12 @@ public class VensimImporter extends AbstractModelImporter {
             Matcher m = getDirectPattern.matcher(expression);
             while (m.find()) {
                 int openParen = m.end() - 1;
-                int closeParen = VensimExprTranslator.findMatchingParen(expression, openParen);
+                int closeParen = ExprParsingUtils.findMatchingParen(expression, openParen);
                 if (closeParen <= 0) {
                     continue;
                 }
                 String argsStr = expression.substring(openParen + 1, closeParen);
-                String filePath = VensimExprTranslator.extractFirstArgument(argsStr);
+                String filePath = ExprParsingUtils.extractFirstArgument(argsStr);
                 if (filePath == null || filePath.isBlank() || !resolvedFiles.add(filePath)) {
                     continue;
                 }
@@ -515,7 +515,7 @@ public class VensimImporter extends AbstractModelImporter {
             return;
         }
         int argsStart = m.end();
-        int closeParen = VensimExprTranslator.findMatchingParen(expression, argsStart - 1);
+        int closeParen = ExprParsingUtils.findMatchingParen(expression, argsStart - 1);
         if (closeParen < 0) {
             warnings.add("Malformed INTEG expression for '" + eq.name() + "'");
             return;
@@ -631,7 +631,7 @@ public class VensimImporter extends AbstractModelImporter {
             return;
         }
 
-        java.util.Optional<double[][]> pointsOpt = VensimExprTranslator.parseLookupPoints(expression);
+        java.util.Optional<double[][]> pointsOpt = NameNormalizationStage.parseLookupPoints(expression);
         if (pointsOpt.isEmpty() || pointsOpt.get()[0].length < 2) {
             warnings.add("Could not parse lookup data for '" + displayName + "'");
             return;
