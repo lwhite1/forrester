@@ -1,6 +1,5 @@
 package systems.courant.sd.app.canvas.dialogs;
 
-import systems.courant.sd.app.canvas.HelpContextResolver;
 import systems.courant.sd.sweep.ExtremeConditionFinding;
 import systems.courant.sd.sweep.ExtremeConditionResult;
 
@@ -10,7 +9,6 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
-import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -34,7 +32,7 @@ import systems.courant.sd.app.canvas.Styles;
  * <p>Only one instance may be open per owner window. Use {@link #showOrUpdate} to
  * create a new dialog or refresh and bring an existing one to the front.
  */
-public class ExtremeConditionDialog extends Dialog<Void> {
+public class ExtremeConditionDialog extends ValidatingDialog<Void> {
 
     private static final Map<Stage, ExtremeConditionDialog> OPEN_INSTANCES = new WeakHashMap<>();
 
@@ -95,9 +93,10 @@ public class ExtremeConditionDialog extends Dialog<Void> {
     }
 
     public ExtremeConditionDialog(ExtremeConditionResult result, Stage owner) {
-        HelpContextResolver.addHelpButton(this);
+        super("Extreme Condition Test Results", null);
+        // This is a results-viewer, not a config dialog: replace OK/Cancel with Close
+        getDialogPane().getButtonTypes().setAll(ButtonType.CLOSE);
         initModality(Modality.NONE);
-        setTitle("Extreme Condition Test Results");
         this.currentResult = result;
 
         table = new TableView<>();
@@ -173,11 +172,13 @@ public class ExtremeConditionDialog extends Dialog<Void> {
         getDialogPane().setContent(root);
         getDialogPane().setPrefWidth(Styles.screenAwareWidth(800));
         getDialogPane().setPrefHeight(Styles.screenAwareHeight(500));
-        getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
-
-        setResultConverter(button -> null);
 
         setOnHidden(e -> OPEN_INSTANCES.values().remove(this));
+    }
+
+    @Override
+    protected Void buildResult() {
+        return null;
     }
 
     /**

@@ -3,27 +3,25 @@ package systems.courant.sd.app.canvas.dialogs;
 import systems.courant.sd.model.def.ReferenceDataset;
 
 import javafx.geometry.Insets;
-import javafx.scene.control.ButtonBar;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import systems.courant.sd.app.canvas.HelpContextResolver;
-import systems.courant.sd.app.canvas.Styles;
 
 /**
  * Dialog for mapping CSV column names to model variable names. Each CSV column
  * is shown with a dropdown to select the corresponding model variable or
  * "(skip)" to exclude it from the imported dataset.
  */
-public class ColumnMappingDialog extends Dialog<ReferenceDataset> {
+public class ColumnMappingDialog extends ValidatingDialog<ReferenceDataset> {
 
     private static final String SKIP = "(skip)";
+
+    private final ReferenceDataset dataset;
+    private final Map<String, ComboBox<String>> mappings;
 
     /**
      * Creates a column mapping dialog.
@@ -32,9 +30,8 @@ public class ColumnMappingDialog extends Dialog<ReferenceDataset> {
      * @param modelVariables the known model variable names available for mapping
      */
     public ColumnMappingDialog(ReferenceDataset dataset, List<String> modelVariables) {
-        HelpContextResolver.addHelpButton(this);
-        setTitle("Map Reference Data Columns");
-        setHeaderText("Map CSV columns to model variables");
+        super("Map Reference Data Columns", "Map CSV columns to model variables");
+        this.dataset = dataset;
 
         GridPane grid = new GridPane();
         grid.setHgap(10);
@@ -45,7 +42,7 @@ public class ColumnMappingDialog extends Dialog<ReferenceDataset> {
         grid.add(new Label("Model Variable"), 1, 0);
 
         List<String> csvColumns = dataset.variableNames();
-        Map<String, ComboBox<String>> mappings = new LinkedHashMap<>();
+        mappings = new LinkedHashMap<>();
 
         for (int i = 0; i < csvColumns.size(); i++) {
             String csvCol = csvColumns.get(i);
@@ -77,18 +74,12 @@ public class ColumnMappingDialog extends Dialog<ReferenceDataset> {
             mappings.put(csvCol, combo);
         }
 
-        getDialogPane().setContent(grid);
-        getDialogPane().setPrefWidth(Styles.screenAwareWidth(Styles.CONFIG_DIALOG_WIDTH));
+        setStandardContent(grid);
+    }
 
-        ButtonType okButton = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
-        getDialogPane().getButtonTypes().addAll(okButton, ButtonType.CANCEL);
-
-        setResultConverter(button -> {
-            if (button == okButton) {
-                return buildMappedDataset(dataset, mappings);
-            }
-            return null;
-        });
+    @Override
+    protected ReferenceDataset buildResult() {
+        return buildMappedDataset(dataset, mappings);
     }
 
     private static ReferenceDataset buildMappedDataset(ReferenceDataset original,

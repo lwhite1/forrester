@@ -1,16 +1,12 @@
 package systems.courant.sd.app.canvas.dialogs;
 
-import javafx.beans.binding.Bindings;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonBar;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
@@ -19,7 +15,7 @@ import javafx.scene.layout.VBox;
 
 import java.util.ArrayList;
 import java.util.List;
-import systems.courant.sd.app.canvas.HelpContextResolver;
+
 import systems.courant.sd.app.canvas.ParameterRowBase;
 import systems.courant.sd.app.canvas.Styles;
 
@@ -27,7 +23,7 @@ import systems.courant.sd.app.canvas.Styles;
  * Dialog for configuring an optimization run: parameters with bounds,
  * objective type, target variable, algorithm, and max evaluations.
  */
-public class OptimizerDialog extends Dialog<OptimizerDialog.Config> {
+public class OptimizerDialog extends ValidatingDialog<OptimizerDialog.Config> {
 
     public enum ObjectiveType {
         MINIMIZE, MAXIMIZE, TARGET, MINIMIZE_PEAK
@@ -56,9 +52,7 @@ public class OptimizerDialog extends Dialog<OptimizerDialog.Config> {
     private TextField maxEvalsField;
 
     public OptimizerDialog(List<String> constantNames, List<String> stockNames) {
-        HelpContextResolver.addHelpButton(this);
-        setTitle("Optimize");
-        setHeaderText("Configure optimization");
+        super("Optimize", "Configure optimization");
 
         Label paramsLabel = new Label("Parameters");
         paramsLabel.setStyle(Styles.SECTION_HEADER);
@@ -67,12 +61,34 @@ public class OptimizerDialog extends Dialog<OptimizerDialog.Config> {
                 paramsLabel,
                 buildParametersSection(constantNames),
                 buildSettingsGrid(stockNames),
-                buildValidationLabel());
+                bindValidation("optimizerValidationLabel", this::getValidationMessage,
+                        maxEvalsField.textProperty(), targetValueField.textProperty(),
+                        objectiveCombo.valueProperty(), targetVarCombo.valueProperty(),
+                        paramRows, fieldChangeCounter));
         content.setPadding(new Insets(10));
-        getDialogPane().setContent(content);
-        getDialogPane().setPrefWidth(Styles.screenAwareWidth(Styles.CONFIG_DIALOG_WIDTH));
+        setStandardContent(content);
+    }
 
-        configureButtons();
+    @Override
+    protected Config buildResult() {
+        List<ParamConfig> params = new ArrayList<>();
+        for (ParamRow row : paramRows) {
+            if (row.isValid()) {
+                params.add(row.toConfig());
+            }
+        }
+        double targetVal = 0;
+        if (objectiveCombo.getValue() == ObjectiveType.TARGET) {
+            targetVal = Double.parseDouble(targetValueField.getText().trim());
+        }
+        return new Config(
+                params,
+                objectiveCombo.getValue(),
+                targetVarCombo.getValue(),
+                targetVal,
+                algorithmCombo.getValue(),
+                Integer.parseInt(maxEvalsField.getText().trim())
+        );
     }
 
     private ScrollPane buildParametersSection(List<String> constantNames) {
@@ -151,65 +167,6 @@ public class OptimizerDialog extends Dialog<OptimizerDialog.Config> {
         settingsGrid.add(maxEvalsField, 1, 4);
 
         return settingsGrid;
-    }
-
-    private Label buildValidationLabel() {
-        Label validationLabel = new Label();
-        validationLabel.setStyle(Styles.VALIDATION_ERROR);
-        validationLabel.setWrapText(true);
-        validationLabel.setMaxWidth(Double.MAX_VALUE);
-        validationLabel.setId("optimizerValidationLabel");
-        validationLabel.textProperty().bind(
-                Bindings.createStringBinding(this::getValidationMessage,
-                        maxEvalsField.textProperty(), targetValueField.textProperty(),
-                        objectiveCombo.valueProperty(), targetVarCombo.valueProperty(),
-                        paramRows, fieldChangeCounter)
-        );
-        return validationLabel;
-    }
-
-    private void configureButtons() {
-        ButtonType okButton = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
-        getDialogPane().getButtonTypes().addAll(okButton, ButtonType.CANCEL);
-
-        getDialogPane().lookupButton(okButton).disableProperty().bind(
-                Bindings.createBooleanBinding(this::isInvalid,
-                        maxEvalsField.textProperty(), targetValueField.textProperty(),
-                        objectiveCombo.valueProperty(), targetVarCombo.valueProperty(),
-                        paramRows, fieldChangeCounter)
-        );
-
-        setResultConverter(button -> {
-            if (button == okButton) {
-                return buildConfig();
-            }
-            return null;
-        });
-    }
-
-    private Config buildConfig() {
-        List<ParamConfig> params = new ArrayList<>();
-        for (ParamRow row : paramRows) {
-            if (row.isValid()) {
-                params.add(row.toConfig());
-            }
-        }
-        double targetVal = 0;
-        if (objectiveCombo.getValue() == ObjectiveType.TARGET) {
-            targetVal = Double.parseDouble(targetValueField.getText().trim());
-        }
-        return new Config(
-                params,
-                objectiveCombo.getValue(),
-                targetVarCombo.getValue(),
-                targetVal,
-                algorithmCombo.getValue(),
-                Integer.parseInt(maxEvalsField.getText().trim())
-        );
-    }
-
-    private boolean isInvalid() {
-        return !getValidationMessage().isEmpty();
     }
 
     private String getValidationMessage() {

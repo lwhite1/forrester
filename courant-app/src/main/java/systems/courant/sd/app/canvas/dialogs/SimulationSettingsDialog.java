@@ -5,23 +5,18 @@ import systems.courant.sd.model.def.SimulationSettings;
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
-import javafx.scene.control.ButtonBar;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.Separator;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
-import systems.courant.sd.app.canvas.HelpContextResolver;
-import systems.courant.sd.app.canvas.Styles;
 
 /**
  * Dialog for configuring simulation settings: time step unit, duration amount,
  * duration unit, strict mode, and save-per recording interval.
  */
-public class SimulationSettingsDialog extends Dialog<SimulationSettings> {
+public class SimulationSettingsDialog extends ValidatingDialog<SimulationSettings> {
 
     private static final String[] TIME_UNIT_OPTIONS = {
             "Day", "Week", "Month", "Year", "Hour", "Minute", "Second"
@@ -35,9 +30,7 @@ public class SimulationSettingsDialog extends Dialog<SimulationSettings> {
     private final TextField savePerField;
 
     public SimulationSettingsDialog(SimulationSettings existing) {
-        HelpContextResolver.addHelpButton(this);
-        setTitle("Simulation Settings");
-        setHeaderText("Configure simulation parameters");
+        super("Simulation Settings", "Configure simulation parameters");
 
         timeStepCombo = new ComboBox<>(FXCollections.observableArrayList(TIME_UNIT_OPTIONS));
         timeStepCombo.setId("simTimeStep");
@@ -101,37 +94,29 @@ public class SimulationSettingsDialog extends Dialog<SimulationSettings> {
         grid.add(new Label("Strict Mode:"), 0, 7);
         grid.add(strictModeCheckBox, 1, 7);
 
-        getDialogPane().setContent(grid);
-        getDialogPane().setPrefWidth(Styles.screenAwareWidth(Styles.CONFIG_DIALOG_WIDTH));
-
-        ButtonType okButton = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
-        getDialogPane().getButtonTypes().addAll(okButton, ButtonType.CANCEL);
+        setStandardContent(grid);
 
         // Validate: disable OK when duration, DT, or savePer is not valid
-        getDialogPane().lookupButton(okButton).disableProperty().bind(
-                Bindings.createBooleanBinding(
-                        () -> !isValidPositiveNumber(durationField.getText())
-                                || !isValidPositiveNumber(dtField.getText())
-                                || !isValidPositiveInteger(savePerField.getText()),
-                        durationField.textProperty(),
-                        dtField.textProperty(),
-                        savePerField.textProperty()
-                )
-        );
+        bindOkDisable(Bindings.createBooleanBinding(
+                () -> !isValidPositiveNumber(durationField.getText())
+                        || !isValidPositiveNumber(dtField.getText())
+                        || !isValidPositiveInteger(savePerField.getText()),
+                durationField.textProperty(),
+                dtField.textProperty(),
+                savePerField.textProperty()
+        ));
+    }
 
-        setResultConverter(button -> {
-            if (button == okButton) {
-                return new SimulationSettings(
-                        timeStepCombo.getValue(),
-                        Double.parseDouble(durationField.getText().trim()),
-                        durationUnitCombo.getValue(),
-                        Double.parseDouble(dtField.getText().trim()),
-                        strictModeCheckBox.isSelected(),
-                        Long.parseLong(savePerField.getText().trim())
-                );
-            }
-            return null;
-        });
+    @Override
+    protected SimulationSettings buildResult() {
+        return new SimulationSettings(
+                timeStepCombo.getValue(),
+                Double.parseDouble(durationField.getText().trim()),
+                durationUnitCombo.getValue(),
+                Double.parseDouble(dtField.getText().trim()),
+                strictModeCheckBox.isSelected(),
+                Long.parseLong(savePerField.getText().trim())
+        );
     }
 
     private static String formatDuration(double value) {
