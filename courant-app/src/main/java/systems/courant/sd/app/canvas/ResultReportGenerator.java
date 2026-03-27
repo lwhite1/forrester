@@ -2,7 +2,6 @@ package systems.courant.sd.app.canvas;
 
 import systems.courant.sd.model.graph.BehaviorClassification;
 import systems.courant.sd.model.graph.BehaviorClassification.Mode;
-import systems.courant.sd.model.graph.FeedbackAnalysis;
 import systems.courant.sd.model.graph.LoopDominanceAnalysis;
 import systems.courant.sd.sweep.MonteCarloResult;
 import systems.courant.sd.sweep.OptimizationResult;
@@ -31,29 +30,25 @@ import java.util.Map;
  */
 public final class ResultReportGenerator {
 
-    private static final int CHART_WIDTH = 800;
-    private static final int CHART_HEIGHT = 400;
-    private static final int MARGIN_LEFT = 70;
-    private static final int MARGIN_RIGHT = 30;
-    private static final int MARGIN_TOP = 40;
-    private static final int MARGIN_BOTTOM = 50;
+    static final int CHART_WIDTH = 800;
+    static final int CHART_HEIGHT = 400;
+    static final int MARGIN_LEFT = 70;
+    static final int MARGIN_RIGHT = 30;
+    static final int MARGIN_TOP = 40;
+    static final int MARGIN_BOTTOM = 50;
 
-    private static final String[] SERIES_COLORS = {
+    static final String[] SERIES_COLORS = {
             "#2c5282", "#d6604d", "#4393c3", "#f4a582", "#92c5de",
             "#b2182b", "#2166ac", "#d1e5f0", "#fddbc7", "#67001f"
     };
 
-    private static final int TORNADO_BAR_HEIGHT = 28;
-    private static final int TORNADO_LEFT_MARGIN = 200;
-    private static final int TORNADO_RIGHT_MARGIN = 60;
-    private static final int TORNADO_TOP = 40;
-    private static final int TORNADO_BAR_GAP = 6;
+    static final int TORNADO_BAR_HEIGHT = 28;
+    static final int TORNADO_LEFT_MARGIN = 200;
+    static final int TORNADO_RIGHT_MARGIN = 60;
+    static final int TORNADO_TOP = 40;
+    static final int TORNADO_BAR_GAP = 6;
 
-    private static final String[] REINFORCING_COLORS = {"#27ae60", "#2ecc71", "#1abc9c", "#16a085"};
-    private static final String[] BALANCING_COLORS = {"#2980b9", "#3498db", "#2c3e50", "#34495e"};
-    private static final String[] NEUTRAL_COLORS = {"#7f8c8d", "#95a5a6", "#bdc3c7"};
-
-    private static final int AREA_CHART_HEIGHT = 350;
+    static final int AREA_CHART_HEIGHT = 350;
 
     private ResultReportGenerator() {
     }
@@ -464,210 +459,11 @@ public final class ResultReportGenerator {
 
     static void writeLoopDominanceSection(StringBuilder html,
                                           LoopDominanceAnalysis dominance) {
-        html.append("<section>\n<h2>Loop Dominance</h2>\n");
-        html.append(stackedAreaChartSvg(dominance));
-        writeDominanceTransitionTable(html, dominance);
-        html.append("</section>\n\n");
+        LoopDominanceReportSection.write(html, dominance);
     }
-
-    static void writeDominanceTransitionTable(StringBuilder html,
-                                              LoopDominanceAnalysis dominance) {
-        if (dominance.stepCount() == 0) {
-            return;
-        }
-
-        html.append("<h3>Dominance Transitions</h3>\n");
-        html.append("<table class=\"element-table\">\n");
-        html.append("<thead><tr><th>Step Range</th><th>Dominant Loop</th>");
-        html.append("<th>Type</th></tr></thead>\n");
-        html.append("<tbody>\n");
-
-        int prevDominant = dominance.dominantLoopAt(0);
-        int rangeStart = 0;
-
-        for (int step = 1; step < dominance.stepCount(); step++) {
-            int dominant = dominance.dominantLoopAt(step);
-            if (dominant != prevDominant) {
-                writeTransitionRow(html, dominance, rangeStart, step - 1, prevDominant);
-                prevDominant = dominant;
-                rangeStart = step;
-            }
-        }
-        // Write final range
-        writeTransitionRow(html, dominance, rangeStart, dominance.stepCount() - 1, prevDominant);
-
-        html.append("</tbody></table>\n");
-    }
-
-    private static void writeTransitionRow(StringBuilder html,
-                                           LoopDominanceAnalysis dominance,
-                                           int from, int to, int loopIdx) {
-        html.append("<tr>");
-        if (from == to) {
-            html.append("<td>").append(from).append("</td>");
-        } else {
-            html.append("<td>").append(from).append("–").append(to).append("</td>");
-        }
-        if (loopIdx >= 0 && loopIdx < dominance.loopCount()) {
-            html.append("<td class=\"name\">")
-                    .append(esc(dominance.loopLabels().get(loopIdx))).append("</td>");
-            FeedbackAnalysis.LoopType type = dominance.loopTypes().get(loopIdx);
-            html.append("<td>").append(type != null ? type.label() : "—").append("</td>");
-        } else {
-            html.append("<td class=\"name\">None</td><td>—</td>");
-        }
-        html.append("</tr>\n");
-    }
-
-    // ── SVG: Stacked Area Chart ─────────────────────────────────────
 
     static String stackedAreaChartSvg(LoopDominanceAnalysis dominance) {
-        int loopCount = dominance.loopCount();
-        int stepCount = dominance.stepCount();
-        if (loopCount == 0 || stepCount <= 1) {
-            return "<p>Not enough data for loop dominance chart.</p>\n";
-        }
-
-        // Normalize activity at each step (stacked to 100%)
-        double[][] normalized = new double[loopCount][stepCount];
-        for (int step = 0; step < stepCount; step++) {
-            double total = 0;
-            for (int loop = 0; loop < loopCount; loop++) {
-                total += dominance.score(loop, step);
-            }
-            for (int loop = 0; loop < loopCount; loop++) {
-                normalized[loop][step] = total > 0
-                        ? dominance.score(loop, step) / total
-                        : 0;
-            }
-        }
-
-        // Sample for large step counts
-        int sampleInterval = Math.max(1, stepCount / 500);
-        int sampleCount = 0;
-        for (int s = 0; s < stepCount; s += sampleInterval) {
-            sampleCount++;
-        }
-
-        ChartScaffold chart = new ChartScaffold(
-                MARGIN_LEFT, CHART_WIDTH - MARGIN_RIGHT,
-                MARGIN_TOP, AREA_CHART_HEIGHT - MARGIN_BOTTOM,
-                CHART_WIDTH - MARGIN_RIGHT - MARGIN_LEFT,
-                AREA_CHART_HEIGHT - MARGIN_BOTTOM - MARGIN_TOP,
-                0, 1.0);
-
-        StringBuilder svg = new StringBuilder(8192);
-        svgLine(svg,
-                "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 %d %d\" "
-                        + "class=\"chart-svg\">",
-                CHART_WIDTH, AREA_CHART_HEIGHT);
-
-        chart.writeBackground(svg, "#fafafa");
-
-        // Draw stacked areas from bottom to top
-        for (int loop = loopCount - 1; loop >= 0; loop--) {
-            String color = loopColor(dominance, loop);
-            StringBuilder points = new StringBuilder();
-
-            // Top edge (cumulative from loop 0..loop)
-            int sampleIdx = 0;
-            for (int step = 0; step < stepCount; step += sampleInterval) {
-                double cumulative = 0;
-                for (int l = 0; l <= loop; l++) {
-                    cumulative += normalized[l][step];
-                }
-                double x = chart.mapX((double) sampleIdx / Math.max(1, sampleCount - 1));
-                double y = chart.mapY(cumulative);
-                if (!points.isEmpty()) {
-                    points.append(' ');
-                }
-                points.append(String.format(Locale.US, "%.1f,%.1f", x, y));
-                sampleIdx++;
-            }
-
-            // Bottom edge (cumulative from loop 0..loop-1, right to left)
-            // Mirror top edge sampling: iterate same sample indices in reverse
-            for (sampleIdx = sampleCount - 1; sampleIdx >= 0; sampleIdx--) {
-                int step = Math.min(sampleIdx * sampleInterval, stepCount - 1);
-                double cumulative = 0;
-                for (int l = 0; l < loop; l++) {
-                    cumulative += normalized[l][step];
-                }
-                double x = chart.mapX((double) sampleIdx / Math.max(1, sampleCount - 1));
-                double y = chart.mapY(cumulative);
-                points.append(' ');
-                points.append(String.format(Locale.US, "%.1f,%.1f", x, y));
-            }
-
-            svgLine(svg,
-                    "<polygon points=\"%s\" fill=\"%s\" fill-opacity=\"0.6\" stroke=\"%s\" "
-                            + "stroke-width=\"0.5\"/>",
-                    points, color, color);
-        }
-
-        chart.writeAxes(svg);
-
-        // Y-axis ticks as percentages
-        for (int i = 0; i <= 5; i++) {
-            double frac = i / 5.0;
-            double y = chart.mapY(frac);
-            svgLine(svg,
-                    "<text x=\"%d\" y=\"%.1f\" text-anchor=\"end\" "
-                            + "font-size=\"11\" fill=\"#4a5568\">%d%%</text>",
-                    MARGIN_LEFT - 8, y + 4, (int) (frac * 100));
-        }
-
-        // X-axis: step labels
-        int xTicks = Math.min(10, sampleCount - 1);
-        if (xTicks > 0) {
-            for (int i = 0; i <= xTicks; i++) {
-                int step = (int) Math.round((double) i * (stepCount - 1) / xTicks);
-                double x = chart.mapX((double) i / xTicks);
-                svgLine(svg,
-                        "<text x=\"%.1f\" y=\"%d\" text-anchor=\"middle\" "
-                                + "font-size=\"11\" fill=\"#4a5568\">%d</text>",
-                        x, AREA_CHART_HEIGHT - MARGIN_BOTTOM + 18, step);
-            }
-        }
-
-        chart.writeTitle(svg, "Loop Dominance Over Time");
-
-        // Step label
-        svgLine(svg,
-                "<text x=\"%d\" y=\"%d\" text-anchor=\"middle\" "
-                        + "font-size=\"12\" fill=\"#4a5568\">Step</text>",
-                MARGIN_LEFT + chart.plotWidth() / 2, AREA_CHART_HEIGHT - 5);
-
-        // Legend
-        int legendX = chart.plotRight() - 160;
-        int legendY = chart.plotTop() + 10;
-        for (int i = 0; i < loopCount && i < 10; i++) {
-            String color = loopColor(dominance, i);
-            int ly = legendY + i * 16;
-            svgLine(svg,
-                    "<rect x=\"%d\" y=\"%d\" width=\"14\" height=\"10\" "
-                            + "fill=\"%s\" fill-opacity=\"0.6\"/>",
-                    legendX, ly, color);
-            String label = dominance.loopLabels().get(i);
-            FeedbackAnalysis.LoopType type = dominance.loopTypes().get(i);
-            String typeLabel = type != null ? " (" + type.label() + ")" : "";
-            svgLine(svg,
-                    "<text x=\"%d\" y=\"%d\" font-size=\"10\" fill=\"#4a5568\">%s</text>",
-                    legendX + 18, ly + 9, esc(label + typeLabel));
-        }
-
-        svg.append("</svg>\n");
-        return svg.toString();
-    }
-
-    private static String loopColor(LoopDominanceAnalysis dominance, int loopIdx) {
-        FeedbackAnalysis.LoopType type = dominance.loopTypes().get(loopIdx);
-        if (type == FeedbackAnalysis.LoopType.REINFORCING) {
-            return REINFORCING_COLORS[loopIdx % REINFORCING_COLORS.length];
-        } else if (type == FeedbackAnalysis.LoopType.BALANCING) {
-            return BALANCING_COLORS[loopIdx % BALANCING_COLORS.length];
-        }
-        return NEUTRAL_COLORS[loopIdx % NEUTRAL_COLORS.length];
+        return LoopDominanceReportSection.stackedAreaChartSvg(dominance);
     }
 
     // ── Phase 3: Optimization ─────────────────────────────────────────
@@ -716,7 +512,7 @@ public final class ResultReportGenerator {
      * Eliminates repeated margin/tick/axis scaffolding from individual
      * chart methods.
      */
-    private record ChartScaffold(int plotLeft, int plotRight, int plotTop, int plotBottom,
+    record ChartScaffold(int plotLeft, int plotRight, int plotTop, int plotBottom,
                                   int plotWidth, int plotHeight, double yMin, double yMax) {
 
         static ChartScaffold of(double dataMin, double dataMax) {
@@ -1116,7 +912,7 @@ public final class ResultReportGenerator {
      * Keeps the literal {@code \n} out of the format string to avoid the SpotBugs
      * VA_FORMAT_STRING_USES_NEWLINE warning.
      */
-    private static void svgLine(StringBuilder sb, String format, Object... args) {
+    static void svgLine(StringBuilder sb, String format, Object... args) {
         sb.append(String.format(Locale.US, format, args)).append('\n');
     }
 
@@ -1160,14 +956,14 @@ public final class ResultReportGenerator {
         return String.format(Locale.US, "%.6g", value);
     }
 
-    private static String fmtPct(double percentile) {
+    static String fmtPct(double percentile) {
         if (percentile == Math.floor(percentile)) {
             return String.valueOf((int) percentile);
         }
         return String.valueOf(percentile);
     }
 
-    private static String fmtPercent(double fraction) {
+    static String fmtPercent(double fraction) {
         double pct = fraction * 100.0;
         if (pct >= 1.0) {
             return String.format(Locale.US, "%.0f%%", pct);
