@@ -387,6 +387,18 @@ public class FormFieldBuilder {
         fade.play();
     }
 
+    /**
+     * Trims and normalizes a text value, returning {@code null} for blank/empty strings.
+     * Handles null input safely.
+     */
+    public static String normalizeToNull(String text) {
+        if (text == null) {
+            return null;
+        }
+        String trimmed = text.trim();
+        return trimmed.isEmpty() ? null : trimmed;
+    }
+
     private void commitRename(TextField nameField) {
         String oldName = ctx.getElementName();
         String newName = nameField.getText().trim();
