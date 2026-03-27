@@ -1,8 +1,6 @@
 package systems.courant.sd.io.vensim;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -47,33 +45,6 @@ final class FunctionTranslationStage implements ExprTransformationStage {
             "(?i)FIND\\s+ZERO\\s*\\(");
     private static final Pattern LOOKUP_AREA_PATTERN = Pattern.compile(
             "(?i)LOOKUP\\s+AREA\\s*\\(");
-    private static final Pattern GET_XLS_DATA_PATTERN = Pattern.compile(
-            "(?i)GET\\s+XLS\\s+DATA\\s*\\(");
-    private static final Pattern GET_DIRECT_DATA_PATTERN = Pattern.compile(
-            "(?i)GET\\s+DIRECT\\s+DATA\\s*\\(");
-    private static final Pattern GET_XLS_CONSTANTS_PATTERN = Pattern.compile(
-            "(?i)GET\\s+XLS\\s+CONSTANTS\\s*\\(");
-    private static final Pattern GET_DIRECT_CONSTANTS_PATTERN = Pattern.compile(
-            "(?i)GET\\s+DIRECT\\s+CONSTANTS\\s*\\(");
-    private static final Pattern GET_XLS_LOOKUPS_PATTERN = Pattern.compile(
-            "(?i)GET\\s+XLS\\s+LOOKUPS\\s*\\(");
-    private static final Pattern GET_DIRECT_LOOKUPS_PATTERN = Pattern.compile(
-            "(?i)GET\\s+DIRECT\\s+LOOKUPS\\s*\\(");
-
-    private static final Set<String> UNSUPPORTED_FUNCTIONS = Set.of(
-            "DELAY N", "TABBED ARRAY",
-            "VECTOR SELECT", "VECTOR ELM MAP", "VECTOR SORT ORDER",
-            "ALLOCATE AVAILABLE");
-    private static final List<Pattern> UNSUPPORTED_FUNCTION_PATTERNS;
-    static {
-        List<Pattern> patterns = new ArrayList<>();
-        for (String func : UNSUPPORTED_FUNCTIONS) {
-            patterns.add(Pattern.compile(
-                    "(?i)\\b" + Pattern.quote(func) + "\\s*\\("));
-        }
-        UNSUPPORTED_FUNCTION_PATTERNS = List.copyOf(patterns);
-    }
-
     @Override
     public void apply(TranslationContext ctx) {
         String expr = ctx.expression();
@@ -120,19 +91,6 @@ final class FunctionTranslationStage implements ExprTransformationStage {
         expr = FIND_ZERO_PATTERN.matcher(expr).replaceAll("FIND_ZERO(");
         expr = PULSE_TRAIN_PATTERN.matcher(expr).replaceAll("PULSE_TRAIN(");
         expr = LOOKUP_AREA_PATTERN.matcher(expr).replaceAll("LOOKUP_AREA(");
-
-        // GET XLS/DIRECT functions → 0 placeholder with warning
-        expr = translateGetFunction(expr, GET_XLS_DATA_PATTERN, "GET XLS DATA", warnings);
-        expr = translateGetFunction(expr, GET_DIRECT_DATA_PATTERN, "GET DIRECT DATA", warnings);
-        expr = translateGetFunction(expr, GET_XLS_CONSTANTS_PATTERN, "GET XLS CONSTANTS", warnings);
-        expr = translateGetFunction(expr, GET_DIRECT_CONSTANTS_PATTERN,
-                "GET DIRECT CONSTANTS", warnings);
-        expr = translateGetFunction(expr, GET_XLS_LOOKUPS_PATTERN, "GET XLS LOOKUPS", warnings);
-        expr = translateGetFunction(expr, GET_DIRECT_LOOKUPS_PATTERN,
-                "GET DIRECT LOOKUPS", warnings);
-
-        // Check for unsupported functions
-        checkUnsupportedFunctions(expr, warnings);
 
         ctx.setExpression(expr);
     }
@@ -306,17 +264,4 @@ final class FunctionTranslationStage implements ExprTransformationStage {
         return expr;
     }
 
-    private static void checkUnsupportedFunctions(String expr, List<String> warnings) {
-        for (Pattern p : UNSUPPORTED_FUNCTION_PATTERNS) {
-            Matcher m = p.matcher(expr);
-            if (m.find()) {
-                String matched = m.group().strip();
-                int parenIdx = matched.indexOf('(');
-                String funcName = (parenIdx > 0)
-                        ? matched.substring(0, parenIdx).strip()
-                        : matched;
-                warnings.add("Unsupported Vensim function: " + funcName);
-            }
-        }
-    }
 }
