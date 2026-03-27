@@ -770,7 +770,7 @@ class ResultReportGeneratorTest {
         void shouldContainTransitionTable() {
             LoopDominanceAnalysis dominance = buildDominanceAnalysis();
             StringBuilder html = new StringBuilder();
-            ResultReportGenerator.writeDominanceTransitionTable(html, dominance);
+            LoopDominanceReportSection.writeDominanceTransitionTable(html, dominance);
             String output = html.toString();
 
             assertThat(output).contains("Dominance Transitions");
