@@ -110,8 +110,7 @@ public class StockForm implements ElementForm {
     }
 
     private void commitUnit(ComboBox<String> box) {
-        String raw = box.getValue() != null ? box.getValue().trim() : "";
-        String unit = raw.isEmpty() ? null : raw;
+        String unit = FormFieldBuilder.normalizeToNull(box.getValue());
         Optional<StockDef> stockOpt = ctx.getEditor().getStockByName(ctx.getElementName());
         if (stockOpt.isPresent() && Objects.equals(unit, stockOpt.get().unit())) {
             return;
@@ -131,8 +130,7 @@ public class StockForm implements ElementForm {
     }
 
     private void commitComment(TextArea area) {
-        String text = area.getText().trim();
-        String comment = text.isEmpty() ? null : text;
+        String comment = FormFieldBuilder.normalizeToNull(area.getText());
         Optional<StockDef> stockOpt = ctx.getEditor().getStockByName(ctx.getElementName());
         if (stockOpt.isEmpty() || Objects.equals(comment, stockOpt.get().comment())) {
             return;

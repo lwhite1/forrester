@@ -55,8 +55,7 @@ public class CldVariableForm implements ElementForm {
     }
 
     private void commitComment(TextArea area) {
-        String text = area.getText().trim();
-        String comment = text.isEmpty() ? null : text;
+        String comment = FormFieldBuilder.normalizeToNull(area.getText());
         CldVariableDef variable = ctx.getEditor().getCldVariableByName(ctx.getElementName())
                 .orElse(null);
         if (variable == null || Objects.equals(comment, variable.comment())) {

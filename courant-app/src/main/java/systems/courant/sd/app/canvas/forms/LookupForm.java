@@ -504,8 +504,7 @@ public class LookupForm implements ElementForm {
     }
 
     private void commitComment(TextArea area) {
-        String text = area.getText().trim();
-        String comment = text.isEmpty() ? null : text;
+        String comment = FormFieldBuilder.normalizeToNull(area.getText());
         Optional<LookupTableDef> ltOpt = ctx.getEditor().getLookupTableByName(ctx.getElementName());
         if (ltOpt.isEmpty() || Objects.equals(comment, ltOpt.get().comment())) {
             return;
@@ -612,8 +611,7 @@ public class LookupForm implements ElementForm {
     }
 
     private void commitUnit(ComboBox<String> box) {
-        String unit = box.getValue() != null ? box.getValue().trim() : "";
-        String normalizedUnit = unit.isEmpty() ? null : unit;
+        String normalizedUnit = FormFieldBuilder.normalizeToNull(box.getValue());
         Optional<LookupTableDef> ltOpt = ctx.getEditor().getLookupTableByName(ctx.getElementName());
         if (ltOpt.isPresent() && Objects.equals(normalizedUnit, ltOpt.get().unit())) {
             return;
