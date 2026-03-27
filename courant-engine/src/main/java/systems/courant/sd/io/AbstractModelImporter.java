@@ -70,7 +70,7 @@ public abstract class AbstractModelImporter implements ModelImporter {
      * Returns true if the expression is a numeric literal (integer, decimal,
      * or scientific notation).
      */
-    protected static boolean isNumericLiteral(String expr) {
+    public static boolean isNumericLiteral(String expr) {
         return expr != null && NUMERIC_PATTERN.matcher(expr.strip()).matches();
     }
 }
