@@ -1,6 +1,7 @@
 package systems.courant.sd.app.canvas.renderers;
 
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
 
 import systems.courant.sd.app.canvas.CanvasState;
 import systems.courant.sd.app.canvas.ColorPalette;
@@ -36,20 +37,19 @@ final class MaterialFlowPass implements RenderPass {
 
             boolean mismatch = maturity != null
                     && maturity.unitMismatchFlows().contains(flow.name());
+            Color flowColor;
             if (mismatch) {
-                ConnectionRenderer.drawMaterialFlow(gc,
-                        endpoints.sourceX(), endpoints.sourceY(),
-                        endpoints.midX(), endpoints.midY(),
-                        endpoints.sinkX(), endpoints.sinkY(),
-                        endpoints.sourceIsCloud(), endpoints.sinkIsCloud(),
-                        ColorPalette.UNIT_MISMATCH);
+                flowColor = ColorPalette.UNIT_MISMATCH;
             } else {
-                ConnectionRenderer.drawMaterialFlow(gc,
-                        endpoints.sourceX(), endpoints.sourceY(),
-                        endpoints.midX(), endpoints.midY(),
-                        endpoints.sinkX(), endpoints.sinkY(),
-                        endpoints.sourceIsCloud(), endpoints.sinkIsCloud());
+                flowColor = canvasState.getColor(flow.name())
+                        .map(Color::web).orElse(ColorPalette.MATERIAL_FLOW);
             }
+            ConnectionRenderer.drawMaterialFlow(gc,
+                    endpoints.sourceX(), endpoints.sourceY(),
+                    endpoints.midX(), endpoints.midY(),
+                    endpoints.sinkX(), endpoints.sinkY(),
+                    endpoints.sourceIsCloud(), endpoints.sinkIsCloud(),
+                    flowColor);
         }
     }
 }

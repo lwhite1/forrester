@@ -4,10 +4,15 @@ import systems.courant.sd.model.def.CausalLinkDef;
 import systems.courant.sd.model.def.ElementType;
 
 import javafx.scene.canvas.Canvas;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.ColorPicker;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import systems.courant.sd.app.canvas.CanvasState;
 import systems.courant.sd.app.canvas.CanvasToolBar;
 import systems.courant.sd.app.canvas.ConnectionId;
@@ -52,6 +57,8 @@ public final class CanvasContextMenuController {
         void showWhereUsed(String elementName);
         void showUses(String elementName);
         void convertVariableToComment(String variableName);
+        void setElementColor(String elementName, String hexColor);
+        void setCausalLinkColor(ConnectionId link, String hexColor);
     }
 
     private final ModuleNavigationController navController;
@@ -138,6 +145,16 @@ public final class CanvasContextMenuController {
             menu.getItems().addAll(new SeparatorMenuItem(), convertItem);
         }
 
+        // Color submenu
+        String currentHex = canvasState.getColor(elementName).orElse(null);
+        Menu colorMenu = buildColorMenu(currentHex, hex -> {
+            callbacks.saveUndoState("Change color");
+            callbacks.setElementColor(elementName, hex);
+            callbacks.redraw();
+            callbacks.fireStatusChanged();
+        });
+        menu.getItems().addAll(new SeparatorMenuItem(), colorMenu);
+
         menu.getItems().addAll(new SeparatorMenuItem(),
                 cutItem, copyItem, new SeparatorMenuItem(), deleteItem);
         menu.show(canvas, screenX, screenY);
@@ -163,6 +180,17 @@ public final class CanvasContextMenuController {
             polarityMenu.getItems().add(item);
         }
         menu.getItems().add(polarityMenu);
+
+        // Color submenu
+        String currentLinkColor = editor.getCausalLinks().stream()
+                .filter(cl -> cl.from().equals(link.from()) && cl.to().equals(link.to()))
+                .findFirst().map(cl -> cl.hasColor() ? cl.color() : null).orElse(null);
+        Menu colorMenu = buildColorMenu(currentLinkColor, hex -> {
+            callbacks.saveUndoState("Change link color");
+            callbacks.setCausalLinkColor(link, hex);
+            callbacks.redraw();
+        });
+        menu.getItems().add(colorMenu);
 
         MenuItem deleteItem = new MenuItem("Delete");
         deleteItem.setOnAction(e -> {
@@ -198,6 +226,64 @@ public final class CanvasContextMenuController {
         menu.getItems().add(deleteItem);
 
         menu.show(canvas, screenX, screenY);
+    }
+
+    // ── Color menu helpers ─────────────────────────────────────────────
+
+    private static final String[][] COLOR_SWATCHES = {
+            {"Black",  "#2C3E50"},
+            {"Red",    "#E74C3C"},
+            {"Blue",   "#2980B9"},
+            {"Green",  "#27AE60"},
+            {"Orange", "#E67E22"},
+            {"Purple", "#8E44AD"},
+    };
+
+    /**
+     * Builds a "Color" submenu with preset swatches, a "Custom..." option, and "Default".
+     *
+     * @param currentHex the currently applied hex color, or null for default
+     * @param onColor    callback receiving the chosen hex string, or null for "Default"
+     */
+    private static Menu buildColorMenu(String currentHex, java.util.function.Consumer<String> onColor) {
+        Menu menu = new Menu("Color");
+        for (String[] swatch : COLOR_SWATCHES) {
+            MenuItem item = new MenuItem(swatch[0]);
+            Rectangle rect = new Rectangle(12, 12, Color.web(swatch[1]));
+            item.setGraphic(rect);
+            String hex = swatch[1];
+            item.setOnAction(e -> onColor.accept(hex));
+            menu.getItems().add(item);
+        }
+        menu.getItems().add(new SeparatorMenuItem());
+
+        MenuItem customItem = new MenuItem("Custom\u2026");
+        customItem.setOnAction(e -> {
+            Color initial = currentHex != null ? Color.web(currentHex) : Color.web("#2C3E50");
+            Dialog<Color> dialog = new Dialog<>();
+            dialog.setTitle("Choose Color");
+            dialog.setHeaderText(null);
+            ColorPicker picker = new ColorPicker(initial);
+            dialog.getDialogPane().setContent(picker);
+            dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+            dialog.setResultConverter(btn -> btn == ButtonType.OK ? picker.getValue() : null);
+            dialog.showAndWait().ifPresent(color -> {
+                String hex = String.format("#%02X%02X%02X",
+                        (int) (color.getRed() * 255),
+                        (int) (color.getGreen() * 255),
+                        (int) (color.getBlue() * 255));
+                onColor.accept(hex);
+            });
+        });
+        menu.getItems().add(customItem);
+
+        menu.getItems().add(new SeparatorMenuItem());
+        MenuItem defaultItem = new MenuItem("Default");
+        defaultItem.setDisable(currentHex == null);
+        defaultItem.setOnAction(e -> onColor.accept(null));
+        menu.getItems().add(defaultItem);
+
+        return menu;
     }
 
     /**

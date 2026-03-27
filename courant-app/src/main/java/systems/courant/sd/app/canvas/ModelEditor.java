@@ -584,7 +584,20 @@ public class ModelEditor {
             CausalLinkDef link = causalLinks.get(i);
             if (link.from().equals(from) && link.to().equals(to)) {
                 causalLinks.set(i, new CausalLinkDef(from, to, polarity, link.comment(),
-                        link.strength(), link.bias()));
+                        link.strength(), link.bias(), link.color()));
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** @return true if the causal link was found and its color updated */
+    public boolean setCausalLinkColor(String from, String to, String color) {
+        checkFxThread();
+        for (int i = 0; i < causalLinks.size(); i++) {
+            CausalLinkDef link = causalLinks.get(i);
+            if (link.from().equals(from) && link.to().equals(to)) {
+                causalLinks.set(i, link.withColor(color));
                 return true;
             }
         }

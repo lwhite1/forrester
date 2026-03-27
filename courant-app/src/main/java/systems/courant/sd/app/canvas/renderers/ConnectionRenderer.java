@@ -139,6 +139,18 @@ public final class ConnectionRenderer {
                                       double toX, double toY,
                                       CausalLinkGeometry.ControlPoint cp,
                                       CausalLinkDef.Polarity polarity) {
+        drawCausalLink(gc, fromX, fromY, toX, toY, cp, polarity, null);
+    }
+
+    /**
+     * Draws a causal link with an optional custom color override.
+     */
+    public static void drawCausalLink(GraphicsContext gc,
+                                      double fromX, double fromY,
+                                      double toX, double toY,
+                                      CausalLinkGeometry.ControlPoint cp,
+                                      CausalLinkDef.Polarity polarity,
+                                      Color customColor) {
         // Compute arrowhead placement along the curve
         double[] ah = CausalLinkGeometry.arrowheadPoint(fromX, fromY, cp.x(), cp.y(),
                 toX, toY, LayoutMetrics.CAUSAL_ARROWHEAD_LENGTH);
@@ -149,11 +161,16 @@ public final class ConnectionRenderer {
         double stopT = ah[4];
 
         // Draw the curved line, stopping at the arrowhead base
-        Color linkColor = polarity == CausalLinkDef.Polarity.UNKNOWN
-                ? ColorPalette.CAUSAL_UNKNOWN : ColorPalette.CAUSAL_LINK;
+        Color linkColor;
+        if (customColor != null) {
+            linkColor = customColor;
+        } else {
+            linkColor = polarity == CausalLinkDef.Polarity.UNKNOWN
+                    ? ColorPalette.CAUSAL_UNKNOWN : ColorPalette.CAUSAL_LINK;
+        }
         gc.setStroke(linkColor);
         gc.setLineWidth(LayoutMetrics.CAUSAL_LINK_WIDTH);
-        if (polarity == CausalLinkDef.Polarity.UNKNOWN) {
+        if (customColor == null && polarity == CausalLinkDef.Polarity.UNKNOWN) {
             gc.setLineDashes(4, 3);
         } else {
             gc.setLineDashes();
@@ -173,7 +190,7 @@ public final class ConnectionRenderer {
         PolarityLabelLayout labelLayout = PolarityLabelLayout.forQuadratic(
                 fromX, fromY, cp.x(), cp.y(), toX, toY);
         if (labelLayout.valid()) {
-            Color labelColor = PolarityLabelLayout.colorFor(polarity);
+            Color labelColor = customColor != null ? customColor : PolarityLabelLayout.colorFor(polarity);
             Font labelFont = polarity == CausalLinkDef.Polarity.UNKNOWN
                     ? LayoutMetrics.CAUSAL_UNKNOWN_FONT : LayoutMetrics.CAUSAL_POLARITY_FONT;
             gc.setFill(labelColor);
@@ -190,6 +207,16 @@ public final class ConnectionRenderer {
     public static void drawCausalLinkSelfLoop(GraphicsContext gc,
                                                double[] loopPts,
                                                CausalLinkDef.Polarity polarity) {
+        drawCausalLinkSelfLoop(gc, loopPts, polarity, null);
+    }
+
+    /**
+     * Draws a self-loop causal link with an optional custom color override.
+     */
+    public static void drawCausalLinkSelfLoop(GraphicsContext gc,
+                                               double[] loopPts,
+                                               CausalLinkDef.Polarity polarity,
+                                               Color customColor) {
         double startX = loopPts[0];
         double startY = loopPts[1];
         double cp1X = loopPts[2];
@@ -200,11 +227,16 @@ public final class ConnectionRenderer {
         double endY = loopPts[7];
 
         // Draw curve
-        Color linkColor = polarity == CausalLinkDef.Polarity.UNKNOWN
-                ? ColorPalette.CAUSAL_UNKNOWN : ColorPalette.CAUSAL_LINK;
+        Color linkColor;
+        if (customColor != null) {
+            linkColor = customColor;
+        } else {
+            linkColor = polarity == CausalLinkDef.Polarity.UNKNOWN
+                    ? ColorPalette.CAUSAL_UNKNOWN : ColorPalette.CAUSAL_LINK;
+        }
         gc.setStroke(linkColor);
         gc.setLineWidth(LayoutMetrics.CAUSAL_LINK_WIDTH);
-        if (polarity == CausalLinkDef.Polarity.UNKNOWN) {
+        if (customColor == null && polarity == CausalLinkDef.Polarity.UNKNOWN) {
             gc.setLineDashes(4, 3);
         } else {
             gc.setLineDashes();
@@ -227,7 +259,7 @@ public final class ConnectionRenderer {
 
         // Polarity label at the top of the loop
         PolarityLabelLayout labelLayout = PolarityLabelLayout.forSelfLoop(loopPts);
-        Color labelColor = PolarityLabelLayout.colorFor(polarity);
+        Color labelColor = customColor != null ? customColor : PolarityLabelLayout.colorFor(polarity);
         Font labelFont = polarity == CausalLinkDef.Polarity.UNKNOWN
                 ? LayoutMetrics.CAUSAL_UNKNOWN_FONT : LayoutMetrics.CAUSAL_POLARITY_FONT;
         gc.setFill(labelColor);

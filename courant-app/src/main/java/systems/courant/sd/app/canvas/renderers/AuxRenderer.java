@@ -1,6 +1,7 @@
 package systems.courant.sd.app.canvas.renderers;
 
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
 
 import systems.courant.sd.app.canvas.CanvasState;
 import systems.courant.sd.app.canvas.LayoutMetrics;
@@ -27,7 +28,8 @@ final class AuxRenderer implements ElementTypeRenderer {
         boolean hasDelay = showDelay
                 && DelayDetector.equationContainsDelay(equation);
         List<String> subscripts = editor.getElementSubscripts(name);
+        Color customColor = canvasState.getColor(name).map(Color::web).orElse(null);
         ElementRenderer.drawAux(gc, name, isLiteral, equation, hasDelay, subscripts,
-                cx - w / 2, cy - h / 2, w, h);
+                cx - w / 2, cy - h / 2, w, h, false, customColor);
     }
 }

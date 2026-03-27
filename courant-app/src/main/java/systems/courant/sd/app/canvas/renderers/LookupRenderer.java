@@ -1,6 +1,7 @@
 package systems.courant.sd.app.canvas.renderers;
 
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
 
 import systems.courant.sd.app.canvas.CanvasState;
 import systems.courant.sd.app.canvas.LayoutMetrics;
@@ -16,6 +17,7 @@ final class LookupRenderer implements ElementTypeRenderer {
                        CanvasState canvasState, ModelEditor editor, boolean showDelay) {
         double w = LayoutMetrics.effectiveWidth(canvasState, name);
         double h = LayoutMetrics.effectiveHeight(canvasState, name);
-        ElementRenderer.drawLookup(gc, name, cx - w / 2, cy - h / 2, w, h);
+        Color customColor = canvasState.getColor(name).map(Color::web).orElse(null);
+        ElementRenderer.drawLookup(gc, name, cx - w / 2, cy - h / 2, w, h, false, customColor);
     }
 }

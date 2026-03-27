@@ -1,6 +1,7 @@
 package systems.courant.sd.app.canvas.renderers;
 
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
 
 import systems.courant.sd.app.canvas.CanvasState;
 import systems.courant.sd.app.canvas.ModelEditor;
@@ -28,6 +29,7 @@ final class CommentRenderer implements ElementTypeRenderer {
             h = auto[1];
             canvasState.setSize(name, w, h);
         }
-        ElementRenderer.drawComment(gc, text, cx - w / 2, cy - h / 2, w, h);
+        Color customColor = canvasState.getColor(name).map(Color::web).orElse(null);
+        ElementRenderer.drawComment(gc, text, cx - w / 2, cy - h / 2, w, h, customColor);
     }
 }
