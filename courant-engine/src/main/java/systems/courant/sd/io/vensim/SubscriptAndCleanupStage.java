@@ -22,6 +22,7 @@ import java.util.regex.Pattern;
  */
 final class SubscriptAndCleanupStage implements ExprTransformationStage {
 
+    private static final Pattern CARET_PATTERN = Pattern.compile("\\^");
     private static final Pattern TIME_VAR_PATTERN = Pattern.compile("(?i)\\bTime\\b");
     private static final Pattern SUM_FUNC_PATTERN = Pattern.compile("(?i)\\bSUM\\s*\\(");
     private static final Pattern VMIN_FUNC_PATTERN = Pattern.compile("(?i)\\bVMIN\\s*\\(");
@@ -29,10 +30,39 @@ final class SubscriptAndCleanupStage implements ExprTransformationStage {
             "([a-zA-Z_][a-zA-Z0-9_]*)!");
     private static final Pattern SUBSCRIPT_BRACKET_PATTERN = Pattern.compile(
             "([a-zA-Z_][a-zA-Z0-9_]*)\\[([^\\]]+)\\]");
+    private static final Pattern GET_XLS_DATA_PATTERN = Pattern.compile(
+            "(?i)GET\\s+XLS\\s+DATA\\s*\\(");
+    private static final Pattern GET_DIRECT_DATA_PATTERN = Pattern.compile(
+            "(?i)GET\\s+DIRECT\\s+DATA\\s*\\(");
+    private static final Pattern GET_XLS_CONSTANTS_PATTERN = Pattern.compile(
+            "(?i)GET\\s+XLS\\s+CONSTANTS\\s*\\(");
+    private static final Pattern GET_DIRECT_CONSTANTS_PATTERN = Pattern.compile(
+            "(?i)GET\\s+DIRECT\\s+CONSTANTS\\s*\\(");
+    private static final Pattern GET_XLS_LOOKUPS_PATTERN = Pattern.compile(
+            "(?i)GET\\s+XLS\\s+LOOKUPS\\s*\\(");
+    private static final Pattern GET_DIRECT_LOOKUPS_PATTERN = Pattern.compile(
+            "(?i)GET\\s+DIRECT\\s+LOOKUPS\\s*\\(");
+    private static final Set<String> UNSUPPORTED_FUNCTIONS = Set.of(
+            "DELAY N", "TABBED ARRAY",
+            "VECTOR SELECT", "VECTOR ELM MAP", "VECTOR SORT ORDER",
+            "ALLOCATE AVAILABLE");
+    private static final List<Pattern> UNSUPPORTED_FUNCTION_PATTERNS;
+    static {
+        java.util.ArrayList<Pattern> patterns = new java.util.ArrayList<>();
+        for (String func : UNSUPPORTED_FUNCTIONS) {
+            patterns.add(Pattern.compile(
+                    "(?i)\\b" + Pattern.quote(func) + "\\s*\\("));
+        }
+        UNSUPPORTED_FUNCTION_PATTERNS = List.copyOf(patterns);
+    }
 
     @Override
     public void apply(TranslationContext ctx) {
         String expr = ctx.expression();
+        List<String> warnings = ctx.warnings();
+
+        // ^ → ** (power operator; must run after function translations)
+        expr = CARET_PATTERN.matcher(expr).replaceAll("**");
 
         // Time → TIME (unless "Time" is a user-defined name)
         if (!ctx.knownNamesLower().contains("time")) {
@@ -41,7 +71,7 @@ final class SubscriptAndCleanupStage implements ExprTransformationStage {
 
         // Expand SUM(expr[dim!]) and VMIN(expr[dim!]) using subscript dimensions
         if (!ctx.subscriptDimensions().isEmpty()) {
-            expr = expandVectorFunctions(expr, ctx.subscriptDimensions(), ctx.warnings());
+            expr = expandVectorFunctions(expr, ctx.subscriptDimensions(), warnings);
         }
 
         // Translate subscript bracket notation: name[label] → name_label
@@ -53,6 +83,23 @@ final class SubscriptAndCleanupStage implements ExprTransformationStage {
 
         // Rewrite lookupName(arg) → LOOKUP(lookupName, arg)
         expr = rewriteLookupCalls(expr, ctx.lookupNames());
+
+        // GET XLS/DIRECT functions → 0 placeholder with warning
+        expr = FunctionTranslationStage.translateGetFunction(
+                expr, GET_XLS_DATA_PATTERN, "GET XLS DATA", warnings);
+        expr = FunctionTranslationStage.translateGetFunction(
+                expr, GET_DIRECT_DATA_PATTERN, "GET DIRECT DATA", warnings);
+        expr = FunctionTranslationStage.translateGetFunction(
+                expr, GET_XLS_CONSTANTS_PATTERN, "GET XLS CONSTANTS", warnings);
+        expr = FunctionTranslationStage.translateGetFunction(
+                expr, GET_DIRECT_CONSTANTS_PATTERN, "GET DIRECT CONSTANTS", warnings);
+        expr = FunctionTranslationStage.translateGetFunction(
+                expr, GET_XLS_LOOKUPS_PATTERN, "GET XLS LOOKUPS", warnings);
+        expr = FunctionTranslationStage.translateGetFunction(
+                expr, GET_DIRECT_LOOKUPS_PATTERN, "GET DIRECT LOOKUPS", warnings);
+
+        // Check for unsupported functions
+        checkUnsupportedFunctions(expr, warnings);
 
         ctx.setExpression(expr);
     }
@@ -173,5 +220,19 @@ final class SubscriptAndCleanupStage implements ExprTransformationStage {
             }
         }
         return expr;
+    }
+
+    private static void checkUnsupportedFunctions(String expr, List<String> warnings) {
+        for (Pattern p : UNSUPPORTED_FUNCTION_PATTERNS) {
+            Matcher m = p.matcher(expr);
+            if (m.find()) {
+                String matched = m.group().strip();
+                int parenIdx = matched.indexOf('(');
+                String funcName = (parenIdx > 0)
+                        ? matched.substring(0, parenIdx).strip()
+                        : matched;
+                warnings.add("Unsupported Vensim function: " + funcName);
+            }
+        }
     }
 }

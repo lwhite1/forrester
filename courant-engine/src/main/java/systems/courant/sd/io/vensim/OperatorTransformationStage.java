@@ -22,7 +22,6 @@ final class OperatorTransformationStage implements ExprTransformationStage {
     private static final Pattern OR_PATTERN = Pattern.compile("(?i):OR:");
     private static final Pattern NOT_PATTERN = Pattern.compile("(?i):NOT:");
     private static final Pattern NOT_EQUAL_PATTERN = Pattern.compile("<>");
-    private static final Pattern CARET_PATTERN = Pattern.compile("\\^");
 
     @Override
     public void apply(TranslationContext ctx) {
@@ -38,9 +37,6 @@ final class OperatorTransformationStage implements ExprTransformationStage {
 
         // Not-equal operator: <> → !=
         expr = NOT_EQUAL_PATTERN.matcher(expr).replaceAll("!=");
-
-        // Power operator: ^ → **
-        expr = CARET_PATTERN.matcher(expr).replaceAll("**");
 
         ctx.setExpression(expr);
     }
