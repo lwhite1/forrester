@@ -4,6 +4,8 @@ import systems.courant.sd.app.canvas.controllers.AlignmentController;
 import systems.courant.sd.app.canvas.AnalysisRunner;
 import systems.courant.sd.app.canvas.ActivityLogPanel;
 import systems.courant.sd.app.canvas.BreadcrumbBar;
+import systems.courant.sd.app.canvas.CanvasEvent;
+import systems.courant.sd.app.canvas.CanvasEventBus;
 import systems.courant.sd.app.canvas.CanvasToolBar;
 import systems.courant.sd.app.canvas.Clipboard;
 import systems.courant.sd.app.canvas.CommandPalette;
@@ -118,6 +120,7 @@ public class ModelWindow {
     private volatile boolean editorShown;
     private final List<MenuItem> editorOnlyItems = new ArrayList<>();
     private MenuItem validationIssuesItem;
+    private final CanvasEventBus eventBus = new CanvasEventBus();
 
     public ModelWindow(Stage stage, CourantApp app, Clipboard clipboard) {
         this.stage = stage;
@@ -288,15 +291,20 @@ public class ModelWindow {
 
     private void configureCanvasCallbacks() {
         canvas.setToolBar(toolBar);
-        canvas.setOnStatusChanged(() -> {
-            updateStatusBar();
+        // StatusChanged: publish on bus, subscribers handle their own updates
+        canvas.setOnStatusChanged(() -> eventBus.publish(new CanvasEvent.StatusChanged()));
+        eventBus.subscribe(CanvasEvent.StatusChanged.class, e -> updateStatusBar());
+        eventBus.subscribe(CanvasEvent.StatusChanged.class, e -> {
             if (canvas.analysis().isLoopHighlightActive()) {
                 updateLoopNavigator();
             }
+        });
+        eventBus.subscribe(CanvasEvent.StatusChanged.class, e -> {
             if (propertiesPanel != null) {
                 propertiesPanel.updateSelection(canvas, canvas.getEditor());
             }
         });
+
         canvas.setOnPasteWarning(replaced -> {
             String names = String.join(", ", replaced);
             activityLogPanel.log("warning",
@@ -304,12 +312,18 @@ public class ModelWindow {
                     + (replaced.size() == 1 ? "" : "s")
                     + " replaced with 0 (" + names + ")");
         });
-        canvas.analysis().setOnValidationChanged(result -> {
-            statusBar.updateValidation(result.errorCount(), result.warningCount());
+
+        // ValidationChanged: publish on bus
+        canvas.analysis().setOnValidationChanged(result ->
+                eventBus.publish(new CanvasEvent.ValidationChanged(result)));
+        eventBus.subscribe(CanvasEvent.ValidationChanged.class, e ->
+                statusBar.updateValidation(e.result().errorCount(), e.result().warningCount()));
+        eventBus.subscribe(CanvasEvent.ValidationChanged.class, e -> {
             if (validationIssuesItem != null) {
-                validationIssuesItem.setDisable(result.isClean());
+                validationIssuesItem.setDisable(e.result().isClean());
             }
         });
+
         statusBar.setOnValidationClicked(this::showValidationDialog);
 
         breadcrumbBar = new BreadcrumbBar();
@@ -317,7 +331,17 @@ public class ModelWindow {
             canvas.navigation().navigateToDepth(depth);
             canvas.requestFocus();
         });
-        canvas.navigation().setOnNavigationChanged(this::updateBreadcrumb);
+
+        // NavigationChanged: publish on bus
+        canvas.navigation().setOnNavigationChanged(() ->
+                eventBus.publish(new CanvasEvent.NavigationChanged()));
+        eventBus.subscribe(CanvasEvent.NavigationChanged.class, e -> {
+            if (breadcrumbBar != null && canvas.getEditor() != null) {
+                breadcrumbBar.update(canvas.navigation().getNavigationPath());
+            }
+        });
+        eventBus.subscribe(CanvasEvent.NavigationChanged.class, e -> updateTitle());
+        eventBus.subscribe(CanvasEvent.NavigationChanged.class, e -> updateStatusBar());
     }
 
     private void createRightPanel() {
@@ -949,13 +973,7 @@ public class ModelWindow {
         dockManager.updateTitle(name);
     }
 
-    private void updateBreadcrumb() {
-        if (breadcrumbBar != null && canvas.getEditor() != null) {
-            breadcrumbBar.update(canvas.navigation().getNavigationPath());
-        }
-        updateTitle();
-        updateStatusBar();
-    }
+    // updateBreadcrumb() replaced by NavigationChanged event bus subscribers
 
     Path getCurrentFile() {
         return fileController.getCurrentFile();
