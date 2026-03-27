@@ -283,7 +283,7 @@ public final class HitTester {
                 FlowGeometry.Point2D clippedTo = FlowGeometry.clipToElement(
                         state, toName, cp.x(), cp.y());
 
-                dist = CausalLinkGeometry.pointToCurveDistance(worldX, worldY,
+                dist = CausalLinkGeometry.pointToArcDistance(worldX, worldY,
                         clippedFrom.x(), clippedFrom.y(),
                         cp.x(), cp.y(),
                         clippedTo.x(), clippedTo.y());

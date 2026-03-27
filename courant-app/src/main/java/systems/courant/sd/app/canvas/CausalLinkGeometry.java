@@ -510,6 +510,168 @@ public final class CausalLinkGeometry {
         return selfLoopPoints(cx, cy, halfW, halfH);
     }
 
+    // ── Circular arc approximation ─────────────────────────────────────
+
+    /**
+     * Two cubic Bézier control points that approximate a circular arc.
+     */
+    public record CubicArc(double cp1x, double cp1y, double cp2x, double cp2y) {
+    }
+
+    /**
+     * Converts a quadratic Bézier control point into two cubic Bézier control
+     * points that approximate the circular arc passing through the same three
+     * points (start, quadratic apex at t=0.5, end).
+     * <p>
+     * Falls back to the exact quadratic-to-cubic conversion when the three
+     * points are nearly collinear (the arc degenerates to a straight line).
+     */
+    public static CubicArc toCircularArc(double x0, double y0,
+                                          double qx, double qy,
+                                          double x1, double y1) {
+        // Apex of the quadratic at t=0.5
+        double ax = (x0 + 2 * qx + x1) / 4;
+        double ay = (y0 + 2 * qy + y1) / 4;
+
+        // Circumscribed circle through P0, apex, P1
+        double d = 2 * (x0 * (ay - y1) + ax * (y1 - y0) + x1 * (y0 - ay));
+
+        if (Math.abs(d) < 1e-6) {
+            // Nearly collinear — exact quadratic→cubic (same parabolic shape)
+            return new CubicArc(
+                    x0 + (2.0 / 3) * (qx - x0), y0 + (2.0 / 3) * (qy - y0),
+                    x1 + (2.0 / 3) * (qx - x1), y1 + (2.0 / 3) * (qy - y1));
+        }
+
+        double s0 = x0 * x0 + y0 * y0;
+        double sa = ax * ax + ay * ay;
+        double s1 = x1 * x1 + y1 * y1;
+
+        double cx = (s0 * (ay - y1) + sa * (y1 - y0) + s1 * (y0 - ay)) / d;
+        double cy = (s0 * (x1 - ax) + sa * (x0 - x1) + s1 * (ax - x0)) / d;
+        double r = Math.sqrt((x0 - cx) * (x0 - cx) + (y0 - cy) * (y0 - cy));
+
+        // Angles from circle center
+        double theta0 = Math.atan2(y0 - cy, x0 - cx);
+        double theta1 = Math.atan2(y1 - cy, x1 - cx);
+        double thetaA = Math.atan2(ay - cy, ax - cx);
+
+        // Sweep from theta0 to theta1, normalized to (-π, π]
+        double sweep = theta1 - theta0;
+        if (sweep > Math.PI) {
+            sweep -= 2 * Math.PI;
+        }
+        if (sweep < -Math.PI) {
+            sweep += 2 * Math.PI;
+        }
+
+        // Ensure the sweep passes through the apex
+        double sweepToA = thetaA - theta0;
+        if (sweepToA > Math.PI) {
+            sweepToA -= 2 * Math.PI;
+        }
+        if (sweepToA < -Math.PI) {
+            sweepToA += 2 * Math.PI;
+        }
+        if (sweep > 0 && sweepToA < 0) {
+            sweep -= 2 * Math.PI;
+        } else if (sweep < 0 && sweepToA > 0) {
+            sweep += 2 * Math.PI;
+        }
+
+        // Cubic approximation coefficient: k = (4/3) * tan(sweep/4)
+        double k = (4.0 / 3) * Math.tan(sweep / 4);
+
+        // CCW tangent at P0 and P1 (perpendicular to radius, counter-clockwise)
+        double t0x = -(y0 - cy) / r;
+        double t0y = (x0 - cx) / r;
+        double t1x = -(y1 - cy) / r;
+        double t1y = (x1 - cx) / r;
+
+        return new CubicArc(
+                x0 + k * r * t0x, y0 + k * r * t0y,
+                x1 - k * r * t1x, y1 - k * r * t1y);
+    }
+
+    /**
+     * Evaluates a point on the circular-arc cubic approximation at parameter t.
+     * Accepts a quadratic CP for interface compatibility.
+     */
+    public static double[] evaluateAsArc(double fromX, double fromY,
+                                          double cpX, double cpY,
+                                          double toX, double toY, double t) {
+        CubicArc arc = toCircularArc(fromX, fromY, cpX, cpY, toX, toY);
+        return evaluateCubic(fromX, fromY, arc.cp1x, arc.cp1y,
+                arc.cp2x, arc.cp2y, toX, toY, t);
+    }
+
+    /**
+     * Returns the tangent on the circular-arc cubic approximation at parameter t.
+     * Accepts a quadratic CP for interface compatibility.
+     */
+    public static double[] tangentAsArc(double fromX, double fromY,
+                                         double cpX, double cpY,
+                                         double toX, double toY, double t) {
+        CubicArc arc = toCircularArc(fromX, fromY, cpX, cpY, toX, toY);
+        return tangentCubic(fromX, fromY, arc.cp1x, arc.cp1y,
+                arc.cp2x, arc.cp2y, toX, toY, t);
+    }
+
+    /**
+     * Strokes the circular-arc cubic approximation on the graphics context.
+     * Accepts a quadratic CP for interface compatibility.
+     */
+    public static void strokeArcCurve(GraphicsContext gc,
+                                       double fromX, double fromY,
+                                       double cpX, double cpY,
+                                       double toX, double toY, double stopT) {
+        CubicArc arc = toCircularArc(fromX, fromY, cpX, cpY, toX, toY);
+        strokeCubicCurve(gc, fromX, fromY, arc.cp1x, arc.cp1y,
+                arc.cp2x, arc.cp2y, toX, toY, stopT);
+    }
+
+    /**
+     * Computes the minimum distance from a point to the circular-arc cubic.
+     * Accepts a quadratic CP for interface compatibility.
+     */
+    public static double pointToArcDistance(double px, double py,
+                                            double fromX, double fromY,
+                                            double cpX, double cpY,
+                                            double toX, double toY) {
+        CubicArc arc = toCircularArc(fromX, fromY, cpX, cpY, toX, toY);
+        return pointToCubicDistance(px, py, fromX, fromY,
+                arc.cp1x, arc.cp1y, arc.cp2x, arc.cp2y, toX, toY);
+    }
+
+    /**
+     * Computes arrowhead placement on the circular-arc cubic approximation.
+     * Returns {tipX, tipY, tangentX, tangentY, stopT}.
+     * Accepts a quadratic CP for interface compatibility.
+     */
+    public static double[] arrowheadPointArc(double fromX, double fromY,
+                                              double cpX, double cpY,
+                                              double toX, double toY,
+                                              double arrowLength) {
+        CubicArc arc = toCircularArc(fromX, fromY, cpX, cpY, toX, toY);
+        double[] tip = evaluateCubic(fromX, fromY, arc.cp1x, arc.cp1y,
+                arc.cp2x, arc.cp2y, toX, toY, 1.0);
+        double bestT = 1.0;
+        for (int i = HIT_TEST_SAMPLES - 1; i >= 0; i--) {
+            double t = (double) i / HIT_TEST_SAMPLES;
+            double[] pt = evaluateCubic(fromX, fromY, arc.cp1x, arc.cp1y,
+                    arc.cp2x, arc.cp2y, toX, toY, t);
+            double dx = tip[0] - pt[0];
+            double dy = tip[1] - pt[1];
+            if (Math.sqrt(dx * dx + dy * dy) >= arrowLength) {
+                bestT = t;
+                break;
+            }
+        }
+        double[] tan = tangentCubic(fromX, fromY, arc.cp1x, arc.cp1y,
+                arc.cp2x, arc.cp2y, toX, toY, 1.0);
+        return new double[]{tip[0], tip[1], tan[0], tan[1], bestT};
+    }
+
     /**
      * Evaluates a point on the quadratic Bézier curve at parameter t ∈ [0,1].
      * B(t) = (1-t)²·P0 + 2(1-t)t·CP + t²·P1
