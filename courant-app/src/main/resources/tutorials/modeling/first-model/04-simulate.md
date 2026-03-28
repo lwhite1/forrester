@@ -2,9 +2,9 @@
 
 Go to **Simulate → Simulation Settings** and enter:
 
-  Time step:      `Minute`
-  Duration:       `60`
-  Duration unit:  `Minute`
+- **Time step:** `Minute`
+- **Duration:** `60`
+- **Duration unit:** `Minute`
 
 This simulates one hour of cooling, one minute at a time.
 
