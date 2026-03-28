@@ -85,8 +85,6 @@ public final class MarkdownToTextFlow {
 
         /** Accumulates cell texts for the current table row. */
         private List<String> currentRowCells;
-        /** Column widths for the current table (computed from header row). */
-        private List<Integer> columnWidths;
         /** All rows (header + body) collected before rendering. */
         private List<List<String>> tableRows;
         /** Whether we are inside a table cell (suppresses normal emit). */
@@ -200,11 +198,9 @@ public final class MarkdownToTextFlow {
                 }
                 firstParagraph = false;
                 tableRows = new ArrayList<>();
-                columnWidths = new ArrayList<>();
                 visitChildren(customBlock);
                 renderTable();
                 tableRows = null;
-                columnWidths = null;
             } else {
                 super.visit(customBlock);
             }
