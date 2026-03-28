@@ -133,6 +133,21 @@ class MarkdownToTextFlowTest {
             // Should have double newline between paragraphs
             assertThat(text).contains("\n\n");
         }
+
+        @Test
+        @DisplayName("heading followed by paragraph has tight spacing")
+        void shouldHaveTightSpacingAfterHeading(FxRobot robot) {
+            String text = fullText("## Title\n\nParagraph text");
+            // Heading ends with \n, then paragraph follows immediately (no extra blank line)
+            assertThat(text).contains("Title\nParagraph");
+        }
+
+        @Test
+        @DisplayName("two consecutive headings still have normal spacing")
+        void shouldSeparateConsecutiveHeadings(FxRobot robot) {
+            String text = fullText("## First\n\n## Second");
+            assertThat(text).contains("First\n\n\nSecond");
+        }
     }
 
     @Nested
