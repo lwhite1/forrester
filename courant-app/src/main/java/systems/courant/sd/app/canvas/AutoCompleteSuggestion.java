@@ -19,7 +19,7 @@ record AutoCompleteSuggestion(
     enum Kind {
         STOCK("S"),
         FLOW("F"),
-        AUX("A"),
+        AUX("V"),
         LOOKUP("L"),
         MODULE("M"),
         FUNCTION("fn");
