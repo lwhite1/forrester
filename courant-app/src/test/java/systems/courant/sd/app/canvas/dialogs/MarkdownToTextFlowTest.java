@@ -136,6 +136,57 @@ class MarkdownToTextFlowTest {
     }
 
     @Nested
+    @DisplayName("Tables")
+    class Tables {
+
+        @Test
+        @DisplayName("renders a simple two-column table")
+        void shouldRenderSimpleTable(FxRobot robot) {
+            String md = """
+                    | Name | Value |
+                    |------|-------|
+                    | alpha | 1 |
+                    | beta | 2 |
+                    """;
+            String text = fullText(md);
+            assertThat(text).contains("Name").contains("Value");
+            assertThat(text).contains("alpha").contains("1");
+            assertThat(text).contains("beta").contains("2");
+            // Header separator should use box-drawing characters
+            assertThat(text).contains("\u2500");
+        }
+
+        @Test
+        @DisplayName("renders header row in bold")
+        void shouldRenderHeaderBold(FxRobot robot) {
+            String md = """
+                    | H1 | H2 |
+                    |----|-----|
+                    | a  | b  |
+                    """;
+            List<Text> nodes = render(md);
+            Text header = nodes.stream()
+                    .filter(t -> t.getText().contains("H1"))
+                    .findFirst().orElseThrow();
+            assertThat(header.getStyle()).contains("-fx-font-weight: bold");
+        }
+
+        @Test
+        @DisplayName("renders the mental models table from the tutorial")
+        void shouldRenderMentalModelsTable(FxRobot robot) {
+            String md = """
+                    | Mental Model | Formal SD Model |
+                    |---|---|
+                    | "Hiring more staff will fix the backlog" | Staff increases rate |
+                    """;
+            String text = fullText(md);
+            assertThat(text).contains("Mental Model").contains("Formal SD Model");
+            assertThat(text).contains("Hiring more staff");
+            assertThat(text).doesNotContain("|");
+        }
+    }
+
+    @Nested
     @DisplayName("Edge cases")
     class EdgeCases {
 

@@ -3,9 +3,17 @@ package systems.courant.sd.app.canvas.dialogs;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 
+import org.commonmark.ext.gfm.tables.TableBlock;
+import org.commonmark.ext.gfm.tables.TableBody;
+import org.commonmark.ext.gfm.tables.TableCell;
+import org.commonmark.ext.gfm.tables.TableHead;
+import org.commonmark.ext.gfm.tables.TableRow;
+import org.commonmark.ext.gfm.tables.TablesExtension;
 import org.commonmark.node.AbstractVisitor;
 import org.commonmark.node.BulletList;
 import org.commonmark.node.Code;
+import org.commonmark.node.CustomBlock;
+import org.commonmark.node.CustomNode;
 import org.commonmark.node.Document;
 import org.commonmark.node.Emphasis;
 import org.commonmark.node.FencedCodeBlock;
@@ -21,7 +29,9 @@ import org.commonmark.node.StrongEmphasis;
 import org.commonmark.parser.Parser;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Deque;
+import java.util.List;
 
 /**
  * Converts a CommonMark Markdown string into a JavaFX {@link TextFlow},
@@ -37,11 +47,14 @@ import java.util.Deque;
  *   <li>Ordered lists ({@code 1. item})</li>
  *   <li>Fenced / indented code blocks</li>
  *   <li>Paragraphs separated by blank lines</li>
+ *   <li>GFM-style tables ({@code | col | col |})</li>
  * </ul>
  */
 public final class MarkdownToTextFlow {
 
-    private static final Parser PARSER = Parser.builder().build();
+    private static final Parser PARSER = Parser.builder()
+            .extensions(List.of(TablesExtension.create()))
+            .build();
 
     private MarkdownToTextFlow() {
     }
@@ -69,6 +82,16 @@ public final class MarkdownToTextFlow {
 
         private boolean firstParagraph = true;
         private int orderedListIndex;
+
+        /** Accumulates cell texts for the current table row. */
+        private List<String> currentRowCells;
+        /** Column widths for the current table (computed from header row). */
+        private List<Integer> columnWidths;
+        /** All rows (header + body) collected before rendering. */
+        private List<List<String>> tableRows;
+        /** Whether we are inside a table cell (suppresses normal emit). */
+        private boolean inTableCell;
+        private StringBuilder cellBuffer;
 
         TextFlow result() {
             return flow;
@@ -167,12 +190,116 @@ public final class MarkdownToTextFlow {
             emit(code, "-fx-font-family: monospace; -fx-font-weight: bold;");
         }
 
+        // ── Table nodes ────────────────────────────────────────────────
+
+        @Override
+        public void visit(CustomBlock customBlock) {
+            if (customBlock instanceof TableBlock) {
+                if (!firstParagraph) {
+                    emit("\n\n", null);
+                }
+                firstParagraph = false;
+                tableRows = new ArrayList<>();
+                columnWidths = new ArrayList<>();
+                visitChildren(customBlock);
+                renderTable();
+                tableRows = null;
+                columnWidths = null;
+            } else {
+                super.visit(customBlock);
+            }
+        }
+
+        @Override
+        public void visit(CustomNode customNode) {
+            if (customNode instanceof TableHead || customNode instanceof TableBody) {
+                visitChildren(customNode);
+            } else if (customNode instanceof TableRow) {
+                currentRowCells = new ArrayList<>();
+                visitChildren(customNode);
+                tableRows.add(currentRowCells);
+                currentRowCells = null;
+            } else if (customNode instanceof TableCell) {
+                inTableCell = true;
+                cellBuffer = new StringBuilder();
+                visitChildren(customNode);
+                currentRowCells.add(cellBuffer.toString().trim());
+                cellBuffer = null;
+                inTableCell = false;
+            } else {
+                super.visit(customNode);
+            }
+        }
+
+        private void renderTable() {
+            if (tableRows.isEmpty()) {
+                return;
+            }
+            // Compute column widths from all rows
+            int cols = tableRows.stream().mapToInt(List::size).max().orElse(0);
+            int[] widths = new int[cols];
+            for (List<String> row : tableRows) {
+                for (int i = 0; i < row.size(); i++) {
+                    widths[i] = Math.max(widths[i], row.get(i).length());
+                }
+            }
+
+            boolean first = true;
+            for (int r = 0; r < tableRows.size(); r++) {
+                List<String> row = tableRows.get(r);
+                if (!first) {
+                    emit("\n", null);
+                }
+                first = false;
+
+                // Header row is bold
+                boolean isHeader = (r == 0);
+                StringBuilder line = new StringBuilder();
+                for (int c = 0; c < cols; c++) {
+                    String cell = c < row.size() ? row.get(c) : "";
+                    if (c > 0) {
+                        line.append("  \u2502  ");
+                    }
+                    line.append(pad(cell, widths[c]));
+                }
+                if (isHeader) {
+                    emit(line.toString(), "-fx-font-weight: bold;");
+                } else {
+                    emit(line.toString(), null);
+                }
+
+                // Separator line after header
+                if (isHeader) {
+                    emit("\n", null);
+                    StringBuilder sep = new StringBuilder();
+                    for (int c = 0; c < cols; c++) {
+                        if (c > 0) {
+                            sep.append("\u2500\u2500\u253C\u2500\u2500");
+                        }
+                        sep.append("\u2500".repeat(widths[c]));
+                    }
+                    emit(sep.toString(), null);
+                }
+            }
+        }
+
+        private static String pad(String s, int width) {
+            if (s.length() >= width) {
+                return s;
+            }
+            return s + " ".repeat(width - s.length());
+        }
+
         // ── Inline nodes ─────────────────────────────────────────────
 
         @Override
         public void visit(org.commonmark.node.Text text) {
-            String style = styleStack.isEmpty() ? null : styleStack.peek();
-            emit(text.getLiteral(), style);
+            if (inTableCell) {
+                cellBuffer.append(text.getLiteral());
+            } else {
+                String style = styleStack.isEmpty() ? null : styleStack.peek();
+                emit(text.getLiteral(), style);
+            }
         }
 
         @Override
@@ -191,8 +318,12 @@ public final class MarkdownToTextFlow {
 
         @Override
         public void visit(Code code) {
-            emit(code.getLiteral(),
-                    "-fx-font-family: monospace; -fx-font-weight: bold;");
+            if (inTableCell) {
+                cellBuffer.append(code.getLiteral());
+            } else {
+                emit(code.getLiteral(),
+                        "-fx-font-family: monospace; -fx-font-weight: bold;");
+            }
         }
 
         @Override
