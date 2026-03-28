@@ -1,11 +1,16 @@
+## Create a new model
+
+Start by creating a blank model: **File → New**.
+
 ## Name your model
 
-Before adding elements, give the model a name and description. Go to **File → Model Properties** and enter:
+Before adding elements, give the model a name and description. Go to **File → Model Info** and enter:
 
-  Name:        `Coffee Cooling`
+  Name: `Coffee Cooling`
+
   Description: `Newton's law of cooling — coffee approaching room temperature`
 
-This helps identify your model later in file listings and reports.
+Good documentation is essential. When you revisit a model weeks later, or share it with a colleague, clear names and descriptions make the difference between a model that communicates its purpose and one that requires detective work to understand.
 
 ## Place a Stock
 
