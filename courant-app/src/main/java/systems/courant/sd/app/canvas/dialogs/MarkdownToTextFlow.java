@@ -81,6 +81,7 @@ public final class MarkdownToTextFlow {
         private final Deque<String> styleStack = new ArrayDeque<>();
 
         private boolean firstParagraph = true;
+        private boolean lastBlockWasHeading;
         private int orderedListIndex;
 
         /** Accumulates cell texts for the current table row. */
@@ -115,17 +116,19 @@ public final class MarkdownToTextFlow {
             visitChildren(heading);
             styleStack.pop();
             emit("\n", null);
+            lastBlockWasHeading = true;
         }
 
         @Override
         public void visit(Paragraph paragraph) {
             boolean insideListItem = paragraph.getParent() instanceof ListItem;
             if (!insideListItem) {
-                if (!firstParagraph) {
+                if (!firstParagraph && !lastBlockWasHeading) {
                     emit("\n\n", null);
                 }
                 firstParagraph = false;
             }
+            lastBlockWasHeading = false;
             visitChildren(paragraph);
         }
 
