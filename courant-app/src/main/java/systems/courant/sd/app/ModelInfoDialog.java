@@ -14,7 +14,7 @@ import systems.courant.sd.app.canvas.ModelEditor;
 import systems.courant.sd.model.ModelMetadata;
 
 /**
- * Dialog for viewing and editing model metadata: name, comment, author,
+ * Dialog for viewing and editing model metadata: name, description, author,
  * source, license, and URL.
  */
 final class ModelInfoDialog {
@@ -75,7 +75,7 @@ final class ModelInfoDialog {
         fileLabel.setStyle("-fx-text-fill: #666;");
         grid.add(new Label("File:"), 0, row);
         grid.add(fileLabel, 1, row++);
-        grid.add(new Label("Comment:"), 0, row);
+        grid.add(new Label("Description:"), 0, row);
         grid.add(commentArea, 1, row++);
         grid.add(new Label("Author:"), 0, row);
         grid.add(authorField, 1, row++);
