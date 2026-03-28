@@ -5,6 +5,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Tab;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 
 import systems.courant.sd.app.canvas.HelpContent;
@@ -86,12 +87,18 @@ public class ContentTutorialDialog extends AbstractTutorialDialog {
     }
 
     /**
-     * Creates a tab whose content is preceded by an "Open Example Model"
-     * button. The button invokes the registered {@link #modelOpener}
-     * callback with the given model resource path.
+     * Creates a tab whose content is followed by an "Open Example Model"
+     * button at the bottom. The button invokes the registered
+     * {@link #modelOpener} callback with the given model resource path.
      */
     private static Tab createModelTab(String title, TextFlow rendered,
                                        String modelPath) {
+        Text hint = new Text("We recommend working through the tutorial yourself,"
+                + " but if you get stuck you can open the finished model:");
+        hint.setStyle("-fx-font-size: 12px; -fx-fill: #555;");
+        TextFlow hintFlow = new TextFlow(hint);
+        hintFlow.setMaxWidth(CONTENT_MAX_WIDTH);
+
         Button openModelBtn = new Button("Open Example Model");
         openModelBtn.setStyle(
                 "-fx-background-color: #E8F0FE; -fx-text-fill: #1A73E8;"
@@ -103,7 +110,7 @@ public class ContentTutorialDialog extends AbstractTutorialDialog {
         rendered.setLineSpacing(4);
         rendered.setMaxWidth(CONTENT_MAX_WIDTH);
 
-        VBox wrapper = new VBox(8, openModelBtn, rendered);
+        VBox wrapper = new VBox(8, rendered, hintFlow, openModelBtn);
         wrapper.setPadding(new Insets(16));
 
         ScrollPane scroll = new ScrollPane(wrapper);
