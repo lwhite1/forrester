@@ -9,6 +9,8 @@ This helps identify your model later in file listings and reports.
 
 ## Place a Stock
 
+A stock (also called a **level**) represents a quantity whose value accumulates over time through inflows and outflows. Temperature may not seem like a typical stock — we usually think of stocks as inventories or populations — but it fits: coffee temperature is a state that changes continuously as heat flows out into the room. You set its starting value; the simulation computes the rest.
+
 Press `4` (or click the Stock button in the toolbar), then click on the canvas.
 Double-click the stock to select it. In the **Properties panel** on the right, name it: `Coffee Temperature`
 Set the initial value to `100` (degrees Celsius).
