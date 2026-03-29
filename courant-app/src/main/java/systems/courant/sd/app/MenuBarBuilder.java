@@ -159,6 +159,9 @@ final class MenuBarBuilder {
                 "Validation Issues\u2026");
         validationIssuesItem.setDisable(true);
 
+        MenuItem documentItem = registry.toMenuItem("Document",
+                "Document\u2026");
+
         CheckMenuItem activityLogItem = checkItem("Activity Log", null,
                 new KeyCodeCombination(KeyCode.L,
                         KeyCombination.SHORTCUT_DOWN),
@@ -182,7 +185,7 @@ final class MenuBarBuilder {
                 new SeparatorMenuItem(),
                 hideAuxItem, hideInfoLinksItem, showDelayItem,
                 new SeparatorMenuItem(),
-                validationIssuesItem,
+                validationIssuesItem, documentItem,
                 new SeparatorMenuItem(),
                 activityLogItem, popOutDashboardItem);
         viewMenu.setDisable(true);

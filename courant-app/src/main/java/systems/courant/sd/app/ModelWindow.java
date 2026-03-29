@@ -30,6 +30,7 @@ import systems.courant.sd.app.canvas.dialogs.TutorialContentLoader;
 import systems.courant.sd.app.canvas.StatusBar;
 import systems.courant.sd.app.canvas.UndoHistoryPopup;
 import systems.courant.sd.app.canvas.UndoManager;
+import systems.courant.sd.app.canvas.dialogs.DocumentDialog;
 import systems.courant.sd.app.canvas.dialogs.ValidationDialog;
 import systems.courant.sd.app.canvas.ZoomOverlay;
 import systems.courant.sd.model.def.ElementType;
@@ -497,6 +498,8 @@ public class ModelWindow {
                     canvas.zoomOut(); canvas.requestFocus(); });
         commandRegistry.add("Validation Issues", "View",
                 this::showValidationDialog, null, "menuValidationIssues");
+        commandRegistry.add("Document", "View",
+                this::showDocumentDialog, null, "menuDocument");
         commandRegistry.add("Toggle Hide Variables", "View", () -> {
                     canvas.setHideVariables(!canvas.isHideVariables());
                     canvas.requestFocus(); });
@@ -952,6 +955,13 @@ public class ModelWindow {
             return;
         }
         ValidationDialog.showOrUpdate(result, canvas.elements()::selectElement, stage);
+    }
+
+    private void showDocumentDialog() {
+        if (editor == null) {
+            return;
+        }
+        DocumentDialog.showOrUpdate(editor, canvas.elements()::selectElement, stage);
     }
 
     private void updateTitle() {
