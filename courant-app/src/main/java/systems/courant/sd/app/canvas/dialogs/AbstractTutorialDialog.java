@@ -1,10 +1,19 @@
 package systems.courant.sd.app.canvas.dialogs;
 
 import javafx.geometry.Insets;
+import javafx.scene.Cursor;
+import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.Labeled;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.KeyCode;
+import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
 
@@ -120,11 +129,55 @@ public abstract class AbstractTutorialDialog extends Stage {
         content.setPadding(new Insets(16));
         content.setLineSpacing(4);
         content.setMaxWidth(maxWidth);
+        makeTextCopyable(content);
 
         ScrollPane scroll = new ScrollPane(content);
         scroll.setFitToWidth(true);
 
         return new Tab(title, scroll);
+    }
+
+    /**
+     * Makes the text in a {@link TextFlow} copyable via {@code Ctrl+C}
+     * and a right-click context menu. The flow is made focusable and the
+     * cursor changes to a text cursor to signal that text can be copied.
+     */
+    static void makeTextCopyable(TextFlow flow) {
+        flow.setFocusTraversable(true);
+        flow.setCursor(Cursor.TEXT);
+        flow.setOnMouseClicked(e -> flow.requestFocus());
+
+        flow.setOnKeyPressed(e -> {
+            if (e.isShortcutDown() && e.getCode() == KeyCode.C) {
+                copyTextToClipboard(flow);
+                e.consume();
+            }
+        });
+
+        MenuItem copyItem = new MenuItem("Copy All Text");
+        copyItem.setOnAction(e -> copyTextToClipboard(flow));
+        ContextMenu contextMenu = new ContextMenu(copyItem);
+        flow.setOnContextMenuRequested(e -> {
+            contextMenu.show(flow, e.getScreenX(), e.getScreenY());
+            e.consume();
+        });
+    }
+
+    private static void copyTextToClipboard(TextFlow flow) {
+        StringBuilder sb = new StringBuilder();
+        for (Node child : flow.getChildren()) {
+            if (child instanceof Text t) {
+                sb.append(t.getText());
+            } else if (child instanceof Labeled labeled) {
+                sb.append(labeled.getText());
+            }
+        }
+        if (sb.isEmpty()) {
+            return;
+        }
+        ClipboardContent content = new ClipboardContent();
+        content.putString(sb.toString());
+        Clipboard.getSystemClipboard().setContent(content);
     }
 
     private void installProgressTracking(TabPane tabPane) {

@@ -109,6 +109,7 @@ public class ContentTutorialDialog extends AbstractTutorialDialog {
         rendered.setPadding(Insets.EMPTY);
         rendered.setLineSpacing(4);
         rendered.setMaxWidth(CONTENT_MAX_WIDTH);
+        makeTextCopyable(rendered);
 
         VBox wrapper = new VBox(8, rendered, hintFlow, openModelBtn);
         wrapper.setPadding(new Insets(16));

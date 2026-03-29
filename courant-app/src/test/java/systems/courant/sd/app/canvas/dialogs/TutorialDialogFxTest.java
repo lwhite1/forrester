@@ -1,9 +1,13 @@
 package systems.courant.sd.app.canvas.dialogs;
 
+import javafx.scene.Cursor;
 import javafx.scene.Scene;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
 
 import org.junit.jupiter.api.DisplayName;
@@ -164,5 +168,54 @@ class TutorialDialogFxTest {
         assertThat(sirDialog.resolvedTutorialId()).isEqualTo("feedback-loops");
         assertThat(delaysDialog.resolvedTutorialId()).isEqualTo("delays");
         assertThat(cldDialog.resolvedTutorialId()).isEqualTo("cld-basics");
+    }
+
+    @Test
+    @DisplayName("Tutorial text flows are focusable for copy support")
+    void textFlowsAreFocusable(FxRobot robot) {
+        TextFlow flow = findFirstTextFlow(quickstartDialog);
+        assertThat(flow).isNotNull();
+        assertThat(flow.isFocusTraversable()).isTrue();
+    }
+
+    @Test
+    @DisplayName("Tutorial text flows have text cursor")
+    void textFlowsHaveTextCursor(FxRobot robot) {
+        TextFlow flow = findFirstTextFlow(quickstartDialog);
+        assertThat(flow).isNotNull();
+        assertThat(flow.getCursor()).isEqualTo(Cursor.TEXT);
+    }
+
+    @Test
+    @DisplayName("Tutorial text flows have context menu handler for copy")
+    void textFlowsHaveContextMenuHandler(FxRobot robot) {
+        TextFlow flow = findFirstTextFlow(quickstartDialog);
+        assertThat(flow).isNotNull();
+        assertThat(flow.getOnContextMenuRequested()).isNotNull();
+    }
+
+    @Test
+    @DisplayName("Tutorial text flows have key handler for Ctrl+C")
+    void textFlowsHaveKeyHandler(FxRobot robot) {
+        TextFlow flow = findFirstTextFlow(quickstartDialog);
+        assertThat(flow).isNotNull();
+        assertThat(flow.getOnKeyPressed()).isNotNull();
+    }
+
+    private static TextFlow findFirstTextFlow(ContentTutorialDialog dialog) {
+        TabPane tabs = (TabPane) dialog.getScene().getRoot();
+        Tab firstTab = tabs.getTabs().getFirst();
+        ScrollPane scroll = (ScrollPane) firstTab.getContent();
+        if (scroll.getContent() instanceof TextFlow tf) {
+            return tf;
+        }
+        // Model tab wraps TextFlow in a VBox
+        if (scroll.getContent() instanceof javafx.scene.layout.VBox vbox) {
+            return vbox.getChildren().stream()
+                    .filter(n -> n instanceof TextFlow)
+                    .map(n -> (TextFlow) n)
+                    .findFirst().orElse(null);
+        }
+        return null;
     }
 }
