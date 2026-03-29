@@ -14,6 +14,7 @@ import org.testfx.api.FxRobot;
 import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
 
+import java.io.IOException;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -197,6 +198,68 @@ class MarkdownToTextFlowTest {
             String text = fullText(md);
             assertThat(text).contains("Mental Model").contains("Formal SD Model");
             assertThat(text).contains("Hiring more staff");
+            assertThat(text).doesNotContain("|");
+        }
+
+        @Test
+        @DisplayName("renders table with italic markup inside cells")
+        void shouldRenderTableWithItalicInCells(FxRobot robot) {
+            String md = """
+                    | Mental Model | Formal SD Model |
+                    |---|---|
+                    | "Hiring more staff will fix the backlog" | Staff increases completion rate, but training delays reduce productivity for 3 months, temporarily *worsening* the backlog |
+                    | "The epidemic will fade on its own" | Susceptible population depletes, slowing transmission \u2014 but only after a peak determined by the contact rate |
+                    """;
+            String text = fullText(md);
+            assertThat(text).contains("Mental Model").contains("Formal SD Model");
+            assertThat(text).contains("Hiring more staff");
+            assertThat(text).contains("worsening");
+            assertThat(text).contains("epidemic");
+            assertThat(text).doesNotContain("|");
+        }
+
+        @Test
+        @DisplayName("renders table preceded by other markdown content")
+        void shouldRenderTableAfterOtherContent(FxRobot robot) {
+            String md = """
+                    ## Heading
+
+                    Some paragraph text with **bold** words.
+
+                    - bullet one
+                    - bullet two
+
+                    ## Another heading
+
+                    More text here.
+
+                    | Col A | Col B |
+                    |-------|-------|
+                    | val 1 | val 2 |
+
+                    Trailing paragraph.
+                    """;
+            String text = fullText(md);
+            assertThat(text).contains("Col A").contains("Col B");
+            assertThat(text).contains("val 1").contains("val 2");
+            assertThat(text).doesNotContain("|");
+            assertThat(text).contains("Trailing paragraph");
+        }
+
+        @Test
+        @DisplayName("renders actual tutorial markdown file content")
+        void shouldRenderActualTutorialFile(FxRobot robot) throws IOException {
+            String md = new String(
+                    MarkdownToTextFlowTest.class.getClassLoader()
+                            .getResourceAsStream("tutorials/modeling/intro-concepts/02-mental-models.md")
+                            .readAllBytes(),
+                    java.nio.charset.StandardCharsets.UTF_8);
+            String text = fullText(md);
+            // Table content should be present
+            assertThat(text).contains("Mental Model").contains("Formal SD Model");
+            assertThat(text).contains("Hiring more staff");
+            assertThat(text).contains("worsening");
+            // Pipe characters should NOT be visible
             assertThat(text).doesNotContain("|");
         }
     }
