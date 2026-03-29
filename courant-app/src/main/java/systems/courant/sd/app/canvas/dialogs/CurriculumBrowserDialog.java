@@ -6,10 +6,10 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.control.SplitPane;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
@@ -50,11 +50,11 @@ public class CurriculumBrowserDialog extends Stage {
         detailPane.setPadding(new Insets(24));
         detailPane.setStyle("-fx-background-color: #F5F6F8;");
 
-        BorderPane root = new BorderPane();
-        root.setLeft(treeView);
-        root.setCenter(detailPane);
+        SplitPane splitPane = new SplitPane(treeView, detailPane);
+        splitPane.setDividerPositions(220.0 / 700);
+        splitPane.setId("curriculumSplitPane");
 
-        Scene scene = new Scene(root, 700, 520);
+        Scene scene = new Scene(splitPane, 700, 520);
         setScene(scene);
 
         // Show detail when selection changes
