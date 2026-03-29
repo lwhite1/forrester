@@ -825,11 +825,7 @@ public class ModelWindow {
     private void showCurriculumBrowser() {
         helpWindows.showOrBring("curriculum-browser", () -> {
             CurriculumBrowserDialog browser = new CurriculumBrowserDialog();
-            browser.setOnLaunchTutorial(jsonPath -> {
-                showEditor();
-                fileController.newModel();
-                showContentTutorial(jsonPath);
-            });
+            browser.setOnLaunchTutorial(this::showContentTutorial);
             return browser;
         });
     }
