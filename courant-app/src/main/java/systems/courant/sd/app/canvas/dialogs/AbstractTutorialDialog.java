@@ -4,6 +4,7 @@ import javafx.geometry.Insets;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.Labeled;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
@@ -167,7 +168,12 @@ public abstract class AbstractTutorialDialog extends Stage {
         for (Node child : flow.getChildren()) {
             if (child instanceof Text t) {
                 sb.append(t.getText());
+            } else if (child instanceof Labeled labeled) {
+                sb.append(labeled.getText());
             }
+        }
+        if (sb.isEmpty()) {
+            return;
         }
         ClipboardContent content = new ClipboardContent();
         content.putString(sb.toString());
