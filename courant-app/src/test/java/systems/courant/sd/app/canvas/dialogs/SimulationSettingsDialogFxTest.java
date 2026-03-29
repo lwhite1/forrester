@@ -7,6 +7,7 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DialogPane;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
@@ -273,5 +274,76 @@ class SimulationSettingsDialogFxTest {
                         .filter(bt -> bt.getButtonData().isDefaultButton())
                         .findFirst().orElseThrow());
         assertThat(okButton.isDisabled()).isTrue();
+    }
+
+    @Test
+    @DisplayName("Changing Time Step auto-syncs Duration Unit")
+    @SuppressWarnings("unchecked")
+    void timeStepChangesSyncsDurationUnit(FxRobot robot) {
+        showDialog(null);
+
+        ComboBox<String> timeStep = robot.lookup("#simTimeStep").queryAs(ComboBox.class);
+        ComboBox<String> durationUnit = robot.lookup("#simDurationUnit").queryAs(ComboBox.class);
+
+        // Default: both are "Day"
+        assertThat(timeStep.getValue()).isEqualTo("Day");
+        assertThat(durationUnit.getValue()).isEqualTo("Day");
+
+        // Change time step to "Minute" → duration unit should auto-sync
+        Platform.runLater(() -> timeStep.setValue("Minute"));
+        WaitForAsyncUtils.waitForFxEvents();
+
+        assertThat(durationUnit.getValue()).isEqualTo("Minute");
+    }
+
+    @Test
+    @DisplayName("Existing mismatched settings are preserved on dialog open")
+    @SuppressWarnings("unchecked")
+    void existingMismatchedSettingsPreserved(FxRobot robot) {
+        // Open dialog with mismatched units — should NOT auto-sync on open
+        showDialog(new SimulationSettings("Minute", 100, "Day"));
+
+        ComboBox<String> timeStep = robot.lookup("#simTimeStep").queryAs(ComboBox.class);
+        ComboBox<String> durationUnit = robot.lookup("#simDurationUnit").queryAs(ComboBox.class);
+
+        assertThat(timeStep.getValue()).isEqualTo("Minute");
+        assertThat(durationUnit.getValue()).isEqualTo("Day");
+    }
+
+    @Test
+    @DisplayName("Warning label shows for high step count")
+    void warningLabelShowsForHighStepCount(FxRobot robot) {
+        // Minute step + 100 Day duration = 144,000 steps (above WARNING_THRESHOLD)
+        showDialog(new SimulationSettings("Minute", 100, "Day"));
+
+        Label warning = robot.lookup("#simStepWarning").queryAs(Label.class);
+        assertThat(warning.getText()).contains("steps");
+        assertThat(warning.getText()).contains("slow");
+    }
+
+    @Test
+    @DisplayName("Warning label is empty for normal step count")
+    void warningLabelEmptyForNormalStepCount(FxRobot robot) {
+        // Day step + 100 Day duration = 100 steps (below WARNING_THRESHOLD)
+        showDialog(new SimulationSettings("Day", 100, "Day"));
+
+        Label warning = robot.lookup("#simStepWarning").queryAs(Label.class);
+        assertThat(warning.getText()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("OK button is disabled when step count exceeds MAX_STEPS")
+    void okDisabledWhenStepCountExceedsMax(FxRobot robot) {
+        // Second step + 200 Day duration = 17,280,000 steps (exceeds 10M MAX_STEPS)
+        showDialog(new SimulationSettings("Second", 200, "Day"));
+
+        Node okButton = dialogPane.lookupButton(
+                dialogPane.getButtonTypes().stream()
+                        .filter(bt -> bt.getButtonData().isDefaultButton())
+                        .findFirst().orElseThrow());
+        assertThat(okButton.isDisabled()).isTrue();
+
+        Label validation = robot.lookup("#simValidation").queryAs(Label.class);
+        assertThat(validation.getText()).contains("Too many steps");
     }
 }

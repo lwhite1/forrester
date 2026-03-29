@@ -51,7 +51,7 @@ public class Simulation {
      * Maximum number of simulation steps allowed. Protects against unreasonable
      * duration/timeStep combinations that would effectively hang the simulation.
      */
-    static final long MAX_STEPS = 10_000_000L;
+    public static final long MAX_STEPS = 10_000_000L;
 
     /**
      * Default wall-clock timeout for a single simulation run (60 seconds).
