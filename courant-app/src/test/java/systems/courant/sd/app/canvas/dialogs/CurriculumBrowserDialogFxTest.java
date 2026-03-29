@@ -1,6 +1,7 @@
 package systems.courant.sd.app.canvas.dialogs;
 
 import javafx.scene.Scene;
+import javafx.scene.control.SplitPane;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.layout.StackPane;
@@ -24,6 +25,7 @@ class CurriculumBrowserDialogFxTest {
     @Start
     void start(Stage stage) {
         dialog = new CurriculumBrowserDialog();
+        dialog.show();
 
         stage.setScene(new Scene(new StackPane(), 100, 100));
         stage.show();
@@ -107,5 +109,14 @@ class CurriculumBrowserDialogFxTest {
         TreeItem<Object> simCore = tree().getRoot().getChildren().get(1)
                 .getChildren().getFirst();
         assertThat(simCore.getChildren()).hasSize(2);
+    }
+
+    @Test
+    @DisplayName("layout uses a resizable SplitPane")
+    void layoutUsesSplitPane(FxRobot robot) {
+        SplitPane splitPane = (SplitPane) dialog.getScene().lookup("#curriculumSplitPane");
+        assertThat(splitPane).isNotNull();
+        assertThat(splitPane.getItems()).hasSize(2);
+        assertThat(splitPane.getDividerPositions()[0]).isBetween(0.2, 0.5);
     }
 }
